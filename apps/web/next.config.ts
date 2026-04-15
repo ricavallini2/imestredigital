@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
   // Output standalone para Docker (imagem final mínima)
   output: 'standalone',
 
+  // Pular verificação de tipos no build (verificar separadamente via tsc)
+  typescript: { ignoreBuildErrors: true },
+  eslint: { ignoreDuringBuilds: true },
+
   // Pacotes que devem ser resolvidos pelo Node em runtime (não bundled pelo webpack)
   serverExternalPackages: ['jsonwebtoken'],
 
