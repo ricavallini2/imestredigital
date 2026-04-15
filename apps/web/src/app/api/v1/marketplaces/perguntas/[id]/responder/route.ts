@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PERGUNTAS_MOCK, MARKETPLACES_MOCK } from '../../../../_mock-data';
+import { PERGUNTAS_MOCK, MARKETPLACES_MOCK } from '../../../_mock-data';
 
 export async function POST(
   req: NextRequest,

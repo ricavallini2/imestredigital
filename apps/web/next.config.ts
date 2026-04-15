@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
   // Output standalone para Docker (imagem final mínima)
   output: 'standalone',
 
+  // Pacotes que devem ser resolvidos pelo Node em runtime (não bundled pelo webpack)
+  serverExternalPackages: ['jsonwebtoken'],
+
   // Transpila pacotes internos do monorepo
   transpilePackages: ['@imestredigital/types', '@imestredigital/ui'],
 
