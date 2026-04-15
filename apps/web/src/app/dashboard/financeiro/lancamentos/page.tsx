@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Plus,
@@ -298,6 +298,10 @@ function LancamentoModal({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function LancamentosPage() {
+  return <Suspense fallback={null}><LancamentosContent /></Suspense>;
+}
+
+function LancamentosContent() {
   const searchParams = useSearchParams();
   const [pagina, setPagina] = useState(1);
   const LIMITE = 20;

@@ -5,7 +5,7 @@
  * Listagem completa com filtros, edição de preço e gestão de status
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Search,
@@ -182,6 +182,10 @@ const STATUS_CHIPS: { label: string; value: string }[] = [
 ];
 
 export default function AnunciosPage() {
+  return <Suspense fallback={null}><AnunciosContent /></Suspense>;
+}
+
+function AnunciosContent() {
   const searchParams = useSearchParams();
   const canalInicial = searchParams.get('canal') ?? '';
 

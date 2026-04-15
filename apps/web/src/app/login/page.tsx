@@ -5,7 +5,7 @@
  * Tela de autenticação com email e senha
  */
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
@@ -14,6 +14,14 @@ import { LogoAuth } from '@/components/ui/logo';
 import { api } from '@/lib/api';
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginContent />
+    </Suspense>
+  );
+}
+
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const registroSucesso = searchParams.get('registro') === 'sucesso';

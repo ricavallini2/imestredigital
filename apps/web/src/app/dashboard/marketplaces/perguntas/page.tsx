@@ -5,7 +5,7 @@
  * Responder perguntas sobre anúncios com sugestões de IA
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   MessageSquare,
@@ -337,6 +337,10 @@ function PerguntaCard({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function PerguntasPage() {
+  return <Suspense fallback={null}><PerguntasContent /></Suspense>;
+}
+
+function PerguntasContent() {
   const searchParams = useSearchParams();
   const canalInicial  = searchParams.get('canal')  ?? '';
   const statusInicial = searchParams.get('status') ?? '';
