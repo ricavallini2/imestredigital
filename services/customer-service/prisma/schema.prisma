@@ -1,0 +1,329 @@
+// ═══════════════════════════════════════════════════════════════
+// iMestreDigital - Customer Service (CRM) - Schema Prisma
+// ═══════════════════════════════════════════════════════════════
+// Modelos de dados para gerenciamento de clientes, contatos,
+// endereços, histórico de interações e segmentação de clientes.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Cliente - Registro principal de cliente (pessoa física ou jurídica)
+// Armazena informações essenciais do cliente com multi-tenancy.
+// Pode ser do tipo PESSOA_FISICA (cpf, dataNascimento, genero) ou
+// PESSOA_JURIDICA (cnpj, razaoSocial, inscrição estadual).
+model Cliente {
+  id                    String                @id @default(cuid())
+  tenantId              String                // ID da empresa/tenant
+
+  // Tipo de cliente
+  tipo                  TipoCliente           // PESSOA_FISICA ou PESSOA_JURIDICA
+
+  // Dados básicos
+  nome                  String                // Nome da pessoa ou fantasia
+  nomeFantasia          String?               // Nome fantasia (opcional para PJ)
+  razaoSocial           String?               // Razão social (apenas PJ)
+
+  // Documentos
+  cpf                   String?               // CPF (apenas PF), sem formatação
+  cnpj                  String?               // CNPJ (apenas PJ), sem formatação
+  inscricaoEstadual     String?               // Inscrição estadual (PJ)
+
+  // Contato
+  email                 String                // Email principal (único por tenant+email)
+  emailSecundario       String?               // Email secundário
+  telefone              String?               // Telefone comercial
+  celular               String?               // Celular/WhatsApp
+
+  // Dados pessoais (apenas PF)
+  dataNascimento        DateTime?             // Data de nascimento
+  genero                String?               // M/F/O
+
+  // Observações e categorização
+  observacoes           String?               // Notas internas
+  tags                  String[]              // Categorias/tags do cliente
+
+  // Scoring e status
+  score                 Int                   @default(0) // Pontuação do cliente
+  status                StatusCliente         @default(PROSPECT) // Ativo, inativo, bloqueado, prospect
+  origem                OrigemCliente         @default(MANUAL) // Como foi criado
+
+  // Histórico de vendas
+  ultimaCompra          DateTime?             // Data da última compra
+  totalCompras          Int                   @default(0) // Total de pedidos
+  valorTotalCompras     Int                   @default(0) // Valor total em centavos
+
+  // Relacionamentos
+  enderecos             EnderecoCliente[]
+  contatos              ContatoCliente[]
+  interacoes            InteracaoCliente[]
+  segmentos             ClienteSegmento[]
+
+  // Auditoria
+  criadoEm              DateTime              @default(now())
+  atualizadoEm          DateTime              @updatedAt
+
+  // Índices
+  @@unique([tenantId, cpf], map: "uk_cliente_tenant_cpf") // CPF único por tenant
+  @@unique([tenantId, cnpj], map: "uk_cliente_tenant_cnpj") // CNPJ único por tenant
+  @@unique([tenantId, email], map: "uk_cliente_tenant_email") // Email único por tenant
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, origem])
+  @@index([tenantId, criadoEm])
+}
+
+// EnderecoCliente - Endereço de entrega ou cobrança do cliente
+// Um cliente pode ter múltiplos endereços marcados como
+// padrão, entrega ou cobrança.
+model EnderecoCliente {
+  id                    String                @id @default(cuid())
+  tenantId              String
+
+  // Relacionamento com cliente
+  clienteId             String
+  cliente               Cliente               @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  // Tipo de endereço
+  tipo                  TipoEndereco          // ENTREGA, COBRANCA ou AMBOS
+
+  // Dados do endereço
+  logradouro            String                // Rua, avenida, etc
+  numero                String                // Número do imóvel
+  complemento           String?               // Complemento (apto, sala, etc)
+  bairro                String                // Bairro
+  cidade                String                // Cidade
+  estado                String                @db.Char(2) // UF (SP, RJ, etc)
+  cep                   String                @db.Char(8) // CEP sem formatação
+  pais                  String                @default("BR") // País (padrão Brasil)
+
+  // Padrão
+  padrao                Boolean               @default(false) // Endereço padrão
+
+  // Auditoria
+  criadoEm              DateTime              @default(now())
+
+  @@index([tenantId, clienteId])
+}
+
+// ContatoCliente - Contatos adicionais do cliente
+// Permite armazenar múltiplos pontos de contato (pessoas específicas)
+// dentro da empresa do cliente.
+model ContatoCliente {
+  id                    String                @id @default(cuid())
+  tenantId              String
+
+  // Relacionamento com cliente
+  clienteId             String
+  cliente               Cliente               @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  // Dados do contato
+  nome                  String                // Nome do contato
+  cargo                 String?               // Cargo na empresa
+  email                 String?               // Email do contato
+  telefone              String?               // Telefone
+  celular               String?               // Celular/WhatsApp
+
+  // Marcação
+  principal             Boolean               @default(false) // Contato principal
+  observacoes           String?               // Notas sobre este contato
+
+  // Auditoria
+  criadoEm              DateTime              @default(now())
+
+  @@index([tenantId, clienteId])
+}
+
+// InteracaoCliente - Histórico de interações com o cliente
+// Registra todas as interações: vendas, atendimentos, reclamações,
+// devoluções, emails, mensagens, etc.
+model InteracaoCliente {
+  id                    String                @id @default(cuid())
+  tenantId              String
+
+  // Relacionamento com cliente
+  clienteId             String
+  cliente               Cliente               @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  // Tipo e canal
+  tipo                  TipoInteracao         // VENDA, ATENDIMENTO, RECLAMACAO, DEVOLUCAO, EMAIL, TELEFONE, CHAT, MARKETPLACE, NOTA
+  canal                 CanalInteracao        // TELEFONE, EMAIL, WHATSAPP, CHAT, PRESENCIAL, MARKETPLACE
+
+  // Conteúdo
+  titulo                String                // Assunto/resumo
+  descricao             String                // Descrição completa
+
+  // Contexto
+  data                  DateTime              @default(now()) // Data da interação
+  usuarioId             String                // ID do usuário que registrou
+  pedidoId              String?               // ID do pedido relacionado (se houver)
+
+  // Metadados adicionais
+  metadata              Json?                 // Dados adicionais em JSON
+
+  // Auditoria
+  criadoEm              DateTime              @default(now())
+
+  @@index([tenantId, clienteId])
+  @@index([tenantId, tipo])
+  @@index([tenantId, data])
+}
+
+// SegmentoCliente - Definição de um segmento de clientes
+// Permite criar segmentos dinâmicos baseados em regras
+// (ex: "Clientes que gastaram mais de R$10k nos últimos 30 dias").
+model SegmentoCliente {
+  id                    String                @id @default(cuid())
+  tenantId              String
+
+  // Identificação
+  nome                  String                // Nome do segmento
+  descricao             String?               // Descrição
+
+  // Regras dinâmicas em JSON
+  // Ex: { "valor_minimo": 10000, "dias": 30, "campos": ["status", "tags"] }
+  regras                Json                  // Regras de filtro dinâmicas
+
+  // Estatísticas
+  totalClientes         Int                   @default(0) // Total de clientes neste segmento
+  ativo                 Boolean               @default(true)
+
+  // Relacionamentos
+  clientes              ClienteSegmento[]
+
+  // Auditoria
+  criadoEm              DateTime              @default(now())
+  atualizadoEm          DateTime              @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, ativo])
+}
+
+// ClienteSegmento - Tabela associativa entre Cliente e SegmentoCliente
+// Associa clientes aos segmentos dos quais fazem parte.
+model ClienteSegmento {
+  id                    String                @id @default(cuid())
+
+  // Relacionamentos
+  clienteId             String
+  cliente               Cliente               @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  segmentoId            String
+  segmento              SegmentoCliente       @relation(fields: [segmentoId], references: [id], onDelete: Cascade)
+
+  // Data de adição ao segmento
+  adicionadoEm          DateTime              @default(now())
+
+  @@unique([clienteId, segmentoId])
+  @@index([segmentoId])
+}
+
+// ImportacaoCliente - Registro de importações em lote
+// Controla o processo de importação de clientes a partir de
+// arquivos CSV ou XLSX.
+model ImportacaoCliente {
+  id                    String                @id @default(cuid())
+  tenantId              String
+
+  // Arquivo
+  arquivo               String                // Caminho ou nome do arquivo
+  formato               FormatoImportacao     // CSV ou XLSX
+
+  // Status da importação
+  status                StatusImportacao      @default(PENDENTE) // PENDENTE, PROCESSANDO, CONCLUIDO, ERRO
+
+  // Contadores
+  totalRegistros        Int                   // Total de linhas no arquivo
+  importados            Int                   @default(0) // Linhas processadas com sucesso
+  erros                 Int                   @default(0) // Linhas com erro
+
+  // Log de erros em JSON
+  logErros              Json?                 // Array de erros: [{ linha: 2, campo: "email", erro: "email inválido" }]
+
+  // Contexto
+  usuarioId             String                // Usuário que iniciou a importação
+
+  // Auditoria
+  criadoEm              DateTime              @default(now())
+  concluidoEm           DateTime?             // Quando a importação foi concluída
+
+  @@index([tenantId, status])
+  @@index([tenantId, criadoEm])
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ENUMS - Tipos de Cliente, Status, Origem, etc
+// ═══════════════════════════════════════════════════════════════
+
+/// Tipo de cliente: Pessoa Física ou Jurídica
+enum TipoCliente {
+  PESSOA_FISICA
+  PESSOA_JURIDICA
+}
+
+/// Status do cliente
+enum StatusCliente {
+  PROSPECT      // Interessado, ainda não comprou
+  ATIVO         // Cliente ativo com compras
+  INATIVO       // Cliente que parou de comprar
+  BLOQUEADO     // Cliente com inadimplência ou problemas
+}
+
+/// Origem do cliente (como foi adicionado)
+enum OrigemCliente {
+  MANUAL        // Criado manualmente
+  MARKETPLACE   // Vindo de marketplace
+  SITE          // Cadastro via site
+  INDICACAO     // Indicação de outro cliente
+  IMPORTACAO    // Importado em lote
+}
+
+/// Tipo de endereço
+enum TipoEndereco {
+  ENTREGA
+  COBRANCA
+  AMBOS
+}
+
+/// Tipo de interação com cliente
+enum TipoInteracao {
+  VENDA
+  ATENDIMENTO
+  RECLAMACAO
+  DEVOLUCAO
+  EMAIL
+  TELEFONE
+  CHAT
+  MARKETPLACE
+  NOTA
+}
+
+/// Canal de comunicação
+enum CanalInteracao {
+  TELEFONE
+  EMAIL
+  WHATSAPP
+  CHAT
+  PRESENCIAL
+  MARKETPLACE
+}
+
+/// Formato de arquivo para importação
+enum FormatoImportacao {
+  CSV
+  XLSX
+}
+
+/// Status da importação
+enum StatusImportacao {
+  PENDENTE
+  PROCESSANDO
+  CONCLUIDO
+  ERRO
+}

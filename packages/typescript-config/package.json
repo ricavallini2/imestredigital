@@ -1,0 +1,7 @@
+{
+  "name": "@imestredigital/typescript-config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Configurações TypeScript compartilhadas do iMestreDigital",
+  "files": ["*.json"]
+}

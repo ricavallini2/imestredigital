@@ -1,0 +1,63 @@
+/* ═══════════════════════════════════════════════════════════════
+ * iMestreDigital - Estilos Globais
+ * ═══════════════════════════════════════════════════════════════
+ * Base Tailwind + customizações globais do sistema.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Fonte padrão e cores do sistema */
+  :root {
+    --cor-fundo: #F8FAFC;
+    --cor-texto: #1E293B;
+    --cor-borda: #E2E8F0;
+    --cor-primaria: #2E86C1;
+    --cor-primaria-hover: #2874A6;
+    --cor-destaque: #E67E22;
+    --cor-sucesso: #27AE60;
+    --cor-erro: #E74C3C;
+    --cor-aviso: #F39C12;
+  }
+
+  /* Tema escuro */
+  .dark {
+    --cor-fundo: #0F172A;
+    --cor-texto: #E2E8F0;
+    --cor-borda: #334155;
+    --cor-primaria: #5DADE2;
+    --cor-primaria-hover: #85C1E9;
+  }
+
+  body {
+    @apply bg-[var(--cor-fundo)] text-[var(--cor-texto)] antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+}
+
+@layer components {
+  /* Botão primário padrão */
+  .btn-primario {
+    @apply bg-marca-500 text-white px-4 py-2 rounded-lg font-medium
+           hover:bg-marca-600 active:bg-marca-700
+           transition-colors duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Card padrão do dashboard */
+  .card {
+    @apply bg-white dark:bg-slate-800 rounded-xl border border-[var(--cor-borda)]
+           shadow-sm p-6;
+  }
+
+  /* Input padrão */
+  .input-padrao {
+    @apply w-full px-3 py-2 border border-[var(--cor-borda)] rounded-lg
+           bg-white dark:bg-slate-900
+           focus:outline-none focus:ring-2 focus:ring-marca-500 focus:border-transparent
+           placeholder:text-slate-400
+           transition-shadow duration-150;
+  }
+}

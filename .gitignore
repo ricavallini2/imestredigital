@@ -1,0 +1,65 @@
+# Dependências
+node_modules/
+.pnp
+.pnp.js
+
+# Build e Saída
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Ambiente e Segredos
+.env
+.env.local
+.env.production
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# Testes e Cobertura
+coverage/
+.nyc_output/
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Docker
+docker-compose.override.yml
+
+# Terraform
+infra/terraform/**/.terraform/
+infra/terraform/**/*.tfstate
+infra/terraform/**/*.tfstate.backup
+infra/terraform/**/*.tfvars
+!infra/terraform/**/*.tfvars.example
+
+# Turborepo
+.turbo/
+
+# Prisma
+services/*/prisma/*.db
+
+# Python / AI Engine
+services/ai-engine/__pycache__/
+services/ai-engine/*.pyc
+services/ai-engine/.venv/
+services/ai-engine/data/*.csv
+services/ai-engine/data/*.parquet
+
+# Documentos gerados (manter os originais)
+*.docx
+!docs/**/*.docx

@@ -1,0 +1,181 @@
+// ═══════════════════════════════════════════════════════════════
+// iMestreDigital - Schema do Banco de Dados (Catálogo)
+// ═══════════════════════════════════════════════════════════════
+// Este schema define as tabelas do microserviço de catálogo.
+// Usa PostgreSQL como banco de dados principal.
+// Todos os IDs são UUIDs gerados automaticamente.
+// ═══════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Produto ──────────────────────────────────────────────
+
+/// Produto principal do catálogo
+model Produto {
+  id             String  @id @default(uuid()) @db.Uuid
+  tenantId       String  @map("tenant_id") @db.Uuid
+  sku            String
+  gtin           String?
+  nome           String
+  descricao      String  @db.Text
+  descricaoCurta String? @map("descricao_curta")
+  status         String  @default("rascunho") // rascunho, ativo, inativo, descontinuado
+
+  // Dados fiscais
+  ncm    String
+  cest   String?
+  origem Int     @default(0)
+
+  // Precificação (em centavos para evitar problemas com decimais)
+  precoCusto       Int  @map("preco_custo")
+  precoVenda       Int  @map("preco_venda")
+  precoPromocional Int? @map("preco_promocional")
+
+  // Dimensões e peso
+  peso        Int // gramas
+  altura      Float // cm
+  largura     Float // cm
+  comprimento Float // cm
+
+  // SEO
+  tags          String[]
+  metaTitulo    String?  @map("meta_titulo")
+  metaDescricao String?  @map("meta_descricao")
+
+  // Timestamps
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  // Relacionamentos
+  categoriaId String            @map("categoria_id") @db.Uuid
+  categoria   Categoria         @relation(fields: [categoriaId], references: [id])
+  marcaId     String?           @map("marca_id") @db.Uuid
+  marca       Marca?            @relation(fields: [marcaId], references: [id])
+  imagens     ImagemProduto[]
+  variacoes   VariacaoProduto[]
+
+  // Índices para performance
+  @@unique([tenantId, sku])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, categoriaId])
+  @@index([nome])
+  @@index([gtin])
+  @@map("produtos")
+}
+
+// ─── Imagem do Produto ────────────────────────────────────
+
+/// Imagem associada a um produto ou variação
+model ImagemProduto {
+  id           String  @id @default(uuid()) @db.Uuid
+  produtoId    String  @map("produto_id") @db.Uuid
+  produto      Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  url          String
+  urlMiniatura String? @map("url_miniatura")
+  altText      String? @map("alt_text")
+  ordem        Int     @default(0)
+  principal    Boolean @default(false)
+
+  criadoEm DateTime @default(now()) @map("criado_em")
+
+  @@index([produtoId])
+  @@map("imagens_produto")
+}
+
+// ─── Variação de Produto ──────────────────────────────────
+
+/// Variação de um produto (cor, tamanho, etc.)
+model VariacaoProduto {
+  id         String  @id @default(uuid()) @db.Uuid
+  produtoId  String  @map("produto_id") @db.Uuid
+  produto    Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  sku        String
+  gtin       String?
+  nome       String
+  precoVenda Int?    @map("preco_venda")
+  peso       Int?
+
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  atributos AtributoVariacao[]
+  imagens   ImagemVariacao[]
+
+  @@index([produtoId])
+  @@map("variacoes_produto")
+}
+
+/// Atributo de uma variação (ex: Cor=Azul, Tamanho=M)
+model AtributoVariacao {
+  id         String          @id @default(uuid()) @db.Uuid
+  variacaoId String          @map("variacao_id") @db.Uuid
+  variacao   VariacaoProduto @relation(fields: [variacaoId], references: [id], onDelete: Cascade)
+  nome       String // Ex: "Cor", "Tamanho"
+  valor      String // Ex: "Azul", "M"
+
+  @@map("atributos_variacao")
+}
+
+/// Imagem específica de uma variação
+model ImagemVariacao {
+  id         String          @id @default(uuid()) @db.Uuid
+  variacaoId String          @map("variacao_id") @db.Uuid
+  variacao   VariacaoProduto @relation(fields: [variacaoId], references: [id], onDelete: Cascade)
+  url        String
+  ordem      Int             @default(0)
+
+  @@map("imagens_variacao")
+}
+
+// ─── Categoria ────────────────────────────────────────────
+
+/// Categoria de produto com suporte a hierarquia
+model Categoria {
+  id       String  @id @default(uuid()) @db.Uuid
+  tenantId String  @map("tenant_id") @db.Uuid
+  nome     String
+  slug     String
+  nivel    Int     @default(0)
+  ativa    Boolean @default(true)
+
+  categoriaPaiId String?     @map("categoria_pai_id") @db.Uuid
+  categoriaPai   Categoria?  @relation("CategoriaHierarquia", fields: [categoriaPaiId], references: [id])
+  subcategorias  Categoria[] @relation("CategoriaHierarquia")
+  produtos       Produto[]
+
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@map("categorias")
+}
+
+// ─── Marca ────────────────────────────────────────────────
+
+/// Marca de produto
+model Marca {
+  id       String    @id @default(uuid()) @db.Uuid
+  tenantId String    @map("tenant_id") @db.Uuid
+  nome     String
+  slug     String
+  logoUrl  String?   @map("logo_url")
+  ativa    Boolean   @default(true)
+  produtos Produto[]
+
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@map("marcas")
+}

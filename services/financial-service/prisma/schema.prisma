@@ -1,0 +1,239 @@
+// ═══════════════════════════════════════════════════════════════
+// iMestreDigital - Schema do Financial Service
+// ═══════════════════════════════════════════════════════════════
+// Gerencia:
+// - Contas bancárias e financeiras
+// - Lançamentos (contas a receber/pagar)
+// - Categorias financeiras hierárquicas
+// - Recorrências automáticas
+// - Fluxo de caixa e DRE
+// - Conciliação bancária
+// ═══════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Conta Financeira ─────────────────────────────────────────
+/// Representação de uma conta bancária ou financeira da empresa.
+/// Tipos: corrente, poupança, caixa, cartão, digital, etc.
+model ContaFinanceira {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+
+  nome            String
+  tipo            String   // CORRENTE, POUPANCA, CAIXA, CARTAO, DIGITAL
+  banco           String?
+  agencia         String?
+  conta           String?
+
+  saldoAtual      Decimal  @default(0) @db.Decimal(19, 2) @map("saldo_atual")
+  saldoInicial    Decimal  @default(0) @db.Decimal(19, 2) @map("saldo_inicial")
+
+  ativa           Boolean  @default(true)
+  cor             String?  @default("#3B82F6")
+  icone           String?  @default("bank")
+
+  criadoEm        DateTime @default(now()) @map("criado_em")
+  atualizadoEm    DateTime @updatedAt @map("atualizado_em")
+
+  // Relacionamentos
+  lancamentos     Lancamento[]
+  transferenciasOrigem      Lancamento[] @relation("TransferenciaOrigem")
+  transferenciasDestino     Lancamento[] @relation("TransferenciaDestino")
+  recorrencias    Recorrencia[]
+  conciliacoes    ConciliacaoBancaria[]
+
+  @@index([tenantId])
+  @@index([ativa])
+  @@map("contas_financeiras")
+}
+
+// ─── Lançamento (Contas a Pagar/Receber) ──────────────────────
+/// Transação financeira: receita, despesa ou transferência.
+/// Pode ser pago/recebido ou permanecer em aberto.
+model Lancamento {
+  id                String   @id @default(uuid()) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  contaId           String?  @map("conta_id") @db.Uuid
+  conta             ContaFinanceira? @relation(fields: [contaId], references: [id], onDelete: SetNull)
+
+  tipo              String   // RECEITA, DESPESA, TRANSFERENCIA
+  categoria         String?
+  subcategoria      String?
+  descricao         String   @db.Text
+  valor             Decimal  @db.Decimal(19, 2)
+
+  dataVencimento    DateTime @map("data_vencimento")
+  dataPagamento     DateTime? @map("data_pagamento")
+  dataCompetencia   DateTime? @map("data_competencia")
+
+  status            String   @default("PENDENTE") // PENDENTE, PAGO, ATRASADO, CANCELADO
+  formaPagamento    String?  @map("forma_pagamento") // PIX, TED, DOC, BOLETO, DINHEIRO, etc
+
+  // Parcelamento
+  numeroParcela     Int?     @map("numero_parcela")
+  totalParcelas     Int?     @map("total_parcelas")
+  parcelaOrigemId   String?  @map("parcela_origem_id") @db.Uuid
+
+  // Integrações
+  pedidoId          String?  @map("pedido_id") @db.Uuid
+  notaFiscalId      String?  @map("nota_fiscal_id") @db.Uuid
+
+  fornecedor        String?
+  cliente           String?
+  observacao        String?  @db.Text
+  tags              String[] @default([])
+
+  // Recorrência
+  recorrente        Boolean  @default(false)
+  recorrenciaId     String?  @map("recorrencia_id") @db.Uuid
+  recorrencia       Recorrencia? @relation(fields: [recorrenciaId], references: [id], onDelete: SetNull)
+
+  anexoUrl          String?  @map("anexo_url")
+
+  criadoEm          DateTime @default(now()) @map("criado_em")
+  atualizadoEm      DateTime @updatedAt @map("atualizado_em")
+
+  // Relacionamentos para transferências
+  contaOrigemId     String?  @map("conta_origem_id") @db.Uuid
+  contaOrigem       ContaFinanceira? @relation("TransferenciaOrigem", fields: [contaOrigemId], references: [id], onDelete: SetNull)
+
+  contaDestinoId    String?  @map("conta_destino_id") @db.Uuid
+  contaDestino      ContaFinanceira? @relation("TransferenciaDestino", fields: [contaDestinoId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tipo])
+  @@index([status])
+  @@index([dataVencimento])
+  @@index([dataPagamento])
+  @@index([contaId])
+  @@index([recorrenciaId])
+  @@map("lancamentos")
+}
+
+// ─── Categoria Financeira ──────────────────────────────────────
+/// Categorias hierárquicas para organizar receitas e despesas.
+model CategoriaFinanceira {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+
+  nome            String
+  tipo            String   // RECEITA, DESPESA
+  icone           String?  @default("tag")
+  cor             String?  @default("#6B7280")
+
+  paiId           String?  @map("pai_id") @db.Uuid
+  pai             CategoriaFinanceira? @relation("CategoriaPai", fields: [paiId], references: [id], onDelete: SetNull)
+  filhos          CategoriaFinanceira[] @relation("CategoriaPai")
+
+  ativa           Boolean  @default(true)
+
+  criadoEm        DateTime @default(now()) @map("criado_em")
+  atualizadoEm    DateTime @updatedAt @map("atualizado_em")
+
+  @@index([tenantId])
+  @@index([tipo])
+  @@index([paiId])
+  @@map("categorias_financeiras")
+}
+
+// ─── Recorrência ──────────────────────────────────────────────
+/// Configuração para gerar lançamentos automaticamente.
+/// Exemplo: aluguel todo mês, no dia 5.
+model Recorrencia {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  contaId         String?  @map("conta_id") @db.Uuid
+  conta           ContaFinanceira? @relation(fields: [contaId], references: [id], onDelete: SetNull)
+
+  descricao       String
+  tipo            String   // RECEITA, DESPESA
+  categoria       String?
+  valor           Decimal  @db.Decimal(19, 2)
+
+  frequencia      String   // DIARIA, SEMANAL, QUINZENAL, MENSAL, BIMESTRAL, TRIMESTRAL, SEMESTRAL, ANUAL
+  diaVencimento   Int?     @map("dia_vencimento") // 1-31, ou null se semanal
+
+  proximaGeracao  DateTime @map("proxima_geracao")
+  ativa           Boolean  @default(true)
+
+  criadoEm        DateTime @default(now()) @map("criado_em")
+  atualizadoEm    DateTime @updatedAt @map("atualizado_em")
+
+  // Relacionamentos
+  lancamentos     Lancamento[]
+
+  @@index([tenantId])
+  @@index([frequencia])
+  @@index([ativa])
+  @@map("recorrencias")
+}
+
+// ─── Conciliação Bancária ────────────────────────────────────
+/// Processo de reconciliar saldo do sistema com extrato bancário.
+model ConciliacaoBancaria {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  contaId         String   @map("conta_id") @db.Uuid
+  conta           ContaFinanceira @relation(fields: [contaId], references: [id], onDelete: Cascade)
+
+  dataInicio      DateTime @map("data_inicio")
+  dataFim         DateTime @map("data_fim")
+
+  saldoInicial    Decimal  @db.Decimal(19, 2) @map("saldo_inicial")
+  saldoFinal      Decimal  @db.Decimal(19, 2) @map("saldo_final")
+
+  status          String   @default("EM_ANDAMENTO") // EM_ANDAMENTO, CONCLUIDA, DIVERGENTE
+  divergencias    Json?    @default("[]")
+
+  criadoEm        DateTime @default(now()) @map("criado_em")
+  atualizadoEm    DateTime @updatedAt @map("atualizado_em")
+
+  @@index([tenantId])
+  @@index([contaId])
+  @@index([status])
+  @@map("conciliacoes_bancarias")
+}
+
+// ─── DRE (Demonstração de Resultado do Exercício) ─────────────
+/// Relatório financeiro mensal/anual.
+model DRE {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenantId              String   @map("tenant_id") @db.Uuid
+
+  periodo               String   // MENSAL, TRIMESTRAL, ANUAL
+  ano                   Int
+  mes                   Int?
+
+  receitaBruta          Decimal  @db.Decimal(19, 2) @map("receita_bruta")
+  deducoes              Decimal  @db.Decimal(19, 2) @default(0)
+  receitaLiquida        Decimal  @db.Decimal(19, 2) @map("receita_liquida")
+
+  custosMercadorias     Decimal  @db.Decimal(19, 2) @default(0) @map("custos_mercadorias")
+  lucroBruto            Decimal  @db.Decimal(19, 2) @map("lucro_bruto")
+
+  despesasOperacionais  Decimal  @db.Decimal(19, 2) @default(0) @map("despesas_operacionais")
+  despesasAdministrativas Decimal @db.Decimal(19, 2) @default(0) @map("despesas_administrativas")
+  despesasComerciais    Decimal  @db.Decimal(19, 2) @default(0) @map("despesas_comerciais")
+
+  resultadoOperacional  Decimal  @db.Decimal(19, 2) @map("resultado_operacional")
+
+  despesasFinanceiras   Decimal  @db.Decimal(19, 2) @default(0) @map("despesas_financeiras")
+  receitasFinanceiras   Decimal  @db.Decimal(19, 2) @default(0) @map("receitas_financeiras")
+
+  lucroLiquido          Decimal  @db.Decimal(19, 2) @map("lucro_liquido")
+
+  criadoEm              DateTime @default(now()) @map("criado_em")
+
+  @@index([tenantId])
+  @@index([ano])
+  @@index([mes])
+  @@map("dres")
+}

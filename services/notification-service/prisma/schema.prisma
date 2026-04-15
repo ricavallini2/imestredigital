@@ -1,0 +1,172 @@
+// ═══════════════════════════════════════════════════════════════
+// iMestreDigital - Schema do Notification Service
+// ═══════════════════════════════════════════════════════════════
+// Gerencia notificações (email, push, SMS, webhooks, internas),
+// templates de notificações, configurações de webhooks,
+// e preferências do usuário para notificações.
+// ═══════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Notificação ──────────────────────────────────────────────
+
+/// Notificação enviada ou a ser enviada a um usuário.
+/// Rastreia o status de cada notificação através dos canais.
+model Notificacao {
+  id                  String    @id @default(uuid()) @db.Uuid
+  tenantId            String    @map("tenant_id") @db.Uuid
+
+  // Tipo e canal de entrega
+  tipo                String    // EMAIL, PUSH, SMS, WEBHOOK, INTERNA
+  titulo              String
+  mensagem            String
+  canal               String?   // email, firebase, twilio, etc
+
+  // Destinatário
+  destinatarioId      String?   @map("destinatario_id") @db.Uuid  // ID do usuário
+  destinatarioEmail   String?   @map("destinatario_email")
+
+  // Status de entrega
+  status              String    @default("PENDENTE")  // PENDENTE, ENVIANDO, ENVIADA, FALHA, LIDA
+  prioridade          String    @default("NORMAL")    // BAIXA, NORMAL, ALTA, URGENTE
+
+  // Metadados e rastreamento
+  metadata            Json?     @default("{}")        // Dados customizados por tipo
+  tentativas          Int       @default(0)
+  ultimaTentativa     DateTime? @map("ultima_tentativa")
+  enviadaEm           DateTime? @map("enviada_em")
+  lidaEm              DateTime? @map("lida_em")
+  erroMensagem        String?   @map("erro_mensagem")
+
+  // Timestamps
+  criadoEm            DateTime  @default(now()) @map("criado_em")
+  atualizadoEm        DateTime  @updatedAt @map("atualizado_em")
+
+  @@index([tenantId])
+  @@index([destinatarioId])
+  @@index([status])
+  @@index([tipo])
+  @@map("notificacoes")
+}
+
+// ─── Template de Notificação ──────────────────────────────────
+
+/// Template reutilizável para notificações.
+/// Usa Handlebars para interpolação de variáveis.
+model TemplateNotificacao {
+  id          String    @id @default(uuid()) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+
+  // Identificação
+  nome        String    // Ex: "Boas-vindas", "Pedido Confirmado"
+  slug        String    // Ex: "boas-vindas", "pedido-confirmado"
+
+  // Conteúdo
+  tipo        String    // EMAIL, PUSH, SMS, INTERNA
+  assunto     String?   // Para emails
+  conteudo    String    // Template Handlebars
+  variaveis   Json      @default("[]")  // Array de nomes de variáveis esperadas
+
+  // Status
+  ativo       Boolean   @default(true)
+
+  // Timestamps
+  criadoEm    DateTime  @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@map("template_notificacoes")
+}
+
+// ─── Configuração de Webhook ──────────────────────────────────
+
+/// Configuração de webhook para notificar sistemas externos.
+/// Suporta HMAC-SHA256 para assinatura segura.
+model ConfiguracaoWebhook {
+  id                    String    @id @default(uuid()) @db.Uuid
+  tenantId              String    @map("tenant_id") @db.Uuid
+
+  // Identificação
+  nome                  String
+  url                   String    @map("url")
+
+  // Segurança
+  segredo               String?   // Para assinatura HMAC-SHA256
+
+  // Configuração
+  eventos               String[]  // Array de eventos a enviar
+  ativo                 Boolean   @default(true)
+
+  // Monitoramento
+  ultimoEnvio           DateTime? @map("ultimo_envio")
+  falhasConsecutivas    Int       @default(0) @map("falhas_consecutivas")
+
+  // Timestamps
+  criadoEm              DateTime  @default(now()) @map("criado_em")
+  atualizadoEm          DateTime  @updatedAt @map("atualizado_em")
+
+  // Relacionamentos
+  historicoWebhooks     HistoricoWebhook[]
+
+  @@index([tenantId])
+  @@map("configuracao_webhooks")
+}
+
+// ─── Histórico de Webhook ─────────────────────────────────────
+
+/// Registro de cada tentativa de envio de webhook.
+model HistoricoWebhook {
+  id                String    @id @default(uuid()) @db.Uuid
+  tenantId          String    @map("tenant_id") @db.Uuid
+  webhookId         String    @map("webhook_id") @db.Uuid
+  webhook           ConfiguracaoWebhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  // Detalhes do envio
+  evento            String
+  payload           Json
+  statusCode        Int?      @map("status_code")
+  resposta          String?
+
+  // Rastreamento
+  tentativa         Int       @default(1)
+  sucesso           Boolean   @default(false)
+
+  // Timestamps
+  criadoEm          DateTime  @default(now()) @map("criado_em")
+
+  @@index([tenantId])
+  @@index([webhookId])
+  @@map("historico_webhooks")
+}
+
+// ─── Preferência de Notificação ────────────────────────────────
+
+/// Preferências do usuário para recebimento de notificações.
+/// Controla quais canais e eventos o usuário deseja receber.
+model PreferenciaNotificacao {
+  id                String    @id @default(uuid()) @db.Uuid
+  tenantId          String    @map("tenant_id") @db.Uuid
+  usuarioId         String    @map("usuario_id") @db.Uuid
+
+  // Preferência
+  canal             String    // email, push, sms, interna
+  tipoEvento        String    @map("tipo_evento")  // pedido.criado, estoque.baixo, etc
+  habilitado        Boolean   @default(true)
+
+  // Timestamps
+  criadoEm          DateTime  @default(now()) @map("criado_em")
+  atualizadoEm      DateTime  @updatedAt @map("atualizado_em")
+
+  @@unique([tenantId, usuarioId, canal, tipoEvento])
+  @@index([tenantId])
+  @@index([usuarioId])
+  @@map("preferencia_notificacoes")
+}

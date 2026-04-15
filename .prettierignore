@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+.next
+coverage
+.turbo
+infra/terraform/.terraform
+*.min.js
+*.min.css

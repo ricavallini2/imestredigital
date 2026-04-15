@@ -1,0 +1,109 @@
+// ═══════════════════════════════════════════════════════════════
+// iMestreDigital - Schema do Auth Service
+// ═══════════════════════════════════════════════════════════════
+// Gerencia tenants (empresas), usuários, tokens e permissões.
+// Este é o schema mais crítico do sistema — todas as outras
+// tabelas em outros serviços referenciam o tenantId daqui.
+// ═══════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Tenant (Empresa) ─────────────────────────────────────
+
+/// Empresa/organização cadastrada no sistema.
+/// Cada tenant tem seus dados completamente isolados.
+model Tenant {
+  id                String  @id @default(uuid()) @db.Uuid
+  nome              String
+  cnpj              String? @unique
+  email             String
+  telefone          String?
+  endereco          String?
+  inscricaoEstadual String? @map("inscricao_estadual")
+
+  // Plano e limites
+  plano            String @default("starter") // starter, growth, pro, enterprise
+  status           String @default("ativo") // ativo, suspenso, cancelado
+  limiteUsuarios   Int    @default(1) @map("limite_usuarios")
+  limitePedidosMes Int    @default(500) @map("limite_pedidos_mes")
+
+  // Configurações do tenant (JSON flexível)
+  configuracoes Json? @default("{}")
+
+  // Timestamps
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  // Relacionamentos
+  usuarios Usuario[]
+
+  @@index([status])
+  @@map("tenants")
+}
+
+// ─── Usuário ──────────────────────────────────────────────
+
+/// Usuário do sistema, sempre vinculado a um tenant.
+model Usuario {
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @map("tenant_id") @db.Uuid
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  nome      String
+  email     String @unique
+  senhaHash String @map("senha_hash")
+
+  // Permissões
+  cargo  String @default("operador") // admin, gerente, operador, visualizador
+  status String @default("ativo") // ativo, pendente, inativo, removido
+
+  // Verificação e segurança
+  emailVerificado Boolean   @default(false) @map("email_verificado")
+  ultimoLogin     DateTime? @map("ultimo_login")
+  tentativasLogin Int       @default(0) @map("tentativas_login")
+  bloqueadoAte    DateTime? @map("bloqueado_ate")
+
+  // Avatar e preferências
+  avatarUrl    String? @map("avatar_url")
+  preferencias Json?   @default("{}")
+
+  // Timestamps
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  // Relacionamentos
+  refreshTokens RefreshToken[]
+
+  @@index([tenantId])
+  @@index([email])
+  @@map("usuarios")
+}
+
+// ─── Refresh Token ────────────────────────────────────────
+
+/// Tokens de refresh armazenados para rotação segura.
+/// Cada login gera um refresh token; ao renovar, o antigo é revogado.
+model RefreshToken {
+  id        String  @id @default(uuid()) @db.Uuid
+  token     String  @unique
+  usuarioId String  @map("usuario_id") @db.Uuid
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  expiraEm   DateTime  @map("expira_em")
+  revogado   Boolean   @default(false)
+  revogadoEm DateTime? @map("revogado_em")
+
+  criadoEm DateTime @default(now()) @map("criado_em")
+
+  @@index([usuarioId])
+  @@index([token])
+  @@map("refresh_tokens")
+}

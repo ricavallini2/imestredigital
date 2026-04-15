@@ -1,0 +1,50 @@
+{
+  "name": "imestredigital",
+  "version": "0.1.0",
+  "private": true,
+  "description": "iMestreDigital - ERP SaaS com IA integrada para comércio brasileiro",
+  "author": "Ricardo Cavallini",
+  "license": "UNLICENSED",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:unit": "turbo run test:unit",
+    "test:integration": "turbo run test:integration",
+    "test:e2e": "turbo run test:e2e",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "setup": "node scripts/setup.js",
+    "setup:seed-only": "node scripts/setup.js --seed-only",
+    "docker:up": "docker-compose -f infra/docker/docker-compose.dev.yml up -d",
+    "docker:down": "docker-compose -f infra/docker/docker-compose.dev.yml down",
+    "docker:logs": "docker-compose -f infra/docker/docker-compose.dev.yml logs -f",
+    "db:migrate": "turbo run db:migrate",
+    "db:seed": "turbo run db:seed",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "turbo": "^2.4.0",
+    "husky": "^9.1.0",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.3.0",
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": ["eslint --fix", "prettier --write"],
+    "*.{json,md,yml,yaml}": ["prettier --write"]
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

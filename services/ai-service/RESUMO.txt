@@ -1,0 +1,400 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                     AI SERVICE - IMESTRE DIGITAL v1.0.0                       ║
+║           Motor de Inteligência Artificial para ERP Brasileiro               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📋 RESUMO EXECUTIVO
+═══════════════════════════════════════════════════════════════════════════════
+
+O AI Service é um serviço microserviço completo em NestJS que fornece:
+
+1. iMestreAI - Assistente conversacional inteligente
+   → Chat com histórico de conversas
+   → Processamento de comandos em linguagem natural
+   → Integração com OpenAI GPT-4
+
+2. Motor de Análise - Insights automáticos
+   → Análise de vendas (tendências, sazonalidade)
+   → Alertas de estoque (crítico, encalhado)
+   → Análise financeira (fluxo de caixa)
+   → Classificação fiscal (pendências)
+   → Insights de marketplace
+
+3. Previsão de Demanda
+   → Algoritmo combinado (média móvel + regressão + sazonalidade)
+   → Cálculo de ponto de reposição
+   → Estimativa de confiança
+
+4. Classificação Fiscal
+   → Sugestão de NCM via IA
+   → Sugestão de CFOP
+   → Validação contra tabela TIPI
+
+5. Sugestões Inteligentes
+   → Preço (baseado em custo + mercado)
+   → Descrição de produto (otimizada SEO)
+   → Respostas para clientes (marketplace)
+   → Títulos de anúncio (por marketplace)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📁 ESTRUTURA CRIADA
+═══════════════════════════════════════════════════════════════════════════════
+
+Arquivos TypeScript: 44
+Arquivos Config: 2 (.env files)
+Documentação: 3 (SETUP.md, ESTRUTURA.md, RESUMO.txt)
+Arquivos Docker: 2 (Dockerfile, docker-compose.yml)
+Arquivos Suporte: 3 (package.json, tsconfig.json, nest-cli.json)
+
+TOTAL: 54 arquivos criados
+
+Local: /sessions/gifted-kind-franklin/mnt/Saas - ERP IA/services/ai-service/
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🏗️ ARQUITETURA
+═══════════════════════════════════════════════════════════════════════════════
+
+CAMADAS:
+┌─────────────────────────────────────┐
+│  HTTP Controllers (Swagger docs)    │
+├─────────────────────────────────────┤
+│  Services (Lógica de negócio)       │
+├─────────────────────────────────────┤
+│  Repositories (Acesso a dados)      │
+├─────────────────────────────────────┤
+│  Prisma ORM (PostgreSQL)            │
+├─────────────────────────────────────┤
+│  Kafka/Redis (Cache + Mensageria)   │
+└─────────────────────────────────────┘
+
+MÓDULOS:
+1. Assistente     → Chat e processamento de comandos
+2. Insights       → Análises automáticas
+3. Previsão       → Previsão de demanda
+4. Classificação  → NCM/CFOP
+5. Sugestão       → Preço/Descrição/Respostas
+6. Eventos        → Kafka producer/consumer
+7. Prisma         → ORM e banco de dados
+8. Saúde          → Health checks
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🛠️ STACK TECNOLÓGICO
+═══════════════════════════════════════════════════════════════════════════════
+
+Backend:
+  • NestJS 10.2.0 - Framework web/API
+  • TypeScript 5.2.0 - Linguagem tipada
+  • Node.js 20+ - Runtime
+
+Banco de Dados:
+  • PostgreSQL 16 - Banco relacional
+  • Prisma 5.7.0 - ORM moderno
+
+Cache & Mensageria:
+  • Redis 7 - Cache distribuído
+  • Kafka/Redpanda - Event streaming
+
+IA:
+  • OpenAI GPT-4 - Principal provider
+  • class-validator - Validação de DTOs
+  • simple-statistics - Cálculos estatísticos
+  • ml-regression - Regressão linear
+
+API:
+  • Swagger/OpenAPI 7.1.0 - Documentação interativa
+  • Cache-manager - Abstração de cache
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🚀 QUICK START
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Clonar e preparar:
+   cd services/ai-service
+   cp .env.example .env.development
+   # Editar .env.development com OPENAI_API_KEY
+
+2. Instalar dependências:
+   npm install
+
+3. Iniciar stack local:
+   docker-compose up -d
+   sleep 10
+
+4. Setup Prisma:
+   npm run prisma:generate
+   npm run prisma:migrate
+
+5. Iniciar servidor:
+   npm run dev
+
+6. Acessar Swagger:
+   http://localhost:3008/docs
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📊 ENDPOINTS PRINCIPAIS
+═══════════════════════════════════════════════════════════════════════════════
+
+ASSISTENTE (Chat):
+  POST   /assistente/conversas                    - Iniciar conversa
+  GET    /assistente/conversas                    - Listar conversas
+  GET    /assistente/conversas/{id}               - Obter conversa
+  POST   /assistente/conversas/{id}/mensagens     - Enviar mensagem
+  POST   /assistente/comando                      - Comando rápido
+
+INSIGHTS:
+  GET    /insights                                - Listar insights
+  GET    /insights/{id}                           - Obter insight
+  PUT    /insights/{id}/visualizar                - Marcar como lido
+  POST   /insights/gerar                          - Gerar insights
+
+PREVISÃO:
+  POST   /previsao/demanda                        - Prever demanda
+  POST   /previsao/categoria                      - Prever categoria
+  POST   /previsao/ponto-reposicao                - Calcular reposição
+  GET    /previsao                                - Listar previsões
+
+CLASSIFICAÇÃO:
+  POST   /classificacao/ncm                       - Sugerir NCM
+  POST   /classificacao/cfop                      - Sugerir CFOP
+  POST   /classificacao/produto/{id}              - Classificar produto
+  GET    /classificacao/validar-ncm/{ncm}         - Validar NCM
+
+SUGESTÕES:
+  POST   /sugestoes/resposta-marketplace          - Sugerir resposta
+  POST   /sugestoes/descricao-produto             - Gerar descrição
+  POST   /sugestoes/preco                         - Sugerir preço
+  POST   /sugestoes/titulo-anuncio                - Gerar título
+  GET    /sugestoes                               - Listar sugestões
+  PUT    /sugestoes/{id}/aceitar                  - Aceitar sugestão
+
+SAÚDE:
+  GET    /saude                                   - Status simples
+  GET    /saude/detalhado                         - Status completo
+  GET    /saude/db                                - Status PostgreSQL
+  GET    /saude/llm                               - Status OpenAI
+  GET    /saude/kafka                             - Status Kafka
+  GET    /saude/cache                             - Status Redis
+
+═══════════════════════════════════════════════════════════════════════════════
+
+💾 MODELOS DE DADOS (Prisma)
+═══════════════════════════════════════════════════════════════════════════════
+
+ConversaIA
+  • id, tenantId, usuarioId
+  • titulo, contexto (JSON)
+  • criadoEm, atualizadoEm
+
+MensagemIA
+  • id, conversaId, papel (USUARIO|ASSISTENTE|SISTEMA)
+  • conteudo, metadados (tokens, modelo, tempo)
+  • criadoEm
+
+InsightIA
+  • id, tenantId
+  • tipo (VENDA|ESTOQUE|FINANCEIRO|FISCAL|MARKETPLACE)
+  • titulo, descricao, prioridade (ALTA|MEDIA|BAIXA)
+  • dados (JSON), acaoSugerida
+  • visualizado, criadoEm
+
+PrevisaoDemanda
+  • id, tenantId, produtoId
+  • periodo, quantidadePrevista
+  • confianca (0-1), metodoCalculo
+  • dadosEntrada (JSON), criadoEm
+
+SugestaoIA
+  • id, tenantId
+  • tipo (PRECO|ESTOQUE|CLASSIFICACAO_FISCAL|RESPOSTA_MARKETPLACE|DESCRICAO_PRODUTO)
+  • contexto (JSON), sugestao, confianca
+  • aceita, criadoEm
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔄 FLUXOS DE EVENTOS (Kafka)
+═══════════════════════════════════════════════════════════════════════════════
+
+PUBLICADOS:
+  ia.insight_gerado          → Novo insight criado
+  ia.previsao_calculada      → Previsão calculada
+  ia.sugestao_criada         → Sugestão gerada
+  ia.classificacao_completada → Classificação concluída
+
+CONSUMIDOS:
+  pedidos.pedido_criado      → Analisar padrão de vendas
+  pedidos.pedido_pago        → Recalcular previsões
+  catalogo.produto_criado    → Classificar produto
+  estoque.estoque_atualizado → Verificar alertas
+  financeiro.lancamento_criado → Gerar insights
+  fiscal.nota_autorizada     → Registrar operação
+
+═══════════════════════════════════════════════════════════════════════════════
+
+⚙️ CONFIGURAÇÕES
+═══════════════════════════════════════════════════════════════════════════════
+
+Porta: 3008
+Ambiente: development, staging, production
+Log Level: debug (dev), info (prod)
+Rate Limit: 10.000 tokens/min, 100 requisições/min por tenant
+Cache TTL: 3600 segundos (configurável)
+Swagger: /docs
+Prisma Studio: localhost:5555
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 CONVENÇÕES
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ Linguagem: Português do Brasil (PT-BR)
+✓ Nomes: camelCase (vars), PascalCase (classes)
+✓ Async/Await: Obrigatório para I/O
+✓ Erros: Tipados (BadRequestException, NotFoundException)
+✓ Validação: class-validator em DTOs
+✓ Logging: Logger estruturado do NestJS
+✓ Banco: Prisma com migrations versionadas
+✓ Cache: Redis com TTL configurável
+✓ Testes: Jest + Supertest
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🆘 TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+Erro: OPENAI_API_KEY not configured
+→ Configure em .env.development e reinicie
+
+Erro: PostgreSQL connection refused
+→ docker-compose ps (verificar se está rodando)
+→ docker-compose logs postgres (ver logs)
+
+Erro: Kafka broker unavailable
+→ Aguarde inicialização do Redpanda (~30 segundos)
+→ docker-compose logs redpanda
+
+Erro: Rate limit exceeded
+→ Aumente RATE_LIMIT_TOKENS_POR_MINUTO
+
+Banco de dados vazio?
+→ npm run prisma:migrate
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📚 DOCUMENTAÇÃO
+═══════════════════════════════════════════════════════════════════════════════
+
+SETUP.md        → Guia de instalação completo
+ESTRUTURA.md    → Documentação de arquitetura
+RESUMO.txt      → Este arquivo
+Swagger API     → http://localhost:3008/docs (após iniciar)
+Prisma Studio   → npm run prisma:studio
+
+═══════════════════════════════════════════════════════════════════════════════
+
+👥 MULTI-TENANCY
+═══════════════════════════════════════════════════════════════════════════════
+
+Implementado via TenantMiddleware:
+  • Extrair tenantId do header X-Tenant-Id
+  • Fallback: DEFAULT_TENANT_ID (dev)
+  • Todas as queries filtradas por tenantId
+  • Isolamento de dados garantido
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔐 SEGURANÇA
+═══════════════════════════════════════════════════════════════════════════════
+
+Implementado:
+  ✓ Rate limiting por tenant
+  ✓ Validação de DTOs (class-validator)
+  ✓ CORS habilitado (configurável)
+  ✓ Sensitive data logging control
+
+Pendente (próximos passos):
+  • Autenticação JWT
+  • Autorização RBAC
+  • Audit logs
+  • Encryption de dados sensíveis
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📈 PERFORMANCE
+═══════════════════════════════════════════════════════════════════════════════
+
+Otimizações implementadas:
+  ✓ Cache Redis para descrições (7 dias)
+  ✓ Índices no Prisma em queries frequentes
+  ✓ Async/await para não bloquear
+  ✓ Connection pooling PostgreSQL
+  ✓ Rate limiting para proteção
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📝 PRÓXIMAS MELHORIAS
+═══════════════════════════════════════════════════════════════════════════════
+
+[ ] Integração com serviços reais via HTTP
+[ ] Testes unitários (Jest)
+[ ] Testes e2e (Supertest)
+[ ] Scheduled tasks (cronjobs)
+[ ] Métricas Prometheus
+[ ] Observabilidade (OpenTelemetry)
+[ ] Autenticação JWT
+[ ] Autorização RBAC
+[ ] Soft deletes
+[ ] Versionamento de API
+
+═══════════════════════════════════════════════════════════════════════════════
+
+ℹ️ INFORMAÇÕES TÉCNICAS
+═══════════════════════════════════════════════════════════════════════════════
+
+Versão: 1.0.0
+Data de criação: 2024-03-23
+Framework: NestJS 10.2.0
+Linguagem: TypeScript 5.2.0
+Node.js: 20+
+Banco: PostgreSQL 16
+Cache: Redis 7
+Mensageria: Kafka/Redpanda
+IA: OpenAI GPT-4
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ STATUS
+═══════════════════════════════════════════════════════════════════════════════
+
+[✓] Estrutura base criada
+[✓] Todos os módulos implementados
+[✓] DTOs e validação
+[✓] Prisma schema
+[✓] Docker setup
+[✓] Health checks
+[✓] Documentação
+[✓] Endpoints Swagger
+
+Pronto para: Instalação → Testes → Deploy
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 PRÓXIMOS PASSOS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Executar setup.sh (ou seguir SETUP.md)
+2. Configurar OPENAI_API_KEY
+3. Iniciar com: npm run dev
+4. Testar endpoints em http://localhost:3008/docs
+5. Implementar testes
+6. Integrar com serviços reais
+7. Deploy em produção
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Developed with 🤖 for iMestreDigital
+All code in Portuguese (BR) | All documentation in Portuguese (BR)

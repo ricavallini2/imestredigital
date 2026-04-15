@@ -1,0 +1,21 @@
+{
+  "name": "@imestredigital/logger",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Logger estruturado do iMestreDigital com contexto de tenant",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "lint": "eslint src --ext .ts"
+  },
+  "devDependencies": {
+    "@imestredigital/typescript-config": "*",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "pino": "^9.1.0",
+    "pino-pretty": "^11.2.0"
+  }
+}

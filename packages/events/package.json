@@ -1,0 +1,20 @@
+{
+  "name": "@imestredigital/events",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Definição e tipagem de eventos de domínio do iMestreDigital",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "lint": "eslint src --ext .ts"
+  },
+  "devDependencies": {
+    "@imestredigital/typescript-config": "*",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "@imestredigital/types": "*"
+  }
+}

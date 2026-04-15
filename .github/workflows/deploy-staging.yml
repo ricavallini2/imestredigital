@@ -1,0 +1,65 @@
+# ═══════════════════════════════════════════════════════════════
+# iMestreDigital - Deploy para Staging
+# ═══════════════════════════════════════════════════════════════
+# Executado automaticamente quando há merge na branch develop.
+# Faz build das imagens Docker e deploy no ambiente de staging.
+# ═══════════════════════════════════════════════════════════════
+
+name: Deploy Staging
+
+on:
+  push:
+    branches: [develop]
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+
+jobs:
+  deploy:
+    name: Build & Deploy Staging
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login no GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build e push das imagens
+        run: |
+          # Lista de serviços para build
+          SERVICES="catalog-service inventory-service order-service marketplace-service fiscal-service financial-service customer-service notification-service auth-service"
+
+          for SERVICE in $SERVICES; do
+            echo "🏗️ Construindo $SERVICE..."
+            docker build \
+              -f infra/docker/Dockerfile.service \
+              --build-arg SERVICE_NAME=$SERVICE \
+              -t ${{ env.IMAGE_PREFIX }}/$SERVICE:staging \
+              -t ${{ env.IMAGE_PREFIX }}/$SERVICE:${{ github.sha }} \
+              .
+            docker push ${{ env.IMAGE_PREFIX }}/$SERVICE:staging
+            docker push ${{ env.IMAGE_PREFIX }}/$SERVICE:${{ github.sha }}
+          done
+
+          # Build do frontend
+          echo "🏗️ Construindo web..."
+          docker build \
+            -f infra/docker/Dockerfile.web \
+            -t ${{ env.IMAGE_PREFIX }}/web:staging \
+            -t ${{ env.IMAGE_PREFIX }}/web:${{ github.sha }} \
+            .
+          docker push ${{ env.IMAGE_PREFIX }}/web:staging
+          docker push ${{ env.IMAGE_PREFIX }}/web:${{ github.sha }}
+
+      # TODO: Adicionar deploy via ArgoCD quando cluster Kubernetes estiver configurado
+      - name: Notificar deploy
+        run: echo "✅ Imagens de staging publicadas com sucesso"

@@ -1,0 +1,252 @@
+// ═══════════════════════════════════════════════════════════════
+// iMestreDigital - Schema do Order Service (OMS)
+// ═══════════════════════════════════════════════════════════════
+// Gerencia pedidos omnichannel (marketplace, e-commerce, loja física)
+// com integração com inventory-service, fiscal-service e payment-service.
+// ═══════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Pedido (Ordem de Venda) ─────────────────────────────────
+
+/// Pedido completo com informações de cliente, itens, pagamento e entrega.
+/// Suporta múltiplos canais: marketplace, e-commerce, loja física, manual.
+model Pedido {
+  id                  String   @id @default(uuid()) @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+
+  // Numeração
+  numero              Int      @map("numero")
+
+  // Cliente
+  clienteId           String?  @map("cliente_id") @db.Uuid
+  clienteNome         String   @map("cliente_nome")
+  clienteEmail        String?  @map("cliente_email")
+  clienteCpfCnpj      String?  @map("cliente_cpf_cnpj")
+
+  // Origem e Canal
+  origem              String   @default("MANUAL") @map("origem") // LOJA, MARKETPLACE, ECOMMERCE, MANUAL
+  canalOrigem         String?  @map("canal_origem") // MERCADOLIVRE, SHOPEE, AMAZON, MAGALU, SITE, LOJA_FISICA, MANUAL
+  pedidoExternoId     String?  @unique @map("pedido_externo_id") // ID do marketplace
+
+  // Status do Pedido
+  status              String   @default("RASCUNHO") @map("status")
+  // RASCUNHO -> PENDENTE -> CONFIRMADO -> SEPARANDO -> SEPARADO -> FATURADO -> ENVIADO -> ENTREGUE
+  // CANCELADO, DEVOLVIDO
+
+  // Status do Pagamento
+  statusPagamento     String   @default("PENDENTE") @map("status_pagamento")
+  // PENDENTE -> AUTORIZADO -> PAGO / ESTORNADO / REEMBOLSADO
+
+  // Pagamento
+  metodoPagamento     String?  @map("metodo_pagamento")
+  parcelas            Int      @default(1)
+
+  // Valores
+  valorProdutos       Decimal  @default(0) @db.Decimal(12, 2) @map("valor_produtos")
+  valorDesconto       Decimal  @default(0) @db.Decimal(12, 2) @map("valor_desconto")
+  valorFrete          Decimal  @default(0) @db.Decimal(12, 2) @map("valor_frete")
+  valorTotal          Decimal  @default(0) @db.Decimal(12, 2) @map("valor_total")
+
+  // Observações
+  observacao          String?  @map("observacao")
+
+  // Endereço de Entrega (JSON com: cep, rua, numero, complemento, bairro, cidade, uf)
+  enderecoEntrega     Json?    @map("endereco_entrega")
+
+  // Rastreamento
+  rastreamento        String?  @map("rastreamento")
+  codigoRastreio      String?  @map("codigo_rastreio")
+  transportadora      String?  @map("transportadora")
+  prazoEntrega        Int?     @map("prazo_entrega") // dias
+
+  // Datas de Transição de Status
+  dataAprovacao       DateTime? @map("data_aprovacao")
+  dataSeparacao       DateTime? @map("data_separacao")
+  dataFaturamento     DateTime? @map("data_faturamento")
+  dataEnvio           DateTime? @map("data_envio")
+  dataEntrega         DateTime? @map("data_entrega")
+  dataCancelamento    DateTime? @map("data_cancelamento")
+
+  // Cancelamento
+  motivoCancelamento  String?  @map("motivo_cancelamento")
+
+  // Nota Fiscal
+  notaFiscalId        String?  @map("nota_fiscal_id") @db.Uuid
+
+  // Timestamps
+  criadoEm            DateTime @default(now()) @map("criado_em")
+  atualizadoEm        DateTime @updatedAt @map("atualizado_em")
+
+  // Relacionamentos
+  itens               ItemPedido[]
+  historico           HistoricoPedido[]
+  pagamentos          Pagamento[]
+  devolucoes          Devolucao[]
+
+  @@unique([tenantId, numero])
+  @@index([tenantId])
+  @@index([status])
+  @@index([statusPagamento])
+  @@index([canalOrigem])
+  @@index([clienteId])
+  @@index([criadoEm])
+  @@map("pedidos")
+}
+
+// ─── Item do Pedido ──────────────────────────────────────────
+
+/// Itens (produtos) que fazem parte do pedido.
+model ItemPedido {
+  id                String   @id @default(uuid()) @db.Uuid
+  pedidoId          String   @map("pedido_id") @db.Uuid
+  pedido            Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  produtoId         String   @map("produto_id") @db.Uuid
+  variacaoId        String?  @map("variacao_id") @db.Uuid
+
+  sku               String   @map("sku")
+  titulo            String   @map("titulo")
+  quantidade        Int      @map("quantidade")
+
+  // Preços
+  valorUnitario     Decimal  @db.Decimal(12, 2) @map("valor_unitario")
+  valorDesconto     Decimal  @default(0) @db.Decimal(12, 2) @map("valor_desconto")
+  valorTotal        Decimal  @db.Decimal(12, 2) @map("valor_total")
+
+  // Dimensões
+  peso              Decimal? @db.Decimal(10, 3) @map("peso")
+  largura           Decimal? @db.Decimal(10, 2) @map("largura")
+  altura            Decimal? @db.Decimal(10, 2) @map("altura")
+  comprimento       Decimal? @db.Decimal(10, 2) @map("comprimento")
+
+  criadoEm          DateTime @default(now()) @map("criado_em")
+
+  // Relacionamentos
+  itensDevolvidos   ItemDevolucao[]
+
+  @@index([pedidoId])
+  @@index([produtoId])
+  @@map("itens_pedidos")
+}
+
+// ─── Histórico de Pedido ────────────────────────────────────
+
+/// Rastreamento de todas as mudanças de status do pedido.
+model HistoricoPedido {
+  id                String   @id @default(uuid()) @db.Uuid
+  pedidoId          String   @map("pedido_id") @db.Uuid
+  pedido            Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  tenantId          String   @map("tenant_id") @db.Uuid
+
+  statusAnterior     String?  @map("status_anterior")
+  statusNovo        String   @map("status_novo")
+  descricao         String   @map("descricao")
+
+  usuarioId         String?  @map("usuario_id") @db.Uuid
+  dadosExtras       Json?    @map("dados_extras")
+
+  criadoEm          DateTime @default(now()) @map("criado_em")
+
+  @@index([pedidoId])
+  @@index([tenantId])
+  @@index([criadoEm])
+  @@map("historicos_pedidos")
+}
+
+// ─── Pagamento ───────────────────────────────────────────────
+
+/// Informações de pagamento vinculadas ao pedido.
+model Pagamento {
+  id                String   @id @default(uuid()) @db.Uuid
+  pedidoId          String   @map("pedido_id") @db.Uuid
+  pedido            Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  tenantId          String   @map("tenant_id") @db.Uuid
+
+  // Tipo e Status
+  tipo              String   @map("tipo")
+  // CARTAO_CREDITO, CARTAO_DEBITO, BOLETO, PIX, TRANSFERENCIA, MARKETPLACE
+  status            String   @default("PENDENTE") @map("status")
+  // PENDENTE -> PROCESSANDO -> APROVADO / RECUSADO / ESTORNADO
+
+  valor             Decimal  @db.Decimal(12, 2)
+  parcelas          Int      @default(1)
+
+  // Gateway de Pagamento
+  gateway           String?  @map("gateway")
+  transacaoExternaId String? @map("transacao_externa_id")
+  dadosGateway      Json?    @map("dados_gateway")
+
+  dataPagamento     DateTime? @map("data_pagamento")
+
+  criadoEm          DateTime @default(now()) @map("criado_em")
+  atualizadoEm      DateTime @updatedAt @map("atualizado_em")
+
+  @@index([pedidoId])
+  @@index([tenantId])
+  @@index([status])
+  @@map("pagamentos")
+}
+
+// ─── Devolução ───────────────────────────────────────────────
+
+/// Gestão de devoluções e reembolsos.
+model Devolucao {
+  id                String   @id @default(uuid()) @db.Uuid
+  pedidoId          String   @map("pedido_id") @db.Uuid
+  pedido            Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  tenantId          String   @map("tenant_id") @db.Uuid
+
+  motivo            String   @map("motivo")
+  status            String   @default("SOLICITADA") @map("status")
+  // SOLICITADA -> APROVADA -> RECEBIDA -> REEMBOLSADA / RECUSADA
+
+  valorReembolso    Decimal  @db.Decimal(12, 2) @map("valor_reembolso")
+
+  codigoRastreioRetorno String? @map("codigo_rastreio_retorno")
+
+  observacao        String?  @map("observacao")
+
+  criadoEm          DateTime @default(now()) @map("criado_em")
+  atualizadoEm      DateTime @updatedAt @map("atualizado_em")
+
+  // Relacionamentos
+  itens             ItemDevolucao[]
+
+  @@index([pedidoId])
+  @@index([tenantId])
+  @@index([status])
+  @@map("devolucoes")
+}
+
+// ─── Item de Devolução ───────────────────────────────────────
+
+/// Itens específicos que fazem parte da devolução.
+model ItemDevolucao {
+  id                String   @id @default(uuid()) @db.Uuid
+  devolucaoId       String   @map("devolucao_id") @db.Uuid
+  devolucao         Devolucao @relation(fields: [devolucaoId], references: [id], onDelete: Cascade)
+
+  itemPedidoId      String   @map("item_pedido_id") @db.Uuid
+  itemPedido        ItemPedido @relation(fields: [itemPedidoId], references: [id], onDelete: Cascade)
+
+  quantidade        Int      @map("quantidade")
+  motivo            String   @map("motivo")
+
+  criadoEm          DateTime @default(now()) @map("criado_em")
+
+  @@index([devolucaoId])
+  @@index([itemPedidoId])
+  @@map("itens_devolucoes")
+}

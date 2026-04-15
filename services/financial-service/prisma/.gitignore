@@ -1,0 +1,8 @@
+# Migrations geradas localmente
+/migrations/*
+!.gitkeep
+
+# Arquivos de desenvolvimento
+*.db
+*.db-shm
+*.db-wal

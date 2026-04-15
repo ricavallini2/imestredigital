@@ -1,0 +1,146 @@
+// Este é o arquivo de schema do Prisma para o AI Service do iMestreDigital
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo de Conversa com IA
+// Armazena histórico de conversas do usuário com o iMestreAI assistente
+model ConversaIA {
+  id           String       @id @default(cuid())
+  tenantId     String       // ID do tenant (empresa)
+  usuarioId    String       // ID do usuário que iniciou a conversa
+  titulo       String       // Título/tópico da conversa
+
+  // Contexto da conversa em formato JSON
+  // Ex: { modulo: "vendas", dadosRelevantes: {...}, dataInicio: "2024-01-15" }
+  contexto     Json         @default("{}")
+
+  mensagens    MensagemIA[] // Histórico de mensagens
+
+  criadoEm     DateTime     @default(now())
+  atualizadoEm DateTime     @updatedAt
+
+  @@index([tenantId, usuarioId])
+  @@index([tenantId, criadoEm])
+}
+
+// Modelo de Mensagem dentro de uma Conversa
+// Armazena cada mensagem do usuário ou do assistente
+model MensagemIA {
+  id         String     @id @default(cuid())
+  conversaId String
+  conversa   ConversaIA @relation(fields: [conversaId], references: [id], onDelete: Cascade)
+
+  // Quem enviou: USUARIO, ASSISTENTE ou SISTEMA
+  papel      String     // "USUARIO" | "ASSISTENTE" | "SISTEMA"
+
+  // Conteúdo da mensagem
+  conteudo   String
+
+  // Metadados da resposta
+  // Ex: { tokensUsados: 150, modelo: "gpt-4", tempoRespostaMs: 1250, custo: 0.0045 }
+  metadados  Json       @default("{}")
+
+  criadoEm   DateTime   @default(now())
+
+  @@index([conversaId])
+  @@index([papel])
+}
+
+// Modelo de Insights gerados automaticamente
+// Análises e sugestões inteligentes sobre negócio do tenant
+model InsightIA {
+  id             String   @id @default(cuid())
+  tenantId       String   // ID do tenant
+
+  // Tipo de insight: VENDA, ESTOQUE, FINANCEIRO, FISCAL, MARKETPLACE
+  tipo           String   // "VENDA" | "ESTOQUE" | "FINANCEIRO" | "FISCAL" | "MARKETPLACE"
+
+  titulo         String   // Ex: "Produto com estoque crítico"
+  descricao      String   @db.Text // Descrição detalhada
+
+  // Prioridade da ação sugerida
+  prioridade     String   @default("MEDIA") // "ALTA" | "MEDIA" | "BAIXA"
+
+  // Dados associados ao insight
+  // Ex: { produtoId: "abc", estoque: 2, vendaMedia: 50 }
+  dados          Json     @default("{}")
+
+  // Ação sugerida para o usuário
+  acaoSugerida   String?  @db.Text
+
+  // Se foi visualizado/lido pelo usuário
+  visualizado    Boolean  @default(false)
+
+  criadoEm       DateTime @default(now())
+
+  @@index([tenantId, tipo])
+  @@index([tenantId, visualizado])
+  @@index([tenantId, prioridade])
+  @@index([criadoEm])
+}
+
+// Modelo de Previsão de Demanda
+// Previsões de vendas futuras baseadas em histórico
+model PrevisaoDemanda {
+  id              String   @id @default(cuid())
+  tenantId        String   // ID do tenant
+  produtoId       String   // ID do produto sendo previsto
+
+  // Período para o qual a previsão foi feita
+  periodo         DateTime // Data de início do período previsto
+
+  // Quantidade prevista de vendas
+  quantidadePrevista Decimal @db.Decimal(10, 2)
+
+  // Nível de confiança da previsão (0 a 1)
+  confianca       Decimal  @db.Decimal(5, 4)
+
+  // Método usado para calcular: "MEDIA_MOVEL", "REGRESSAO_LINEAR", "SAZONALIDADE"
+  metodoCalculo   String
+
+  // Dados de entrada usados no cálculo
+  // Ex: { vendas30dias: [10, 15, 12, ...], indicesSazonalidade: {...} }
+  dadosEntrada    Json     @default("{}")
+
+  criadoEm        DateTime @default(now())
+
+  @@index([tenantId, produtoId])
+  @@index([tenantId, periodo])
+  @@unique([tenantId, produtoId, periodo])
+}
+
+// Modelo de Sugestões geradas pela IA
+// Sugestões de preço, estoque, classificação, descrição de produtos, etc
+model SugestaoIA {
+  id          String   @id @default(cuid())
+  tenantId    String   // ID do tenant
+
+  // Tipo de sugestão: PRECO, ESTOQUE, CLASSIFICACAO_FISCAL, RESPOSTA_MARKETPLACE, DESCRICAO_PRODUTO
+  tipo        String   // "PRECO" | "ESTOQUE" | "CLASSIFICACAO_FISCAL" | "RESPOSTA_MARKETPLACE" | "DESCRICAO_PRODUTO"
+
+  // Contexto da sugestão
+  // Ex: { produtoId: "abc", perguntaId: "xyz" }
+  contexto    Json     @default("{}")
+
+  // A sugestão em si
+  sugestao    String   @db.Text
+
+  // Confiança da sugestão (0 a 1)
+  confianca   Decimal  @db.Decimal(5, 4)
+
+  // Se foi aceita pelo usuário
+  aceita      Boolean  @default(false)
+
+  criadoEm    DateTime @default(now())
+
+  @@index([tenantId, tipo])
+  @@index([tenantId, aceita])
+  @@index([criadoEm])
+}

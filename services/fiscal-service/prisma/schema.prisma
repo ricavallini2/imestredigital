@@ -1,0 +1,177 @@
+// ═══════════════════════════════════════════════════════════════
+// iMestreDigital - Schema do Fiscal Service
+// ═══════════════════════════════════════════════════════════════
+// Gerencia Notas Fiscais Eletrônicas, configurações fiscais,
+// regras de cálculo de impostos, eventos e comunicação SEFAZ.
+// ═══════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Nota Fiscal (NF-e, NFS-e, NFC-e)
+model NotaFiscal {
+  id                   String   @id @default(uuid()) @db.Uuid
+  tenantId             String   @map("tenant_id") @db.Uuid
+  tipo                 String   // NFE, NFSE, NFCE
+  serie                String
+  numero               Int
+  chaveAcesso          String   @unique // 44 dígitos
+  naturezaOperacao    String   // VENDA, DEVOLUCAO, etc
+  dataEmissao          DateTime @map("data_emissao")
+  dataSaida            DateTime? @map("data_saida")
+  status               String   @default("RASCUNHO") // RASCUNHO, VALIDADA, ENVIADA, AUTORIZADA, REJEITADA, CANCELADA, INUTILIZADA
+  valorTotal           BigInt   @map("valor_total") // Em centavos
+  valorProdutos        BigInt   @map("valor_produtos")
+  valorDesconto        BigInt   @map("valor_desconto") @default(0)
+  valorFrete           BigInt   @map("valor_frete") @default(0)
+  valorSeguro          BigInt   @map("valor_seguro") @default(0)
+  valorOutros          BigInt   @map("valor_outros") @default(0)
+  valorIcms            BigInt   @map("valor_icms") @default(0)
+  valorPis             BigInt   @map("valor_pis") @default(0)
+  valorCofins          BigInt   @map("valor_cofins") @default(0)
+  valorIpi             BigInt   @map("valor_ipi") @default(0)
+  xmlEnvio             String?  @map("xml_envio") @db.Text
+  xmlRetorno           String?  @map("xml_retorno") @db.Text
+  protocolo            String?
+  motivoRejeicao       String?  @map("motivo_rejeicao")
+  pedidoId             String?  @map("pedido_id") @db.Uuid
+  clienteId            String?  @map("cliente_id") @db.Uuid
+  emitente             Json? // Dados do emitente em JSON
+  destinatario         Json? // Dados do destinatário em JSON
+  informacoesAdicionais String? @map("informacoes_adicionais") @db.Text
+
+  criadoEm             DateTime @default(now()) @map("criado_em")
+  atualizadoEm         DateTime @updatedAt @map("atualizado_em")
+
+  itens   ItemNotaFiscal[]
+  eventos EventoFiscal[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, tipo])
+  @@index([tenantId, dataEmissao])
+  @@index([chaveAcesso])
+  @@map("notas_fiscais")
+}
+
+/// Item de Nota Fiscal (produtos/serviços)
+model ItemNotaFiscal {
+  id                  String   @id @default(uuid()) @db.Uuid
+  notaFiscalId        String   @map("nota_fiscal_id") @db.Uuid
+  notaFiscal          NotaFiscal @relation(fields: [notaFiscalId], references: [id], onDelete: Cascade)
+  produtoId           String   @map("produto_id") @db.Uuid
+  descricao           String
+  ncm                 String
+  cfop                String
+  unidade             String   // UN, KG, L, etc
+  quantidade          BigInt   // Em centavos ou menor unidade
+  valorUnitario       BigInt   @map("valor_unitario")
+  valorTotal          BigInt   @map("valor_total")
+  valorDesconto       BigInt   @map("valor_desconto") @default(0)
+  origemMercadoria    String   @map("origem_mercadoria") // 0-Nacional, 1-Estrangeira direita, 2-Estrangeira adquirida
+  cstIcms             String   @map("cst_icms")
+  aliquotaIcms        BigInt   @map("aliquota_icms") // Em centavos de percentual (100 = 1%)
+  baseIcms            BigInt   @map("base_icms") @default(0)
+  valorIcms           BigInt   @map("valor_icms") @default(0)
+  cstPis              String   @map("cst_pis")
+  aliquotaPis         BigInt   @map("aliquota_pis") @default(0)
+  basePis             BigInt   @map("base_pis") @default(0)
+  valorPis            BigInt   @map("valor_pis") @default(0)
+  cstCofins           String   @map("cst_cofins")
+  aliquotaCofins      BigInt   @map("aliquota_cofins") @default(0)
+  baseCofins          BigInt   @map("base_cofins") @default(0)
+  valorCofins         BigInt   @map("valor_cofins") @default(0)
+  cstIpi              String?  @map("cst_ipi")
+  aliquotaIpi         BigInt   @map("aliquota_ipi") @default(0)
+  baseIpi             BigInt   @map("base_ipi") @default(0)
+  valorIpi            BigInt   @map("valor_ipi") @default(0)
+  numeroPedido        String?  @map("numero_pedido")
+  itemPedido          Int?     @map("item_pedido")
+
+  @@index([notaFiscalId])
+  @@index([produtoId])
+  @@map("itens_nota_fiscal")
+}
+
+/// Evento Fiscal (Cancelamento, Carta de Correção, Inutilização)
+model EventoFiscal {
+  id              String   @id @default(uuid()) @db.Uuid
+  notaFiscalId    String   @map("nota_fiscal_id") @db.Uuid
+  notaFiscal      NotaFiscal @relation(fields: [notaFiscalId], references: [id], onDelete: Cascade)
+  tenantId        String   @map("tenant_id") @db.Uuid
+  tipo            String   // CANCELAMENTO, CARTA_CORRECAO, INUTILIZACAO
+  sequencia       Int      // Sequência do evento
+  dataEvento      DateTime @map("data_evento")
+  protocolo       String?  // Protocolo retornado pela SEFAZ
+  justificativa   String   // Motivo do cancelamento/CC-e
+  xmlEnvio        String?  @map("xml_envio") @db.Text
+  xmlRetorno      String?  @map("xml_retorno") @db.Text
+  status          String   @default("PENDENTE") // PENDENTE, ENVIADO, AUTORIZADO, REJEITADO
+
+  criadoEm        DateTime @default(now()) @map("criado_em")
+
+  @@index([tenantId])
+  @@index([notaFiscalId])
+  @@map("eventos_fiscais")
+}
+
+/// Configuração Fiscal do Tenant
+model ConfiguracaoFiscal {
+  id                     String   @id @default(uuid()) @db.Uuid
+  tenantId               String   @unique @map("tenant_id") @db.Uuid
+  regimeTributario      String   // SIMPLES_NACIONAL, LUCRO_PRESUMIDO, LUCRO_REAL, MEI
+  inscricaoEstadual     String?  @map("inscricao_estadual")
+  inscricaoMunicipal    String?  @map("inscricao_municipal")
+  cnae                  String?  // Código CNAE principal
+  crt                   String?  // Código de Regime Tributário
+  ambienteSefaz         String   @default("HOMOLOGACAO") @map("ambiente_sefaz") // PRODUCAO, HOMOLOGACAO
+  certificadoDigital    Bytes?   @map("certificado_digital") // Armazenado criptografado
+  senhaCertificado      String?  @map("senha_certificado") // Armazenado criptografado
+  validadeCertificado   DateTime? @map("validade_certificado")
+  serieNfe              String?  @default("1") @map("serie_nfe")
+  proximoNumeroNfe      Int      @default(1) @map("proximo_numero_nfe")
+  serieNfce             String?  @default("1") @map("serie_nfce")
+  proximoNumeroNfce     Int      @default(1) @map("proximo_numero_nfce")
+  tokenCsc              String?  @map("token_csc") // Token para NFC-e
+  idCsc                 String?  @map("id_csc") // ID CSC para NFC-e
+
+  criadoEm              DateTime @default(now()) @map("criado_em")
+  atualizadoEm          DateTime @updatedAt @map("atualizado_em")
+
+  @@map("configuracoes_fiscais")
+}
+
+/// Regra Fiscal (Classificação de impostos por NCM, CFOP, UF, etc)
+model RegraFiscal {
+  id                String   @id @default(uuid()) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  nome              String
+  descricao         String?
+  ncm               String   // Código NCM (8 dígitos)
+  cfop              String   // Código CFOP
+  cstIcms           String   @map("cst_icms")
+  aliquotaIcms      BigInt   @map("aliquota_icms") // Em centavos de percentual
+  cstPis            String   @map("cst_pis")
+  aliquotaPis       BigInt   @map("aliquota_pis")
+  cstCofins         String   @map("cst_cofins")
+  aliquotaCofins    BigInt   @map("aliquota_cofins")
+  cstIpi            String?  @map("cst_ipi")
+  aliquotaIpi       BigInt   @map("aliquota_ipi") @default(0)
+  ufOrigem          String?  @map("uf_origem") // Se NULL, aplica para todos
+  ufDestino         String?  @map("uf_destino")
+  regimeTributario  String?  @map("regime_tributario") // Se NULL, aplica para todos
+  ativa             Boolean  @default(true)
+
+  criadoEm          DateTime @default(now()) @map("criado_em")
+  atualizadoEm      DateTime @updatedAt @map("atualizado_em")
+
+  @@index([tenantId])
+  @@index([tenantId, ncm, cfop])
+  @@map("regras_fiscais")
+}

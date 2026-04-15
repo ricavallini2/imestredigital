@@ -1,0 +1,186 @@
+# ═══════════════════════════════════════════════════════════════
+# iMestreDigital - Ambiente de Desenvolvimento Local
+# ═══════════════════════════════════════════════════════════════
+# Este docker-compose sobe todos os serviços de infraestrutura
+# necessários para desenvolvimento local. Os microserviços rodam
+# fora do Docker (via `npm run dev`) para facilitar o hot-reload.
+#
+# Uso:
+#   npm run docker:up    → Sobe os serviços
+#   npm run docker:down  → Para os serviços
+#   npm run docker:logs  → Acompanha os logs
+# ═══════════════════════════════════════════════════════════════
+
+services:
+  # ─── Banco de Dados Principal ─────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: imestredigital-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: imestredigital
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Script de inicialização para criar databases dos serviços
+      - ./init-db.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Cache e Filas Rápidas ────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: imestredigital-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Message Broker (Event Streaming) ─────────────────────
+  # Usamos Redpanda como substituto leve do Kafka para desenvolvimento
+  # Compatível 100% com protocolo Kafka, mas sem JVM
+  redpanda:
+    image: redpandadata/redpanda:v24.1.1
+    container_name: imestredigital-redpanda
+    restart: unless-stopped
+    ports:
+      - "9092:9092"    # Kafka API
+      - "8081:8081"    # Schema Registry
+      - "8082:8082"    # REST Proxy
+      - "9644:9644"    # Admin API
+    command:
+      - redpanda
+      - start
+      - --kafka-addr internal://0.0.0.0:9093,external://0.0.0.0:9092
+      - --advertise-kafka-addr internal://redpanda:9093,external://localhost:9092
+      - --schema-registry-addr 0.0.0.0:8081
+      - --pandaproxy-addr internal://0.0.0.0:8083,external://0.0.0.0:8082
+      - --advertise-pandaproxy-addr internal://redpanda:8083,external://localhost:8082
+      - --smp 1
+      - --memory 512M
+      - --mode dev-container
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+
+  # Console do Redpanda (UI para visualizar tópicos e mensagens)
+  redpanda-console:
+    image: redpandadata/console:v2.6.0
+    container_name: imestredigital-redpanda-console
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      CONFIG_FILEPATH: /tmp/config.yml
+      CONSOLE_CONFIG_FILE: |
+        kafka:
+          brokers: ["redpanda:9093"]
+          schemaRegistry:
+            enabled: true
+            urls: ["http://redpanda:8081"]
+        redpanda:
+          adminApi:
+            enabled: true
+            urls: ["http://redpanda:9644"]
+    depends_on:
+      - redpanda
+
+  # ─── Motor de Busca ──────────────────────────────────────
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: imestredigital-elasticsearch
+    restart: unless-stopped
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms256m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\\|yellow\"'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Kibana (UI para Elasticsearch - opcional)
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.0
+    container_name: imestredigital-kibana
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  # ─── Armazenamento de Objetos (S3 local) ─────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: imestredigital-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"    # API S3
+      - "9011:9001"    # Console Web (9001 mapeado para 9011 para evitar conflito)
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
+  # ─── Observabilidade ─────────────────────────────────────
+  # Grafana (dashboards e visualização)
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: imestredigital-grafana
+    restart: unless-stopped
+    ports:
+      - "3030:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  # Mailpit (captura de e-mails em desenvolvimento)
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: imestredigital-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"    # SMTP
+      - "8025:8025"    # Web UI
+
+volumes:
+  postgres_data:
+    name: imestredigital_postgres
+  redis_data:
+    name: imestredigital_redis
+  redpanda_data:
+    name: imestredigital_redpanda
+  elasticsearch_data:
+    name: imestredigital_elasticsearch
+  minio_data:
+    name: imestredigital_minio
+  grafana_data:
+    name: imestredigital_grafana
+
+networks:
+  default:
+    name: imestredigital-network

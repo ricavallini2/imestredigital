@@ -1,0 +1,57 @@
+version: '3.9'
+
+services:
+  # ─── PostgreSQL ──────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: financial-db
+    environment:
+      POSTGRES_USER: developer
+      POSTGRES_PASSWORD: dev123456
+      POSTGRES_DB: imestredigital_financial
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U developer"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Redis ───────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: financial-cache
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Redpanda (Kafka) ────────────────────────────────────
+  redpanda:
+    image: docker.redpanda.com/redpanda:latest
+    container_name: financial-kafka
+    ports:
+      - "8081:8081"
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      REDPANDA_ADVERTISED_KAFKA_API: redpanda:29092
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+  redpanda_data:

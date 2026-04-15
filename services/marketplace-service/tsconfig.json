@@ -1,0 +1,34 @@
+{
+  "extends": "@imestredigital/typescript-config/tsconfig.nestjs.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"],
+      "@config/*": ["./config/*"],
+      "@modules/*": ["./modules/*"],
+      "@common/*": ["./common/*"],
+      "@decorators/*": ["./decorators/*"],
+      "@dtos/*": ["./dtos/*"],
+      "@filters/*": ["./filters/*"],
+      "@guards/*": ["./guards/*"],
+      "@interceptors/*": ["./interceptors/*"],
+      "@interfaces/*": ["./interfaces/*"],
+      "@middlewares/*": ["./middlewares/*"],
+      "@pipes/*": ["./pipes/*"]
+    },
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
+}

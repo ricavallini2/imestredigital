@@ -1,0 +1,541 @@
+# ═══════════════════════════════════════════════════════════════
+# iMestreDigital - Stack de Produção
+# ═══════════════════════════════════════════════════════════════
+# Deploy completo para VPS com Docker Compose.
+# Inclui: Nginx (reverse proxy + SSL), PostgreSQL, Redis,
+# Redpanda (Kafka), todos os microserviços e o frontend.
+#
+# Uso:
+#   docker compose -f docker-compose.prod.yml up -d
+#   docker compose -f docker-compose.prod.yml logs -f
+#   docker compose -f docker-compose.prod.yml down
+#
+# Perfis (--profile):
+#   observability  → Grafana, Elasticsearch, Kibana
+#   storage        → MinIO (S3 local)
+#   mail           → Mailpit (captura de emails)
+#
+# Exemplo com observabilidade:
+#   docker compose -f docker-compose.prod.yml --profile observability up -d
+# ═══════════════════════════════════════════════════════════════
+
+services:
+
+  # ═══════════════════════════════════════════════════════════
+  # INFRAESTRUTURA
+  # ═══════════════════════════════════════════════════════════
+
+  # ─── Reverse Proxy + SSL ─────────────────────────────────
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: imestredigital-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - certbot_data:/var/www/certbot:ro
+      - ssl_certs:/etc/letsencrypt:ro
+    depends_on:
+      web:
+        condition: service_healthy
+    networks:
+      - frontend
+      - backend
+
+  # ─── Certbot (SSL Let's Encrypt) ────────────────────────
+  certbot:
+    image: certbot/certbot:latest
+    container_name: imestredigital-certbot
+    volumes:
+      - certbot_data:/var/www/certbot
+      - ssl_certs:/etc/letsencrypt
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - frontend
+
+  # ─── Banco de Dados ──────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: imestredigital-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-imestredigital}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: ${POSTGRES_DB:-imestredigital}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-imestredigital}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - backend
+
+  # ─── Cache ───────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: imestredigital-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+        --appendonly yes
+        --maxmemory 128mb
+        --maxmemory-policy allkeys-lru
+        --requirepass ${REDIS_PASSWORD:?Defina REDIS_PASSWORD no .env}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 192M
+    networks:
+      - backend
+
+  # ─── Message Broker (Kafka-compatible) ───────────────────
+  redpanda:
+    image: redpandadata/redpanda:v24.1.1
+    container_name: imestredigital-redpanda
+    restart: unless-stopped
+    command:
+      - redpanda
+      - start
+      - --kafka-addr internal://0.0.0.0:9093,external://0.0.0.0:9092
+      - --advertise-kafka-addr internal://redpanda:9093,external://redpanda:9092
+      - --schema-registry-addr 0.0.0.0:8081
+      - --smp 1
+      - --memory 256M
+      - --mode dev-container
+      - --default-log-level=warn
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "health", "--api-urls", "localhost:9644"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - backend
+
+  # ═══════════════════════════════════════════════════════════
+  # FRONTEND
+  # ═══════════════════════════════════════════════════════════
+
+  web:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.web
+    image: imestredigital/web:${APP_VERSION:-latest}
+    container_name: imestredigital-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - frontend
+      - backend
+
+  # ═══════════════════════════════════════════════════════════
+  # MICROSERVIÇOS
+  # ═══════════════════════════════════════════════════════════
+
+  auth-service:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: auth-service
+    image: imestredigital/auth-service:${APP_VERSION:-latest}
+    container_name: imestredigital-auth
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-imestredigital}:${POSTGRES_PASSWORD}@postgres:5432/auth_service
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      KAFKA_BROKERS: redpanda:9093
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no .env}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?Defina JWT_REFRESH_SECRET no .env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - backend
+
+  catalog-service:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: catalog-service
+    image: imestredigital/catalog-service:${APP_VERSION:-latest}
+    container_name: imestredigital-catalog
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3010
+      DATABASE_URL: postgresql://${POSTGRES_USER:-imestredigital}:${POSTGRES_PASSWORD}@postgres:5432/catalog_service
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      KAFKA_BROKERS: redpanda:9093
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - backend
+
+  inventory-service:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: inventory-service
+    image: imestredigital/inventory-service:${APP_VERSION:-latest}
+    container_name: imestredigital-inventory
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3011
+      DATABASE_URL: postgresql://${POSTGRES_USER:-imestredigital}:${POSTGRES_PASSWORD}@postgres:5432/inventory_service
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      KAFKA_BROKERS: redpanda:9093
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - backend
+
+  order-service:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: order-service
+    image: imestredigital/order-service:${APP_VERSION:-latest}
+    container_name: imestredigital-order
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3005
+      DATABASE_URL: postgresql://${POSTGRES_USER:-imestredigital}:${POSTGRES_PASSWORD}@postgres:5432/order_service
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      KAFKA_BROKERS: redpanda:9093
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - backend
+
+  financial-service:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: financial-service
+    image: imestredigital/financial-service:${APP_VERSION:-latest}
+    container_name: imestredigital-financial
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3006
+      DATABASE_URL: postgresql://${POSTGRES_USER:-imestredigital}:${POSTGRES_PASSWORD}@postgres:5432/financial_service
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      KAFKA_BROKERS: redpanda:9093
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - backend
+
+  fiscal-service:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: fiscal-service
+    image: imestredigital/fiscal-service:${APP_VERSION:-latest}
+    container_name: imestredigital-fiscal
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3004
+      DATABASE_URL: postgresql://${POSTGRES_USER:-imestredigital}:${POSTGRES_PASSWORD}@postgres:5432/fiscal_service
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      KAFKA_BROKERS: redpanda:9093
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - backend
+
+  customer-service:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: customer-service
+    image: imestredigital/customer-service:${APP_VERSION:-latest}
+    container_name: imestredigital-customer
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3012
+      DATABASE_URL: postgresql://${POSTGRES_USER:-imestredigital}:${POSTGRES_PASSWORD}@postgres:5432/customer_service
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      KAFKA_BROKERS: redpanda:9093
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - backend
+
+  marketplace-service:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: marketplace-service
+    image: imestredigital/marketplace-service:${APP_VERSION:-latest}
+    container_name: imestredigital-marketplace
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3007
+      DATABASE_URL: postgresql://${POSTGRES_USER:-imestredigital}:${POSTGRES_PASSWORD}@postgres:5432/marketplace_service
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      KAFKA_BROKERS: redpanda:9093
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - backend
+
+  ai-service:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: ai-service
+    image: imestredigital/ai-service:${APP_VERSION:-latest}
+    container_name: imestredigital-ai
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3008
+      DATABASE_URL: postgresql://${POSTGRES_USER:-imestredigital}:${POSTGRES_PASSWORD}@postgres:5432/ai_service
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      KAFKA_BROKERS: redpanda:9093
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - backend
+
+  notification-service:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.service
+      args:
+        SERVICE_NAME: notification-service
+    image: imestredigital/notification-service:${APP_VERSION:-latest}
+    container_name: imestredigital-notification
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3009
+      DATABASE_URL: postgresql://${POSTGRES_USER:-imestredigital}:${POSTGRES_PASSWORD}@postgres:5432/notification_service
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      KAFKA_BROKERS: redpanda:9093
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - backend
+
+  # ═══════════════════════════════════════════════════════════
+  # SERVIÇOS OPCIONAIS (usar --profile para ativar)
+  # ═══════════════════════════════════════════════════════════
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: imestredigital-elasticsearch
+    restart: unless-stopped
+    profiles: ["observability"]
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms256m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\\|yellow\"'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: imestredigital-grafana
+    restart: unless-stopped
+    profiles: ["observability"]
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://${DOMAIN}/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    volumes:
+      - grafana_data:/var/lib/grafana
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - backend
+
+  minio:
+    image: minio/minio:latest
+    container_name: imestredigital-minio
+    restart: unless-stopped
+    profiles: ["storage"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-minioadmin}
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - backend
+
+# ═══════════════════════════════════════════════════════════
+# VOLUMES
+# ═══════════════════════════════════════════════════════════
+volumes:
+  postgres_data:
+    name: imestredigital_prod_postgres
+  redis_data:
+    name: imestredigital_prod_redis
+  redpanda_data:
+    name: imestredigital_prod_redpanda
+  elasticsearch_data:
+    name: imestredigital_prod_elasticsearch
+  grafana_data:
+    name: imestredigital_prod_grafana
+  minio_data:
+    name: imestredigital_prod_minio
+  certbot_data:
+    name: imestredigital_prod_certbot
+  ssl_certs:
+    name: imestredigital_prod_ssl
+
+# ═══════════════════════════════════════════════════════════
+# NETWORKS
+# ═══════════════════════════════════════════════════════════
+networks:
+  frontend:
+    name: imestredigital-frontend
+  backend:
+    name: imestredigital-backend
+    internal: true   # Sem acesso externo direto

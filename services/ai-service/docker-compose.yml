@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  # PostgreSQL para dados de IA
+  postgres:
+    image: postgres:16-alpine
+    container_name: ai-service-postgres
+    environment:
+      POSTGRES_DB: imestre_ai_db
+      POSTGRES_USER: ia_user
+      POSTGRES_PASSWORD: senha_segura_123
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ia_user']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis para cache
+  redis:
+    image: redis:7-alpine
+    container_name: ai-service-redis
+    command: redis-server --appendonly yes
+    ports:
+      - '6380:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redpanda (Kafka compatível)
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:latest
+    container_name: ai-service-redpanda
+    command:
+      - redpanda
+      - start
+      - --smp=1
+      - --memory=1G
+      - --overprovisioned
+      - --node-id=0
+      - --kafka-addr=PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr=PLAINTEXT://redpanda:29092,OUTSIDE://localhost:9092
+      - --rpc-addr=0.0.0.0:33145
+      - --advertise-rpc-addr=redpanda:33145
+    ports:
+      - '9092:9092'
+      - '29092:29092'
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    healthcheck:
+      test: ['CMD-SHELL', 'rpk cluster info']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # AI Service
+  ai-service:
+    build: .
+    container_name: ai-service
+    environment:
+      NODE_ENV: development
+      PORT: 3008
+      LOG_LEVEL: debug
+
+      # Banco de dados
+      DATABASE_URL: postgresql://ia_user:senha_segura_123@postgres:5432/imestre_ai_db
+
+      # OpenAI (substituir com chave real)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-sk-test-key}
+      OPENAI_MODEL: gpt-4
+      OPENAI_TEMPERATURE: 0.7
+      OPENAI_MAX_TOKENS: 2000
+
+      # Kafka
+      KAFKA_BROKERS: redpanda:29092
+      KAFKA_CLIENT_ID: ai-service
+      KAFKA_GROUP_ID: ai-service-group
+
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 1
+
+      # Rate limiting
+      RATE_LIMIT_TOKENS_POR_MINUTO: 10000
+      RATE_LIMIT_REQUISICOES_POR_MINUTO: 100
+
+      # Swagger
+      SWAGGER_ENABLED: 'true'
+      SWAGGER_PATH: /docs
+
+    ports:
+      - '3008:3008'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+
+volumes:
+  postgres_data:
+  redis_data:
+  redpanda_data:
+
+networks:
+  default:
+    name: ai-service-network

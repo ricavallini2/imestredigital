@@ -1,0 +1,72 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Web App (Next.js)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm run dev --prefix apps/web"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "Auth Service (NestJS)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm run dev --prefix services/auth-service"],
+      "port": 3001
+    },
+    {
+      "name": "Fiscal Service (NestJS)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm run dev --prefix services/fiscal-service"],
+      "port": 3004
+    },
+    {
+      "name": "Order Service / OMS (NestJS)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm run dev --prefix services/order-service"],
+      "port": 3005
+    },
+    {
+      "name": "Financial Service (NestJS)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm run dev --prefix services/financial-service"],
+      "port": 3006
+    },
+    {
+      "name": "Marketplace Service (NestJS)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm run dev --prefix services/marketplace-service"],
+      "port": 3007
+    },
+    {
+      "name": "AI Service (NestJS)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm run dev --prefix services/ai-service"],
+      "port": 3008
+    },
+    {
+      "name": "Notification Service (NestJS)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm run dev --prefix services/notification-service"],
+      "port": 3009
+    },
+    {
+      "name": "Catalog Service (NestJS)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm run dev --prefix services/catalog-service"],
+      "port": 3010
+    },
+    {
+      "name": "Inventory Service (NestJS)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm run dev --prefix services/inventory-service"],
+      "port": 3011
+    },
+    {
+      "name": "Customer Service / CRM (NestJS)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm run dev --prefix services/customer-service"],
+      "port": 3012
+    }
+  ]
+}
