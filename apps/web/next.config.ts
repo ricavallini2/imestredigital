@@ -22,14 +22,6 @@ const nextConfig: NextConfig = {
   // Transpila pacotes internos do monorepo
   transpilePackages: ['@imestredigital/types', '@imestredigital/ui'],
 
-  // Webpack config para externals (jsonwebtoken não pode ser bundled)
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals = [...(config.externals || []), 'jsonwebtoken'];
-    }
-    return config;
-  },
-
   // Configuração de imagens (permite domínios de CDN)
   images: {
     remotePatterns: [
