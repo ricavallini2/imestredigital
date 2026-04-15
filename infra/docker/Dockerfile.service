@@ -48,6 +48,11 @@ ARG SERVICE_NAME
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Gerar Prisma Client (necessário antes do build)
+RUN if [ -f "services/${SERVICE_NAME}/prisma/schema.prisma" ]; then \
+      cd services/${SERVICE_NAME} && npx prisma generate; \
+    fi
+
 # Build usando o nome completo do workspace (@imestredigital/SERVICE_NAME)
 RUN npx turbo run build --filter=@imestredigital/${SERVICE_NAME}
 
