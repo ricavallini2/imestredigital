@@ -10,8 +10,21 @@ FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
+# Copiar configs do monorepo
 COPY package.json package-lock.json turbo.json ./
-COPY packages/*/package.json ./packages/
+
+# Copiar package.json de cada package (preservando estrutura)
+COPY packages/config/package.json ./packages/config/
+COPY packages/database/package.json ./packages/database/
+COPY packages/eslint-config/package.json ./packages/eslint-config/
+COPY packages/events/package.json ./packages/events/
+COPY packages/logger/package.json ./packages/logger/
+COPY packages/types/package.json ./packages/types/
+COPY packages/typescript-config/package.json ./packages/typescript-config/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/utils/package.json ./packages/utils/
+
+# Copiar package.json do app web
 COPY apps/web/package.json ./apps/web/
 
 RUN npm ci
@@ -26,7 +39,8 @@ COPY . .
 # Variáveis de build (substituir em CI/CD)
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN npx turbo run build --filter=web
+# Nome completo do workspace conforme package.json
+RUN npx turbo run build --filter=@imestredigital/web
 
 # ─── Estágio 3: Produção ──────────────────────────────────
 FROM node:20-alpine AS runner

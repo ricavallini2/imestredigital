@@ -2,8 +2,6 @@
 # iMestreDigital - Dockerfile Base para Microserviços NestJS
 # ═══════════════════════════════════════════════════════════════
 # Dockerfile multi-stage para builds otimizados de produção.
-# Utiliza camadas separadas para dependências e código,
-# maximizando o cache do Docker entre builds.
 #
 # Uso:
 #   docker build -f infra/docker/Dockerfile.service \
@@ -16,10 +14,31 @@ FROM node:20-alpine AS base
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copia apenas arquivos de dependência para cache eficiente
+# Copia configs do monorepo
 COPY package.json package-lock.json turbo.json ./
-COPY packages/*/package.json ./packages/
-COPY services/*/package.json ./services/
+
+# Copiar package.json de cada package (preservando estrutura)
+COPY packages/config/package.json ./packages/config/
+COPY packages/database/package.json ./packages/database/
+COPY packages/eslint-config/package.json ./packages/eslint-config/
+COPY packages/events/package.json ./packages/events/
+COPY packages/logger/package.json ./packages/logger/
+COPY packages/types/package.json ./packages/types/
+COPY packages/typescript-config/package.json ./packages/typescript-config/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/utils/package.json ./packages/utils/
+
+# Copiar package.json de cada serviço (preservando estrutura)
+COPY services/ai-service/package.json ./services/ai-service/
+COPY services/auth-service/package.json ./services/auth-service/
+COPY services/catalog-service/package.json ./services/catalog-service/
+COPY services/customer-service/package.json ./services/customer-service/
+COPY services/financial-service/package.json ./services/financial-service/
+COPY services/fiscal-service/package.json ./services/fiscal-service/
+COPY services/inventory-service/package.json ./services/inventory-service/
+COPY services/marketplace-service/package.json ./services/marketplace-service/
+COPY services/notification-service/package.json ./services/notification-service/
+COPY services/order-service/package.json ./services/order-service/
 
 # ─── Estágio 2: Instalação de dependências ─────────────────
 FROM base AS deps
@@ -32,8 +51,8 @@ ARG SERVICE_NAME
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build apenas o serviço alvo e suas dependências
-RUN npx turbo run build --filter=${SERVICE_NAME}
+# Build usando o nome completo do workspace (@imestredigital/SERVICE_NAME)
+RUN npx turbo run build --filter=@imestredigital/${SERVICE_NAME}
 
 # ─── Estágio 4: Produção ──────────────────────────────────
 FROM node:20-alpine AS runner
@@ -52,6 +71,9 @@ ARG SERVICE_NAME
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/services/${SERVICE_NAME}/dist ./dist
 COPY --from=builder /app/services/${SERVICE_NAME}/package.json ./package.json
+
+# Copiar prisma schema se existir (necessário para Prisma Client em runtime)
+COPY --from=builder /app/services/${SERVICE_NAME}/prisma ./prisma
 
 USER imestredigital
 
