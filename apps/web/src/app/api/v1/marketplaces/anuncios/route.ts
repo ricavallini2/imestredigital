@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ANUNCIOS_MOCK, AnuncioMock } from '../_mock-data';
 
-export type { AnuncioMock } from '../_mock-data';
-export { ANUNCIOS_MOCK } from '../_mock-data';
-
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const canal  = searchParams.get('canal')  ?? '';

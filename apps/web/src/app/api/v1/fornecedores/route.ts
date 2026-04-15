@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-export { FornecedorMock, FORNECEDORES_MOCK } from './_mock-data';
 import { FornecedorMock, FORNECEDORES_MOCK } from './_mock-data';
 
 // Helper kept for INITIAL_FORNECEDORES reference

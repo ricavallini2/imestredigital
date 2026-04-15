@@ -4,7 +4,6 @@ import {
 } from './_mock-data';
 
 export type { TituloCobrancaMock } from './_mock-data';
-export { TITULOS_COBRANCA_MOCK, ACORDOS_MOCK, ACOES_COBRANCA_MOCK, getConfiguracao, calcularScoreIA, getMensagemTom } from './_mock-data';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-export { ContaBancariaMock, CONTAS_BANCARIAS_MOCK } from './_mock-data';
 import { ContaBancariaMock, CONTAS_BANCARIAS_MOCK } from './_mock-data';
 
 // ─── GET ──────────────────────────────────────────────────────────────────────

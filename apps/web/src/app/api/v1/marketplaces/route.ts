@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MARKETPLACES_MOCK, MarketplaceMock } from './_mock-data';
 
-export type { MarketplaceMock } from './_mock-data';
-export { MARKETPLACES_MOCK } from './_mock-data';
-
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const status = searchParams.get('status') ?? '';

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-export { ItemCompraMock, StatusCompra, PedidoCompraMock, COMPRAS_MOCK, nextNumeroCompra } from './_mock-data';
 import { PedidoCompraMock, COMPRAS_MOCK, nextNumeroCompra } from './_mock-data';
 
 // Helpers kept for INITIAL_COMPRAS reference (data now managed in _mock-data.ts)
