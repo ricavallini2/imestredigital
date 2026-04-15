@@ -3,7 +3,7 @@
  * Define notas fiscais, tributação e obrigações acessórias.
  */
 
-import { BaseEntity, EntityId, Moeda, Endereco } from '../common';
+import { BaseEntity, EntityId, Moeda } from '../common';
 
 /** Tipos de documento fiscal */
 export enum TipoDocumentoFiscal {
