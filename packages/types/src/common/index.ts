@@ -5,6 +5,35 @@
  * Interfaces e tipos usados por múltiplos microserviços.
  */
 
+/** Identificador único de entidade (UUID) */
+export type EntityId = string;
+
+/** Entidade base com campos comuns a todas as tabelas */
+export interface BaseEntity {
+  id: EntityId;
+  tenantId: string;
+  criadoEm: string;
+  atualizadoEm: string;
+}
+
+/** Representação monetária */
+export interface Moeda {
+  valor: number;
+  moeda: string; // 'BRL', 'USD', etc.
+}
+
+/** Endereço completo */
+export interface Endereco {
+  logradouro: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  estado: string; // UF
+  cep: string;
+  pais?: string;
+}
+
 /** Resposta padrão da API */
 export interface RespostaAPI<T = any> {
   /** Dados da resposta */
