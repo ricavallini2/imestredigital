@@ -43,6 +43,7 @@
     "*.{ts,tsx,js,jsx}": ["eslint --fix", "prettier --write"],
     "*.{json,md,yml,yaml}": ["prettier --write"]
   },
+  "packageManager": "npm@10.8.2",
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
