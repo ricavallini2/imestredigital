@@ -13,7 +13,7 @@ import { PrismaService } from '../../src/modules/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 // Dados mock reutilizáveis
 const TENANT_MOCK = {
