@@ -64,6 +64,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
+# OpenSSL compat para Prisma engine
+RUN apk add --no-cache openssl && \
+    ln -sf /usr/lib/libssl.so.3 /usr/lib/libssl.so.1.1 && \
+    ln -sf /usr/lib/libcrypto.so.3 /usr/lib/libcrypto.so.1.1
+
 # Usuário não-root por segurança
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 imestredigital
