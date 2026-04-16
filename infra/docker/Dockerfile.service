@@ -74,8 +74,11 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/services/${SERVICE_NAME}/dist ./dist
 COPY --from=builder /app/services/${SERVICE_NAME}/package.json ./package.json
 
-# Copiar prisma schema se existir (necessário para Prisma Client em runtime)
+# Copiar prisma schema e gerar client no runtime
 COPY --from=builder /app/services/${SERVICE_NAME}/prisma ./prisma
+# Copiar também o .prisma gerado no builder
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 USER imestredigital
 
