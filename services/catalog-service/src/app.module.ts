@@ -8,7 +8,7 @@
  * - Todos os módulos de domínio
  */
 
-import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { TerminusModule } from '@nestjs/terminus';
@@ -44,10 +44,16 @@ import { TenantMiddleware } from './middlewares/tenant.middleware';
   controllers: [HealthController],
 })
 export class AppModule implements NestModule {
-  /** Aplica middleware de tenant em todas as rotas da API */
+  /** Aplica middleware de tenant em todas as rotas da API exceto health checks e docs. */
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(TenantMiddleware)
+      .exclude(
+        { path: 'api/v1/health', method: RequestMethod.ALL },
+        { path: 'api/v1/health/(.*)', method: RequestMethod.ALL },
+        { path: 'api/docs', method: RequestMethod.ALL },
+        { path: 'api/docs/(.*)', method: RequestMethod.ALL },
+      )
       .forRoutes('*');
   }
 }

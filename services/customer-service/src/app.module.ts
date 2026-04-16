@@ -9,7 +9,7 @@
  * - Integração Kafka
  */
 
-import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule, RequestMethod } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -18,6 +18,7 @@ import { TerminusModule } from '@nestjs/terminus';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { CacheModule } from './modules/cache/cache.module';
 import { TenantMiddleware } from './middleware/tenant.middleware';
+import { HealthController } from './controllers/health.controller';
 
 // Módulos de domínio
 import { ClienteModule } from './modules/cliente/cliente.module';
@@ -69,14 +70,22 @@ import { KafkaModule } from './modules/kafka/kafka.module';
     SegmentoModule,
     ImportacaoModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule implements NestModule {
   /**
-   * Configura middleware global para extrair tenant do JWT
+   * Configura middleware global para extrair tenant do JWT.
+   * Exclui endpoints públicos (health, docs) para não bloquear probes do Docker.
    */
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(TenantMiddleware)
-      .forRoutes('api/*'); // Aplica a todas as rotas da API
+      .exclude(
+        { path: 'api/v1/health', method: RequestMethod.ALL },
+        { path: 'api/v1/health/(.*)', method: RequestMethod.ALL },
+        { path: 'api/docs', method: RequestMethod.ALL },
+        { path: 'api/docs/(.*)', method: RequestMethod.ALL },
+      )
+      .forRoutes('api/*');
   }
 }
