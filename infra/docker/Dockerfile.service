@@ -48,9 +48,11 @@ ARG SERVICE_NAME
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Gerar Prisma Client (necessário antes do build)
+# Gerar Prisma Client para o target correto do Alpine
 RUN if [ -f "services/${SERVICE_NAME}/prisma/schema.prisma" ]; then \
-      cd services/${SERVICE_NAME} && npx prisma generate; \
+      cd services/${SERVICE_NAME} && \
+      sed -i '/provider.*=.*"prisma-client-js"/a\  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]' prisma/schema.prisma && \
+      npx prisma generate; \
     fi
 
 # Build usando o nome completo do workspace (@imestredigital/SERVICE_NAME)
@@ -64,10 +66,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# OpenSSL compat para Prisma engine
-RUN apk add --no-cache openssl && \
-    ln -sf /usr/lib/libssl.so.3 /usr/lib/libssl.so.1.1 && \
-    ln -sf /usr/lib/libcrypto.so.3 /usr/lib/libcrypto.so.1.1
+# OpenSSL 1.1 compat para Prisma engine (Alpine 3.20+)
+RUN apk add --no-cache openssl-dev || apk add --no-cache openssl
 
 # Usuário não-root por segurança
 RUN addgroup --system --gid 1001 nodejs
