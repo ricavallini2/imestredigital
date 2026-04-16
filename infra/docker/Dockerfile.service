@@ -80,6 +80,12 @@ COPY --from=builder /app/services/${SERVICE_NAME}/generated ./generated
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
+# Copiar pacotes internos do monorepo (workspace symlinks não funcionam no COPY)
+COPY --from=builder /app/packages/config ./node_modules/@imestredigital/config
+COPY --from=builder /app/packages/logger ./node_modules/@imestredigital/logger
+COPY --from=builder /app/packages/types ./node_modules/@imestredigital/types
+COPY --from=builder /app/packages/events ./node_modules/@imestredigital/events
+
 USER imestredigital
 
 # Health check integrado
