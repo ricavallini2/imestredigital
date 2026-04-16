@@ -51,7 +51,7 @@ COPY . .
 # Gerar Prisma Client para o target correto do Alpine
 RUN if [ -f "services/${SERVICE_NAME}/prisma/schema.prisma" ]; then \
       cd services/${SERVICE_NAME} && \
-      sed -i '/provider.*=.*"prisma-client-js"/a\  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]' prisma/schema.prisma && \
+      sed -i '/provider.*=.*"prisma-client-js"/a\  binaryTargets = ["native", "debian-openssl-3.0.x"]' prisma/schema.prisma && \
       npx prisma generate; \
     fi
 
@@ -59,15 +59,15 @@ RUN if [ -f "services/${SERVICE_NAME}/prisma/schema.prisma" ]; then \
 RUN npx turbo run build --filter=@imestredigital/${SERVICE_NAME}
 
 # ─── Estágio 4: Produção ──────────────────────────────────
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 
 # Variáveis de ambiente padrão
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# OpenSSL 1.1 compat para Prisma engine (Alpine 3.20+)
-RUN apk add --no-cache openssl-dev || apk add --no-cache openssl
+# OpenSSL + wget para health check
+RUN apt-get update -y && apt-get install -y openssl wget && rm -rf /var/lib/apt/lists/*
 
 # Usuário não-root por segurança
 RUN addgroup --system --gid 1001 nodejs
