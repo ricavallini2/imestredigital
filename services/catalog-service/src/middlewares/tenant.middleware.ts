@@ -31,7 +31,10 @@ export class TenantMiddleware implements NestMiddleware {
 
   use(req: Request, res: Response, next: NextFunction) {
     // Rotas públicas não precisam de tenant
-    if (req.path.includes('/health') || req.path.includes('/docs')) {
+    // Usa originalUrl porque NestJS com setGlobalPrefix + URI versioning
+    // monta o middleware num sub-router onde req.path é stripado (ex: "/" ao invés de "/api/v1/health")
+    const url = req.originalUrl || req.url;
+    if (url.includes('/health') || url.includes('/docs')) {
       return next();
     }
 
