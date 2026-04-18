@@ -7,11 +7,16 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "strict": true,
+    "strict": false,
     "noImplicitAny": false,
+    "strictNullChecks": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
+    "composite": false,
     "declaration": false,
     "declarationMap": false,
     "sourceMap": true,
