@@ -21,6 +21,9 @@
     "db:generate": "prisma generate",
     "clean": "rm -rf dist node_modules"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "dependencies": {
     "@nestjs/common": "^10.3.0",
     "@nestjs/config": "^3.2.0",

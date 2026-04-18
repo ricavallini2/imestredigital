@@ -1,6 +1,14 @@
 -- ═══════════════════════════════════════════════════════════════════════════════
--- iMestreDigital - Complete Database Migrations
--- Generated from Prisma schemas
+-- iMestreDigital - Referência de Schema SQL (DOCUMENTO DE REFERÊNCIA)
+-- ═══════════════════════════════════════════════════════════════════════════════
+-- ⚠️  ATENÇÃO: Este arquivo NÃO é mais usado pelo deploy.sh.
+--
+-- O schema do banco é gerenciado diretamente pelo Prisma via:
+--   ./deploy.sh migrate   → executa `prisma db push` em todos os serviços
+--
+-- Este arquivo foi gerado antes da reengenharia dos schemas (commit 7b4465d)
+-- e pode estar DESATUALIZADO. Mantido apenas como referência histórica.
+-- Para ver o schema atual, consulte cada services/<nome>/prisma/schema.prisma
 -- ═══════════════════════════════════════════════════════════════════════════════
 
 -- ═══════════════════════════════════════════════════════════════════════════════

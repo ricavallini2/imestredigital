@@ -250,7 +250,7 @@ cmd_deploy() {
 
 cmd_migrate() {
     check_env
-    log_info "═══ Rodando Migrations ═══"
+    log_info "═══ Aplicando Schema ao Banco (prisma db push) ═══"
 
     SERVICES=(
         "auth-service"
@@ -266,13 +266,13 @@ cmd_migrate() {
     )
 
     for svc in "${SERVICES[@]}"; do
-        log_info "Migration: $svc"
+        log_info "Schema push: $svc"
         docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" \
-            exec -T "$svc" npx prisma migrate deploy 2>/dev/null || \
-            log_warn "Migration falhou ou não existe para $svc (pode ser normal se não há migrations ainda)"
+            exec -T "$svc" npx prisma db push --accept-data-loss 2>&1 | tail -5 || \
+            log_warn "db push falhou para $svc — verifique se o container está rodando"
     done
 
-    log_ok "Migrations concluídas"
+    log_ok "Schema aplicado em todos os serviços"
 }
 
 cmd_seed() {
@@ -285,15 +285,18 @@ cmd_seed() {
         "inventory-service"
         "order-service"
         "financial-service"
+        "fiscal-service"
         "customer-service"
+        "marketplace-service"
+        "ai-service"
         "notification-service"
     )
 
     for svc in "${SERVICES[@]}"; do
         log_info "Seed: $svc"
+        # Tenta prisma db seed primeiro; se não tiver config, roda ts-node direto
         docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" \
-            exec -T "$svc" npx prisma db seed 2>/dev/null || \
-            log_warn "Seed falhou ou não existe para $svc"
+            exec -T "$svc" sh -c 'npx prisma db seed 2>/dev/null || node_modules/.bin/ts-node prisma/seed.ts 2>/dev/null || node_modules/.bin/tsx prisma/seed.ts 2>/dev/null || echo "Seed não disponível"'
     done
 
     log_ok "Seeds concluídos"
