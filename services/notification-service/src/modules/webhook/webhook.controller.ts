@@ -42,7 +42,7 @@ export class WebhookController {
   ) {
     const tenantId = req.user?.tenantId || req.tenantId;
 
-    const webhook = await this.webhookService.registrarWebhook(tenantId, dto);
+    const webhook = await this.webhookService.registrarWebhook(tenantId, dto as any);
 
     return webhook;
   }

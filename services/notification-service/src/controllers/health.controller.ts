@@ -20,7 +20,7 @@ export class HealthController {
   @HealthCheck()
   async check() {
     return this.health.check([
-      () => this.db.pingDb(this.prisma, { timeout: 1500 }),
+      () => (this.db as any).pingDb(this.prisma, { timeout: 1500 }),
     ]);
   }
 }

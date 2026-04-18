@@ -21,7 +21,7 @@ export class UsuarioService {
   /** Lista todos os usuários ativos de um tenant */
   async listarPorTenant(tenantId: string) {
     const usuarios = await this.prisma.usuario.findMany({
-      where: { tenantId, status: { not: 'removido' } },
+      where: { tenantId, status: { not: 'REMOVIDO' } },
       select: {
         id: true,
         nome: true,
@@ -40,7 +40,7 @@ export class UsuarioService {
   /** Cria um novo usuário no tenant */
   async criar(tenantId: string, dto: CriarUsuarioDto) {
     // Verifica se email já existe globalmente
-    const existente = await this.prisma.usuario.findUnique({
+    const existente = await this.prisma.usuario.findFirst({
       where: { email: dto.email },
     });
 
@@ -58,8 +58,8 @@ export class UsuarioService {
         nome: dto.nome,
         email: dto.email,
         senhaHash,
-        cargo: dto.cargo || 'operador',
-        status: 'pendente', // Aguardando ativação pelo convite
+        cargo: dto.cargo || 'OPERADOR',
+        status: 'PENDENTE', // Aguardando ativação pelo convite
       },
       select: {
         id: true,
@@ -90,7 +90,7 @@ export class UsuarioService {
 
     await this.prisma.usuario.update({
       where: { id: usuarioId },
-      data: { status: 'inativo' },
+      data: { status: 'INATIVO' },
     });
 
     // Revoga todos os tokens do usuário

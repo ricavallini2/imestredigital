@@ -149,7 +149,7 @@ export class NotificacaoConsumerService {
           titulo: 'Alerta: Estoque baixo',
           mensagem: `Produto "${dados.produtoNome}" tem apenas ${dados.quantidadeEmEstoque} unidades em estoque (mínimo: ${dados.nivelMinimo}).`,
           destinatarioEmail: dados.adminEmail,
-          prioridade: 'ALTA',
+          prioridade: 'ALTA' as any,
           metadata: {
             produtoId: dados.produtoId,
             evento: 'estoque.baixo',

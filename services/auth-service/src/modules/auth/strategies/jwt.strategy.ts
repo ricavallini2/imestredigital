@@ -48,7 +48,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       select: { id: true, status: true, tenantId: true, cargo: true },
     });
 
-    if (!usuario || usuario.status !== 'ativo') {
+    if (!usuario || usuario.status !== 'ATIVO') {
       throw new UnauthorizedException('Token inválido ou usuário desativado');
     }
 

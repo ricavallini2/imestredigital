@@ -24,13 +24,13 @@ import { CacheService } from './cache.service';
             port: redisPort,
             db: configService.get('REDIS_DB', 0),
             ttl: 300, // 5 minutos padrão
-          };
+          } as any;
         }
 
         // Fallback: cache em memória
         return {
           ttl: 300,
-        };
+        } as any;
       },
     }),
   ],

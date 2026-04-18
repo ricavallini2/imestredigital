@@ -60,7 +60,7 @@ export class AuthService {
    */
   async registrar(dto: RegistrarDto) {
     // Verifica se email já está em uso
-    const emailExistente = await this.prisma.usuario.findUnique({
+    const emailExistente = await this.prisma.usuario.findFirst({
       where: { email: dto.email },
     });
 
@@ -91,8 +91,8 @@ export class AuthService {
           cnpj: dto.cnpj,
           email: dto.email,
           telefone: dto.telefone,
-          plano: 'starter', // Plano inicial padrão
-          status: 'ativo',
+          plano: 'STARTER', // Plano inicial padrão
+          status: 'ATIVO',
         },
       });
 
@@ -103,8 +103,8 @@ export class AuthService {
           nome: dto.nome,
           email: dto.email,
           senhaHash,
-          cargo: 'admin',     // Administrador do tenant
-          status: 'ativo',
+          cargo: 'ADMIN',     // Administrador do tenant
+          status: 'ATIVO',
           emailVerificado: false,
         },
       });
@@ -148,7 +148,7 @@ export class AuthService {
    */
   async login(dto: LoginDto) {
     // Busca usuário pelo email (incluindo dados do tenant)
-    const usuario = await this.prisma.usuario.findUnique({
+    const usuario = await this.prisma.usuario.findFirst({
       where: { email: dto.email },
       include: { tenant: true },
     });
@@ -159,12 +159,12 @@ export class AuthService {
     }
 
     // Verifica se o usuário está ativo
-    if (usuario.status !== 'ativo') {
+    if (usuario.status !== 'ATIVO') {
       throw new UnauthorizedException('Sua conta está desativada. Entre em contato com o administrador.');
     }
 
     // Verifica se o tenant está ativo
-    if (usuario.tenant.status !== 'ativo') {
+    if (usuario.tenant.status !== 'ATIVO') {
       throw new UnauthorizedException('A empresa está com acesso suspenso. Entre em contato com o suporte.');
     }
 
