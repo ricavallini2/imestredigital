@@ -122,8 +122,8 @@ model AnuncioMarketplace {
   idExterno                 String                  @db.VarChar(255) // ID do anúncio na plataforma
   titulo                    String                  @db.VarChar(500)
   descricao                 String                  @db.Text
-  preco                     Decimal(19,2)          @db.Decimal(19, 2)
-  precoPromocional          Decimal(19,2)?          @db.Decimal(19, 2)
+  preco                     Decimal                @db.Decimal(19, 2)
+  precoPromocional          Decimal?               @db.Decimal(19, 2)
   estoque                   Int                     @default(0)
   status                    StatusAnuncio           @default(ATIVO)
   url                       String                  @db.Text
@@ -159,8 +159,8 @@ model PedidoMarketplace {
   statusExterno             String                  @db.VarChar(100) // Status na plataforma original
   comprador                 Json                    @default("{}") // { nome, email, telefone, etc }
   itens                     Json                    @default("[]") // [ { sku, titulo, quantidade, preco } ]
-  valorTotal                Decimal(19,2)          @db.Decimal(19, 2)
-  valorFrete                Decimal(19,2)          @db.Decimal(19, 2)
+  valorTotal                Decimal                @db.Decimal(19, 2)
+  valorFrete                Decimal                @db.Decimal(19, 2)
   enderecoEntrega           Json                    @default("{}") // { rua, numero, cep, cidade, estado }
   etiquetaEnvio             String?                 @db.Text
   codigoRastreio            String?                 @db.VarChar(255)

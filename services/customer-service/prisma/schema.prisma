@@ -57,7 +57,7 @@ model Cliente {
   // Histórico de vendas
   ultimaCompra          DateTime?             // Data da última compra
   totalCompras          Int                   @default(0) // Total de pedidos
-  valorTotalCompras     Decimal(19,2)         @default(0) // Valor total em centavos
+  valorTotalCompras     Decimal               @default(0) @db.Decimal(19, 2) // Valor total
 
   // Soft delete
   deletadoEm            DateTime?             // Data de exclusão lógica
