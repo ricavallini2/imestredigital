@@ -21,7 +21,7 @@ export class UsuarioService {
   /** Lista todos os usuários ativos de um tenant */
   async listarPorTenant(tenantId: string) {
     const usuarios = await this.prisma.usuario.findMany({
-      where: { tenantId, status: { not: 'REMOVIDO' } },
+      where: { tenantId, status: { not: 'REMOVIDO' as any } },
       select: {
         id: true,
         nome: true,
@@ -58,7 +58,7 @@ export class UsuarioService {
         nome: dto.nome,
         email: dto.email,
         senhaHash,
-        cargo: dto.cargo || 'OPERADOR',
+        cargo: (dto.cargo || 'OPERADOR') as any,
         status: 'PENDENTE', // Aguardando ativação pelo convite
       },
       select: {
