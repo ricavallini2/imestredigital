@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ContaMarketplace, TipoMarketplace, StatusContaMarketplace } from '@prisma/client';
+import { ContaMarketplace, PlataformaMarketplace, StatusConexao } from '../../../generated/client';
 
 /**
  * Repository para operações de banco de dados de ContaMarketplace
@@ -17,25 +17,25 @@ export class ContaMarketplaceRepository {
    */
   async criar(dados: {
     tenantId: string;
-    marketplace: TipoMarketplace;
+    plataforma: PlataformaMarketplace;
     nome: string;
     accessToken: string;
     refreshToken?: string;
-    sellerId: string;
+    idExterno: string;
     tokenExpiraEm?: Date;
     configuracoes?: Record<string, any>;
   }): Promise<ContaMarketplace> {
     return this.prisma.contaMarketplace.create({
       data: {
         tenantId: dados.tenantId,
-        marketplace: dados.marketplace,
+        plataforma: dados.plataforma,
         nome: dados.nome,
         accessToken: dados.accessToken,
         refreshToken: dados.refreshToken,
-        sellerId: dados.sellerId,
+        idExterno: dados.idExterno,
         tokenExpiraEm: dados.tokenExpiraEm,
         configuracoes: dados.configuracoes || {},
-        status: StatusContaMarketplace.ATIVA,
+        status: StatusConexao.ATIVA,
       },
     });
   }
@@ -61,7 +61,7 @@ export class ContaMarketplaceRepository {
         tenantId,
       },
       orderBy: {
-        createdAt: 'desc',
+        criadoEm: 'desc',
       },
     });
   }
@@ -73,7 +73,7 @@ export class ContaMarketplaceRepository {
     return this.prisma.contaMarketplace.findMany({
       where: {
         tenantId,
-        status: StatusContaMarketplace.ATIVA,
+        status: StatusConexao.ATIVA,
       },
     });
   }
@@ -83,14 +83,14 @@ export class ContaMarketplaceRepository {
    */
   async buscarPorMarketplaceeSellerId(
     tenantId: string,
-    marketplace: TipoMarketplace,
-    sellerId: string,
+    plataforma: PlataformaMarketplace,
+    idExterno: string,
   ): Promise<ContaMarketplace | null> {
     return this.prisma.contaMarketplace.findFirst({
       where: {
         tenantId,
-        marketplace,
-        sellerId,
+        plataforma,
+        idExterno,
       },
     });
   }
@@ -109,7 +109,6 @@ export class ContaMarketplaceRepository {
       },
       data: {
         ...dados,
-        updatedAt: new Date(),
       },
     });
   }
@@ -136,7 +135,6 @@ export class ContaMarketplaceRepository {
         accessToken,
         refreshToken: refreshToken || undefined,
         tokenExpiraEm,
-        updatedAt: new Date(),
       },
     });
   }
@@ -147,7 +145,7 @@ export class ContaMarketplaceRepository {
   async atualizarStatus(
     id: string,
     tenantId: string,
-    status: StatusContaMarketplace,
+    status: StatusConexao,
   ): Promise<ContaMarketplace> {
     return this.prisma.contaMarketplace.update({
       where: {
@@ -155,7 +153,6 @@ export class ContaMarketplaceRepository {
       },
       data: {
         status,
-        updatedAt: new Date(),
       },
     });
   }
@@ -186,7 +183,7 @@ export class ContaMarketplaceRepository {
         id,
       },
       data: {
-        status: StatusContaMarketplace.INATIVA,
+        status: StatusConexao.INATIVA,
       },
     });
   }

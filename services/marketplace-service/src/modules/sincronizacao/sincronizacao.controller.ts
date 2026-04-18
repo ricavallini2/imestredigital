@@ -9,7 +9,7 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { SincronizacaoService } from './sincronizacao.service';
 import { SincronizarDto } from '../../dtos/sincronizar.dto';
-import { TipoSincronizacao } from '@prisma/client';
+import { TipoSincronizacao } from '../../../generated/client';
 
 @ApiTags('Sincronização')
 @ApiBearerAuth()

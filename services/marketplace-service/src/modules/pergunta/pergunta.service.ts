@@ -28,7 +28,7 @@ export class PerguntaService {
       const conta = await this.contaRepository.buscarPorId(contaId, tenantId);
       if (!conta) throw new Error('Conta não encontrada');
 
-      const adapter = this.integracaoFactory.criar(conta.marketplace);
+      const adapter = this.integracaoFactory.criar(conta.plataforma);
       const perguntasExternas = await adapter.listarPerguntas();
 
       let importadas = 0;
@@ -43,7 +43,7 @@ export class PerguntaService {
             tenantId,
             contaMarketplaceId: contaId,
             anuncioId: perguntaExterna.anuncioId,
-            marketplacePerguntaId: perguntaExterna.id,
+            idExterno: perguntaExterna.id,
             pergunta: perguntaExterna.pergunta,
             status: 'PENDENTE',
             compradorNome: perguntaExterna.compradorNome,
@@ -52,7 +52,7 @@ export class PerguntaService {
 
           await this.produtorEventos.perguntaRecebida(tenantId, {
             perguntaId: perguntaExterna.id,
-            marketplace: conta.marketplace,
+            marketplace: conta.plataforma,
             pergunta: perguntaExterna.pergunta,
             compradorNome: perguntaExterna.compradorNome,
           });
@@ -81,8 +81,8 @@ export class PerguntaService {
         tenantId,
       );
 
-      const adapter = this.integracaoFactory.criar(conta.marketplace);
-      await adapter.responderPergunta(pergunta.marketplacePerguntaId, resposta);
+      const adapter = this.integracaoFactory.criar(conta.plataforma);
+      await adapter.responderPergunta(pergunta.idExterno, resposta);
 
       return this.repository.atualizar(perguntaId, {
         resposta,

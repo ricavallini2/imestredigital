@@ -2,7 +2,7 @@ import { Controller, Get, Post, Delete, Param, Body, Headers, HttpCode, BadReque
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ContaMarketplaceService } from './conta-marketplace.service';
 import { ConectarMarketplaceDto } from '@dtos/conectar-marketplace.dto';
-import { TipoMarketplace } from '@prisma/client';
+import { PlataformaMarketplace } from '../../../generated/client';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -30,13 +30,13 @@ export class ContaMarketplaceController {
     @Param('marketplace') marketplace: string,
     @Headers('x-tenant-id') tenantId: string,
   ) {
-    if (!Object.values(TipoMarketplace).includes(marketplace as TipoMarketplace)) {
+    if (!Object.values(PlataformaMarketplace).includes(marketplace as PlataformaMarketplace)) {
       throw new BadRequestException(`Marketplace inválido: ${marketplace}`);
     }
 
     const state = uuidv4();
     const url = this.service.obterUrlAutenticacao(
-      marketplace as TipoMarketplace,
+      marketplace as PlataformaMarketplace,
       state,
     );
 

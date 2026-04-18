@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { PedidoMarketplace } from '@prisma/client';
+import { PedidoMarketplace } from '../../../generated/client';
 
 /**
  * Repository para PedidoMarketplace
@@ -21,7 +21,7 @@ export class PedidoMarketplaceRepository {
 
   async buscarPorMarketplacePedidoId(marketplacePedidoId: string): Promise<PedidoMarketplace | null> {
     return this.prisma.pedidoMarketplace.findFirst({
-      where: { marketplacePedidoId },
+      where: { idExterno: marketplacePedidoId },
     });
   }
 
@@ -35,7 +35,7 @@ export class PedidoMarketplaceRepository {
   async atualizar(id: string, dados: Partial<PedidoMarketplace>): Promise<PedidoMarketplace> {
     return this.prisma.pedidoMarketplace.update({
       where: { id },
-      data: { ...dados, updatedAt: new Date() },
+      data: { ...dados },
     });
   }
 

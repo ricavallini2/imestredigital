@@ -1,6 +1,6 @@
 import { IsEnum, IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { TipoSincronizacao } from '@prisma/client';
+import { TipoSincronizacao } from '../../generated/client';
 
 /**
  * DTO para disparar sincronização

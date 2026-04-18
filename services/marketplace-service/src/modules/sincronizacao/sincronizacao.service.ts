@@ -6,7 +6,7 @@ import { PerguntaService } from '../pergunta/pergunta.service';
 import { ContaMarketplaceRepository } from '../conta-marketplace/conta-marketplace.repository';
 import { CacheService } from '../cache/cache.service';
 import { IntegracaoFactory } from '../integracao/integracao.factory';
-import { StatusSincronizacao, TipoSincronizacao } from '@prisma/client';
+import { StatusSincronizacao, TipoSincronizacao } from '../../../generated/client';
 
 /**
  * Serviço de orquestração de sincronizações

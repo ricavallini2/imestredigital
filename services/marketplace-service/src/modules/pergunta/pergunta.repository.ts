@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { PerguntaMarketplace } from '@prisma/client';
+import { PerguntaMarketplace } from '../../../generated/client';
 
 /**
  * Repository para PerguntaMarketplace
@@ -36,7 +36,7 @@ export class PerguntaRepository {
   async atualizar(id: string, dados: Partial<PerguntaMarketplace>): Promise<PerguntaMarketplace> {
     return this.prisma.perguntaMarketplace.update({
       where: { id },
-      data: { ...dados, updatedAt: new Date() },
+      data: { ...dados },
     });
   }
 

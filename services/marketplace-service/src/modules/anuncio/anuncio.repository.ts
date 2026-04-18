@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AnuncioMarketplace, StatusAnuncioMarketplace } from '@prisma/client';
+import { AnuncioMarketplace, StatusAnuncio } from '../../../generated/client';
 
 /**
  * Repository para AnuncioMarketplace
@@ -28,14 +28,14 @@ export class AnuncioRepository {
   async listar(tenantId: string, filtros?: any): Promise<AnuncioMarketplace[]> {
     return this.prisma.anuncioMarketplace.findMany({
       where: { tenantId, ...filtros },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { criadoEm: 'desc' },
     });
   }
 
   async atualizar(id: string, dados: Partial<AnuncioMarketplace>): Promise<AnuncioMarketplace> {
     return this.prisma.anuncioMarketplace.update({
       where: { id },
-      data: { ...dados, updatedAt: new Date() },
+      data: { ...dados },
     });
   }
 
@@ -51,7 +51,7 @@ export class AnuncioRepository {
 
   async buscarPorMarketplaceItemId(marketplaceItemId: string): Promise<AnuncioMarketplace | null> {
     return this.prisma.anuncioMarketplace.findFirst({
-      where: { marketplaceItemId },
+      where: { idExterno: marketplaceItemId },
     });
   }
 }

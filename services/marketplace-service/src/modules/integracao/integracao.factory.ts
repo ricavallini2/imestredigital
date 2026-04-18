@@ -1,6 +1,6 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TipoMarketplace } from '@prisma/client';
+import { PlataformaMarketplace } from '../../../../generated/client';
 import { IIntegracaoMarketplace } from './integracao-base.interface';
 import { MercadoLivreAdapter } from './mercado-livre/mercado-livre.adapter';
 import { ShopeeAdapter } from './shopee/shopee.adapter';
@@ -29,23 +29,23 @@ export class IntegracaoFactory {
    * Cria adapter para o marketplace especificado
    * @throws BadRequestException se marketplace não for suportado
    */
-  criar(marketplace: TipoMarketplace): IIntegracaoMarketplace {
+  criar(marketplace: PlataformaMarketplace): IIntegracaoMarketplace {
     this.logger.debug(`Criando adapter para marketplace: ${marketplace}`);
 
     switch (marketplace) {
-      case TipoMarketplace.MERCADO_LIVRE:
+      case PlataformaMarketplace.MERCADO_LIVRE:
         return this.mercadoLivreAdapter;
 
-      case TipoMarketplace.SHOPEE:
+      case PlataformaMarketplace.SHOPEE:
         return this.shopeeAdapter;
 
-      case TipoMarketplace.AMAZON:
+      case PlataformaMarketplace.AMAZON:
         return this.amazonAdapter;
 
-      case TipoMarketplace.MAGALU:
+      case PlataformaMarketplace.MAGALU:
         return this.magaluAdapter;
 
-      case TipoMarketplace.AMERICANAS:
+      case PlataformaMarketplace.AMERICANAS:
         return this.americanasAdapter;
 
       default:
@@ -59,28 +59,28 @@ export class IntegracaoFactory {
    * Lista todos os marketplaces suportados
    */
   obterMarketplacesSuportados(): string[] {
-    return Object.values(TipoMarketplace);
+    return Object.values(PlataformaMarketplace);
   }
 
   /**
    * Verifica se um marketplace é suportado
    */
   eSuportado(marketplace: string): boolean {
-    return Object.values(TipoMarketplace).includes(
-      marketplace as TipoMarketplace,
+    return Object.values(PlataformaMarketplace).includes(
+      marketplace as PlataformaMarketplace,
     );
   }
 
   /**
    * Obtém nome amigável do marketplace
    */
-  obterNomeAmigavel(marketplace: TipoMarketplace): string {
-    const nomes: Record<TipoMarketplace, string> = {
-      [TipoMarketplace.MERCADO_LIVRE]: 'Mercado Livre',
-      [TipoMarketplace.SHOPEE]: 'Shopee',
-      [TipoMarketplace.AMAZON]: 'Amazon',
-      [TipoMarketplace.MAGALU]: 'Magalu',
-      [TipoMarketplace.AMERICANAS]: 'Americanas',
+  obterNomeAmigavel(marketplace: PlataformaMarketplace): string {
+    const nomes: Record<PlataformaMarketplace, string> = {
+      [PlataformaMarketplace.MERCADO_LIVRE]: 'Mercado Livre',
+      [PlataformaMarketplace.SHOPEE]: 'Shopee',
+      [PlataformaMarketplace.AMAZON]: 'Amazon',
+      [PlataformaMarketplace.MAGALU]: 'Magalu',
+      [PlataformaMarketplace.AMERICANAS]: 'Americanas',
     };
 
     return nomes[marketplace] || marketplace;

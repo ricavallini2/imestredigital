@@ -3,7 +3,7 @@ import { ContaMarketplaceRepository } from './conta-marketplace.repository';
 import { IntegracaoFactory } from '../integracao/integracao.factory';
 import { ProdutorEventosService } from '../eventos/produtor-eventos.service';
 import { CacheService } from '../cache/cache.service';
-import { TipoMarketplace, StatusContaMarketplace } from '@prisma/client';
+import { PlataformaMarketplace, StatusConexao } from '../../../generated/client';
 import { MercadoLivreAdapter } from '../integracao/mercado-livre/mercado-livre.adapter';
 
 /**
@@ -25,8 +25,8 @@ export class ContaMarketplaceService {
   /**
    * Obtém URL de autenticação OAuth2 do Mercado Livre
    */
-  obterUrlAutenticacao(marketplace: TipoMarketplace, state: string): string {
-    if (marketplace === TipoMarketplace.MERCADO_LIVRE) {
+  obterUrlAutenticacao(marketplace: PlataformaMarketplace, state: string): string {
+    if (marketplace === PlataformaMarketplace.MERCADO_LIVRE) {
       return this.mercadoLivreAdapter.getOAuthUrl(state);
     }
 
@@ -38,7 +38,7 @@ export class ContaMarketplaceService {
    */
   async conectar(
     tenantId: string,
-    marketplace: TipoMarketplace,
+    marketplace: PlataformaMarketplace,
     credenciais: Record<string, any>,
   ) {
     try {
@@ -68,11 +68,11 @@ export class ContaMarketplaceService {
       // Salvar no banco
       const conta = await this.repository.criar({
         tenantId,
-        marketplace,
+        plataforma: marketplace,
         nome: credenciais.nome || `${marketplace} - ${new Date().toLocaleDateString('pt-BR')}`,
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
-        sellerId: credenciais.sellerId || `seller-${Date.now()}`,
+        idExterno: credenciais.sellerId || `seller-${Date.now()}`,
         tokenExpiraEm: tokens.expiresAt,
       });
 
@@ -80,7 +80,7 @@ export class ContaMarketplaceService {
       await this.produtorEventos.contaConectada(tenantId, {
         contaId: conta.id,
         marketplace,
-        sellerId: conta.sellerId,
+        sellerId: conta.idExterno,
       });
 
       this.logger.log(`Conta ${marketplace} conectada com sucesso`);
@@ -106,7 +106,7 @@ export class ContaMarketplaceService {
       await this.repository.atualizarStatus(
         contaId,
         tenantId,
-        StatusContaMarketplace.INATIVA,
+        StatusConexao.INATIVA,
       );
 
       // Limpar cache
@@ -115,7 +115,7 @@ export class ContaMarketplaceService {
       // Publicar evento
       await this.produtorEventos.contaDesconectada(tenantId, {
         contaId,
-        marketplace: conta.marketplace,
+        marketplace: conta.plataforma,
       });
 
       this.logger.log(`Conta ${contaId} desconectada`);
@@ -140,7 +140,7 @@ export class ContaMarketplaceService {
         throw new Error('Refresh token não disponível');
       }
 
-      const adapter = this.integracaoFactory.criar(conta.marketplace);
+      const adapter = this.integracaoFactory.criar(conta.plataforma);
       const novoTokens = await adapter.renovarToken(conta.refreshToken);
 
       await this.repository.atualizarTokens(
@@ -157,7 +157,7 @@ export class ContaMarketplaceService {
       await this.repository.atualizarStatus(
         contaId,
         tenantId,
-        StatusContaMarketplace.ERRO_TOKEN,
+        StatusConexao.ERRO,
       );
 
       this.logger.error(`Erro ao renovar token: ${erro.message}`);
@@ -183,7 +183,7 @@ export class ContaMarketplaceService {
 
       return {
         id: conta.id,
-        marketplace: conta.marketplace,
+        marketplace: conta.plataforma,
         status: conta.status,
         tokenExpiraEm: conta.tokenExpiraEm,
         ultimaSincronizacao: conta.ultimaSincronizacao,

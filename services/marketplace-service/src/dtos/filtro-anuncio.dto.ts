@@ -1,29 +1,29 @@
 import { IsEnum, IsOptional, IsNumber, IsString, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { TipoMarketplace, StatusAnuncioMarketplace } from '@prisma/client';
+import { PlataformaMarketplace, StatusAnuncio } from '../../generated/client';
 
 /**
  * DTO para filtrar anúncios
  */
 export class FiltroAnuncioDto {
   @ApiProperty({
-    enum: TipoMarketplace,
+    enum: PlataformaMarketplace,
     description: 'Filtrar por marketplace (opcional)',
     required: false,
   })
-  @IsEnum(TipoMarketplace)
+  @IsEnum(PlataformaMarketplace)
   @IsOptional()
-  marketplace?: TipoMarketplace;
+  marketplace?: PlataformaMarketplace;
 
   @ApiProperty({
-    enum: StatusAnuncioMarketplace,
+    enum: StatusAnuncio,
     description: 'Filtrar por status (opcional)',
     required: false,
   })
-  @IsEnum(StatusAnuncioMarketplace)
+  @IsEnum(StatusAnuncio)
   @IsOptional()
-  status?: StatusAnuncioMarketplace;
+  status?: StatusAnuncio;
 
   @ApiProperty({
     description: 'Filtrar por ID do produto (opcional)',

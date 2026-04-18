@@ -28,7 +28,7 @@ export class PedidoMarketplaceService {
       const conta = await this.contaRepository.buscarPorId(contaId, tenantId);
       if (!conta) throw new Error('Conta não encontrada');
 
-      const adapter = this.integracaoFactory.criar(conta.marketplace);
+      const adapter = this.integracaoFactory.criar(conta.plataforma);
       const pedidosExternos = await adapter.listarPedidos();
 
       for (const pedidoExterno of pedidosExternos) {
@@ -41,10 +41,10 @@ export class PedidoMarketplaceService {
           await this.repository.criar({
             tenantId,
             contaMarketplaceId: contaId,
-            marketplacePedidoId: pedidoExterno.numeroMarketplace,
-            marketplace: conta.marketplace,
+            idExterno: pedidoExterno.numeroMarketplace,
+            plataforma: conta.plataforma,
             status: 'PENDENTE',
-            statusMarketplace: pedidoExterno.statusMarketplace,
+            statusExterno: pedidoExterno.statusMarketplace,
             comprador: pedidoExterno.comprador,
             itens: pedidoExterno.itens,
             valorTotal: pedidoExterno.valorTotal,
@@ -57,7 +57,7 @@ export class PedidoMarketplaceService {
 
           await this.produtorEventos.pedidoRecebido(tenantId, {
             marketplacePedidoId: pedidoExterno.numeroMarketplace,
-            marketplace: conta.marketplace,
+            marketplace: conta.plataforma,
             comprador: pedidoExterno.comprador,
             valorTotal: pedidoExterno.valorTotal,
           });
@@ -87,11 +87,11 @@ export class PedidoMarketplaceService {
         tenantId,
       );
 
-      const adapter = this.integracaoFactory.criar(conta.marketplace);
-      const pedidoAtualizado = await adapter.obterPedido(pedido.marketplacePedidoId);
+      const adapter = this.integracaoFactory.criar(conta.plataforma);
+      const pedidoAtualizado = await adapter.obterPedido(pedido.idExterno);
 
       await this.repository.atualizar(pedidoId, {
-        statusMarketplace: pedidoAtualizado.statusMarketplace,
+        statusExterno: pedidoAtualizado.statusMarketplace,
       });
     } catch (erro) {
       this.logger.error(`Erro ao sincronizar status: ${erro.message}`);
@@ -116,8 +116,8 @@ export class PedidoMarketplaceService {
         tenantId,
       );
 
-      const adapter = this.integracaoFactory.criar(conta.marketplace);
-      await adapter.enviarRastreio(pedido.marketplacePedidoId, codigoRastreio);
+      const adapter = this.integracaoFactory.criar(conta.plataforma);
+      await adapter.enviarRastreio(pedido.idExterno, codigoRastreio);
 
       await this.repository.atualizar(pedidoId, {
         codigoRastreio,

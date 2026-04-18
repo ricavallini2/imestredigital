@@ -1,19 +1,19 @@
 import { IsEnum, IsString, IsNotEmpty, IsUrl, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { TipoMarketplace } from '@prisma/client';
+import { PlataformaMarketplace } from '../../generated/client';
 
 /**
  * DTO para conectar/autenticar conta de marketplace
  */
 export class ConectarMarketplaceDto {
   @ApiProperty({
-    enum: TipoMarketplace,
+    enum: PlataformaMarketplace,
     description: 'Tipo de marketplace a conectar',
     example: 'MERCADO_LIVRE',
   })
-  @IsEnum(TipoMarketplace)
+  @IsEnum(PlataformaMarketplace)
   @IsNotEmpty()
-  marketplace: TipoMarketplace;
+  marketplace: PlataformaMarketplace;
 
   @ApiProperty({
     description: 'Código de autorização OAuth2 (para Mercado Livre)',

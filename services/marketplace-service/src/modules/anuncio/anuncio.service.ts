@@ -4,7 +4,7 @@ import { ContaMarketplaceRepository } from '../conta-marketplace/conta-marketpla
 import { IntegracaoFactory } from '../integracao/integracao.factory';
 import { ProdutorEventosService } from '../eventos/produtor-eventos.service';
 import { CacheService } from '../cache/cache.service';
-import { StatusAnuncioMarketplace } from '@prisma/client';
+import { StatusAnuncio } from '../../../generated/client';
 
 /**
  * Serviço de gerenciamento de anúncios no marketplace
@@ -31,7 +31,7 @@ export class AnuncioService {
       const conta = await this.contaRepository.buscarPorId(contaId, tenantId);
       if (!conta) throw new NotFoundException('Conta não encontrada');
 
-      const adapter = this.integracaoFactory.criar(conta.marketplace);
+      const adapter = this.integracaoFactory.criar(conta.plataforma);
       const anuncioExterno = await adapter.criarAnuncio(dados);
 
       const anuncio = await this.repository.criar({
@@ -39,13 +39,13 @@ export class AnuncioService {
         contaMarketplaceId: contaId,
         produtoId: dados.produtoId,
         variacaoId: dados.variacaoId,
-        marketplaceItemId: anuncioExterno.id,
+        idExterno: anuncioExterno.id,
         titulo: anuncioExterno.titulo,
         descricao: anuncioExterno.descricao,
         preco: anuncioExterno.preco,
         precoPromocional: anuncioExterno.precoPromocional,
         estoque: anuncioExterno.estoque,
-        status: StatusAnuncioMarketplace.ATIVO,
+        status: StatusAnuncio.ATIVO,
         url: anuncioExterno.url,
         categoria: anuncioExterno.categoria,
         fotos: anuncioExterno.fotos,
@@ -56,8 +56,8 @@ export class AnuncioService {
 
       await this.produtorEventos.anuncioCriado(tenantId, {
         anuncioId: anuncio.id,
-        marketplace: conta.marketplace,
-        marketplaceItemId: anuncio.marketplaceItemId,
+        marketplace: conta.plataforma,
+        marketplaceItemId: anuncio.idExterno,
         produtoId: dados.produtoId,
       });
 
@@ -90,8 +90,8 @@ export class AnuncioService {
       );
       if (!conta) throw new NotFoundException('Conta não encontrada');
 
-      const adapter = this.integracaoFactory.criar(conta.marketplace);
-      await adapter.atualizarAnuncio(anuncio.marketplaceItemId, dados);
+      const adapter = this.integracaoFactory.criar(conta.plataforma);
+      await adapter.atualizarAnuncio(anuncio.idExterno, dados);
 
       const anuncioAtualizado = await this.repository.atualizar(anuncioId, {
         titulo: dados.titulo || anuncio.titulo,
@@ -105,7 +105,7 @@ export class AnuncioService {
 
       await this.produtorEventos.anuncioAtualizado(tenantId, {
         anuncioId: anuncioId,
-        marketplace: conta.marketplace,
+        marketplace: conta.plataforma,
       });
 
       return anuncioAtualizado;
@@ -128,11 +128,11 @@ export class AnuncioService {
         tenantId,
       );
 
-      const adapter = this.integracaoFactory.criar(conta.marketplace);
-      await adapter.pausarAnuncio(anuncio.marketplaceItemId);
+      const adapter = this.integracaoFactory.criar(conta.plataforma);
+      await adapter.pausarAnuncio(anuncio.idExterno);
 
       return this.repository.atualizar(anuncioId, {
-        status: StatusAnuncioMarketplace.PAUSADO,
+        status: StatusAnuncio.PAUSADO,
       });
     } catch (erro) {
       this.logger.error(`Erro ao pausar anúncio: ${erro.message}`);
@@ -153,11 +153,11 @@ export class AnuncioService {
         tenantId,
       );
 
-      const adapter = this.integracaoFactory.criar(conta.marketplace);
-      await adapter.reativarAnuncio(anuncio.marketplaceItemId);
+      const adapter = this.integracaoFactory.criar(conta.plataforma);
+      await adapter.reativarAnuncio(anuncio.idExterno);
 
       return this.repository.atualizar(anuncioId, {
-        status: StatusAnuncioMarketplace.ATIVO,
+        status: StatusAnuncio.ATIVO,
       });
     } catch (erro) {
       this.logger.error(`Erro ao reativar anúncio: ${erro.message}`);
@@ -178,11 +178,11 @@ export class AnuncioService {
         tenantId,
       );
 
-      const adapter = this.integracaoFactory.criar(conta.marketplace);
-      await adapter.encerrarAnuncio(anuncio.marketplaceItemId);
+      const adapter = this.integracaoFactory.criar(conta.plataforma);
+      await adapter.encerrarAnuncio(anuncio.idExterno);
 
       return this.repository.atualizar(anuncioId, {
-        status: StatusAnuncioMarketplace.ENCERRADO,
+        status: StatusAnuncio.REMOVIDO,
       });
     } catch (erro) {
       this.logger.error(`Erro ao encerrar anúncio: ${erro.message}`);
@@ -203,8 +203,8 @@ export class AnuncioService {
         tenantId,
       );
 
-      const adapter = this.integracaoFactory.criar(conta.marketplace);
-      await adapter.atualizarEstoque(anuncio.marketplaceItemId, quantidade);
+      const adapter = this.integracaoFactory.criar(conta.plataforma);
+      await adapter.atualizarEstoque(anuncio.idExterno, quantidade);
 
       await this.repository.atualizar(anuncioId, {
         estoque: quantidade,
@@ -239,8 +239,8 @@ export class AnuncioService {
         tenantId,
       );
 
-      const adapter = this.integracaoFactory.criar(conta.marketplace);
-      await adapter.atualizarPreco(anuncio.marketplaceItemId, preco, precoPromocional);
+      const adapter = this.integracaoFactory.criar(conta.plataforma);
+      await adapter.atualizarPreco(anuncio.idExterno, preco, precoPromocional);
 
       await this.repository.atualizar(anuncioId, {
         preco: preco as any,

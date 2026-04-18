@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { SincronizacaoLog, TipoSincronizacao, StatusSincronizacao } from '@prisma/client';
+import { SincronizacaoLog, TipoSincronizacao, StatusSincronizacao } from '../../../generated/client';
 
 /**
  * Repository para SincronizacaoLog
