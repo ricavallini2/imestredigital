@@ -211,10 +211,10 @@ async function main() {
 
   // ─── Segmentos ─────────────────────────────────────────
   const segVip = await prisma.segmentoCliente.upsert({
-    where: { id: 'seg-vip-001' },
+    where: { id: 'a0000000-0000-0000-0000-000000000001' },
     update: {},
     create: {
-      id: 'seg-vip-001',
+      id: 'a0000000-0000-0000-0000-000000000001',
       tenantId: TENANT_ID,
       nome: 'Clientes VIP',
       descricao: 'Clientes com mais de 5 compras ou valor acima de R$2.000',
@@ -225,10 +225,10 @@ async function main() {
   });
 
   const segNovos = await prisma.segmentoCliente.upsert({
-    where: { id: 'seg-novos-001' },
+    where: { id: 'a0000000-0000-0000-0000-000000000002' },
     update: {},
     create: {
-      id: 'seg-novos-001',
+      id: 'a0000000-0000-0000-0000-000000000002',
       tenantId: TENANT_ID,
       nome: 'Clientes Novos (30 dias)',
       descricao: 'Clientes adquiridos nos últimos 30 dias',
