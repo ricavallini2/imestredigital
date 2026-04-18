@@ -47,7 +47,7 @@ export const kafkaConfig = {
   ssl: process.env.KAFKA_SSL === 'true',
   sasl: process.env.KAFKA_ENABLE_SASL === 'true'
     ? {
-        mechanism: 'scram-sha-256',
+        mechanism: 'scram-sha-256' as const,
         username: process.env.KAFKA_USERNAME || '',
         password: process.env.KAFKA_PASSWORD || '',
       }

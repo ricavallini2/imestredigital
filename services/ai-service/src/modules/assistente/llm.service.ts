@@ -127,7 +127,7 @@ export class LLMService {
       const mensagensFormatadas = [
         { role: 'system' as const, content: sistemaMensagem },
         ...mensagens.map((m) => ({
-          role: (m.papel === 'USUARIO' ? 'user' : 'assistant') as const,
+          role: (m.papel === 'USUARIO' ? 'user' : 'assistant') as 'user' | 'assistant',
           content: m.conteudo,
         })),
       ];

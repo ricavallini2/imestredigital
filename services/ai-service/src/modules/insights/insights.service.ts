@@ -202,7 +202,7 @@ Análise de fluxo de caixa:
     dados?: any;
     acaoSugerida?: string;
   }) {
-    return this.repository.criarInsight(dados);
+    return this.repository.criarInsight(dados as any);
   }
 
   /**

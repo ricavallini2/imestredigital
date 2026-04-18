@@ -8,8 +8,9 @@
  * - Título de anúncio (por marketplace)
  */
 
-import { Injectable, Logger, CACHE_MANAGER } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { LLMService } from '../assistente/llm.service';
 import { SugestaoRepository } from './sugestao.repository';
