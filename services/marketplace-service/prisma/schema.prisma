@@ -1,0 +1,239 @@
+// Marketplace Service - Esquema Prisma
+// Integração com principais marketplaces brasileiros
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+/// Plataforma de marketplace integrada
+enum PlataformaMarketplace {
+  SHOPEE
+  MERCADO_LIVRE
+  AMAZON
+  MAGALU
+  AMERICANAS
+}
+
+/// Status da conexão com marketplace
+enum StatusConexao {
+  ATIVA
+  INATIVA
+  PENDENTE
+  ERRO
+}
+
+/// Status de um anúncio no marketplace
+enum StatusAnuncio {
+  ATIVO
+  PAUSADO
+  REMOVIDO
+  PENDENTE
+}
+
+/// Status de pedido do marketplace
+enum StatusPedidoMarketplace {
+  PENDENTE
+  CONFIRMADO
+  ENVIADO
+  ENTREGUE
+  CANCELADO
+  DEVOLVIDO
+}
+
+/// Status de pergunta de comprador
+enum StatusPerguntaMarketplace {
+  PENDENTE
+  RESPONDIDA
+  DELETADA
+}
+
+/// Tipo de sincronização
+enum TipoSincronizacao {
+  PRODUTO
+  PEDIDO
+  ESTOQUE
+  PRECO
+  PERGUNTA
+}
+
+/// Direção da sincronização
+enum DirecaoSincronizacao {
+  ENVIO
+  RECEBIMENTO
+}
+
+/// Status da sincronização
+enum StatusSincronizacao {
+  SUCESSO
+  ERRO
+  PARCIAL
+}
+
+// ============================================================================
+// MODELOS
+// ============================================================================
+
+/// Conta conectada com marketplace
+model ContaMarketplace {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  tenantId                  String                  @db.Uuid
+  plataforma                PlataformaMarketplace
+  nome                      String                  @db.VarChar(255)
+  accessToken               String                  @db.Text
+  refreshToken              String?                 @db.Text
+  idExterno                 String                  @db.VarChar(255)
+  tokenExpiraEm             DateTime?
+  status                    StatusConexao           @default(ATIVA)
+  ultimaSincronizacao       DateTime?
+  configuracoes             Json                    @default("{}") // Armazena credenciais e configurações específicas da plataforma
+
+  // Relacionamentos
+  anuncios                  AnuncioMarketplace[]
+  pedidos                   PedidoMarketplace[]
+  perguntas                 PerguntaMarketplace[]
+  sincronizacaoLogs         SincronizacaoLog[]
+
+  criadoEm                  DateTime                @default(now())
+  atualizadoEm              DateTime                @updatedAt
+
+  @@index([tenantId])
+  @@index([plataforma])
+  @@index([status])
+  @@unique([tenantId, plataforma, idExterno], map: "uk_conta_marketplace_tenant_plataforma_id")
+}
+
+/// Anúncios nos marketplaces
+model AnuncioMarketplace {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  tenantId                  String                  @db.Uuid
+  contaMarketplaceId        String                  @db.Uuid
+  produtoId                 String                  @db.VarChar(255)
+  variacaoId                String?                 @db.VarChar(255)
+  idExterno                 String                  @db.VarChar(255) // ID do anúncio na plataforma
+  titulo                    String                  @db.VarChar(500)
+  descricao                 String                  @db.Text
+  preco                     Decimal(19,2)          @db.Decimal(19, 2)
+  precoPromocional          Decimal(19,2)?          @db.Decimal(19, 2)
+  estoque                   Int                     @default(0)
+  status                    StatusAnuncio           @default(ATIVO)
+  url                       String                  @db.Text
+  categoria                 String                  @db.VarChar(255)
+  fotos                     String[]                @default([])
+  atributos                 Json                    @default("{}") // Atributos específicos da plataforma
+  metricas                  Json                    @default("{\"visitas\": 0, \"vendas\": 0, \"perguntas\": 0}")
+  ultimaSincronizacao       DateTime?
+
+  // Relacionamentos
+  contaMarketplace          ContaMarketplace        @relation(fields: [contaMarketplaceId], references: [id], onDelete: Cascade)
+  perguntas                 PerguntaMarketplace[]
+
+  criadoEm                  DateTime                @default(now())
+  atualizadoEm              DateTime                @updatedAt
+
+  @@index([tenantId])
+  @@index([contaMarketplaceId])
+  @@index([produtoId])
+  @@index([status])
+  @@index([idExterno])
+}
+
+/// Pedidos originários de marketplaces
+model PedidoMarketplace {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  tenantId                  String                  @db.Uuid
+  contaMarketplaceId        String                  @db.Uuid
+  pedidoInternoId           String?                 @db.VarChar(255)
+  idExterno                 String                  @db.VarChar(255)
+  plataforma                PlataformaMarketplace
+  status                    StatusPedidoMarketplace @default(PENDENTE)
+  statusExterno             String                  @db.VarChar(100) // Status na plataforma original
+  comprador                 Json                    @default("{}") // { nome, email, telefone, etc }
+  itens                     Json                    @default("[]") // [ { sku, titulo, quantidade, preco } ]
+  valorTotal                Decimal(19,2)          @db.Decimal(19, 2)
+  valorFrete                Decimal(19,2)          @db.Decimal(19, 2)
+  enderecoEntrega           Json                    @default("{}") // { rua, numero, cep, cidade, estado }
+  etiquetaEnvio             String?                 @db.Text
+  codigoRastreio            String?                 @db.VarChar(255)
+  dataVenda                 DateTime
+  dataAprovacao             DateTime?
+  prazoEnvio                DateTime?
+  sincronizado              Boolean                 @default(false)
+
+  // Relacionamentos
+  contaMarketplace          ContaMarketplace        @relation(fields: [contaMarketplaceId], references: [id], onDelete: Cascade)
+
+  criadoEm                  DateTime                @default(now())
+  atualizadoEm              DateTime                @updatedAt
+
+  @@index([tenantId])
+  @@index([contaMarketplaceId])
+  @@index([plataforma])
+  @@index([status])
+  @@index([idExterno])
+  @@index([pedidoInternoId])
+}
+
+/// Perguntas dos compradores
+model PerguntaMarketplace {
+  id                        String                      @id @default(uuid()) @db.Uuid
+  tenantId                  String                      @db.Uuid
+  contaMarketplaceId        String                      @db.Uuid
+  anuncioId                 String                      @db.Uuid
+  idExterno                 String                      @db.VarChar(255)
+  pergunta                  String                      @db.Text
+  resposta                  String?                     @db.Text
+  status                    StatusPerguntaMarketplace   @default(PENDENTE)
+  compradorNome             String                      @db.VarChar(255)
+  dataEnvio                 DateTime
+  dataResposta              DateTime?
+
+  // Relacionamentos
+  contaMarketplace          ContaMarketplace            @relation(fields: [contaMarketplaceId], references: [id], onDelete: Cascade)
+  anuncio                   AnuncioMarketplace          @relation(fields: [anuncioId], references: [id], onDelete: Cascade)
+
+  criadoEm                  DateTime                    @default(now())
+  atualizadoEm              DateTime                    @updatedAt
+
+  @@index([tenantId])
+  @@index([contaMarketplaceId])
+  @@index([anuncioId])
+  @@index([status])
+  @@index([idExterno])
+}
+
+/// Log de sincronização entre ERP e marketplaces
+model SincronizacaoLog {
+  id                        String                  @id @default(uuid()) @db.Uuid
+  tenantId                  String                  @db.Uuid
+  contaMarketplaceId        String                  @db.Uuid
+  tipo                      TipoSincronizacao
+  direcao                   DirecaoSincronizacao
+  status                    StatusSincronizacao
+  registrosProcessados      Int                     @default(0)
+  registrosErro             Int                     @default(0)
+  detalhesErro              Json                    @default("[]") // [ { indice: 0, erro: "mensagem" } ]
+  inicioEm                  DateTime
+  fimEm                     DateTime?
+
+  // Relacionamentos
+  contaMarketplace          ContaMarketplace        @relation(fields: [contaMarketplaceId], references: [id], onDelete: Cascade)
+
+  criadoEm                  DateTime                @default(now())
+
+  @@index([tenantId])
+  @@index([contaMarketplaceId])
+  @@index([tipo])
+  @@index([status])
+  @@index([inicioEm])
+}
+

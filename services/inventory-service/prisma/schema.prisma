@@ -14,6 +14,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Enumerações ──────────────────────────────────────────────
+
+enum TipoMovimentacao {
+  ENTRADA
+  SAIDA
+  AJUSTE
+  TRANSFERENCIA
+  DEVOLUCAO
+  RESERVA
+}
+
+enum MotivoMovimentacao {
+  COMPRA
+  VENDA
+  AJUSTE_INVENTARIO
+  TRANSFERENCIA_DEPOSITO
+  DEVOLUCAO_CLIENTE
+  DEVOLUCAO_FORNECEDOR
+  PERDA
+  PRODUCAO
+}
+
+enum StatusReserva {
+  ATIVA
+  CONFIRMADA
+  CANCELADA
+  EXPIRADA
+}
+
 /// Depósito / armazém / centro de distribuição
 model Deposito {
   id        String   @id @default(uuid()) @db.Uuid
@@ -37,15 +66,18 @@ model Deposito {
 
 /// Saldo de estoque de um produto em um depósito específico
 model SaldoEstoque {
-  id               String  @id @default(uuid()) @db.Uuid
-  tenantId         String  @map("tenant_id") @db.Uuid
-  produtoId        String  @map("produto_id") @db.Uuid
-  depositoId       String  @map("deposito_id") @db.Uuid
+  id               String   @id @default(uuid()) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  produtoId        String   @map("produto_id") @db.Uuid
+  depositoId       String   @map("deposito_id") @db.Uuid
   deposito         Deposito @relation(fields: [depositoId], references: [id])
 
-  quantidadeFisica Int     @default(0) @map("quantidade_fisica") // Quantidade real no depósito
-  reservado        Int     @default(0) // Quantidade reservada para pedidos
-  estoqueMinimo    Int     @default(0) @map("estoque_minimo") // Ponto de pedido
+  quantidadeFisica Int      @default(0) @map("quantidade_fisica") // Quantidade real no depósito
+  reservado        Int      @default(0) // Quantidade reservada para pedidos
+  estoqueMinimo    Int      @default(0) @map("estoque_minimo") // Ponto de pedido
+
+  lote             String?  // Número do lote
+  numeroSerie      String?  @map("numero_serie") // Número de série
 
   atualizadoEm     DateTime @updatedAt @map("atualizado_em")
 
@@ -59,14 +91,14 @@ model SaldoEstoque {
 
 /// Reserva de estoque para um pedido (impede venda duplicada)
 model ReservaEstoque {
-  id          String   @id @default(uuid()) @db.Uuid
-  tenantId    String   @map("tenant_id") @db.Uuid
-  produtoId   String   @map("produto_id") @db.Uuid
-  pedidoId    String   @map("pedido_id") @db.Uuid
+  id          String        @id @default(uuid()) @db.Uuid
+  tenantId    String        @map("tenant_id") @db.Uuid
+  produtoId   String        @map("produto_id") @db.Uuid
+  pedidoId    String        @map("pedido_id") @db.Uuid
   quantidade  Int
-  status      String   @default("pendente") // pendente, confirmada, cancelada
+  status      StatusReserva @default(ATIVA)
 
-  criadoEm    DateTime @default(now()) @map("criado_em")
+  criadoEm    DateTime      @default(now()) @map("criado_em")
 
   @@index([tenantId, pedidoId])
   @@index([tenantId, produtoId])
@@ -75,22 +107,24 @@ model ReservaEstoque {
 
 /// Movimentação (histórico de entrada/saída/ajuste/transferência)
 model Movimentacao {
-  id            String   @id @default(uuid()) @db.Uuid
-  tenantId      String   @map("tenant_id") @db.Uuid
-  produtoId     String   @map("produto_id") @db.Uuid
-  depositoId    String   @map("deposito_id") @db.Uuid
-  deposito      Deposito @relation(fields: [depositoId], references: [id])
+  id            String                @id @default(uuid()) @db.Uuid
+  tenantId      String                @map("tenant_id") @db.Uuid
+  produtoId     String                @map("produto_id") @db.Uuid
+  depositoId    String                @map("deposito_id") @db.Uuid
+  deposito      Deposito              @relation(fields: [depositoId], references: [id])
 
-  tipo          String   // entrada, saida, ajuste, transferencia
-  motivo        String   // compra, venda, devolucao, perda, avaria, inventario, transferencia
+  tipo          TipoMovimentacao
+  motivo        MotivoMovimentacao
   quantidade    Int      // Positivo = entrada, Negativo = saída
-  custoUnitario Int?     @map("custo_unitario") // Em centavos
+  custoUnitario Decimal? @db.Decimal(19, 2) @map("custo_unitario")
   observacao    String?
 
-  criadoEm      DateTime @default(now()) @map("criado_em")
+  criadoEm      DateTime              @default(now()) @map("criado_em")
 
   @@index([tenantId])
   @@index([tenantId, produtoId])
+  @@index([depositoId])
   @@index([criadoEm])
+  @@index([tipo])
   @@map("movimentacoes")
 }

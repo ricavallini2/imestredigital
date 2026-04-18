@@ -39,8 +39,8 @@ async function main() {
         cnpj: '12345678000190',
         email: 'contato@empresateste.com',
         telefone: '1133334444',
-        plano: 'starter',
-        status: 'ativo',
+        plano: 'STARTER',
+        status: 'ATIVO',
       },
     });
 
@@ -56,8 +56,8 @@ async function main() {
         nome: 'Usuário Teste',
         email: 'teste@teste.com',
         senhaHash,
-        cargo: 'admin',
-        status: 'ativo',
+        cargo: 'ADMIN',
+        status: 'ATIVO',
         emailVerificado: true,
       },
     });
@@ -66,9 +66,9 @@ async function main() {
 
     // Cria mais alguns usuários de teste com diferentes cargos
     const usuarios = [
-      { id: USER_GERENTE_ID,  nome: 'Gerente Teste',     email: 'gerente@teste.com',     cargo: 'gerente' },
-      { id: USER_OPERADOR_ID, nome: 'Operador Teste',    email: 'operador@teste.com',    cargo: 'operador' },
-      { id: USER_VIEWER_ID,   nome: 'Visualizador Teste', email: 'visualizador@teste.com', cargo: 'visualizador' },
+      { id: USER_GERENTE_ID,  nome: 'Gerente Teste',     email: 'gerente@teste.com',     cargo: 'GERENTE' },
+      { id: USER_OPERADOR_ID, nome: 'Operador Teste',    email: 'operador@teste.com',    cargo: 'OPERADOR' },
+      { id: USER_VIEWER_ID,   nome: 'Visualizador Teste', email: 'visualizador@teste.com', cargo: 'VISUALIZADOR' },
     ];
 
     for (const u of usuarios) {
@@ -80,7 +80,7 @@ async function main() {
           email: u.email,
           senhaHash,
           cargo: u.cargo,
-          status: 'ativo',
+          status: 'ATIVO',
           emailVerificado: true,
         },
       });

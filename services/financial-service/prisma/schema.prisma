@@ -20,15 +20,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Enumerações ──────────────────────────────────────────────
+
+enum TipoLancamento {
+  RECEITA
+  DESPESA
+  TRANSFERENCIA
+}
+
+enum StatusLancamento {
+  PENDENTE
+  PAGO
+  ATRASADO
+  CANCELADO
+  PARCIAL
+}
+
+enum FormaPagamento {
+  DINHEIRO
+  PIX
+  CARTAO_CREDITO
+  CARTAO_DEBITO
+  BOLETO
+  TRANSFERENCIA
+  CHEQUE
+}
+
+enum TipoConta {
+  CORRENTE
+  POUPANCA
+  INVESTIMENTO
+  CAIXA
+  CARTAO
+}
+
 // ─── Conta Financeira ─────────────────────────────────────────
 /// Representação de uma conta bancária ou financeira da empresa.
 /// Tipos: corrente, poupança, caixa, cartão, digital, etc.
 model ContaFinanceira {
-  id              String   @id @default(uuid()) @db.Uuid
-  tenantId        String   @map("tenant_id") @db.Uuid
+  id              String      @id @default(uuid()) @db.Uuid
+  tenantId        String      @map("tenant_id") @db.Uuid
 
   nome            String
-  tipo            String   // CORRENTE, POUPANCA, CAIXA, CARTAO, DIGITAL
+  tipo            TipoConta   // CORRENTE, POUPANCA, INVESTIMENTO, CAIXA, CARTAO
   banco           String?
   agencia         String?
   conta           String?
@@ -59,23 +93,24 @@ model ContaFinanceira {
 /// Transação financeira: receita, despesa ou transferência.
 /// Pode ser pago/recebido ou permanecer em aberto.
 model Lancamento {
-  id                String   @id @default(uuid()) @db.Uuid
-  tenantId          String   @map("tenant_id") @db.Uuid
-  contaId           String?  @map("conta_id") @db.Uuid
-  conta             ContaFinanceira? @relation(fields: [contaId], references: [id], onDelete: SetNull)
+  id                String              @id @default(uuid()) @db.Uuid
+  tenantId          String              @map("tenant_id") @db.Uuid
+  contaId           String?             @map("conta_id") @db.Uuid
+  conta             ContaFinanceira?    @relation(fields: [contaId], references: [id], onDelete: SetNull)
+  usuarioId         String?             @map("usuario_id") @db.Uuid
 
-  tipo              String   // RECEITA, DESPESA, TRANSFERENCIA
+  tipo              TipoLancamento
   categoria         String?
   subcategoria      String?
-  descricao         String   @db.Text
-  valor             Decimal  @db.Decimal(19, 2)
+  descricao         String              @db.Text
+  valor             Decimal             @db.Decimal(19, 2)
 
-  dataVencimento    DateTime @map("data_vencimento")
-  dataPagamento     DateTime? @map("data_pagamento")
-  dataCompetencia   DateTime? @map("data_competencia")
+  dataVencimento    DateTime            @map("data_vencimento")
+  dataPagamento     DateTime?           @map("data_pagamento")
+  dataCompetencia   DateTime?           @map("data_competencia")
 
-  status            String   @default("PENDENTE") // PENDENTE, PAGO, ATRASADO, CANCELADO
-  formaPagamento    String?  @map("forma_pagamento") // PIX, TED, DOC, BOLETO, DINHEIRO, etc
+  status            StatusLancamento    @default(PENDENTE)
+  formaPagamento    FormaPagamento?     @map("forma_pagamento")
 
   // Parcelamento
   numeroParcela     Int?     @map("numero_parcela")
@@ -120,14 +155,19 @@ model Lancamento {
 
 // ─── Categoria Financeira ──────────────────────────────────────
 /// Categorias hierárquicas para organizar receitas e despesas.
+enum TipoCategoriaFinanceira {
+  RECEITA
+  DESPESA
+}
+
 model CategoriaFinanceira {
-  id              String   @id @default(uuid()) @db.Uuid
-  tenantId        String   @map("tenant_id") @db.Uuid
+  id              String                    @id @default(uuid()) @db.Uuid
+  tenantId        String                    @map("tenant_id") @db.Uuid
 
   nome            String
-  tipo            String   // RECEITA, DESPESA
-  icone           String?  @default("tag")
-  cor             String?  @default("#6B7280")
+  tipo            TipoCategoriaFinanceira
+  icone           String?                   @default("tag")
+  cor             String?                   @default("#6B7280")
 
   paiId           String?  @map("pai_id") @db.Uuid
   pai             CategoriaFinanceira? @relation("CategoriaPai", fields: [paiId], references: [id], onDelete: SetNull)
@@ -145,21 +185,32 @@ model CategoriaFinanceira {
 }
 
 // ─── Recorrência ──────────────────────────────────────────────
+enum FrequenciaRecorrencia {
+  DIARIA
+  SEMANAL
+  QUINZENAL
+  MENSAL
+  BIMESTRAL
+  TRIMESTRAL
+  SEMESTRAL
+  ANUAL
+}
+
 /// Configuração para gerar lançamentos automaticamente.
 /// Exemplo: aluguel todo mês, no dia 5.
 model Recorrencia {
-  id              String   @id @default(uuid()) @db.Uuid
-  tenantId        String   @map("tenant_id") @db.Uuid
-  contaId         String?  @map("conta_id") @db.Uuid
-  conta           ContaFinanceira? @relation(fields: [contaId], references: [id], onDelete: SetNull)
+  id              String                  @id @default(uuid()) @db.Uuid
+  tenantId        String                  @map("tenant_id") @db.Uuid
+  contaId         String?                 @map("conta_id") @db.Uuid
+  conta           ContaFinanceira?        @relation(fields: [contaId], references: [id], onDelete: SetNull)
 
   descricao       String
-  tipo            String   // RECEITA, DESPESA
+  tipo            TipoLancamento
   categoria       String?
-  valor           Decimal  @db.Decimal(19, 2)
+  valor           Decimal                 @db.Decimal(19, 2)
 
-  frequencia      String   // DIARIA, SEMANAL, QUINZENAL, MENSAL, BIMESTRAL, TRIMESTRAL, SEMESTRAL, ANUAL
-  diaVencimento   Int?     @map("dia_vencimento") // 1-31, ou null se semanal
+  frequencia      FrequenciaRecorrencia
+  diaVencimento   Int?                    @map("dia_vencimento") // 1-31, ou null se semanal
 
   proximaGeracao  DateTime @map("proxima_geracao")
   ativa           Boolean  @default(true)
@@ -177,21 +228,27 @@ model Recorrencia {
 }
 
 // ─── Conciliação Bancária ────────────────────────────────────
+enum StatusConciliacao {
+  EM_ANDAMENTO
+  CONCLUIDA
+  DIVERGENTE
+}
+
 /// Processo de reconciliar saldo do sistema com extrato bancário.
 model ConciliacaoBancaria {
-  id              String   @id @default(uuid()) @db.Uuid
-  tenantId        String   @map("tenant_id") @db.Uuid
-  contaId         String   @map("conta_id") @db.Uuid
-  conta           ContaFinanceira @relation(fields: [contaId], references: [id], onDelete: Cascade)
+  id              String              @id @default(uuid()) @db.Uuid
+  tenantId        String              @map("tenant_id") @db.Uuid
+  contaId         String              @map("conta_id") @db.Uuid
+  conta           ContaFinanceira     @relation(fields: [contaId], references: [id], onDelete: Cascade)
 
-  dataInicio      DateTime @map("data_inicio")
-  dataFim         DateTime @map("data_fim")
+  dataInicio      DateTime            @map("data_inicio")
+  dataFim         DateTime            @map("data_fim")
 
-  saldoInicial    Decimal  @db.Decimal(19, 2) @map("saldo_inicial")
-  saldoFinal      Decimal  @db.Decimal(19, 2) @map("saldo_final")
+  saldoInicial    Decimal             @db.Decimal(19, 2) @map("saldo_inicial")
+  saldoFinal      Decimal             @db.Decimal(19, 2) @map("saldo_final")
 
-  status          String   @default("EM_ANDAMENTO") // EM_ANDAMENTO, CONCLUIDA, DIVERGENTE
-  divergencias    Json?    @default("[]")
+  status          StatusConciliacao   @default(EM_ANDAMENTO)
+  divergencias    Json?               @default("[]")
 
   criadoEm        DateTime @default(now()) @map("criado_em")
   atualizadoEm    DateTime @updatedAt @map("atualizado_em")
@@ -235,5 +292,6 @@ model DRE {
   @@index([tenantId])
   @@index([ano])
   @@index([mes])
+  @@unique([tenantId, ano, mes], name: "tenantId_ano_mes")
   @@map("dres")
 }

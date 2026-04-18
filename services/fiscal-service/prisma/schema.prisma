@@ -14,28 +14,60 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ═══════════════════════════════════════════════════════════════
+// Enums
+// ═══════════════════════════════════════════════════════════════
+
+enum TipoNotaFiscal {
+  NFE
+  NFCE
+  NFSE
+}
+
+enum StatusNotaFiscal {
+  RASCUNHO
+  VALIDADA
+  TRANSMITIDA
+  AUTORIZADA
+  REJEITADA
+  CANCELADA
+  INUTILIZADA
+  DENEGADA
+}
+
+enum NaturezaOperacao {
+  VENDA
+  DEVOLUCAO_VENDA
+  COMPRA
+  DEVOLUCAO_COMPRA
+  TRANSFERENCIA
+  REMESSA
+  RETORNO
+  BONIFICACAO
+}
+
 /// Nota Fiscal (NF-e, NFS-e, NFC-e)
 model NotaFiscal {
   id                   String   @id @default(uuid()) @db.Uuid
   tenantId             String   @map("tenant_id") @db.Uuid
-  tipo                 String   // NFE, NFSE, NFCE
+  tipo                 TipoNotaFiscal
   serie                String
   numero               Int
   chaveAcesso          String   @unique // 44 dígitos
-  naturezaOperacao    String   // VENDA, DEVOLUCAO, etc
+  naturezaOperacao     NaturezaOperacao @map("natureza_operacao")
   dataEmissao          DateTime @map("data_emissao")
   dataSaida            DateTime? @map("data_saida")
-  status               String   @default("RASCUNHO") // RASCUNHO, VALIDADA, ENVIADA, AUTORIZADA, REJEITADA, CANCELADA, INUTILIZADA
-  valorTotal           BigInt   @map("valor_total") // Em centavos
-  valorProdutos        BigInt   @map("valor_produtos")
-  valorDesconto        BigInt   @map("valor_desconto") @default(0)
-  valorFrete           BigInt   @map("valor_frete") @default(0)
-  valorSeguro          BigInt   @map("valor_seguro") @default(0)
-  valorOutros          BigInt   @map("valor_outros") @default(0)
-  valorIcms            BigInt   @map("valor_icms") @default(0)
-  valorPis             BigInt   @map("valor_pis") @default(0)
-  valorCofins          BigInt   @map("valor_cofins") @default(0)
-  valorIpi             BigInt   @map("valor_ipi") @default(0)
+  status               StatusNotaFiscal @default(RASCUNHO)
+  valorTotal           Decimal  @map("valor_total") @db.Decimal(19, 2)
+  valorProdutos        Decimal  @map("valor_produtos") @db.Decimal(19, 2)
+  valorDesconto        Decimal  @map("valor_desconto") @default(0) @db.Decimal(19, 2)
+  valorFrete           Decimal  @map("valor_frete") @default(0) @db.Decimal(19, 2)
+  valorSeguro          Decimal  @map("valor_seguro") @default(0) @db.Decimal(19, 2)
+  valorOutros          Decimal  @map("valor_outros") @default(0) @db.Decimal(19, 2)
+  valorIcms            Decimal  @map("valor_icms") @default(0) @db.Decimal(19, 2)
+  valorPis             Decimal  @map("valor_pis") @default(0) @db.Decimal(19, 2)
+  valorCofins          Decimal  @map("valor_cofins") @default(0) @db.Decimal(19, 2)
+  valorIpi             Decimal  @map("valor_ipi") @default(0) @db.Decimal(19, 2)
   xmlEnvio             String?  @map("xml_envio") @db.Text
   xmlRetorno           String?  @map("xml_retorno") @db.Text
   protocolo            String?
@@ -52,12 +84,25 @@ model NotaFiscal {
   itens   ItemNotaFiscal[]
   eventos EventoFiscal[]
 
+  @@unique([tenantId, tipo, serie, numero])
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, tipo])
   @@index([tenantId, dataEmissao])
+  @@index([tenantId, clienteId])
   @@index([chaveAcesso])
   @@map("notas_fiscais")
+}
+
+/// Armazena CPF/CNPJ do destinatário para facilitar indexação
+/// Extraído do JSON 'destinatario' para uso em queries
+model NotaFiscalDest {
+  notaFiscalId        String   @id @map("nota_fiscal_id") @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+  destinatarioCpfCnpj String   @map("destinatario_cpf_cnpj")
+
+  @@index([tenantId, destinatarioCpfCnpj])
+  @@map("notas_fiscais_dest")
 }
 
 /// Item de Nota Fiscal (produtos/serviços)
@@ -70,27 +115,31 @@ model ItemNotaFiscal {
   ncm                 String
   cfop                String
   unidade             String   // UN, KG, L, etc
-  quantidade          BigInt   // Em centavos ou menor unidade
-  valorUnitario       BigInt   @map("valor_unitario")
-  valorTotal          BigInt   @map("valor_total")
-  valorDesconto       BigInt   @map("valor_desconto") @default(0)
+  quantidade          Decimal  @db.Decimal(19, 4)
+  valorUnitario       Decimal  @map("valor_unitario") @db.Decimal(19, 2)
+  valorTotal          Decimal  @map("valor_total") @db.Decimal(19, 2)
+  valorDesconto       Decimal  @map("valor_desconto") @default(0) @db.Decimal(19, 2)
   origemMercadoria    String   @map("origem_mercadoria") // 0-Nacional, 1-Estrangeira direita, 2-Estrangeira adquirida
+  // CST ICMS: valores válidos 00-60 (régimen ICMS)
   cstIcms             String   @map("cst_icms")
-  aliquotaIcms        BigInt   @map("aliquota_icms") // Em centavos de percentual (100 = 1%)
-  baseIcms            BigInt   @map("base_icms") @default(0)
-  valorIcms           BigInt   @map("valor_icms") @default(0)
+  aliquotaIcms        Decimal  @map("aliquota_icms") @db.Decimal(5, 4) // Em percentual (ex: 0.1800 = 18%)
+  baseIcms            Decimal  @map("base_icms") @default(0) @db.Decimal(19, 2)
+  valorIcms           Decimal  @map("valor_icms") @default(0) @db.Decimal(19, 2)
+  // CST PIS: valores válidos 01-08 (régimen PIS)
   cstPis              String   @map("cst_pis")
-  aliquotaPis         BigInt   @map("aliquota_pis") @default(0)
-  basePis             BigInt   @map("base_pis") @default(0)
-  valorPis            BigInt   @map("valor_pis") @default(0)
+  aliquotaPis         Decimal  @map("aliquota_pis") @default(0) @db.Decimal(5, 4)
+  basePis             Decimal  @map("base_pis") @default(0) @db.Decimal(19, 2)
+  valorPis            Decimal  @map("valor_pis") @default(0) @db.Decimal(19, 2)
+  // CST COFINS: valores válidos 01-08 (régimen COFINS)
   cstCofins           String   @map("cst_cofins")
-  aliquotaCofins      BigInt   @map("aliquota_cofins") @default(0)
-  baseCofins          BigInt   @map("base_cofins") @default(0)
-  valorCofins         BigInt   @map("valor_cofins") @default(0)
+  aliquotaCofins      Decimal  @map("aliquota_cofins") @default(0) @db.Decimal(5, 4)
+  baseCofins          Decimal  @map("base_cofins") @default(0) @db.Decimal(19, 2)
+  valorCofins         Decimal  @map("valor_cofins") @default(0) @db.Decimal(19, 2)
+  // CST IPI: valores válidos 00-05 (régimen IPI)
   cstIpi              String?  @map("cst_ipi")
-  aliquotaIpi         BigInt   @map("aliquota_ipi") @default(0)
-  baseIpi             BigInt   @map("base_ipi") @default(0)
-  valorIpi            BigInt   @map("valor_ipi") @default(0)
+  aliquotaIpi         Decimal  @map("aliquota_ipi") @default(0) @db.Decimal(5, 4)
+  baseIpi             Decimal  @map("base_ipi") @default(0) @db.Decimal(19, 2)
+  valorIpi            Decimal  @map("valor_ipi") @default(0) @db.Decimal(19, 2)
   numeroPedido        String?  @map("numero_pedido")
   itemPedido          Int?     @map("item_pedido")
 
@@ -99,20 +148,33 @@ model ItemNotaFiscal {
   @@map("itens_nota_fiscal")
 }
 
+enum TipoEventoFiscal {
+  CANCELAMENTO
+  CARTA_CORRECAO
+  INUTILIZACAO
+}
+
+enum StatusEventoFiscal {
+  PENDENTE
+  ENVIADO
+  AUTORIZADO
+  REJEITADO
+}
+
 /// Evento Fiscal (Cancelamento, Carta de Correção, Inutilização)
 model EventoFiscal {
   id              String   @id @default(uuid()) @db.Uuid
   notaFiscalId    String   @map("nota_fiscal_id") @db.Uuid
   notaFiscal      NotaFiscal @relation(fields: [notaFiscalId], references: [id], onDelete: Cascade)
   tenantId        String   @map("tenant_id") @db.Uuid
-  tipo            String   // CANCELAMENTO, CARTA_CORRECAO, INUTILIZACAO
+  tipo            TipoEventoFiscal
   sequencia       Int      // Sequência do evento
   dataEvento      DateTime @map("data_evento")
   protocolo       String?  // Protocolo retornado pela SEFAZ
   justificativa   String   // Motivo do cancelamento/CC-e
   xmlEnvio        String?  @map("xml_envio") @db.Text
   xmlRetorno      String?  @map("xml_retorno") @db.Text
-  status          String   @default("PENDENTE") // PENDENTE, ENVIADO, AUTORIZADO, REJEITADO
+  status          StatusEventoFiscal @default(PENDENTE)
 
   criadoEm        DateTime @default(now()) @map("criado_em")
 
@@ -121,28 +183,40 @@ model EventoFiscal {
   @@map("eventos_fiscais")
 }
 
+enum RegimeTributario {
+  SIMPLES_NACIONAL
+  LUCRO_PRESUMIDO
+  LUCRO_REAL
+  MEI
+}
+
+enum AmbienteSefaz {
+  PRODUCAO
+  HOMOLOGACAO
+}
+
 /// Configuração Fiscal do Tenant
 model ConfiguracaoFiscal {
   id                     String   @id @default(uuid()) @db.Uuid
   tenantId               String   @unique @map("tenant_id") @db.Uuid
-  regimeTributario      String   // SIMPLES_NACIONAL, LUCRO_PRESUMIDO, LUCRO_REAL, MEI
-  inscricaoEstadual     String?  @map("inscricao_estadual")
-  inscricaoMunicipal    String?  @map("inscricao_municipal")
-  cnae                  String?  // Código CNAE principal
-  crt                   String?  // Código de Regime Tributário
-  ambienteSefaz         String   @default("HOMOLOGACAO") @map("ambiente_sefaz") // PRODUCAO, HOMOLOGACAO
-  certificadoDigital    Bytes?   @map("certificado_digital") // Armazenado criptografado
-  senhaCertificado      String?  @map("senha_certificado") // Armazenado criptografado
-  validadeCertificado   DateTime? @map("validade_certificado")
-  serieNfe              String?  @default("1") @map("serie_nfe")
-  proximoNumeroNfe      Int      @default(1) @map("proximo_numero_nfe")
-  serieNfce             String?  @default("1") @map("serie_nfce")
-  proximoNumeroNfce     Int      @default(1) @map("proximo_numero_nfce")
-  tokenCsc              String?  @map("token_csc") // Token para NFC-e
-  idCsc                 String?  @map("id_csc") // ID CSC para NFC-e
+  regimeTributario       RegimeTributario @map("regime_tributario")
+  inscricaoEstadual      String?  @map("inscricao_estadual")
+  inscricaoMunicipal     String?  @map("inscricao_municipal")
+  cnae                   String?  // Código CNAE principal
+  crt                    String?  // Código de Regime Tributário
+  ambienteSefaz          AmbienteSefaz @default(HOMOLOGACAO) @map("ambiente_sefaz")
+  certificadoDigital     Bytes?   @map("certificado_digital") // Armazenado criptografado
+  senhaCertificado       String?  @map("senha_certificado") // Armazenado criptografado
+  validadeCertificado    DateTime? @map("validade_certificado")
+  serieNfe               String?  @default("1") @map("serie_nfe")
+  proximoNumeroNfe       Int      @default(1) @map("proximo_numero_nfe")
+  serieNfce              String?  @default("1") @map("serie_nfce")
+  proximoNumeroNfce      Int      @default(1) @map("proximo_numero_nfce")
+  tokenCsc               String?  @map("token_csc") // Token para NFC-e
+  idCsc                  String?  @map("id_csc") // ID CSC para NFC-e
 
-  criadoEm              DateTime @default(now()) @map("criado_em")
-  atualizadoEm          DateTime @updatedAt @map("atualizado_em")
+  criadoEm               DateTime @default(now()) @map("criado_em")
+  atualizadoEm           DateTime @updatedAt @map("atualizado_em")
 
   @@map("configuracoes_fiscais")
 }
@@ -156,16 +230,16 @@ model RegraFiscal {
   ncm               String   // Código NCM (8 dígitos)
   cfop              String   // Código CFOP
   cstIcms           String   @map("cst_icms")
-  aliquotaIcms      BigInt   @map("aliquota_icms") // Em centavos de percentual
+  aliquotaIcms      Decimal  @map("aliquota_icms") @db.Decimal(5, 4) // Em percentual (ex: 0.1800 = 18%)
   cstPis            String   @map("cst_pis")
-  aliquotaPis       BigInt   @map("aliquota_pis")
+  aliquotaPis       Decimal  @map("aliquota_pis") @db.Decimal(5, 4)
   cstCofins         String   @map("cst_cofins")
-  aliquotaCofins    BigInt   @map("aliquota_cofins")
+  aliquotaCofins    Decimal  @map("aliquota_cofins") @db.Decimal(5, 4)
   cstIpi            String?  @map("cst_ipi")
-  aliquotaIpi       BigInt   @map("aliquota_ipi") @default(0)
+  aliquotaIpi       Decimal  @map("aliquota_ipi") @default(0) @db.Decimal(5, 4)
   ufOrigem          String?  @map("uf_origem") // Se NULL, aplica para todos
   ufDestino         String?  @map("uf_destino")
-  regimeTributario  String?  @map("regime_tributario") // Se NULL, aplica para todos
+  regimeTributario  RegimeTributario? @map("regime_tributario") // Se NULL, aplica para todos
   ativa             Boolean  @default(true)
 
   criadoEm          DateTime @default(now()) @map("criado_em")

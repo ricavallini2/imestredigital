@@ -32,7 +32,7 @@ async function main() {
       origem: 'SITE',
       score: 85,
       totalCompras: 3,
-      valorTotalCompras: 113000, // R$ 1130,00
+      valorTotalCompras: '1130.00', // R$ 1130,00
       ultimaCompra: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
       tags: ['recorrente', 'tecnologia'],
     },
@@ -55,7 +55,7 @@ async function main() {
       origem: 'MARKETPLACE',
       score: 92,
       totalCompras: 8,
-      valorTotalCompras: 520000, // R$ 5200,00
+      valorTotalCompras: '5200.00', // R$ 5200,00
       ultimaCompra: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       tags: ['vip', 'b2b', 'marketplace'],
     },
@@ -77,7 +77,7 @@ async function main() {
       origem: 'INDICACAO',
       score: 70,
       totalCompras: 1,
-      valorTotalCompras: 53000, // R$ 530,00
+      valorTotalCompras: '530.00', // R$ 530,00
       ultimaCompra: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
       tags: ['novo'],
     },
@@ -118,7 +118,7 @@ async function main() {
       origem: 'MANUAL',
       score: 45,
       totalCompras: 2,
-      valorTotalCompras: 89900, // R$ 899,00
+      valorTotalCompras: '899.00', // R$ 899,00
       ultimaCompra: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
       tags: ['b2b', 'inativo'],
     },

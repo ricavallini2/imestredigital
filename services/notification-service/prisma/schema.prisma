@@ -15,6 +15,40 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ═══════════════════════════════════════════════════════════════
+// Enums
+// ═══════════════════════════════════════════════════════════════
+
+enum TipoNotificacao {
+  EMAIL
+  SMS
+  PUSH
+  WHATSAPP
+  WEBHOOK
+}
+
+enum StatusNotificacao {
+  PENDENTE
+  ENVIADA
+  ENTREGUE
+  FALHA
+  LIDA
+}
+
+enum CanalNotificacao {
+  EMAIL
+  SMS
+  PUSH
+  WHATSAPP
+}
+
+enum PrioridadeNotificacao {
+  BAIXA
+  NORMAL
+  ALTA
+  URGENTE
+}
+
 // ─── Notificação ──────────────────────────────────────────────
 
 /// Notificação enviada ou a ser enviada a um usuário.
@@ -24,22 +58,23 @@ model Notificacao {
   tenantId            String    @map("tenant_id") @db.Uuid
 
   // Tipo e canal de entrega
-  tipo                String    // EMAIL, PUSH, SMS, WEBHOOK, INTERNA
+  tipo                TipoNotificacao
   titulo              String
   mensagem            String
-  canal               String?   // email, firebase, twilio, etc
+  canal               CanalNotificacao?
 
   // Destinatário
   destinatarioId      String?   @map("destinatario_id") @db.Uuid  // ID do usuário
   destinatarioEmail   String?   @map("destinatario_email")
 
   // Status de entrega
-  status              String    @default("PENDENTE")  // PENDENTE, ENVIANDO, ENVIADA, FALHA, LIDA
-  prioridade          String    @default("NORMAL")    // BAIXA, NORMAL, ALTA, URGENTE
+  status              StatusNotificacao @default(PENDENTE)
+  prioridade          PrioridadeNotificacao @default(NORMAL)
 
   // Metadados e rastreamento
   metadata            Json?     @default("{}")        // Dados customizados por tipo
   tentativas          Int       @default(0)
+  maxTentativas       Int       @default(3) @map("max_tentativas")
   ultimaTentativa     DateTime? @map("ultima_tentativa")
   enviadaEm           DateTime? @map("enviada_em")
   lidaEm              DateTime? @map("lida_em")
@@ -50,10 +85,20 @@ model Notificacao {
   atualizadoEm        DateTime  @updatedAt @map("atualizado_em")
 
   @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, tipo])
   @@index([destinatarioId])
   @@index([status])
   @@index([tipo])
   @@map("notificacoes")
+}
+
+enum TipoTemplateNotificacao {
+  EMAIL
+  PUSH
+  SMS
+  WHATSAPP
+  INTERNA
 }
 
 // ─── Template de Notificação ──────────────────────────────────
@@ -69,7 +114,7 @@ model TemplateNotificacao {
   slug        String    // Ex: "boas-vindas", "pedido-confirmado"
 
   // Conteúdo
-  tipo        String    // EMAIL, PUSH, SMS, INTERNA
+  tipo        TipoTemplateNotificacao
   assunto     String?   // Para emails
   conteudo    String    // Template Handlebars
   variaveis   Json      @default("[]")  // Array de nomes de variáveis esperadas
@@ -108,6 +153,7 @@ model ConfiguracaoWebhook {
   // Monitoramento
   ultimoEnvio           DateTime? @map("ultimo_envio")
   falhasConsecutivas    Int       @default(0) @map("falhas_consecutivas")
+  maxTentativas         Int       @default(3) @map("max_tentativas")
 
   // Timestamps
   criadoEm              DateTime  @default(now()) @map("criado_em")
@@ -157,7 +203,7 @@ model PreferenciaNotificacao {
   usuarioId         String    @map("usuario_id") @db.Uuid
 
   // Preferência
-  canal             String    // email, push, sms, interna
+  canal             CanalNotificacao
   tipoEvento        String    @map("tipo_evento")  // pedido.criado, estoque.baixo, etc
   habilitado        Boolean   @default(true)
 
@@ -167,6 +213,7 @@ model PreferenciaNotificacao {
 
   @@unique([tenantId, usuarioId, canal, tipoEvento])
   @@index([tenantId])
+  @@index([tenantId, usuarioId])
   @@index([usuarioId])
   @@map("preferencia_notificacoes")
 }

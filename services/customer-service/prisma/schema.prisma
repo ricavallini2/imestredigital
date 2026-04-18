@@ -19,8 +19,8 @@ datasource db {
 // Pode ser do tipo PESSOA_FISICA (cpf, dataNascimento, genero) ou
 // PESSOA_JURIDICA (cnpj, razaoSocial, inscrição estadual).
 model Cliente {
-  id                    String                @id @default(cuid())
-  tenantId              String                // ID da empresa/tenant
+  id                    String                @id @default(uuid()) @db.Uuid
+  tenantId              String                @db.Uuid // ID da empresa/tenant
 
   // Tipo de cliente
   tipo                  TipoCliente           // PESSOA_FISICA ou PESSOA_JURIDICA
@@ -57,7 +57,10 @@ model Cliente {
   // Histórico de vendas
   ultimaCompra          DateTime?             // Data da última compra
   totalCompras          Int                   @default(0) // Total de pedidos
-  valorTotalCompras     Int                   @default(0) // Valor total em centavos
+  valorTotalCompras     Decimal(19,2)         @default(0) // Valor total em centavos
+
+  // Soft delete
+  deletadoEm            DateTime?             // Data de exclusão lógica
 
   // Relacionamentos
   enderecos             EnderecoCliente[]
@@ -75,6 +78,10 @@ model Cliente {
   @@unique([tenantId, email], map: "uk_cliente_tenant_email") // Email único por tenant
   @@index([tenantId])
   @@index([tenantId, status])
+  @@index([tenantId, tipo])
+  @@index([tenantId, email])
+  @@index([tenantId, cpf])
+  @@index([tenantId, cnpj])
   @@index([tenantId, origem])
   @@index([tenantId, criadoEm])
 }
@@ -83,11 +90,11 @@ model Cliente {
 // Um cliente pode ter múltiplos endereços marcados como
 // padrão, entrega ou cobrança.
 model EnderecoCliente {
-  id                    String                @id @default(cuid())
-  tenantId              String
+  id                    String                @id @default(uuid()) @db.Uuid
+  tenantId              String                @db.Uuid
 
   // Relacionamento com cliente
-  clienteId             String
+  clienteId             String                @db.Uuid
   cliente               Cliente               @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
   // Tipo de endereço
@@ -116,11 +123,11 @@ model EnderecoCliente {
 // Permite armazenar múltiplos pontos de contato (pessoas específicas)
 // dentro da empresa do cliente.
 model ContatoCliente {
-  id                    String                @id @default(cuid())
-  tenantId              String
+  id                    String                @id @default(uuid()) @db.Uuid
+  tenantId              String                @db.Uuid
 
   // Relacionamento com cliente
-  clienteId             String
+  clienteId             String                @db.Uuid
   cliente               Cliente               @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
   // Dados do contato
@@ -144,11 +151,11 @@ model ContatoCliente {
 // Registra todas as interações: vendas, atendimentos, reclamações,
 // devoluções, emails, mensagens, etc.
 model InteracaoCliente {
-  id                    String                @id @default(cuid())
-  tenantId              String
+  id                    String                @id @default(uuid()) @db.Uuid
+  tenantId              String                @db.Uuid
 
   // Relacionamento com cliente
-  clienteId             String
+  clienteId             String                @db.Uuid
   cliente               Cliente               @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
   // Tipo e canal
@@ -161,8 +168,8 @@ model InteracaoCliente {
 
   // Contexto
   data                  DateTime              @default(now()) // Data da interação
-  usuarioId             String                // ID do usuário que registrou
-  pedidoId              String?               // ID do pedido relacionado (se houver)
+  usuarioId             String                @db.Uuid // ID do usuário que registrou
+  pedidoId              String?               @db.Uuid // ID do pedido relacionado (se houver)
 
   // Metadados adicionais
   metadata              Json?                 // Dados adicionais em JSON
@@ -179,8 +186,8 @@ model InteracaoCliente {
 // Permite criar segmentos dinâmicos baseados em regras
 // (ex: "Clientes que gastaram mais de R$10k nos últimos 30 dias").
 model SegmentoCliente {
-  id                    String                @id @default(cuid())
-  tenantId              String
+  id                    String                @id @default(uuid()) @db.Uuid
+  tenantId              String                @db.Uuid
 
   // Identificação
   nome                  String                // Nome do segmento
@@ -208,13 +215,13 @@ model SegmentoCliente {
 // ClienteSegmento - Tabela associativa entre Cliente e SegmentoCliente
 // Associa clientes aos segmentos dos quais fazem parte.
 model ClienteSegmento {
-  id                    String                @id @default(cuid())
+  id                    String                @id @default(uuid()) @db.Uuid
 
   // Relacionamentos
-  clienteId             String
+  clienteId             String                @db.Uuid
   cliente               Cliente               @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
-  segmentoId            String
+  segmentoId            String                @db.Uuid
   segmento              SegmentoCliente       @relation(fields: [segmentoId], references: [id], onDelete: Cascade)
 
   // Data de adição ao segmento
@@ -228,8 +235,8 @@ model ClienteSegmento {
 // Controla o processo de importação de clientes a partir de
 // arquivos CSV ou XLSX.
 model ImportacaoCliente {
-  id                    String                @id @default(cuid())
-  tenantId              String
+  id                    String                @id @default(uuid()) @db.Uuid
+  tenantId              String                @db.Uuid
 
   // Arquivo
   arquivo               String                // Caminho ou nome do arquivo
@@ -247,7 +254,7 @@ model ImportacaoCliente {
   logErros              Json?                 // Array de erros: [{ linha: 2, campo: "email", erro: "email inválido" }]
 
   // Contexto
-  usuarioId             String                // Usuário que iniciou a importação
+  usuarioId             String                @db.Uuid // Usuário que iniciou a importação
 
   // Auditoria
   criadoEm              DateTime              @default(now())

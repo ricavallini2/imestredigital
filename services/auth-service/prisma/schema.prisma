@@ -16,6 +16,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Enums ────────────────────────────────────────────────
+
+enum CargoUsuario {
+  ADMIN
+  GERENTE
+  OPERADOR
+  VISUALIZADOR
+}
+
+enum StatusUsuario {
+  ATIVO
+  INATIVO
+  BLOQUEADO
+  PENDENTE
+}
+
+enum PlanoTenant {
+  STARTER
+  PROFISSIONAL
+  ENTERPRISE
+}
+
+enum StatusTenant {
+  ATIVO
+  INATIVO
+  SUSPENSO
+  TRIAL
+}
+
 // ─── Tenant (Empresa) ─────────────────────────────────────
 
 /// Empresa/organização cadastrada no sistema.
@@ -30,8 +59,8 @@ model Tenant {
   inscricaoEstadual String?  @map("inscricao_estadual")
 
   // Plano e limites
-  plano             String   @default("starter") // starter, growth, pro, enterprise
-  status            String   @default("ativo")   // ativo, suspenso, cancelado
+  plano             PlanoTenant @default(STARTER)
+  status            StatusTenant @default(ATIVO)
   limiteUsuarios    Int      @default(1) @map("limite_usuarios")
   limitePedidosMes  Int      @default(500) @map("limite_pedidos_mes")
 
@@ -58,12 +87,12 @@ model Usuario {
   tenant          Tenant    @relation(fields: [tenantId], references: [id])
 
   nome            String
-  email           String    @unique
+  email           String
   senhaHash       String    @map("senha_hash")
 
   // Permissões
-  cargo           String    @default("operador") // admin, gerente, operador, visualizador
-  status          String    @default("ativo")     // ativo, pendente, inativo, removido
+  cargo           CargoUsuario @default(OPERADOR)
+  status          StatusUsuario @default(ATIVO)
 
   // Verificação e segurança
   emailVerificado Boolean   @default(false) @map("email_verificado")
@@ -82,6 +111,7 @@ model Usuario {
   // Relacionamentos
   refreshTokens   RefreshToken[]
 
+  @@unique([tenantId, email])
   @@index([tenantId])
   @@index([email])
   @@map("usuarios")
@@ -105,5 +135,6 @@ model RefreshToken {
 
   @@index([usuarioId])
   @@index([token])
+  @@index([expiraEm])
   @@map("refresh_tokens")
 }

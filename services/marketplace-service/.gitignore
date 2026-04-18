@@ -42,7 +42,7 @@ Thumbs.db
 .env.*.local
 
 # Generated files
-*.prisma
+# Nota: NÃO ignorar *.prisma — schema.prisma precisa estar no repositório
 
 # Temporary files
 *.tmp

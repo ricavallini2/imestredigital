@@ -62,7 +62,7 @@ async function main() {
   const diasAtras = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000);
   const diasAFrente = (n: number) => new Date(Date.now() + n * 24 * 60 * 60 * 1000);
 
-  const lancamentos = [
+  const lancamentos: Parameters<typeof prisma.lancamento.create>[0]['data'][] = [
     // RECEITAS (pagas)
     {
       tenantId: TENANT_ID,
@@ -88,7 +88,7 @@ async function main() {
       dataVencimento: diasAtras(15),
       dataPagamento: diasAtras(14),
       status: 'PAGO',
-      formaPagamento: 'TED',
+      formaPagamento: 'TRANSFERENCIA',
     },
     {
       tenantId: TENANT_ID,
@@ -154,7 +154,7 @@ async function main() {
       dataVencimento: diasAtras(10),
       dataPagamento: diasAtras(9),
       status: 'PAGO',
-      formaPagamento: 'TED',
+      formaPagamento: 'TRANSFERENCIA',
     },
     {
       tenantId: TENANT_ID,

@@ -9,12 +9,50 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ═══════════════════════════════════════════════════════════════
+// Enums
+// ═══════════════════════════════════════════════════════════════
+
+enum PapelMensagem {
+  USUARIO
+  ASSISTENTE
+  SISTEMA
+}
+
+enum TipoInsight {
+  ALERTA
+  OPORTUNIDADE
+  TENDENCIA
+  ANOMALIA
+}
+
+enum StatusInsight {
+  ATIVO
+  LIDO
+  DESCARTADO
+  IMPLEMENTADO
+}
+
+enum TipoSugestao {
+  PRECO
+  ESTOQUE
+  MARKETING
+  OPERACIONAL
+}
+
+enum StatusSugestao {
+  PENDENTE
+  ACEITA
+  REJEITADA
+  IMPLEMENTADA
+}
+
 // Modelo de Conversa com IA
 // Armazena histórico de conversas do usuário com o iMestreAI assistente
 model ConversaIA {
-  id           String       @id @default(cuid())
-  tenantId     String       // ID do tenant (empresa)
-  usuarioId    String       // ID do usuário que iniciou a conversa
+  id           String       @id @default(uuid()) @db.Uuid
+  tenantId     String       @db.Uuid
+  usuarioId    String       @db.Uuid
   titulo       String       // Título/tópico da conversa
 
   // Contexto da conversa em formato JSON
@@ -23,22 +61,24 @@ model ConversaIA {
 
   mensagens    MensagemIA[] // Histórico de mensagens
 
-  criadoEm     DateTime     @default(now())
-  atualizadoEm DateTime     @updatedAt
+  criadoEm     DateTime     @default(now()) @map("criado_em")
+  atualizadoEm DateTime     @updatedAt @map("atualizado_em")
 
+  @@index([tenantId])
   @@index([tenantId, usuarioId])
   @@index([tenantId, criadoEm])
+  @@map("conversas_ia")
 }
 
 // Modelo de Mensagem dentro de uma Conversa
 // Armazena cada mensagem do usuário ou do assistente
 model MensagemIA {
-  id         String     @id @default(cuid())
-  conversaId String
+  id         String     @id @default(uuid()) @db.Uuid
+  conversaId String     @db.Uuid
   conversa   ConversaIA @relation(fields: [conversaId], references: [id], onDelete: Cascade)
 
   // Quem enviou: USUARIO, ASSISTENTE ou SISTEMA
-  papel      String     // "USUARIO" | "ASSISTENTE" | "SISTEMA"
+  papel      PapelMensagem
 
   // Conteúdo da mensagem
   conteudo   String
@@ -47,26 +87,27 @@ model MensagemIA {
   // Ex: { tokensUsados: 150, modelo: "gpt-4", tempoRespostaMs: 1250, custo: 0.0045 }
   metadados  Json       @default("{}")
 
-  criadoEm   DateTime   @default(now())
+  criadoEm   DateTime   @default(now()) @map("criado_em")
 
   @@index([conversaId])
   @@index([papel])
+  @@map("mensagens_ia")
 }
 
 // Modelo de Insights gerados automaticamente
 // Análises e sugestões inteligentes sobre negócio do tenant
 model InsightIA {
-  id             String   @id @default(cuid())
-  tenantId       String   // ID do tenant
+  id             String   @id @default(uuid()) @db.Uuid
+  tenantId       String   @db.Uuid
 
-  // Tipo de insight: VENDA, ESTOQUE, FINANCEIRO, FISCAL, MARKETPLACE
-  tipo           String   // "VENDA" | "ESTOQUE" | "FINANCEIRO" | "FISCAL" | "MARKETPLACE"
+  // Tipo de insight: ALERTA, OPORTUNIDADE, TENDENCIA, ANOMALIA
+  tipo           TipoInsight
 
   titulo         String   // Ex: "Produto com estoque crítico"
   descricao      String   @db.Text // Descrição detalhada
 
-  // Prioridade da ação sugerida
-  prioridade     String   @default("MEDIA") // "ALTA" | "MEDIA" | "BAIXA"
+  // Status do insight
+  status         StatusInsight @default(ATIVO)
 
   // Dados associados ao insight
   // Ex: { produtoId: "abc", estoque: 2, vendaMedia: 50 }
@@ -75,23 +116,22 @@ model InsightIA {
   // Ação sugerida para o usuário
   acaoSugerida   String?  @db.Text
 
-  // Se foi visualizado/lido pelo usuário
-  visualizado    Boolean  @default(false)
+  criadoEm       DateTime @default(now()) @map("criado_em")
+  lidoEm         DateTime? @map("lido_em")
 
-  criadoEm       DateTime @default(now())
-
+  @@index([tenantId])
   @@index([tenantId, tipo])
-  @@index([tenantId, visualizado])
-  @@index([tenantId, prioridade])
+  @@index([tenantId, status])
   @@index([criadoEm])
+  @@map("insights_ia")
 }
 
 // Modelo de Previsão de Demanda
 // Previsões de vendas futuras baseadas em histórico
 model PrevisaoDemanda {
-  id              String   @id @default(cuid())
-  tenantId        String   // ID do tenant
-  produtoId       String   // ID do produto sendo previsto
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @db.Uuid
+  produtoId       String   @db.Uuid // ID do produto sendo previsto
 
   // Período para o qual a previsão foi feita
   periodo         DateTime // Data de início do período previsto
@@ -109,21 +149,26 @@ model PrevisaoDemanda {
   // Ex: { vendas30dias: [10, 15, 12, ...], indicesSazonalidade: {...} }
   dadosEntrada    Json     @default("{}")
 
-  criadoEm        DateTime @default(now())
+  criadoEm        DateTime @default(now()) @map("criado_em")
 
+  @@index([tenantId])
   @@index([tenantId, produtoId])
   @@index([tenantId, periodo])
   @@unique([tenantId, produtoId, periodo])
+  @@map("previsoes_demanda")
 }
 
 // Modelo de Sugestões geradas pela IA
 // Sugestões de preço, estoque, classificação, descrição de produtos, etc
 model SugestaoIA {
-  id          String   @id @default(cuid())
-  tenantId    String   // ID do tenant
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @db.Uuid
 
-  // Tipo de sugestão: PRECO, ESTOQUE, CLASSIFICACAO_FISCAL, RESPOSTA_MARKETPLACE, DESCRICAO_PRODUTO
-  tipo        String   // "PRECO" | "ESTOQUE" | "CLASSIFICACAO_FISCAL" | "RESPOSTA_MARKETPLACE" | "DESCRICAO_PRODUTO"
+  // Tipo de sugestão: PRECO, ESTOQUE, MARKETING, OPERACIONAL
+  tipo        TipoSugestao
+
+  // Status da sugestão
+  status      StatusSugestao @default(PENDENTE)
 
   // Contexto da sugestão
   // Ex: { produtoId: "abc", perguntaId: "xyz" }
@@ -135,12 +180,12 @@ model SugestaoIA {
   // Confiança da sugestão (0 a 1)
   confianca   Decimal  @db.Decimal(5, 4)
 
-  // Se foi aceita pelo usuário
-  aceita      Boolean  @default(false)
+  criadoEm    DateTime @default(now()) @map("criado_em")
+  respondidoEm DateTime? @map("respondido_em")
 
-  criadoEm    DateTime @default(now())
-
+  @@index([tenantId])
   @@index([tenantId, tipo])
-  @@index([tenantId, aceita])
+  @@index([tenantId, status])
   @@index([criadoEm])
+  @@map("sugestoes_ia")
 }
