@@ -23,7 +23,7 @@ export class HealthController {
   @HealthCheck()
   verificarSaude() {
     return this.saude.check([
-      () => this.prismaIndicador.pingDb(this.prisma),
+      () => (this.prismaIndicador as any).pingDb(this.prisma),
     ]);
   }
 }

@@ -3,8 +3,8 @@
  * Publica eventos fiscais para outros serviços consumirem.
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ClientKafka, Inject } from '@nestjs/microservices';
+import { Injectable, Logger, Inject } from '@nestjs/common';
+import { ClientKafka } from '@nestjs/microservices';
 import { TOPICOS_KAFKA } from '../config/kafka.config';
 
 @Injectable()

@@ -107,8 +107,8 @@ async function bootstrap() {
   const port = process.env.PORT || 3004;
   await app.listen(port);
 
-  logger.info(`💰 Fiscal Service rodando na porta ${port}`);
-  logger.info(`📚 Documentação disponível em http://localhost:${port}/api/docs`);
+  console.log(`💰 Fiscal Service rodando na porta ${port}`);
+  console.log(`📚 Documentação disponível em http://localhost:${port}/api/docs`);
 }
 
 bootstrap();
