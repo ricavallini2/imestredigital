@@ -5,6 +5,7 @@
     "experimentalDecorators": true,
     "target": "ES2022",
     "module": "commonjs",
+    "moduleResolution": "node16",
     "strictPropertyInitialization": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,

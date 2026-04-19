@@ -4,7 +4,17 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "types": ["node"],
-    "lib": ["ES2022"]
+    "lib": ["ES2022"],
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "skipLibCheck": true,
+    "composite": false,
+    "declaration": true,
+    "declarationMap": true
   },
   "include": ["src"]
 }
