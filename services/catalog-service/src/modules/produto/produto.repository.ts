@@ -20,7 +20,7 @@ export class ProdutoRepository {
   async criar(tenantId: string, dto: CriarProdutoDto) {
     return this.prisma.produto.create({
       data: {
-        ...dto,
+        ...(dto as any),
         tenantId,
       },
       include: {
@@ -123,7 +123,7 @@ export class ProdutoRepository {
   async remover(tenantId: string, id: string) {
     return this.prisma.produto.updateMany({
       where: { id, tenantId },
-      data: { status: 'descontinuado' },
+      data: { status: 'INATIVO' as any },
     });
   }
 }

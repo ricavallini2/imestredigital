@@ -145,7 +145,7 @@ export class EstoqueRepository {
   async criarReserva(tenantId: string, produtoId: string, quantidade: number, pedidoId: string) {
     return this.prisma.$transaction([
       this.prisma.reservaEstoque.create({
-        data: { tenantId, produtoId, quantidade, pedidoId, status: 'pendente' },
+        data: { tenantId, produtoId, quantidade, pedidoId, status: 'PENDENTE' as any },
       }),
       this.prisma.saldoEstoque.updateMany({
         where: { tenantId, produtoId },
@@ -157,14 +157,14 @@ export class EstoqueRepository {
   /** Confirma reservas (baixa definitiva) */
   async confirmarReservas(tenantId: string, pedidoId: string) {
     const reservas = await this.prisma.reservaEstoque.findMany({
-      where: { tenantId, pedidoId, status: 'pendente' },
+      where: { tenantId, pedidoId, status: 'PENDENTE' as any },
     });
 
     for (const reserva of reservas) {
       await this.prisma.$transaction([
         this.prisma.reservaEstoque.update({
           where: { id: reserva.id },
-          data: { status: 'confirmada' },
+          data: { status: 'CONFIRMADA' as any },
         }),
         this.prisma.saldoEstoque.updateMany({
           where: { tenantId, produtoId: reserva.produtoId },
@@ -180,14 +180,14 @@ export class EstoqueRepository {
   /** Cancela reservas e libera estoque */
   async cancelarReservas(tenantId: string, pedidoId: string) {
     const reservas = await this.prisma.reservaEstoque.findMany({
-      where: { tenantId, pedidoId, status: 'pendente' },
+      where: { tenantId, pedidoId, status: 'PENDENTE' as any },
     });
 
     for (const reserva of reservas) {
       await this.prisma.$transaction([
         this.prisma.reservaEstoque.update({
           where: { id: reserva.id },
-          data: { status: 'cancelada' },
+          data: { status: 'CANCELADA' as any },
         }),
         this.prisma.saldoEstoque.updateMany({
           where: { tenantId, produtoId: reserva.produtoId },
@@ -224,7 +224,7 @@ export class EstoqueRepository {
     observacao?: string;
   }) {
     return this.prisma.movimentacao.create({
-      data: { tenantId, ...dados },
+      data: { tenantId, ...dados, tipo: dados.tipo as any },
     });
   }
 }

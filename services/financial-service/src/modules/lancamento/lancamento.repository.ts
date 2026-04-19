@@ -45,7 +45,7 @@ export class LancamentoRepository {
   async criar(dados: CriarLancamentoInput) {
     return this.prisma.lancamento.create({
       data: {
-        ...dados,
+        ...(dados as any),
       },
       include: {
         conta: true,
