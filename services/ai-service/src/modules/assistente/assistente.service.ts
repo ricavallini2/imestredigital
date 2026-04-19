@@ -99,7 +99,7 @@ export class AssistenteService {
     const historico = await this.repository.obterUltimasMensagens(conversaId, 10);
 
     // 3. Construir system prompt
-    const contexto = { ...conversa.contexto, ...dados.contextoExtra };
+    const contexto = { ...(conversa.contexto as Record<string, any>), ...dados.contextoExtra };
     const systemPrompt = gerarSystemPrompt(contexto);
 
     // 4. Preparar mensagens para LLM

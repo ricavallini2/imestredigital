@@ -14,20 +14,19 @@ export class InsightsRepository {
    */
   async criarInsight(dados: {
     tenantId: string;
-    tipo: 'VENDA' | 'ESTOQUE' | 'FINANCEIRO' | 'FISCAL' | 'MARKETPLACE';
+    tipo: string;
     titulo: string;
     descricao: string;
-    prioridade?: 'ALTA' | 'MEDIA' | 'BAIXA';
+    prioridade?: string;
     dados?: Record<string, any>;
     acaoSugerida?: string;
   }) {
     return this.prisma.insightIA.create({
       data: {
         tenantId: dados.tenantId,
-        tipo: dados.tipo,
+        tipo: dados.tipo as any,
         titulo: dados.titulo,
         descricao: dados.descricao,
-        prioridade: dados.prioridade || 'MEDIA',
         dados: dados.dados || {},
         acaoSugerida: dados.acaoSugerida,
       },
@@ -53,21 +52,14 @@ export class InsightsRepository {
       where.tipo = filtros.tipo;
     }
 
-    if (filtros?.prioridade) {
-      where.prioridade = filtros.prioridade;
-    }
-
     if (filtros?.apenasNaoLidos) {
-      where.visualizado = false;
+      where.status = 'ATIVO';
     }
 
     const [insights, total] = await Promise.all([
       this.prisma.insightIA.findMany({
         where,
-        orderBy: [
-          { prioridade: 'desc' },
-          { criadoEm: 'desc' },
-        ],
+        orderBy: { criadoEm: 'desc' },
         take: filtros?.limite || 20,
         skip: filtros?.offset || 0,
       }),
@@ -92,7 +84,10 @@ export class InsightsRepository {
   async marcarVisualizado(insightId: string) {
     return this.prisma.insightIA.update({
       where: { id: insightId },
-      data: { visualizado: true },
+      data: {
+        status: 'LIDO' as any,
+        lidoEm: new Date(),
+      },
     });
   }
 
@@ -103,7 +98,7 @@ export class InsightsRepository {
     return this.prisma.insightIA.count({
       where: {
         tenantId,
-        visualizado: false,
+        status: 'ATIVO' as any,
       },
     });
   }

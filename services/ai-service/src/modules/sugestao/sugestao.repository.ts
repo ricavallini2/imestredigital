@@ -14,12 +14,7 @@ export class SugestaoRepository {
    */
   async criarSugestao(dados: {
     tenantId: string;
-    tipo:
-      | 'PRECO'
-      | 'ESTOQUE'
-      | 'CLASSIFICACAO_FISCAL'
-      | 'RESPOSTA_MARKETPLACE'
-      | 'DESCRICAO_PRODUTO';
+    tipo: string;
     contexto: Record<string, any>;
     sugestao: string;
     confianca: number;
@@ -27,7 +22,7 @@ export class SugestaoRepository {
     return this.prisma.sugestaoIA.create({
       data: {
         tenantId: dados.tenantId,
-        tipo: dados.tipo,
+        tipo: dados.tipo as any,
         contexto: dados.contexto,
         sugestao: dados.sugestao,
         confianca: dados.confianca,
@@ -54,7 +49,7 @@ export class SugestaoRepository {
     }
 
     if (filtros?.aceita !== undefined) {
-      where.aceita = filtros.aceita;
+      where.status = filtros.aceita ? 'ACEITA' : 'PENDENTE';
     }
 
     const [sugestoes, total] = await Promise.all([
@@ -76,7 +71,10 @@ export class SugestaoRepository {
   async aceitarSugestao(sugestaoId: string) {
     return this.prisma.sugestaoIA.update({
       where: { id: sugestaoId },
-      data: { aceita: true },
+      data: {
+        status: 'ACEITA' as any,
+        respondidoEm: new Date(),
+      },
     });
   }
 }
