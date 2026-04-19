@@ -3,21 +3,6 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"],
-      "@config/*": ["src/config/*"],
-      "@modules/*": ["src/modules/*"],
-      "@common/*": ["src/common/*"],
-      "@decorators/*": ["src/decorators/*"],
-      "@dtos/*": ["src/dtos/*"],
-      "@filters/*": ["src/filters/*"],
-      "@guards/*": ["src/guards/*"],
-      "@interceptors/*": ["src/interceptors/*"],
-      "@interfaces/*": ["src/interfaces/*"],
-      "@middlewares/*": ["src/middlewares/*"],
-      "@pipes/*": ["src/pipes/*"]
-    },
     "strict": false,
     "noImplicitAny": false,
     "strictNullChecks": false,
@@ -32,8 +17,7 @@
     "declarationMap": false,
     "sourceMap": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node"
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
