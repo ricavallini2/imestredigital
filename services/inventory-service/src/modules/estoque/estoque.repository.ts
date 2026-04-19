@@ -224,7 +224,7 @@ export class EstoqueRepository {
     observacao?: string;
   }) {
     return this.prisma.movimentacao.create({
-      data: { tenantId, ...dados, tipo: dados.tipo as any },
+      data: { tenantId, ...dados, tipo: dados.tipo as any } as any,
     });
   }
 }

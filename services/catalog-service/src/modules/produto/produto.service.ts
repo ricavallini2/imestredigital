@@ -132,7 +132,7 @@ export class ProdutoService {
     );
 
     // Se o preço mudou, publica evento específico de preço
-    if (dto.precoVenda && dto.precoVenda !== produtoAtual.precoVenda) {
+    if (dto.precoVenda && dto.precoVenda !== (produtoAtual.precoVenda as any)) {
       await this.producer.publicar(
         TOPICOS_CATALOGO.PRECO_ALTERADO,
         tenantId,
