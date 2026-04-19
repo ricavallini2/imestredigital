@@ -31,9 +31,8 @@ export class PedidoService {
   private transicoePermitidas: Record<string, string[]> = {
     RASCUNHO: ['PENDENTE', 'CANCELADO'],
     PENDENTE: ['CONFIRMADO', 'CANCELADO'],
-    CONFIRMADO: ['SEPARANDO', 'CANCELADO'],
-    SEPARANDO: ['SEPARADO', 'CANCELADO'],
-    SEPARADO: ['FATURADO', 'CANCELADO'],
+    CONFIRMADO: ['EM_SEPARACAO', 'CANCELADO'],
+    EM_SEPARACAO: ['FATURADO', 'CANCELADO'],
     FATURADO: ['ENVIADO', 'CANCELADO'],
     ENVIADO: ['ENTREGUE', 'CANCELADO'],
     ENTREGUE: ['DEVOLVIDO'],
@@ -68,7 +67,7 @@ export class PedidoService {
 
     // Criar pedido
     const pedido = await this.pedidoRepository.criar(tenantId, {
-      origem: dto.origem || 'MANUAL',
+      origem: dto.origem || 'OUTRO',
       canalOrigem: dto.canalOrigem,
       pedidoExternoId: dto.pedidoExternoId,
       clienteId: dto.clienteId,
@@ -190,19 +189,19 @@ export class PedidoService {
    */
   async iniciarSeparacao(tenantId: string, pedidoId: string) {
     const pedido = await this.validarExistencia(tenantId, pedidoId);
-    this.validarTransicao(pedido.status, 'SEPARANDO');
+    this.validarTransicao(pedido.status, 'EM_SEPARACAO');
 
     const pedidoAtualizado = await this.pedidoRepository.atualizarStatus(
       tenantId,
       pedidoId,
-      'SEPARANDO',
+      'EM_SEPARACAO',
     );
 
     await this.pedidoRepository.adicionarHistorico(
       pedidoId,
       tenantId,
       pedido.status,
-      'SEPARANDO',
+      'EM_SEPARACAO',
       'Iniciada separação dos itens',
     );
 
@@ -223,32 +222,12 @@ export class PedidoService {
    */
   async finalizarSeparacao(tenantId: string, pedidoId: string) {
     const pedido = await this.validarExistencia(tenantId, pedidoId);
-    this.validarTransicao(pedido.status, 'SEPARADO');
 
-    const pedidoAtualizado = await this.pedidoRepository.atualizarStatus(
-      tenantId,
-      pedidoId,
-      'SEPARADO',
-    );
+    // EM_SEPARACAO cobre toda a fase de separação — apenas publica evento Kafka
+    // sem alterar o status (que permanece EM_SEPARACAO até o faturamento)
+    await this.kafkaProducer.publicarPedidoSeparado(tenantId, pedidoId, {});
 
-    await this.pedidoRepository.adicionarHistorico(
-      pedidoId,
-      tenantId,
-      pedido.status,
-      'SEPARADO',
-      'Separação concluída',
-    );
-
-    await this.kafkaProducer.publicarPedidoSeparado(
-      tenantId,
-      pedidoId,
-      {},
-    );
-
-    await this.cache.deleteByPattern(`pedidos:${tenantId}:*`);
-    await this.cache.delete(`pedido:${tenantId}:${pedidoId}`);
-
-    return pedidoAtualizado;
+    return pedido;
   }
 
   /**
@@ -305,7 +284,7 @@ export class PedidoService {
     await this.pedidoRepository.adicionarHistorico(
       pedidoId,
       tenantId,
-      'SEPARADO',
+      'EM_SEPARACAO',
       'FATURADO',
       `Nota Fiscal ${notaFiscalId} autorizada`,
     );

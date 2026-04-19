@@ -56,11 +56,11 @@ export class ConsumidorEventosController {
     try {
       const { tenantId, pedidoId, itensReservados } = dados;
 
-      // Atualiza pedido para SEPARANDO
+      // Atualiza pedido para EM_SEPARACAO
       await this.pedidoService.atualizarStatusPedido(
         tenantId,
         pedidoId,
-        'SEPARANDO',
+        'EM_SEPARACAO',
         `Estoque reservado para ${itensReservados.length} itens`,
       );
 

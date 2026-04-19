@@ -176,7 +176,7 @@ export class PedidoRepository {
 
     // Setar data específica conforme o status
     if (novoStatus === 'CONFIRMADO') updateData.dataAprovacao = new Date();
-    if (novoStatus === 'SEPARANDO') updateData.dataSeparacao = new Date();
+    if (novoStatus === 'EM_SEPARACAO') updateData.dataSeparacao = new Date();
     if (novoStatus === 'FATURADO') updateData.dataFaturamento = new Date();
     if (novoStatus === 'ENVIADO') updateData.dataEnvio = new Date();
     if (novoStatus === 'ENTREGUE') updateData.dataEntrega = new Date();
