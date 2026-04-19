@@ -159,7 +159,7 @@ export class ConsumidorEventosController {
       // Registra pagamento autorizado
       await this.pagamentoService.registrarPagamento(tenantId, pedidoId, {
         tipo: dados.tipo,
-        status: 'AUTORIZADO',
+        status: 'APROVADO',
         valor,
         gateway: dados.gateway,
         transacaoExternaId,
@@ -209,7 +209,7 @@ export class ConsumidorEventosController {
       await this.pedidoService.atualizarStatusPagamento(
         tenantId,
         pedidoId,
-        'RECUSADO',
+        'CANCELADO',
       );
 
       console.log(
