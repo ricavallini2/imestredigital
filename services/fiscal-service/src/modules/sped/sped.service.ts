@@ -275,7 +275,7 @@ export class SpedService {
       contadorRegistros++;
 
       // E110: Apuração do ICMS - operações próprias
-      const totalIcmsDebito = notas.reduce((acc, n) => acc + (n.valorIcms || 0), 0);
+      const totalIcmsDebito = notas.reduce((acc, n) => acc + (Number(n.valorIcms) || 0), 0);
       linhas.push(this.formatarLinha('E110', [
         this.formatarValor(totalIcmsDebito),   // VL_TOT_DEBITOS
         '0',                                     // VL_AJ_DEBITOS
@@ -509,9 +509,9 @@ export class SpedService {
       contadorRegistros++;
 
       // Totaliza PIS e COFINS do período
-      const totalPis = notas.reduce((acc, n) => acc + (n.valorPis || 0), 0);
-      const totalCofins = notas.reduce((acc, n) => acc + (n.valorCofins || 0), 0);
-      const totalBase = notas.reduce((acc, n) => acc + (n.valorProdutos || 0), 0);
+      const totalPis = notas.reduce((acc, n) => acc + (Number(n.valorPis) || 0), 0);
+      const totalCofins = notas.reduce((acc, n) => acc + (Number(n.valorCofins) || 0), 0);
+      const totalBase = notas.reduce((acc, n) => acc + (Number(n.valorProdutos) || 0), 0);
 
       // M200: Consolidação PIS/PASEP
       linhas.push(this.formatarLinha('M200', [
@@ -612,9 +612,10 @@ export class SpedService {
    * Formata valor numérico no padrão SPED: inteiro em centavos → decimal com vírgula.
    * Valores são armazenados em centavos no banco, ex: 10050 → "100,50"
    */
-  private formatarValor(valorCentavos: number): string {
-    if (!valorCentavos) return '0,00';
-    const reais = (valorCentavos / 100).toFixed(2);
+  private formatarValor(valorCentavos: number | any): string {
+    const v = Number(valorCentavos);
+    if (!v) return '0,00';
+    const reais = (v / 100).toFixed(2);
     return reais.replace('.', ',');
   }
 

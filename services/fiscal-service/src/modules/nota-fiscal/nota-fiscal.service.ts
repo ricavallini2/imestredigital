@@ -423,17 +423,17 @@ export class NotaFiscalService {
           item.cstIcms = regra.cstIcms;
           item.aliquotaIcms = regra.aliquotaIcms;
           item.baseIcms = item.valorTotal;
-          item.valorIcms = Math.round((item.valorTotal * regra.aliquotaIcms) / 10000);
+          item.valorIcms = Math.round((Number(item.valorTotal) * Number(regra.aliquotaIcms)) / 10000);
 
           item.cstPis = regra.cstPis;
           item.aliquotaPis = regra.aliquotaPis;
           item.basePis = item.valorTotal;
-          item.valorPis = Math.round((item.valorTotal * regra.aliquotaPis) / 10000);
+          item.valorPis = Math.round((Number(item.valorTotal) * Number(regra.aliquotaPis)) / 10000);
 
           item.cstCofins = regra.cstCofins;
           item.aliquotaCofins = regra.aliquotaCofins;
           item.baseCofins = item.valorTotal;
-          item.valorCofins = Math.round((item.valorTotal * regra.aliquotaCofins) / 10000);
+          item.valorCofins = Math.round((Number(item.valorTotal) * Number(regra.aliquotaCofins)) / 10000);
 
           totalIcms += item.valorIcms;
           totalPis += item.valorPis;

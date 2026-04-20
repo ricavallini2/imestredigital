@@ -215,6 +215,22 @@ model ConfiguracaoFiscal {
   proximoNumeroNfce      Int      @default(1) @map("proximo_numero_nfce")
   tokenCsc               String?  @map("token_csc") // Token para NFC-e
   idCsc                  String?  @map("id_csc") // ID CSC para NFC-e
+  // Dados da empresa emitente
+  cnpj                   String?  // CNPJ da empresa emitente
+  razaoSocial            String?  @map("razao_social") // Razão social
+  nomeFantasia           String?  @map("nome_fantasia") // Nome fantasia
+  uf                     String?  // Estado (ex: SP, RJ)
+  codigoMunicipio        String?  @map("codigo_municipio") // Código IBGE do município
+  municipio              String?  // Nome do município
+  cep                    String?  // CEP (apenas dígitos)
+  endereco               String?  // Logradouro
+  numero                 String?  // Número do endereço
+  complemento            String?  // Complemento
+  bairro                 String?  // Bairro
+  telefone               String?  // Telefone
+  fax                    String?  // Fax
+  email                  String?  // E-mail
+  emitente               Json?    // Dados completos do emitente em JSON (para XML NF-e)
 
   criadoEm               DateTime @default(now()) @map("criado_em")
   atualizadoEm           DateTime @updatedAt @map("atualizado_em")

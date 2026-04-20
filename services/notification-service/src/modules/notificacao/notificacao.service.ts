@@ -62,7 +62,7 @@ export class NotificacaoService {
       const notificacao = await this.prisma.notificacao.create({
         data: {
           tenantId,
-          tipo: dto.tipo,
+          tipo: dto.tipo as any,
           titulo: dto.titulo,
           mensagem: dto.mensagem,
           destinatarioId: dto.destinatarioId,
@@ -133,7 +133,7 @@ export class NotificacaoService {
     try {
       await this.prisma.notificacao.update({
         where: { id: notificacao.id },
-        data: { status: 'ENVIANDO' },
+        data: { status: 'ENVIADA' as any },
       });
 
       switch (notificacao.tipo) {
@@ -221,17 +221,17 @@ export class NotificacaoService {
         destinatarioId: usuarioId,
       };
 
-      if (filtros?.status) where.status = filtros.status;
-      if (filtros?.tipo) where.tipo = filtros.tipo;
+      if (filtros?.status) where.status = filtros.status as any;
+      if (filtros?.tipo) where.tipo = filtros.tipo as any;
 
-      const total = await this.prisma.notificacao.count({ where });
+      const total = await this.prisma.notificacao.count({ where: where as any });
 
       const pagina = filtros?.pagina || 1;
       const limite = filtros?.limite || 20;
       const skip = (pagina - 1) * limite;
 
       const dados = await this.prisma.notificacao.findMany({
-        where,
+        where: where as any,
         skip,
         take: limite,
         orderBy: { criadoEm: 'desc' },
@@ -383,7 +383,7 @@ export class NotificacaoService {
             data: {
               tenantId,
               usuarioId,
-              canal: pref.canal,
+              canal: pref.canal as any,
               tipoEvento: pref.tipoEvento,
               habilitado: pref.habilitado,
             },

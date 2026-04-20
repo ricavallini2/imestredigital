@@ -52,6 +52,8 @@ infra/terraform/**/*.tfvars
 
 # Prisma
 services/*/prisma/*.db
+# Prisma generated client (gerado em build - não deve ser versionado)
+services/*/generated/
 
 # Python / AI Engine
 services/ai-engine/__pycache__/

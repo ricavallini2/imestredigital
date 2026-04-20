@@ -23,21 +23,21 @@ export class NotaFiscalRepository {
     return this.prisma.notaFiscal.create({
       data: {
         tenantId,
-        tipo: dados.tipo,
+        tipo: dados.tipo as any,
         serie: dados.serie || '1',
         numero: dados.numero || 1,
         chaveAcesso,
-        naturezaOperacao: dados.naturezaOperacao,
+        naturezaOperacao: dados.naturezaOperacao as any,
         dataEmissao: new Date(dados.dataEmissao),
         dataSaida: dados.dataSaida ? new Date(dados.dataSaida) : null,
-        status: 'RASCUNHO',
+        status: 'RASCUNHO' as any,
         valorTotal: Math.round(valorTotal),
         valorProdutos: Math.round(valorProdutos),
         valorDesconto: Math.round(valorDesconto),
         valorFrete: dados.valorFrete || 0,
         valorSeguro: dados.valorSeguro || 0,
         valorOutros: dados.valorOutros || 0,
-        destinatario: dados.destinatario,
+        destinatario: dados.destinatario as any,
         informacoesAdicionais: dados.informacoesAdicionais,
         pedidoId: dados.pedidoId,
         clienteId: dados.clienteId,
@@ -124,7 +124,7 @@ export class NotaFiscalRepository {
     return this.prisma.notaFiscal.update({
       where: { id: notaId },
       data: {
-        status: novoStatus,
+        status: novoStatus as any,
         xmlEnvio: dados?.xmlEnvio,
         xmlRetorno: dados?.xmlRetorno,
         protocolo: dados?.protocolo,
@@ -146,7 +146,7 @@ export class NotaFiscalRepository {
     return this.prisma.notaFiscal.update({
       where: { id: notaId },
       data: {
-        status: 'AUTORIZADA',
+        status: 'AUTORIZADA' as any,
         xmlRetorno,
         protocolo,
       },
@@ -177,11 +177,11 @@ export class NotaFiscalRepository {
       data: {
         tenantId,
         notaFiscalId: notaId,
-        tipo,
+        tipo: tipo as any,
         sequencia,
         dataEvento: new Date(),
         justificativa,
-        status: 'PENDENTE',
+        status: 'PENDENTE' as any,
       },
     });
   }
@@ -198,7 +198,7 @@ export class NotaFiscalRepository {
     return this.prisma.eventoFiscal.update({
       where: { id: eventoId },
       data: {
-        status,
+        status: status as any,
         xmlRetorno,
         protocolo,
       },

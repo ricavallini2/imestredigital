@@ -15,7 +15,7 @@
  */
 
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
@@ -33,13 +33,9 @@ async function bootstrap() {
   // ─── Configuração de API ────────────────────────────────
 
   // Prefixo global: /api
+  // Nota: controllers já usam path parcial 'v1/notas-fiscais' etc.
+  // então o path final fica /api/v1/notas-fiscais sem precisar de enableVersioning
   app.setGlobalPrefix('api');
-
-  // Versionamento via URI: /api/v1/notas-fiscais
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: '1',
-  });
 
   // ─── Validação Global ───────────────────────────────────
 

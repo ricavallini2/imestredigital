@@ -18,7 +18,7 @@ export class RegraFiscalRepository {
       data: {
         tenantId,
         ...dados,
-      },
+      } as any,
     });
   }
 
@@ -67,7 +67,7 @@ export class RegraFiscalRepository {
   async atualizar(tenantId: string, regraId: string, dados: Partial<CriarRegraFiscalDto>) {
     return this.prisma.regraFiscal.update({
       where: { id: regraId },
-      data: dados,
+      data: dados as any,
     });
   }
 
@@ -100,7 +100,7 @@ export class RegraFiscalRepository {
         ncm,
         ufOrigem: ufOrigem || undefined,
         ufDestino: ufDestino || undefined,
-        regimeTributario: regimeTributario || undefined,
+        regimeTributario: (regimeTributario || undefined) as any,
       },
     });
 
@@ -112,7 +112,7 @@ export class RegraFiscalRepository {
           ativa: true,
           ncm,
           ufDestino,
-          regimeTributario,
+          regimeTributario: regimeTributario as any,
         },
       });
     }
@@ -124,7 +124,7 @@ export class RegraFiscalRepository {
           tenantId,
           ativa: true,
           ncm,
-          regimeTributario,
+          regimeTributario: regimeTributario as any,
         },
       });
     }

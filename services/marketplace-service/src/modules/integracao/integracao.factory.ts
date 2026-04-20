@@ -1,6 +1,6 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PlataformaMarketplace } from '../../../../generated/client';
+import { PlataformaMarketplace } from '../../../generated/client';
 import { IIntegracaoMarketplace } from './integracao-base.interface';
 import { MercadoLivreAdapter } from './mercado-livre/mercado-livre.adapter';
 import { ShopeeAdapter } from './shopee/shopee.adapter';
