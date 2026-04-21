@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Delete, Param, Body, Headers, HttpCode, BadRequestException, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ContaMarketplaceService } from './conta-marketplace.service';
-import { ConectarMarketplaceDto } from '@dtos/conectar-marketplace.dto';
+import { ConectarMarketplaceDto } from '../../dtos/conectar-marketplace.dto';
 import { PlataformaMarketplace } from '../../../generated/client';
 import { v4 as uuidv4 } from 'uuid';
 

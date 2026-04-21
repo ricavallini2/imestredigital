@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
-import { TOPICOS_PRODUZIDOS, MensagemKafka } from '@config/kafka.config';
+import { TOPICOS_PRODUZIDOS, MensagemKafka } from '../../config/kafka.config';
 
 /**
  * Serviço para produzir eventos no Kafka

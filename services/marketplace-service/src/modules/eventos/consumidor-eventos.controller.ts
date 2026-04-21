@@ -10,7 +10,7 @@ import {
   EventoPrecoAlterado,
   EventoPedidoEnviado,
   EventoPedidoCancelado,
-} from '@config/kafka.config';
+} from '../../config/kafka.config';
 
 /**
  * Controller para consumir eventos de outros serviços

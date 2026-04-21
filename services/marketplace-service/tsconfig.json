@@ -3,13 +3,6 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": ".",
-    "paths": {
-      "@dtos/*": ["src/dtos/*"],
-      "@config/*": ["src/config/*"],
-      "@modules/*": ["src/modules/*"],
-      "@/*": ["src/*"]
-    },
     "strict": false,
     "noImplicitAny": false,
     "strictNullChecks": false,
