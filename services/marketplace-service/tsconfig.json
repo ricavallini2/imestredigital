@@ -1,7 +1,6 @@
 {
   "extends": "@imestredigital/typescript-config/tsconfig.nestjs.json",
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": false,
