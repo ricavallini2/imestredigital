@@ -12,21 +12,38 @@ export class CacheService {
   private redis: Redis;
 
   constructor(private readonly configService: ConfigService) {
+    // Prioridade: REDIS_HOST explícito (evita problemas de parsing de URL com
+    // senhas que contêm caracteres especiais como / e =)
+    const redisHost = this.configService.get<string>('REDIS_HOST');
     const redisUrl = this.configService.get<string>('REDIS_URL');
 
-    if (redisUrl) {
-      this.redis = new Redis(redisUrl, {
-        retryStrategy: (times: number) => Math.min(times * 50, 2000),
-      });
-    } else {
-      this.redis = new Redis({
-        host: this.configService.get('REDIS_HOST') || 'localhost',
-        port: this.configService.get('REDIS_PORT') || 6379,
-        password: this.configService.get('REDIS_PASSWORD'),
-        db: this.configService.get('REDIS_DB') || 0,
-        retryStrategy: (times: number) => Math.min(times * 50, 2000),
-      });
+    let host = 'localhost';
+    let port = 6379;
+    let password: string | undefined;
+    let db = 0;
+
+    if (redisHost) {
+      host = redisHost;
+      port = this.configService.get<number>('REDIS_PORT') || 6379;
+      password = this.configService.get<string>('REDIS_PASSWORD');
+      db = this.configService.get<number>('REDIS_DB') || 0;
+    } else if (redisUrl) {
+      // Parseia manualmente para suportar senhas com chars especiais (/, =, @)
+      const m = redisUrl.match(/^redis[s]?:\/\/(?::([^@]*)@)?([^:]+)(?::(\d+))?/);
+      if (m) {
+        password = m[1] || undefined;
+        host = m[2] || 'redis';
+        port = parseInt(m[3] || '6379');
+      }
     }
+
+    this.redis = new Redis({
+      host,
+      port,
+      password,
+      db,
+      retryStrategy: (times: number) => Math.min(times * 50, 2000),
+    });
 
     this.redis.on('connect', () => {
       this.logger.log('Conectado ao Redis');

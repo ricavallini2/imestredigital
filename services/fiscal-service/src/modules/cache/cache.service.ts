@@ -12,20 +12,35 @@ export class CacheService {
   private redis: Redis;
 
   constructor() {
+    // Prioridade: REDIS_HOST explícito (evita problemas de parsing de URL com
+    // senhas que contêm caracteres especiais como / e =)
+    const redisHost = process.env.REDIS_HOST;
     const redisUrl = process.env.REDIS_URL;
 
-    if (redisUrl) {
-      this.redis = new Redis(redisUrl, {
-        retryStrategy: (times) => Math.min(times * 50, 2000),
-      });
-    } else {
-      this.redis = new Redis({
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379'),
-        password: process.env.REDIS_PASSWORD,
-        retryStrategy: (times) => Math.min(times * 50, 2000),
-      });
+    let host = 'localhost';
+    let port = 6379;
+    let password: string | undefined;
+
+    if (redisHost) {
+      host = redisHost;
+      port = parseInt(process.env.REDIS_PORT || '6379');
+      password = process.env.REDIS_PASSWORD;
+    } else if (redisUrl) {
+      // Parseia manualmente para suportar senhas com chars especiais (/, =, @)
+      const m = redisUrl.match(/^redis[s]?:\/\/(?::([^@]*)@)?([^:]+)(?::(\d+))?/);
+      if (m) {
+        password = m[1] || undefined;
+        host = m[2] || 'redis';
+        port = parseInt(m[3] || '6379');
+      }
     }
+
+    this.redis = new Redis({
+      host,
+      port,
+      password,
+      retryStrategy: (times) => Math.min(times * 50, 2000),
+    });
 
     this.redis.on('error', (erro) => {
       this.logger.error('Erro de conexão com Redis:', erro);
