@@ -12,12 +12,20 @@ export class CacheService {
   private redis: Redis;
 
   constructor() {
-    this.redis = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD,
-      retryStrategy: (times) => Math.min(times * 50, 2000),
-    });
+    const redisUrl = process.env.REDIS_URL;
+
+    if (redisUrl) {
+      this.redis = new Redis(redisUrl, {
+        retryStrategy: (times) => Math.min(times * 50, 2000),
+      });
+    } else {
+      this.redis = new Redis({
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+        password: process.env.REDIS_PASSWORD,
+        retryStrategy: (times) => Math.min(times * 50, 2000),
+      });
+    }
 
     this.redis.on('error', (erro) => {
       this.logger.error('Erro de conexão com Redis:', erro);

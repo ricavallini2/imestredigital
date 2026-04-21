@@ -5,14 +5,13 @@
  */
 
 import { Controller, Get } from '@nestjs/common';
-import { HealthCheck, HealthCheckService, PrismaHealthIndicator } from '@nestjs/terminus';
+import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
 import { PrismaService } from '../modules/prisma/prisma.service';
 
 @Controller('health')
 export class HealthController {
   constructor(
     private health: HealthCheckService,
-    private db: PrismaHealthIndicator,
     private prisma: PrismaService,
   ) {}
 
@@ -20,7 +19,10 @@ export class HealthController {
   @HealthCheck()
   async check() {
     return this.health.check([
-      () => (this.db as any).pingDb(this.prisma, { timeout: 1500 }),
+      async () => {
+        await this.prisma.$queryRaw`SELECT 1`;
+        return { database: { status: 'up' as const } };
+      },
     ]);
   }
 }

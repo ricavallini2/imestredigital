@@ -12,13 +12,21 @@ export class CacheService {
   private redis: Redis;
 
   constructor(private readonly configService: ConfigService) {
-    this.redis = new Redis({
-      host: this.configService.get('REDIS_HOST') || 'localhost',
-      port: this.configService.get('REDIS_PORT') || 6379,
-      password: this.configService.get('REDIS_PASSWORD'),
-      db: this.configService.get('REDIS_DB') || 0,
-      retryStrategy: (times: number) => Math.min(times * 50, 2000),
-    });
+    const redisUrl = this.configService.get<string>('REDIS_URL');
+
+    if (redisUrl) {
+      this.redis = new Redis(redisUrl, {
+        retryStrategy: (times: number) => Math.min(times * 50, 2000),
+      });
+    } else {
+      this.redis = new Redis({
+        host: this.configService.get('REDIS_HOST') || 'localhost',
+        port: this.configService.get('REDIS_PORT') || 6379,
+        password: this.configService.get('REDIS_PASSWORD'),
+        db: this.configService.get('REDIS_DB') || 0,
+        retryStrategy: (times: number) => Math.min(times * 50, 2000),
+      });
+    }
 
     this.redis.on('connect', () => {
       this.logger.log('Conectado ao Redis');
