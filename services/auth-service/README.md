@@ -336,10 +336,10 @@ JWT_EXPIRATION=1h
 JWT_REFRESH_EXPIRATION=7
 KAFKA_BROKERS=kafka-broker-1:9092,kafka-broker-2:9092
 CORS_ORIGINS=https://app.imestredigital.com,https://admin.imestredigital.com
-SMTP_HOST=smtp.sendgrid.net
+SMTP_HOST=<host-smtp>
 SMTP_PORT=587
-SMTP_USER=apikey
-SMTP_PASS=seu_sendgrid_api_key
+SMTP_USER=<usuario-smtp>
+SMTP_PASS=<chave-ou-senha-smtp>
 SMTP_FROM=noreply@imestredigital.com
 ```
 
