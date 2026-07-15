@@ -10,33 +10,52 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import {
-  LayoutDashboard, Package, Warehouse, ShoppingCart,
-  Landmark, Store, FileText, DollarSign, Users, Bot,
-  Settings, X, ShoppingBag, Megaphone, MessageCircle, BarChart2,
-  BadgeDollarSign, Settings2, FileCheck2, History, Tag, Tags, FolderTree, MessagesSquare,
+  LayoutDashboard,
+  Package,
+  Warehouse,
+  ShoppingCart,
+  Landmark,
+  Store,
+  FileText,
+  DollarSign,
+  Users,
+  Bot,
+  Settings,
+  X,
+  ShoppingBag,
+  Megaphone,
+  MessageCircle,
+  BarChart2,
+  BadgeDollarSign,
+  Settings2,
+  FileCheck2,
+  History,
+  Tag,
+  Tags,
+  FolderTree,
+  MessagesSquare,
+  Grid3x3,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { LogoSidebar } from '@/components/ui/logo';
 
 const itensMenu = [
-  { href: '/dashboard',             label: 'Dashboard',   icone: LayoutDashboard },
-  { href: '/dashboard/ia',          label: 'iMestreAI',   icone: Bot,  destaque: true },
-  { href: '/dashboard/clientes',    label: 'Clientes',    icone: Users },
-  { href: '/dashboard/produtos',    label: 'Produtos',    icone: Package },
-  { href: '/dashboard/estoque',     label: 'Estoque',     icone: Warehouse },
-  { href: '/dashboard/pedidos',     label: 'Pedidos',     icone: ShoppingCart },
-  { href: '/dashboard/compras',     label: 'Compras',     icone: ShoppingBag },
-  { href: '/dashboard/caixa',       label: 'Caixa',       icone: Landmark },
-  { href: '/dashboard/marketplaces',label: 'Marketplace', icone: Store },
-  { href: '/dashboard/fiscal',      label: 'Fiscal',      icone: FileText },
-  { href: '/dashboard/financeiro',  label: 'Financeiro',  icone: DollarSign },
-  { href: '/dashboard/cobranca',    label: 'Cobrança',    icone: BadgeDollarSign },
-  { href: '/dashboard/mensagens',   label: 'Mensagens',   icone: MessagesSquare },
+  { href: '/dashboard', label: 'Dashboard', icone: LayoutDashboard },
+  { href: '/dashboard/ia', label: 'iMestreAI', icone: Bot, destaque: true },
+  { href: '/dashboard/clientes', label: 'Clientes', icone: Users },
+  { href: '/dashboard/produtos', label: 'Produtos', icone: Package },
+  { href: '/dashboard/estoque', label: 'Estoque', icone: Warehouse },
+  { href: '/dashboard/pedidos', label: 'Pedidos', icone: ShoppingCart },
+  { href: '/dashboard/compras', label: 'Compras', icone: ShoppingBag },
+  { href: '/dashboard/caixa', label: 'Caixa', icone: Landmark },
+  { href: '/dashboard/marketplaces', label: 'Marketplace', icone: Store },
+  { href: '/dashboard/fiscal', label: 'Fiscal', icone: FileText },
+  { href: '/dashboard/financeiro', label: 'Financeiro', icone: DollarSign },
+  { href: '/dashboard/cobranca', label: 'Cobrança', icone: BadgeDollarSign },
+  { href: '/dashboard/mensagens', label: 'Mensagens', icone: MessagesSquare },
 ];
 
-const itensRodape = [
-  { href: '/dashboard/configuracoes', label: 'Configurações', icone: Settings },
-];
+const itensRodape = [{ href: '/dashboard/configuracoes', label: 'Configurações', icone: Settings }];
 
 interface SidebarProps {
   aberta?: boolean;
@@ -52,7 +71,9 @@ export function Sidebar({ aberta = false, onFechar }: SidebarProps) {
       try {
         const v = localStorage.getItem('chat-nao-lidas');
         setMsgNaoLidas(v ? parseInt(v, 10) : 0);
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     };
     ler();
     window.addEventListener('chat-unread-changed', ler);
@@ -78,7 +99,8 @@ export function Sidebar({ aberta = false, onFechar }: SidebarProps) {
       {/* Menu principal */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {itensMenu.map((item) => {
-          const ativo = pathname === item.href ||
+          const ativo =
+            pathname === item.href ||
             (item.href !== '/dashboard' && pathname.startsWith(item.href));
           const ehMarketplace = item.href === '/dashboard/marketplaces';
           const ehCobranca = item.href === '/dashboard/cobranca';
@@ -115,9 +137,13 @@ export function Sidebar({ aberta = false, onFechar }: SidebarProps) {
               {ehCobranca && ativo && (
                 <div className="ml-4 mt-0.5 space-y-0.5 border-l-2 border-marca-200 dark:border-marca-800 pl-3">
                   {[
-                    { href: '/dashboard/cobranca/configuracoes', label: 'Configurações', icone: Settings2 },
-                    { href: '/dashboard/cobranca/acordos',       label: 'Acordos',       icone: FileCheck2 },
-                    { href: '/dashboard/cobranca/historico',     label: 'Histórico',     icone: History },
+                    {
+                      href: '/dashboard/cobranca/configuracoes',
+                      label: 'Configurações',
+                      icone: Settings2,
+                    },
+                    { href: '/dashboard/cobranca/acordos', label: 'Acordos', icone: FileCheck2 },
+                    { href: '/dashboard/cobranca/historico', label: 'Histórico', icone: History },
                   ].map((sub) => {
                     const subAtivo = pathname.startsWith(sub.href);
                     return (
@@ -143,8 +169,13 @@ export function Sidebar({ aberta = false, onFechar }: SidebarProps) {
               {ehProdutos && ativo && (
                 <div className="ml-4 mt-0.5 space-y-0.5 border-l-2 border-marca-200 dark:border-marca-800 pl-3">
                   {[
-                    { href: '/dashboard/produtos/categorias', label: 'Categorias', icone: FolderTree },
+                    {
+                      href: '/dashboard/produtos/categorias',
+                      label: 'Categorias',
+                      icone: FolderTree,
+                    },
                     { href: '/dashboard/produtos/marcas', label: 'Marcas', icone: Tags },
+                    { href: '/dashboard/produtos/grades', label: 'Grades', icone: Grid3x3 },
                     { href: '/dashboard/produtos/etiquetas', label: 'Etiquetas', icone: Tag },
                   ].map((sub) => {
                     const subAtivo = pathname.startsWith(sub.href);
@@ -171,9 +202,17 @@ export function Sidebar({ aberta = false, onFechar }: SidebarProps) {
               {ehMarketplace && ativo && (
                 <div className="ml-4 mt-0.5 space-y-0.5 border-l-2 border-marca-200 dark:border-marca-800 pl-3">
                   {[
-                    { href: '/dashboard/marketplaces/anuncios',  label: 'Anúncios',  icone: Megaphone },
-                    { href: '/dashboard/marketplaces/perguntas', label: 'Perguntas', icone: MessageCircle },
-                    { href: '/dashboard/marketplaces/vendas',    label: 'Vendas',    icone: BarChart2 },
+                    {
+                      href: '/dashboard/marketplaces/anuncios',
+                      label: 'Anúncios',
+                      icone: Megaphone,
+                    },
+                    {
+                      href: '/dashboard/marketplaces/perguntas',
+                      label: 'Perguntas',
+                      icone: MessageCircle,
+                    },
+                    { href: '/dashboard/marketplaces/vendas', label: 'Vendas', icone: BarChart2 },
                   ].map((sub) => {
                     const subAtivo = pathname.startsWith(sub.href);
                     return (
