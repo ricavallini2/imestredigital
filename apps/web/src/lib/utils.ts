@@ -11,10 +11,10 @@
 export function slugSku(texto: string): string {
   return (texto ?? '')
     .normalize('NFD')
-    .replace(/p{Diacritic}/gu, '') // remove acentos
+    .replace(/\p{Diacritic}/gu, '') // remove acentos
     .toUpperCase()
     .trim()
-    .replace(/[s_]+/g, '-') // espaços/underscores viram hífen
+    .replace(/[\s_]+/g, '-') // espaços/underscores viram hífen
     .replace(/[^A-Z0-9-]/g, '') // remove o resto (barras, símbolos)
     .replace(/-+/g, '-') // colapsa hífens repetidos
     .replace(/^-+|-+$/g, ''); // apara hífens das pontas
