@@ -11,7 +11,9 @@ import { CacheModule } from '../cache/cache.module';
 import { SefazModule } from '../sefaz/sefaz.module';
 import { ConfiguracaoFiscalModule } from '../configuracao-fiscal/configuracao-fiscal.module';
 import { RegraFiscalModule } from '../regra-fiscal/regra-fiscal.module';
+import { TributosModule } from '../tributos/tributos.module';
 import { EventosModule } from '../eventos/eventos.module';
+import { ProvedorFiscalModule } from '../provedor-fiscal/provedor-fiscal.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { EventosModule } from '../eventos/eventos.module';
     SefazModule,
     ConfiguracaoFiscalModule,
     RegraFiscalModule,
+    TributosModule,
+    ProvedorFiscalModule,
     forwardRef(() => EventosModule),
   ],
   providers: [NotaFiscalService, NotaFiscalRepository],

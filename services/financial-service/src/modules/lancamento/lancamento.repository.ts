@@ -5,6 +5,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import Decimal from 'decimal.js';
+import {
+  Prisma,
+  TipoLancamento,
+  StatusLancamento,
+  FormaPagamento,
+} from '../../../generated/client';
 
 interface CriarLancamentoInput {
   tenantId: string;
@@ -125,19 +131,31 @@ export class LancamentoRepository {
 
   /**
    * Atualiza lançamento.
+   *
+   * Usa updateMany com { id, tenantId } para garantir que a escrita
+   * nunca atinja um registro de outro tenant, e retorna o registro
+   * já filtrado por tenant.
    */
   async atualizar(id: string, tenantId: string, dados: Partial<CriarLancamentoInput>) {
-    return this.prisma.lancamento.update({
-      where: { id },
-      data: {
-        ...dados,
-        atualizadoEm: new Date(),
-      },
-      include: {
-        conta: true,
-        recorrencia: true,
-      },
+    const { tipo, status, formaPagamento, ...resto } = dados
+
+    const data: Prisma.LancamentoUncheckedUpdateManyInput = {
+      ...resto,
+      atualizadoEm: new Date(),
+    }
+
+    if (tipo !== undefined) data.tipo = tipo as TipoLancamento
+    if (status !== undefined) data.status = status as StatusLancamento
+    if (formaPagamento !== undefined) {
+      data.formaPagamento = formaPagamento as FormaPagamento
+    }
+
+    await this.prisma.lancamento.updateMany({
+      where: { id, tenantId },
+      data,
     });
+
+    return this.buscarPorId(id, tenantId);
   }
 
   /**
@@ -243,5 +261,51 @@ export class LancamentoRepository {
    */
   async deletar(id: string, tenantId: string) {
     return this.cancelar(id, tenantId);
+  }
+
+  /**
+   * Busca um lançamento por (pedidoId, tipo) — usado como defesa em
+   * profundidade na saga para não duplicar o recebível de um pedido já
+   * faturado (complementa o dedup por eventos_processados).
+   */
+  async buscarPorPedidoIdETipo(
+    tenantId: string,
+    pedidoId: string,
+    tipo: TipoLancamento,
+  ) {
+    return this.prisma.lancamento.findFirst({
+      where: { tenantId, pedidoId, tipo },
+    });
+  }
+
+  /**
+   * Idempotência do consumo Kafka: registra que um evento (identificado por
+   * `evento` + `referenciaId`, ex. pedidoId) já foi processado. Retorna
+   * `true` na primeira vez (aplicar o efeito) e `false` em reentregas do
+   * broker (violação de unique → já processado). Mesma semântica usada em
+   * order-service e inventory-service.
+   */
+  async registrarEventoProcessado(
+    tenantId: string,
+    evento: string,
+    referenciaId: string,
+  ): Promise<boolean> {
+    try {
+      await this.prisma.eventoProcessado.create({
+        data: { tenantId, evento, referenciaId },
+      });
+      return true;
+    } catch (erro: unknown) {
+      // P2002 = violação de unique → evento já processado.
+      if (
+        typeof erro === 'object' &&
+        erro !== null &&
+        'code' in erro &&
+        (erro as { code?: string }).code === 'P2002'
+      ) {
+        return false;
+      }
+      throw erro;
+    }
   }
 }

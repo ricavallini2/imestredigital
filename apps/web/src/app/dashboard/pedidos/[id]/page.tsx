@@ -11,8 +11,8 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { usePedido, useConfirmarPedido, useCancelarPedido, useAtualizarStatusPedido } from '@/hooks/usePedidos';
 
 const STATUS_LABELS: Record<string, string> = {
-  PENDENTE: 'Pendente', CONFIRMADO: 'Confirmado', SEPARANDO: 'Separando',
-  SEPARADO: 'Separado', FATURADO: 'Faturado', ENVIADO: 'Enviado',
+  RASCUNHO: 'Rascunho', PENDENTE: 'Pendente', CONFIRMADO: 'Confirmado',
+  EM_SEPARACAO: 'Em Separação', FATURADO: 'Faturado', ENVIADO: 'Enviado',
   ENTREGUE: 'Entregue', CANCELADO: 'Cancelado', DEVOLVIDO: 'Devolvido',
 };
 
@@ -27,15 +27,14 @@ const FORMA_LABELS: Record<string, string> = {
 };
 
 const PROXIMOS_STATUS: Record<string, { status: string; label: string; cor: string }[]> = {
-  PENDENTE:   [{ status: 'CONFIRMADO', label: 'Confirmar', cor: 'bg-blue-500 hover:bg-blue-600 text-white' }],
-  CONFIRMADO: [{ status: 'SEPARANDO',  label: 'Iniciar Separação', cor: 'bg-indigo-500 hover:bg-indigo-600 text-white' }],
-  SEPARANDO:  [{ status: 'SEPARADO',   label: 'Marcar Separado', cor: 'bg-violet-500 hover:bg-violet-600 text-white' }],
-  SEPARADO:   [{ status: 'FATURADO',   label: 'Faturar', cor: 'bg-purple-500 hover:bg-purple-600 text-white' }],
-  FATURADO:   [{ status: 'ENVIADO',    label: 'Marcar Enviado', cor: 'bg-cyan-500 hover:bg-cyan-600 text-white' }],
-  ENVIADO:    [{ status: 'ENTREGUE',   label: 'Confirmar Entrega', cor: 'bg-emerald-500 hover:bg-emerald-600 text-white' }],
+  PENDENTE:     [{ status: 'CONFIRMADO',   label: 'Confirmar', cor: 'bg-blue-500 hover:bg-blue-600 text-white' }],
+  CONFIRMADO:   [{ status: 'EM_SEPARACAO', label: 'Iniciar Separação', cor: 'bg-indigo-500 hover:bg-indigo-600 text-white' }],
+  EM_SEPARACAO: [{ status: 'FATURADO',     label: 'Faturar', cor: 'bg-purple-500 hover:bg-purple-600 text-white' }],
+  FATURADO:     [{ status: 'ENVIADO',      label: 'Marcar Enviado', cor: 'bg-cyan-500 hover:bg-cyan-600 text-white' }],
+  ENVIADO:      [{ status: 'ENTREGUE',     label: 'Confirmar Entrega', cor: 'bg-emerald-500 hover:bg-emerald-600 text-white' }],
 };
 
-const TIMELINE_STEPS = ['PENDENTE','CONFIRMADO','SEPARANDO','SEPARADO','FATURADO','ENVIADO','ENTREGUE'];
+const TIMELINE_STEPS = ['PENDENTE','CONFIRMADO','EM_SEPARACAO','FATURADO','ENVIADO','ENTREGUE'];
 
 const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -110,8 +109,8 @@ export default function PedidoDetalhe() {
             {CANAL_LABELS[(pedido as any).canal] ?? (pedido as any).canal} · {new Date((pedido as any).criadoEm).toLocaleString('pt-BR')}
           </p>
         </div>
-        {/* Emitir NF-e — disponível a partir de SEPARADO */}
-        {!isCancelado && ['SEPARADO','FATURADO','ENVIADO','ENTREGUE'].includes(pedido.status as string) && (
+        {/* Emitir NF-e — disponível a partir da separação (EM_SEPARACAO) */}
+        {!isCancelado && ['EM_SEPARACAO','FATURADO','ENVIADO','ENTREGUE'].includes(pedido.status as string) && (
           <Link
             href={`/dashboard/fiscal/nova?pedidoId=${pedido.id}`}
             className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400 transition-colors">

@@ -47,9 +47,9 @@ COPY --from=builder /build/dist ./dist
 COPY --from=builder /build/prisma ./prisma
 COPY --from=builder /build/node_modules/.prisma ./node_modules/.prisma
 
-# Health check
+# Health check (rota pública, sem token; controller expõe api/v1/health)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3006/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+  CMD node -e "require('http').get('http://localhost:3006/api/v1/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
 # Executar com dumb-init
 ENTRYPOINT ["dumb-init", "--"]

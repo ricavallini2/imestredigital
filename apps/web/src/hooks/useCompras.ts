@@ -58,12 +58,30 @@ export interface PedidoCompra {
   atualizadoEm: string;
 }
 
+// Fornecedor = parceiro com papel FORNECEDOR (PF MEI/autônomo ou PJ).
+// Ver docs/design/parceiro-unificado.md.
+// UNIFICADO: os hooks abaixo leem/gravam via /v1/clientes?papel=FORNECEDOR
+// (cadastro único de parceiros). Este `Fornecedor` é apenas a projeção de
+// apresentação usada pela tela de Compras — o mapeamento fica em
+// parceiroParaFornecedor / fornecedorParaParceiro.
 export interface Fornecedor {
   id: string;
+  // Ausência de `tipo` = PJ (registros legados / criados via importação de NF-e).
+  tipo?: 'PF' | 'PJ';
+  // PJ: identificação social. PF: espelha o nome completo.
   razaoSocial: string;
   nomeFantasia: string;
+  // PF: nome completo.
+  nome?: string;
+  // Documentos por tipo. PF usa cnpj '' (string vazia) e preenche cpf.
   cnpj: string;
+  cpf?: string;
+  rg?: string;
+  // Fiscais (PJ).
   inscricaoEstadual?: string;
+  ieIsento?: boolean;
+  inscricaoMunicipal?: string;
+  regimeTributario?: string;
   email: string;
   telefone: string;
   endereco: {
@@ -202,14 +220,135 @@ export function useEstatisticasCompras() {
   });
 }
 
-// ─── Fornecedores — Listagem ──────────────────────────────────────────────────
+// ─── Mapeamento Parceiro (papel FORNECEDOR) ↔ Fornecedor ──────────────────────
+// A tela de Fornecedores consome o cadastro UNIFICADO de parceiros
+// (/v1/clientes?papel=FORNECEDOR) — que em produção é o customer-service real —
+// em vez de um cadastro paralelo. Ver docs/design/parceiro-unificado.md.
+
+interface EnderecoParceiro {
+  logradouro?: string; numero?: string; complemento?: string;
+  bairro?: string; cidade?: string; estado?: string; uf?: string; cep?: string;
+}
+
+interface ParceiroApi {
+  id: string;
+  tipo?: string;
+  nome?: string;
+  razaoSocial?: string;
+  nomeFantasia?: string;
+  cnpj?: string;
+  cpf?: string;
+  rg?: string;
+  inscricaoEstadual?: string;
+  ieIsento?: boolean;
+  inscricaoMunicipal?: string;
+  regimeTributario?: string;
+  email?: string;
+  telefone?: string;
+  celular?: string;
+  status?: string;
+  enderecos?: EnderecoParceiro[];
+  prazoPagamento?: number;
+  valorTotalComprasFornecedor?: number;
+  totalComprasFornecedor?: number;
+  ultimaCompraFornecedor?: string;
+  criadoEm?: string;
+}
+
+function normalizarTipo(t?: string): 'PF' | 'PJ' {
+  return t === 'PF' || t === 'PESSOA_FISICA' ? 'PF' : 'PJ';
+}
+
+function parceiroParaFornecedor(c: ParceiroApi): Fornecedor {
+  const tipo = normalizarTipo(c.tipo);
+  const end = (c.enderecos ?? [])[0] ?? {};
+  return {
+    id: c.id,
+    tipo,
+    razaoSocial: c.razaoSocial ?? c.nome ?? '',
+    nomeFantasia: c.nomeFantasia ?? c.nome ?? c.razaoSocial ?? '',
+    nome: c.nome,
+    cnpj: c.cnpj ?? '',
+    cpf: c.cpf,
+    rg: c.rg,
+    inscricaoEstadual: c.inscricaoEstadual,
+    ieIsento: c.ieIsento,
+    inscricaoMunicipal: c.inscricaoMunicipal,
+    regimeTributario: c.regimeTributario,
+    email: c.email ?? '',
+    telefone: c.telefone ?? c.celular ?? '',
+    endereco: {
+      logradouro: end.logradouro ?? '',
+      numero: end.numero ?? '',
+      complemento: end.complemento,
+      bairro: end.bairro ?? '',
+      cidade: end.cidade ?? '',
+      uf: end.uf ?? end.estado ?? '',
+      cep: end.cep ?? '',
+    },
+    status: c.status === 'ATIVO' ? 'ATIVO' : 'INATIVO',
+    totalCompras: Number(c.valorTotalComprasFornecedor ?? 0),
+    qtdCompras: Number(c.totalComprasFornecedor ?? 0),
+    ultimaCompra: c.ultimaCompraFornecedor,
+    prazoMedioPagamento: Number(c.prazoPagamento ?? 0),
+    criadoEm: c.criadoEm ?? '',
+  };
+}
+
+function fornecedorParaParceiro(body: Partial<Fornecedor>): Record<string, unknown> {
+  const tipo = body.tipo ?? 'PJ';
+  const end = body.endereco;
+  const nome = tipo === 'PF' ? (body.nome ?? '') : (body.nomeFantasia || body.razaoSocial || '');
+  return {
+    papeis: ['FORNECEDOR'],
+    tipo,
+    nome,
+    ...(tipo === 'PJ'
+      ? {
+          razaoSocial: body.razaoSocial,
+          nomeFantasia: body.nomeFantasia || body.razaoSocial,
+          cnpj: body.cnpj,
+          inscricaoEstadual: body.ieIsento ? '' : body.inscricaoEstadual,
+          ieIsento: body.ieIsento,
+          inscricaoMunicipal: body.inscricaoMunicipal,
+          regimeTributario: body.regimeTributario || undefined,
+        }
+      : {
+          cpf: body.cpf,
+          rg: body.rg,
+        }),
+    email: body.email,
+    telefone: body.telefone,
+    prazoPagamento: body.prazoMedioPagamento,
+    ...(end
+      ? {
+          endereco: {
+            tipo: 'AMBOS',
+            logradouro: end.logradouro,
+            numero: end.numero,
+            complemento: end.complemento,
+            bairro: end.bairro,
+            cidade: end.cidade,
+            estado: end.uf,
+            cep: end.cep,
+          },
+        }
+      : {}),
+  };
+}
+
+// ─── Fornecedores — Listagem (via cadastro unificado de parceiros) ────────────
 
 export function useFornecedores(filters?: { busca?: string; status?: string }) {
   return useQuery({
     queryKey: comprasKeys.fornecedores(filters),
     queryFn: async () => {
-      const { data } = await api.get('/v1/fornecedores', { params: filters });
-      return data as { dados: Fornecedor[]; total: number };
+      const { data } = await api.get('/v1/clientes', {
+        params: { papel: 'FORNECEDOR', busca: filters?.busca, status: filters?.status, limite: 200 },
+      });
+      const lista: ParceiroApi[] = Array.isArray(data?.dados) ? data.dados : [];
+      const dados = lista.map(parceiroParaFornecedor);
+      return { dados, total: (data?.total as number) ?? dados.length };
     },
     staleTime: 60 * 1000,
   });
@@ -221,8 +360,8 @@ export function useFornecedor(id: string) {
   return useQuery({
     queryKey: comprasKeys.fornecedor(id),
     queryFn: async () => {
-      const { data } = await api.get(`/v1/fornecedores/${id}`);
-      return data as Fornecedor;
+      const { data } = await api.get(`/v1/clientes/${id}`);
+      return parceiroParaFornecedor(data as ParceiroApi);
     },
     enabled: !!id,
   });
@@ -250,11 +389,14 @@ export function useCriarFornecedor() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (body: Partial<Fornecedor>) => {
-      const { data } = await api.post('/v1/fornecedores', body);
-      return data as Fornecedor;
+      // Cria um parceiro com papel FORNECEDOR no cadastro unificado.
+      const dto = fornecedorParaParceiro(body);
+      const { data } = await api.post('/v1/clientes', dto);
+      return parceiroParaFornecedor(data as ParceiroApi);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['fornecedores'] });
+      qc.invalidateQueries({ queryKey: ['clientes'] });
       qc.invalidateQueries({ queryKey: comprasKeys.estatisticas });
     },
   });

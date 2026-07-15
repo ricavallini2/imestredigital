@@ -16,12 +16,18 @@ generator client {
 // ============================================================================
 
 /// Plataforma de marketplace integrada
+/// Fonte da verdade dos canais suportados (UPPERCASE_SNAKE).
+/// Mantém alinhamento com packages/types (MarketplaceSuportado) e mocks do frontend.
 enum PlataformaMarketplace {
   SHOPEE
   MERCADO_LIVRE
   AMAZON
   MAGALU
   AMERICANAS
+  SHOPIFY
+  SHEIN
+  NUVEMSHOP
+  WOOCOMMERCE
 }
 
 /// Status da conexão com marketplace
@@ -30,6 +36,8 @@ enum StatusConexao {
   INATIVA
   PENDENTE
   ERRO
+  RECONECTANDO
+  EXPIRANDO
 }
 
 /// Status de um anúncio no marketplace
@@ -38,6 +46,8 @@ enum StatusAnuncio {
   PAUSADO
   REMOVIDO
   PENDENTE
+  ENCERRADO
+  ERRO
 }
 
 /// Status de pedido do marketplace

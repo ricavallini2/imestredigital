@@ -150,17 +150,33 @@ export class PrevisaoService {
   }
 
   /**
-   * Lista previsões geradas
+   * Lista previsões geradas, no envelope paginado canônico:
+   * { dados, total, pagina, limite, totalPaginas }.
    */
   async listarPrevisoes(
     tenantId: string,
     filtros?: {
       produtoId?: string;
+      pagina?: number;
       limite?: number;
-      offset?: number;
     },
   ) {
-    return this.repository.listarPrevisoes(tenantId, filtros);
+    const pagina = filtros?.pagina ?? 0;
+    const limite = filtros?.limite ?? 20;
+
+    const { previsoes, total } = await this.repository.listarPrevisoes(tenantId, {
+      produtoId: filtros?.produtoId,
+      limite,
+      offset: pagina * limite,
+    });
+
+    return {
+      dados: previsoes,
+      total,
+      pagina,
+      limite,
+      totalPaginas: limite > 0 ? Math.ceil(total / limite) : 0,
+    };
   }
 
   // ======= Métodos privados de cálculo =======

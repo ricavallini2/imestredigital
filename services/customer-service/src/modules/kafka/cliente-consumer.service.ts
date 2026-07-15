@@ -26,9 +26,9 @@ export class ClienteConsumerService {
     try {
       this.logger.debug(`Pedido criado: ${data.pedidoId} para cliente ${data.clienteId}`);
 
-      // Busca cliente
-      const cliente = await this.prisma.cliente.findUnique({
-        where: { id: data.clienteId },
+      // Busca cliente (escopado por tenant)
+      const cliente = await this.prisma.cliente.findFirst({
+        where: { id: data.clienteId, tenantId: data.tenantId },
       });
 
       if (!cliente) {
@@ -36,9 +36,11 @@ export class ClienteConsumerService {
         return;
       }
 
-      // Atualiza cliente com informações do pedido
-      await this.prisma.cliente.update({
-        where: { id: data.clienteId },
+      // Atualiza cliente com informações do pedido.
+      // updateMany com tenantId no where garante isolamento multi-tenant:
+      // um evento nunca pode alterar cliente de outro tenant.
+      await this.prisma.cliente.updateMany({
+        where: { id: data.clienteId, tenantId: data.tenantId },
         data: {
           ultimaCompra: new Date(),
           totalCompras: { increment: 1 },
@@ -132,9 +134,9 @@ export class ClienteConsumerService {
     try {
       this.logger.debug(`Devolução criada: ${data.devolucaoId} para cliente ${data.clienteId}`);
 
-      // Busca cliente
-      const cliente = await this.prisma.cliente.findUnique({
-        where: { id: data.clienteId },
+      // Busca cliente (escopado por tenant)
+      const cliente = await this.prisma.cliente.findFirst({
+        where: { id: data.clienteId, tenantId: data.tenantId },
       });
 
       if (!cliente) {
@@ -159,8 +161,9 @@ export class ClienteConsumerService {
       // Ajusta score (reduz por devolução)
       const novoScore = Math.max(0, cliente.score - 5);
 
-      await this.prisma.cliente.update({
-        where: { id: data.clienteId },
+      // updateMany com tenantId no where garante isolamento multi-tenant.
+      await this.prisma.cliente.updateMany({
+        where: { id: data.clienteId, tenantId: data.tenantId },
         data: { score: novoScore },
       });
 

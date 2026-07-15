@@ -43,6 +43,7 @@ enum OrigemPedido {
   MARKETPLACE
   TELEFONE
   WHATSAPP
+  MANUAL
   OUTRO
 }
 
@@ -218,6 +219,27 @@ model HistoricoPedido {
   @@index([tenantId])
   @@index([criadoEm])
   @@map("historicos_pedidos")
+}
+
+// ─── Idempotência de Consumo Kafka ───────────────────────────
+
+/// Registro de eventos já processados (idempotência do consumo Kafka).
+/// Garante que o mesmo evento (ex. estoque.reservado para um pedidoId) só
+/// produza efeito colateral uma única vez, mesmo com reentrega do broker.
+/// Espelha o modelo homônimo do inventory-service (mesmo contrato de saga).
+model EventoProcessado {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  /// Nome lógico do evento consumido (ex. "estoque.reservado", "estoque.insuficiente").
+  evento       String
+  /// Identificador do agregado de referência (ex. pedidoId).
+  referenciaId String   @map("referencia_id")
+
+  processadoEm DateTime @default(now()) @map("processado_em")
+
+  @@unique([evento, referenciaId], name: "evento_referenciaId")
+  @@index([tenantId])
+  @@map("eventos_processados")
 }
 
 // ─── Pagamento ───────────────────────────────────────────────

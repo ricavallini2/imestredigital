@@ -35,8 +35,15 @@ export class RolesGuard implements CanActivate {
     // Obtém o usuário da requisição (injetado pelo JwtAuthGuard)
     const { user } = context.switchToHttp().getRequest();
 
-    // Verifica se o cargo do usuário está na lista permitida
-    if (!cargosExigidos.includes(user.cargo)) {
+    // Comparação case-insensitive: o cargo pode chegar em qualquer caixa
+    // (JWT usa lowercase; o banco grava UPPERCASE). Normaliza ambos os
+    // lados para evitar bypass ou falso negativo por diferença de caixa.
+    const cargoUsuario = (user?.cargo ?? '').toLowerCase();
+    const permitido = cargosExigidos.some(
+      (cargo) => cargo.toLowerCase() === cargoUsuario,
+    );
+
+    if (!permitido) {
       throw new ForbiddenException(
         'Você não tem permissão para acessar este recurso. ' +
         `Cargo necessário: ${cargosExigidos.join(' ou ')}`

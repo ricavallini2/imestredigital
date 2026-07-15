@@ -1,9 +1,10 @@
 // Mock data para o módulo Fiscal — dev sem fiscal-service
 // globalThis garante estado compartilhado entre rotas no Next.js dev
 
+// Alinhado ao enum Prisma `StatusNotaFiscal` (fiscal-service).
 export type StatusNF =
-  | 'RASCUNHO' | 'VALIDADA' | 'PROCESSANDO' | 'EMITIDA'
-  | 'REJEITADA' | 'CANCELADA' | 'DENEGADA';
+  | 'RASCUNHO' | 'VALIDADA' | 'TRANSMITIDA' | 'AUTORIZADA'
+  | 'REJEITADA' | 'CANCELADA' | 'INUTILIZADA' | 'DENEGADA';
 
 export type TipoNF = 'NFE' | 'NFCE' | 'NFSE';
 export type RegimeTributario = 'SIMPLES_NACIONAL' | 'LUCRO_PRESUMIDO' | 'LUCRO_REAL';
@@ -182,7 +183,7 @@ function item(
 
 // ─── NFs Iniciais ─────────────────────────────────────────────────────────────
 const INITIAL_NFS: NotaFiscalMock[] = [
-  // 1 — EMITIDA — Tech Solutions — NFe — 2 itens — grande valor
+  // 1 — AUTORIZADA — Tech Solutions — NFe — 2 itens — grande valor
   (() => {
     const itens = [
       item('i1-1','iPhone 15 Pro 256GB','8517.12.31','6102','UN',2,8999,0,12,0.65,3),
@@ -190,7 +191,7 @@ const INITIAL_NFS: NotaFiscalMock[] = [
     ];
     return {
       id:'nf-001', numero:'000123456', serie:'1', tipo:'NFE' as TipoNF,
-      naturezaOperacao:'Venda de Mercadoria', finalidade:'NORMAL' as const, status:'EMITIDA' as StatusNF,
+      naturezaOperacao:'Venda de Mercadoria', finalidade:'NORMAL' as const, status:'AUTORIZADA' as StatusNF,
       regimeTributario:'LUCRO_PRESUMIDO' as RegimeTributario,
       destinatario:'Tech Solutions Ltda', destinatarioCnpjCpf:'11.222.333/0001-44',
       destinatarioUF:'SP', destinatarioEmail:'compras@techsolutions.com',
@@ -205,12 +206,12 @@ const INITIAL_NFS: NotaFiscalMock[] = [
     };
   })(),
 
-  // 2 — EMITIDA — balcão — NFCe
+  // 2 — AUTORIZADA — balcão — NFCe
   (() => {
     const itens = [item('i2-1','Headphone Sony WH-1000XM5','8518.30.00','5102','UN',1,1899,0,12,0.65,3)];
     return {
       id:'nf-002', numero:'000000045', serie:'1', tipo:'NFCE' as TipoNF,
-      naturezaOperacao:'Venda ao Consumidor', finalidade:'NORMAL' as const, status:'EMITIDA' as StatusNF,
+      naturezaOperacao:'Venda ao Consumidor', finalidade:'NORMAL' as const, status:'AUTORIZADA' as StatusNF,
       regimeTributario:'LUCRO_PRESUMIDO' as RegimeTributario,
       destinatario:'Consumidor Final', destinatarioCnpjCpf:'',
       destinatarioUF:'SP',
@@ -223,7 +224,7 @@ const INITIAL_NFS: NotaFiscalMock[] = [
     };
   })(),
 
-  // 3 — EMITIDA — interstate — Distribuidora ABC
+  // 3 — AUTORIZADA — interstate — Distribuidora ABC
   (() => {
     const itens = [
       item('i3-1','Tênis Nike Air Max 270','6402.99.39','6102','PAR',10,699,200,12,0.65,3),
@@ -232,7 +233,7 @@ const INITIAL_NFS: NotaFiscalMock[] = [
     ];
     return {
       id:'nf-003', numero:'000123457', serie:'1', tipo:'NFE' as TipoNF,
-      naturezaOperacao:'Venda de Mercadoria', finalidade:'NORMAL' as const, status:'EMITIDA' as StatusNF,
+      naturezaOperacao:'Venda de Mercadoria', finalidade:'NORMAL' as const, status:'AUTORIZADA' as StatusNF,
       regimeTributario:'LUCRO_PRESUMIDO' as RegimeTributario,
       destinatario:'Distribuidora ABC', destinatarioCnpjCpf:'44.555.666/0001-77',
       destinatarioUF:'SP', destinatarioEmail:'compras@abc.com',
@@ -246,12 +247,12 @@ const INITIAL_NFS: NotaFiscalMock[] = [
     };
   })(),
 
-  // 4 — EMITIDA — NFSe (serviço)
+  // 4 — AUTORIZADA — NFSe (serviço)
   (() => {
     const itens = [item('i4-1','Consultoria em TI — 10h','9999.99.99','5933','HRS',10,350,0,0,0.65,3,'500')];
     return {
       id:'nf-004', numero:'000000892', serie:'1', tipo:'NFSE' as TipoNF,
-      naturezaOperacao:'Prestação de Serviços', finalidade:'NORMAL' as const, status:'EMITIDA' as StatusNF,
+      naturezaOperacao:'Prestação de Serviços', finalidade:'NORMAL' as const, status:'AUTORIZADA' as StatusNF,
       regimeTributario:'LUCRO_PRESUMIDO' as RegimeTributario,
       destinatario:'Supermercado Central', destinatarioCnpjCpf:'33.444.555/0001-66',
       destinatarioUF:'SP', destinatarioEmail:'ti@central.com',
@@ -265,7 +266,7 @@ const INITIAL_NFS: NotaFiscalMock[] = [
     };
   })(),
 
-  // 5 — EMITIDA — balcão — NFCe
+  // 5 — AUTORIZADA — balcão — NFCe
   (() => {
     const itens = [
       item('i5-1','Tênis Nike Air Max 270','6402.99.39','5102','PAR',1,699,50,12,0.65,3),
@@ -273,7 +274,7 @@ const INITIAL_NFS: NotaFiscalMock[] = [
     ];
     return {
       id:'nf-005', numero:'000000046', serie:'1', tipo:'NFCE' as TipoNF,
-      naturezaOperacao:'Venda ao Consumidor', finalidade:'NORMAL' as const, status:'EMITIDA' as StatusNF,
+      naturezaOperacao:'Venda ao Consumidor', finalidade:'NORMAL' as const, status:'AUTORIZADA' as StatusNF,
       regimeTributario:'LUCRO_PRESUMIDO' as RegimeTributario,
       destinatario:'Consumidor Final', destinatarioCnpjCpf:'',
       destinatarioUF:'SP',
@@ -286,12 +287,12 @@ const INITIAL_NFS: NotaFiscalMock[] = [
     };
   })(),
 
-  // 6 — EMITIDA
+  // 6 — AUTORIZADA
   (() => {
     const itens = [item('i6-1','GoPro HERO12 Black','9006.59.00','6102','UN',1,2199,0,12,0.65,3)];
     return {
       id:'nf-006', numero:'000123458', serie:'1', tipo:'NFE' as TipoNF,
-      naturezaOperacao:'Venda de Mercadoria', finalidade:'NORMAL' as const, status:'EMITIDA' as StatusNF,
+      naturezaOperacao:'Venda de Mercadoria', finalidade:'NORMAL' as const, status:'AUTORIZADA' as StatusNF,
       regimeTributario:'LUCRO_PRESUMIDO' as RegimeTributario,
       destinatario:'Carlos Mendes', destinatarioCnpjCpf:'123.456.789-09',
       destinatarioUF:'SP',
@@ -304,12 +305,12 @@ const INITIAL_NFS: NotaFiscalMock[] = [
     };
   })(),
 
-  // 7 — EMITIDA
+  // 7 — AUTORIZADA
   (() => {
     const itens = [item('i7-1','Samsung Galaxy S24 Ultra 256GB','8517.12.31','6102','UN',3,6499,300,12,0.65,3)];
     return {
       id:'nf-007', numero:'000123459', serie:'1', tipo:'NFE' as TipoNF,
-      naturezaOperacao:'Venda de Mercadoria', finalidade:'NORMAL' as const, status:'EMITIDA' as StatusNF,
+      naturezaOperacao:'Venda de Mercadoria', finalidade:'NORMAL' as const, status:'AUTORIZADA' as StatusNF,
       regimeTributario:'LUCRO_PRESUMIDO' as RegimeTributario,
       destinatario:'Tech Solutions Ltda', destinatarioCnpjCpf:'11.222.333/0001-44',
       destinatarioUF:'SP', destinatarioEmail:'ti@techsolutions.com',
@@ -322,12 +323,12 @@ const INITIAL_NFS: NotaFiscalMock[] = [
     };
   })(),
 
-  // 8 — EMITIDA — mochila
+  // 8 — AUTORIZADA — mochila
   (() => {
     const itens = [item('i8-1','Mochila Samsonite Pro-DLX 5','4202.92.20','5102','UN',2,899,0,12,0.65,3)];
     return {
       id:'nf-008', numero:'000000047', serie:'1', tipo:'NFCE' as TipoNF,
-      naturezaOperacao:'Venda ao Consumidor', finalidade:'NORMAL' as const, status:'EMITIDA' as StatusNF,
+      naturezaOperacao:'Venda ao Consumidor', finalidade:'NORMAL' as const, status:'AUTORIZADA' as StatusNF,
       regimeTributario:'LUCRO_PRESUMIDO' as RegimeTributario,
       destinatario:'Consumidor Final', destinatarioCnpjCpf:'',
       destinatarioUF:'SP',
@@ -339,12 +340,12 @@ const INITIAL_NFS: NotaFiscalMock[] = [
     };
   })(),
 
-  // 9 — PROCESSANDO
+  // 9 — TRANSMITIDA
   (() => {
     const itens = [item('i9-1','Notebook Dell Inspiron 15','8471.30.19','6102','UN',2,4299,0,12,0.65,3)];
     return {
       id:'nf-009', numero:'000123460', serie:'1', tipo:'NFE' as TipoNF,
-      naturezaOperacao:'Venda de Mercadoria', finalidade:'NORMAL' as const, status:'PROCESSANDO' as StatusNF,
+      naturezaOperacao:'Venda de Mercadoria', finalidade:'NORMAL' as const, status:'TRANSMITIDA' as StatusNF,
       regimeTributario:'LUCRO_PRESUMIDO' as RegimeTributario,
       destinatario:'Supermercado Central', destinatarioCnpjCpf:'33.444.555/0001-66',
       destinatarioUF:'SP',
@@ -355,12 +356,12 @@ const INITIAL_NFS: NotaFiscalMock[] = [
     };
   })(),
 
-  // 10 — PROCESSANDO — recente
+  // 10 — TRANSMITIDA — recente
   (() => {
     const itens = [item('i10-1','iPhone 15 Pro 256GB','8517.12.31','5102','UN',1,8999,500,12,0.65,3)];
     return {
       id:'nf-010', numero:'000123461', serie:'1', tipo:'NFE' as TipoNF,
-      naturezaOperacao:'Venda de Mercadoria', finalidade:'NORMAL' as const, status:'PROCESSANDO' as StatusNF,
+      naturezaOperacao:'Venda de Mercadoria', finalidade:'NORMAL' as const, status:'TRANSMITIDA' as StatusNF,
       regimeTributario:'LUCRO_PRESUMIDO' as RegimeTributario,
       destinatario:'Roberto Nunes', destinatarioCnpjCpf:'987.654.321-00',
       destinatarioUF:'SP',
@@ -500,7 +501,7 @@ const INITIAL_REGRAS: RegraFiscalMock[] = [
 
 // ─── IA ───────────────────────────────────────────────────────────────────────
 export function analisarFiscalIA(nfs: NotaFiscalMock[], config: ConfiguracaoFiscalMock) {
-  const emitidas   = nfs.filter((n) => n.status === 'EMITIDA').length;
+  const emitidas   = nfs.filter((n) => n.status === 'AUTORIZADA').length;
   const rejeitadas = nfs.filter((n) => n.status === 'REJEITADA').length;
   const canceladas = nfs.filter((n) => n.status === 'CANCELADA').length;
   const total      = nfs.filter((n) => n.status !== 'RASCUNHO').length;
@@ -511,7 +512,7 @@ export function analisarFiscalIA(nfs: NotaFiscalMock[], config: ConfiguracaoFisc
 
   // Score componentes (0-100 cada)
   const scoreEmissao    = Math.round(taxaEmissao * 40);
-  const scoreCFOP       = nfs.filter((n) => n.status === 'EMITIDA').length > 0 ? 30 : 15;
+  const scoreCFOP       = nfs.filter((n) => n.status === 'AUTORIZADA').length > 0 ? 30 : 15;
   const scoreCertificado = config.certificadoStatus === 'VALIDO' ? 20 : 0;
   const scoreAmbiente   = config.ambiente === 'PRODUCAO' ? 10 : 5;
   const scoreCompliance = scoreEmissao + scoreCFOP + scoreCertificado + scoreAmbiente;
@@ -519,7 +520,7 @@ export function analisarFiscalIA(nfs: NotaFiscalMock[], config: ConfiguracaoFisc
   const saude = scoreCompliance >= 85 ? 'EXCELENTE' : scoreCompliance >= 70 ? 'BOA' : scoreCompliance >= 50 ? 'REGULAR' : 'CRITICA';
 
   // Totais de impostos das NFs emitidas
-  const nfsEmitidas = nfs.filter((n) => n.status === 'EMITIDA');
+  const nfsEmitidas = nfs.filter((n) => n.status === 'AUTORIZADA');
   const totalFaturado  = nfsEmitidas.reduce((s, n) => s + n.valorTotal, 0);
   const totalICMS      = nfsEmitidas.reduce((s, n) => s + n.valorICMS, 0);
   const totalPIS       = nfsEmitidas.reduce((s, n) => s + n.valorPIS, 0);
@@ -532,7 +533,7 @@ export function analisarFiscalIA(nfs: NotaFiscalMock[], config: ConfiguracaoFisc
   if (config.ambiente === 'HOMOLOGACAO') alertas.push({ tipo: 'ATENCAO', titulo: 'Ambiente de Homologação ativo', descricao: 'As notas emitidas não têm validade fiscal. Configure o ambiente de Produção.' });
   if (config.certificadoStatus !== 'VALIDO') alertas.push({ tipo: 'CRITICO', titulo: 'Certificado digital inválido', descricao: 'O certificado A1 não está configurado ou expirou. A emissão de NF-e será bloqueada.' });
   if (canceladas > 0 && (canceladas / total) > 0.1) alertas.push({ tipo: 'ATENCAO', titulo: `Taxa de cancelamento elevada (${(taxaCancelamento*100).toFixed(1)}%)`, descricao: 'Revise o processo de emissão para reduzir cancelamentos desnecessários.' });
-  if (nfs.filter((n) => n.status === 'PROCESSANDO').length > 0) alertas.push({ tipo: 'INFO', titulo: `${nfs.filter(n=>n.status==='PROCESSANDO').length} NF-e em processamento`, descricao: 'Aguardando resposta da SEFAZ. Verifique em alguns minutos.' });
+  if (nfs.filter((n) => n.status === 'TRANSMITIDA').length > 0) alertas.push({ tipo: 'INFO', titulo: `${nfs.filter(n=>n.status==='TRANSMITIDA').length} NF-e em processamento`, descricao: 'Aguardando resposta da SEFAZ. Verifique em alguns minutos.' });
 
   const oportunidades: { titulo: string; descricao: string; economia?: string }[] = [];
   if (config.regimeTributario === 'LUCRO_PRESUMIDO' && totalFaturado < 4800000) {
@@ -559,7 +560,7 @@ export function analisarFiscalIA(nfs: NotaFiscalMock[], config: ConfiguracaoFisc
       taxaRejeicao: +(taxaRejeicao*100).toFixed(1),
       taxaEmissao:  +(taxaEmissao*100).toFixed(1),
       nfsPorStatus: { emitidas, rejeitadas, canceladas,
-        processando: nfs.filter(n=>n.status==='PROCESSANDO').length,
+        processando: nfs.filter(n=>n.status==='TRANSMITIDA').length,
         rascunho:    nfs.filter(n=>n.status==='RASCUNHO').length,
         validada:    nfs.filter(n=>n.status==='VALIDADA').length,
       },

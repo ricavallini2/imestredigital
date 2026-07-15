@@ -5,7 +5,7 @@
  * Implementa retry com backoff exponencial e circuit breaker para falhas consecutivas.
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import * as crypto from 'crypto';
@@ -257,8 +257,9 @@ export class WebhookService {
     dados: Partial<ConfiguracaoWebhookData>,
   ): Promise<any> {
     try {
-      const webhook = await this.prisma.configuracaoWebhook.update({
-        where: { id: webhookId },
+      // Write escopado por tenantId (nunca where:{id} sozinho).
+      const resultado = await this.prisma.configuracaoWebhook.updateMany({
+        where: { id: webhookId, tenantId },
         data: {
           ...(dados.nome && { nome: dados.nome }),
           ...(dados.url && { url: dados.url }),
@@ -268,8 +269,12 @@ export class WebhookService {
         },
       });
 
+      if (resultado.count === 0) {
+        throw new NotFoundException('Webhook não encontrado');
+      }
+
       this.logger.log(`Webhook atualizado: ${webhookId}`);
-      return webhook;
+      return this.obterWebhook(tenantId, webhookId);
     } catch (erro) {
       this.logger.error('Erro ao atualizar webhook:', erro);
       throw erro;
@@ -298,12 +303,13 @@ export class WebhookService {
    */
   async obterWebhook(tenantId: string, webhookId: string): Promise<any> {
     try {
-      const webhook = await this.prisma.configuracaoWebhook.findUnique({
-        where: { id: webhookId },
+      // Leitura escopada por tenantId (findFirst com { id, tenantId }).
+      const webhook = await this.prisma.configuracaoWebhook.findFirst({
+        where: { id: webhookId, tenantId },
       });
 
-      if (!webhook || webhook.tenantId !== tenantId) {
-        throw new Error('Webhook não encontrado');
+      if (!webhook) {
+        throw new NotFoundException('Webhook não encontrado');
       }
 
       return webhook;
@@ -318,13 +324,18 @@ export class WebhookService {
    */
   async desativarWebhook(tenantId: string, webhookId: string): Promise<any> {
     try {
-      const webhook = await this.prisma.configuracaoWebhook.update({
-        where: { id: webhookId },
+      // Write escopado por tenantId (nunca where:{id} sozinho).
+      const resultado = await this.prisma.configuracaoWebhook.updateMany({
+        where: { id: webhookId, tenantId },
         data: { ativo: false },
       });
 
+      if (resultado.count === 0) {
+        throw new NotFoundException('Webhook não encontrado');
+      }
+
       this.logger.log(`Webhook desativado: ${webhookId}`);
-      return webhook;
+      return this.obterWebhook(tenantId, webhookId);
     } catch (erro) {
       this.logger.error('Erro ao desativar webhook:', erro);
       throw erro;

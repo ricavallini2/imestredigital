@@ -5,20 +5,22 @@
 
 import { BaseEntity, EntityId, Endereco } from '../common';
 
-/** Tipo de pessoa (física ou jurídica) */
+// Enums UPPERCASE alinhados ao padrão canônico dos schemas Prisma.
+
+/** Tipo de pessoa (física ou jurídica). Prisma `TipoCliente` = PESSOA_FISICA/PESSOA_JURIDICA. */
 export enum TipoPessoa {
-  FISICA = 'fisica',
-  JURIDICA = 'juridica',
+  FISICA = 'FISICA',
+  JURIDICA = 'JURIDICA',
 }
 
-/** Segmento do cliente atribuído por IA */
+/** Segmento do cliente atribuído por IA (classificação de CRM). */
 export enum SegmentoCliente {
-  VIP = 'vip',
-  RECORRENTE = 'recorrente',
-  OCASIONAL = 'ocasional',
-  NOVO = 'novo',
-  EM_RISCO = 'em_risco',
-  INATIVO = 'inativo',
+  VIP = 'VIP',
+  RECORRENTE = 'RECORRENTE',
+  OCASIONAL = 'OCASIONAL',
+  NOVO = 'NOVO',
+  EM_RISCO = 'EM_RISCO',
+  INATIVO = 'INATIVO',
 }
 
 /** Cliente do sistema */

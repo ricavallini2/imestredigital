@@ -16,6 +16,7 @@ import {
   Param,
   Query,
   Request,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -24,9 +25,11 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { InsightsService } from './insights.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Insights')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('insights')
 export class InsightsController {
   constructor(private service: InsightsService) {}
@@ -72,8 +75,8 @@ export class InsightsController {
     status: 200,
     description: 'Insight encontrado',
   })
-  async obter(@Param('id') insightId: string) {
-    return insightId; // Seria implementado completo
+  async obter(@Request() req, @Param('id') insightId: string) {
+    return this.service.obterInsight(req.tenantId, insightId);
   }
 
   /**

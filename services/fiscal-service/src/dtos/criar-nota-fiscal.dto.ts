@@ -2,7 +2,15 @@
  * DTO para criar Nota Fiscal
  */
 
-import { IsString, IsNumber, IsOptional, IsISO8601, IsArray, ValidateNested, Min } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsISO8601,
+  IsArray,
+  ValidateNested,
+  Min,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ItemNotaFiscalDto } from './item-nota-fiscal.dto';
 
@@ -99,17 +107,17 @@ export class CriarNotaFiscalDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
-  valorFrete?: number; // Em centavos
+  valorFrete?: number; // Em reais
 
   @IsOptional()
   @IsNumber()
   @Min(0)
-  valorSeguro?: number; // Em centavos
+  valorSeguro?: number; // Em reais
 
   @IsOptional()
   @IsNumber()
   @Min(0)
-  valorOutros?: number; // Em centavos
+  valorOutros?: number; // Em reais
 
   @IsOptional()
   @IsString()

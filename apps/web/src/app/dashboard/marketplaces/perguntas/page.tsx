@@ -21,7 +21,8 @@ import { usePerguntas, useResponderPergunta, Pergunta } from '@/hooks/useMarketp
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function tempoRelativo(iso: string): string {
+function tempoRelativo(iso?: string | null): string {
+  if (!iso) return '—';
   const diff = Date.now() - new Date(iso).getTime();
   const min  = Math.floor(diff / 60000);
   if (min < 1)  return 'agora';

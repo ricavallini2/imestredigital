@@ -2,6 +2,10 @@ import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { ProdutorEventosService } from './produtor-eventos.service';
+import { KAFKA_SERVICE } from './eventos.constants';
+
+// Re-export para compatibilidade com importadores existentes.
+export { KAFKA_SERVICE } from './eventos.constants';
 
 /**
  * Módulo de eventos Kafka
@@ -11,7 +15,7 @@ import { ProdutorEventosService } from './produtor-eventos.service';
   imports: [
     ClientsModule.registerAsync([
       {
-        name: 'KAFKA_SERVICE',
+        name: KAFKA_SERVICE,
         useFactory: (configService: ConfigService) => {
           const kafkaBrokers = (
             configService.get('KAFKA_BROKERS') || 'localhost:9092'

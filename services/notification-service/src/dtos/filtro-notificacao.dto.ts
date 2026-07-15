@@ -5,10 +5,15 @@
 import { IsOptional, IsEnum, IsString, IsNumberString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
+/**
+ * Status de notificação — alinhado 1:1 com o enum StatusNotificacao do
+ * schema Prisma (fonte da verdade). NÃO adicionar valores que não existam
+ * no Prisma (ex.: o antigo 'ENVIANDO', que não era persistido em lugar nenhum).
+ */
 export enum StatusNotificacao {
   PENDENTE = 'PENDENTE',
-  ENVIANDO = 'ENVIANDO',
   ENVIADA = 'ENVIADA',
+  ENTREGUE = 'ENTREGUE',
   FALHA = 'FALHA',
   LIDA = 'LIDA',
 }

@@ -5,10 +5,12 @@
 import { IsString, IsArray, IsBoolean, IsOptional, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
+/** Alinhado com o enum TipoTemplateNotificacao do schema Prisma. */
 export enum TipoTemplate {
   EMAIL = 'EMAIL',
   PUSH = 'PUSH',
   SMS = 'SMS',
+  WHATSAPP = 'WHATSAPP',
   INTERNA = 'INTERNA',
 }
 

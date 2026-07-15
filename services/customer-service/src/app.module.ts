@@ -19,6 +19,7 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { CacheModule } from './modules/cache/cache.module';
 import { TenantMiddleware } from './middleware/tenant.middleware';
 import { HealthController } from './controllers/health.controller';
+import { resolverJwtSecret } from './common/jwt-secret';
 
 // Módulos de domínio
 import { ClienteModule } from './modules/cliente/cliente.module';
@@ -45,7 +46,7 @@ import { KafkaModule } from './modules/kafka/kafka.module';
       global: true,
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.get('JWT_SECRET', 'dev-secret-trocar-em-producao'),
+        secret: resolverJwtSecret(config.get<string>('JWT_SECRET')),
         signOptions: {
           expiresIn: config.get('JWT_EXPIRATION', '1h'),
           issuer: 'imestredigital',

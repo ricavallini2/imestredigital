@@ -80,7 +80,11 @@ export const clientesService = {
   },
 
   criarEndereco: async (clienteId: string, dto: Omit<Endereco, 'id'>): Promise<Endereco> => {
-    const { data } = await api.post(`/v1/clientes/${clienteId}/enderecos`, dto);
+    // O backend (customer-service) usa `padrao`; o tipo do frontend usa `principal`.
+    // Traduzimos aqui, na fronteira da API, para manter o contrato consistente.
+    const { principal, ...resto } = dto;
+    const payload = { ...resto, padrao: principal };
+    const { data } = await api.post(`/v1/clientes/${clienteId}/enderecos`, payload);
     return data;
   },
 

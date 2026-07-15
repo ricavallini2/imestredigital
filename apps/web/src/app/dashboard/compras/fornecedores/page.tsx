@@ -1,13 +1,25 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   Building2, Plus, Search, Phone, Mail, MapPin,
   CheckCircle2, XCircle, ShoppingBag, DollarSign,
   Loader2, ChevronRight, X, AlertTriangle, Users,
-  TrendingUp, Calendar,
+  TrendingUp, Calendar, Pencil,
 } from 'lucide-react';
 import { useFornecedores, useCriarFornecedor, type Fornecedor } from '@/hooks/useCompras';
+
+// ─── Constantes ───────────────────────────────────────────────────────────────
+
+// RegimeTributario do contrato (parceiro-unificado). Ver docs/design/parceiro-unificado.md.
+const REGIMES_TRIBUTARIOS = [
+  { value: 'SIMPLES_NACIONAL', label: 'Simples Nacional' },
+  { value: 'MEI', label: 'MEI' },
+  { value: 'LUCRO_PRESUMIDO', label: 'Lucro Presumido' },
+  { value: 'LUCRO_REAL', label: 'Lucro Real' },
+  { value: 'ISENTO', label: 'Isento' },
+] as const
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
@@ -30,10 +42,23 @@ function ModalNovoFornecedor({
   onSuccess: () => void;
 }) {
   const { mutate: criar, isPending } = useCriarFornecedor();
+  // Fornecedor = parceiro com papel FORNECEDOR (PF MEI/autônomo ou PJ).
+  // Ver docs/design/parceiro-unificado.md. Campos fiscais alinhados ao contrato.
+  const [tipo, setTipo] = useState<'PF' | 'PJ'>('PJ');
   const [form, setForm] = useState({
+    // PJ
     razaoSocial: '',
     nomeFantasia: '',
     cnpj: '',
+    inscricaoEstadual: '',
+    ieIsento: false,
+    inscricaoMunicipal: '',
+    regimeTributario: '',
+    // PF
+    nome: '',
+    cpf: '',
+    rg: '',
+    // Comuns
     email: '',
     telefone: '',
     prazoMedioPagamento: 30,
@@ -46,41 +71,74 @@ function ModalNovoFornecedor({
   });
   const [erro, setErro] = useState('');
 
-  const setF = (field: string, value: string | number) =>
+  const setF = (field: string, value: string | number | boolean) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErro('');
-    if (!form.razaoSocial || !form.cnpj) {
-      setErro('Razão Social e CNPJ são obrigatórios.');
-      return;
+
+    if (tipo === 'PJ') {
+      if (!form.razaoSocial || !form.cnpj) {
+        setErro('Razão Social e CNPJ são obrigatórios para Pessoa Jurídica.');
+        return;
+      }
+      if (!form.ieIsento && !form.inscricaoEstadual) {
+        setErro('Inscrição Estadual é obrigatória (ou marque "Isento").');
+        return;
+      }
+    } else {
+      if (!form.nome || !form.cpf) {
+        setErro('Nome e CPF são obrigatórios para Pessoa Física.');
+        return;
+      }
     }
-    criar(
-      {
-        razaoSocial: form.razaoSocial,
-        nomeFantasia: form.nomeFantasia || form.razaoSocial,
-        cnpj: form.cnpj,
-        email: form.email,
-        telefone: form.telefone,
-        prazoMedioPagamento: form.prazoMedioPagamento,
-        endereco: {
-          logradouro: form.logradouro,
-          numero: form.numero,
-          bairro: form.bairro,
-          cidade: form.cidade,
-          uf: form.uf,
-          cep: form.cep,
-        },
+
+    const endereco = {
+      logradouro: form.logradouro,
+      numero: form.numero,
+      bairro: form.bairro,
+      cidade: form.cidade,
+      uf: form.uf,
+      cep: form.cep,
+    };
+
+    // Payload alinhado ao contrato de parceiro (papel FORNECEDOR). A rota mock
+    // normaliza por `tipo` (PF: nome/cpf/rg · PJ: razaoSocial/cnpj/IE/IM/regime).
+    const payload =
+      tipo === 'PJ'
+        ? {
+            tipo,
+            razaoSocial: form.razaoSocial,
+            nomeFantasia: form.nomeFantasia || form.razaoSocial,
+            cnpj: form.cnpj,
+            inscricaoEstadual: form.ieIsento ? '' : form.inscricaoEstadual,
+            ieIsento: form.ieIsento,
+            inscricaoMunicipal: form.inscricaoMunicipal,
+            regimeTributario: form.regimeTributario || undefined,
+            email: form.email,
+            telefone: form.telefone,
+            prazoMedioPagamento: form.prazoMedioPagamento,
+            endereco,
+          }
+        : {
+            tipo,
+            nome: form.nome,
+            cpf: form.cpf,
+            rg: form.rg,
+            email: form.email,
+            telefone: form.telefone,
+            prazoMedioPagamento: form.prazoMedioPagamento,
+            endereco,
+          };
+
+    criar(payload, {
+      onSuccess: () => {
+        onSuccess();
+        onClose();
       },
-      {
-        onSuccess: () => {
-          onSuccess();
-          onClose();
-        },
-        onError: () => setErro('Erro ao criar fornecedor. Tente novamente.'),
-      },
-    );
+      onError: () => setErro('Erro ao criar fornecedor. Tente novamente.'),
+    });
   };
 
   return (
@@ -106,41 +164,148 @@ function ModalNovoFornecedor({
             </div>
           )}
 
+          {/* Seletor de tipo de pessoa */}
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Tipo de Pessoa</p>
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { value: 'PJ' as const, label: 'Pessoa Jurídica' },
+                { value: 'PF' as const, label: 'Pessoa Física (MEI / autônomo)' },
+              ]).map((op) => (
+                <button
+                  key={op.value}
+                  type="button"
+                  onClick={() => setTipo(op.value)}
+                  className={`rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
+                    tipo === op.value
+                      ? 'border-marca-500 bg-marca-50 dark:bg-marca-900/20 text-marca-700 dark:text-marca-300'
+                      : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {op.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Dados básicos */}
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Dados da Empresa</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
+              {tipo === 'PJ' ? 'Dados da Empresa' : 'Dados Pessoais'}
+            </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                  Razão Social <span className="text-red-500">*</span>
-                </label>
-                <input
-                  value={form.razaoSocial}
-                  onChange={(e) => setF('razaoSocial', e.target.value)}
-                  placeholder="Ex.: Tech Distribuidora Ltda"
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-marca-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Nome Fantasia</label>
-                <input
-                  value={form.nomeFantasia}
-                  onChange={(e) => setF('nomeFantasia', e.target.value)}
-                  placeholder="Ex.: TechDist"
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-marca-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                  CNPJ <span className="text-red-500">*</span>
-                </label>
-                <input
-                  value={form.cnpj}
-                  onChange={(e) => setF('cnpj', e.target.value)}
-                  placeholder="XX.XXX.XXX/0001-XX"
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm font-mono text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-marca-500"
-                />
-              </div>
+              {tipo === 'PJ' ? (
+                <>
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      Razão Social <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      value={form.razaoSocial}
+                      onChange={(e) => setF('razaoSocial', e.target.value)}
+                      placeholder="Ex.: Tech Distribuidora Ltda"
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-marca-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Nome Fantasia</label>
+                    <input
+                      value={form.nomeFantasia}
+                      onChange={(e) => setF('nomeFantasia', e.target.value)}
+                      placeholder="Ex.: TechDist"
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-marca-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      CNPJ <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      value={form.cnpj}
+                      onChange={(e) => setF('cnpj', e.target.value)}
+                      placeholder="XX.XXX.XXX/0001-XX"
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm font-mono text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-marca-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      Inscrição Estadual {!form.ieIsento && <span className="text-red-500">*</span>}
+                    </label>
+                    <input
+                      value={form.inscricaoEstadual}
+                      onChange={(e) => setF('inscricaoEstadual', e.target.value)}
+                      disabled={form.ieIsento}
+                      placeholder={form.ieIsento ? 'Isento' : '000.000.000.000'}
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm font-mono text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-marca-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                    <label className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
+                      <input
+                        type="checkbox"
+                        checked={form.ieIsento}
+                        onChange={(e) => setF('ieIsento', e.target.checked)}
+                        className="rounded border-slate-300 text-marca-600 focus:ring-marca-500"
+                      />
+                      Isento
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Inscrição Municipal</label>
+                    <input
+                      value={form.inscricaoMunicipal}
+                      onChange={(e) => setF('inscricaoMunicipal', e.target.value)}
+                      placeholder="Opcional"
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm font-mono text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-marca-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Regime Tributário</label>
+                    <select
+                      value={form.regimeTributario}
+                      onChange={(e) => setF('regimeTributario', e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-marca-500"
+                    >
+                      <option value="">Selecione…</option>
+                      {REGIMES_TRIBUTARIOS.map((r) => (
+                        <option key={r.value} value={r.value}>{r.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      Nome Completo <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      value={form.nome}
+                      onChange={(e) => setF('nome', e.target.value)}
+                      placeholder="Ex.: José Carlos da Silva"
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-marca-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      CPF <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      value={form.cpf}
+                      onChange={(e) => setF('cpf', e.target.value)}
+                      placeholder="000.000.000-00"
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm font-mono text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-marca-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">RG</label>
+                    <input
+                      value={form.rg}
+                      onChange={(e) => setF('rg', e.target.value)}
+                      placeholder="Opcional"
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm font-mono text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-marca-500"
+                    />
+                  </div>
+                </>
+              )}
               <div>
                 <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">E-mail</label>
                 <input
@@ -341,7 +506,7 @@ export default function FornecedoresPage() {
             <input
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
-              placeholder="Buscar por nome, CNPJ, e-mail..."
+              placeholder="Buscar por nome, CNPJ, CPF, e-mail..."
               className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-marca-500"
             />
           </div>
@@ -391,7 +556,13 @@ export default function FornecedoresPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {fornecedores.map((f) => (
+            {fornecedores.map((f) => {
+              // Rótulo de exibição do parceiro — reaproveitado no filtro de compras.
+              const nomeExibicao =
+                f.tipo === 'PF'
+                  ? f.nome || f.razaoSocial
+                  : f.nomeFantasia || f.razaoSocial;
+              return (
               <div
                 key={f.id}
                 className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 hover:border-marca-200 dark:hover:border-marca-700 transition-colors"
@@ -403,10 +574,17 @@ export default function FornecedoresPage() {
                       <Building2 className="h-5 w-5 text-marca-600" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-slate-900 dark:text-slate-100 truncate">
-                        {f.nomeFantasia || f.razaoSocial}
+                      <p className="font-semibold text-slate-900 dark:text-slate-100 truncate flex items-center gap-1.5">
+                        <span className="truncate">
+                          {nomeExibicao}
+                        </span>
+                        <span className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
+                          {f.tipo ?? 'PJ'}
+                        </span>
                       </p>
-                      <p className="text-xs text-slate-400 truncate">{f.razaoSocial}</p>
+                      <p className="text-xs text-slate-400 truncate">
+                        {f.tipo === 'PF' ? 'Pessoa Física' : f.razaoSocial}
+                      </p>
                     </div>
                   </div>
                   <span
@@ -428,7 +606,9 @@ export default function FornecedoresPage() {
                 <div className="space-y-1.5 mb-4">
                   <div className="flex items-center gap-2 text-xs text-slate-500">
                     <MapPin className="h-3 w-3 shrink-0" />
-                    <span className="truncate">{f.endereco.cidade}/{f.endereco.uf} · {f.cnpj}</span>
+                    <span className="truncate">
+                      {f.endereco.cidade}/{f.endereco.uf} · {f.tipo === 'PF' ? f.cpf : f.cnpj}
+                    </span>
                   </div>
                   {f.email && (
                     <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -484,16 +664,24 @@ export default function FornecedoresPage() {
 
                 {/* Ações */}
                 <div className="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
-                  <button className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-600 py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                  <Link
+                    href={`/dashboard/clientes/${f.id}/editar`}
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-600 py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    <Pencil className="h-3 w-3" />
                     Editar
-                  </button>
-                  <button className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-marca-50 dark:bg-marca-900/20 py-2 text-xs font-medium text-marca-600 dark:text-marca-400 hover:bg-marca-100 dark:hover:bg-marca-900/30 transition-colors">
+                  </Link>
+                  <Link
+                    href={`/dashboard/compras?fornecedorId=${encodeURIComponent(f.id)}&fornecedor=${encodeURIComponent(nomeExibicao)}`}
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-marca-50 dark:bg-marca-900/20 py-2 text-xs font-medium text-marca-600 dark:text-marca-400 hover:bg-marca-100 dark:hover:bg-marca-900/30 transition-colors"
+                  >
                     Ver Compras
                     <ChevronRight className="h-3 w-3" />
-                  </button>
+                  </Link>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

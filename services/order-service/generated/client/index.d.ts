@@ -30,8 +30,16 @@ export type ItemPedido = $Result.DefaultSelection<Prisma.$ItemPedidoPayload>
  */
 export type HistoricoPedido = $Result.DefaultSelection<Prisma.$HistoricoPedidoPayload>
 /**
+ * Model EventoProcessado
+ * Registro de eventos já processados (idempotência do consumo Kafka).
+ * Garante que o mesmo evento (ex. estoque.reservado para um pedidoId) só
+ * produza efeito colateral uma única vez, mesmo com reentrega do broker.
+ * Espelha o modelo homônimo do inventory-service (mesmo contrato de saga).
+ */
+export type EventoProcessado = $Result.DefaultSelection<Prisma.$EventoProcessadoPayload>
+/**
  * Model Pagamento
- * Informações de pagamento vinculadas ao pedido.
+ * 
  */
 export type Pagamento = $Result.DefaultSelection<Prisma.$PagamentoPayload>
 /**
@@ -44,6 +52,140 @@ export type Devolucao = $Result.DefaultSelection<Prisma.$DevolucaoPayload>
  * Itens específicos que fazem parte da devolução.
  */
 export type ItemDevolucao = $Result.DefaultSelection<Prisma.$ItemDevolucaoPayload>
+
+/**
+ * Enums
+ */
+export namespace $Enums {
+  export const OrigemPedido: {
+  LOJA_FISICA: 'LOJA_FISICA',
+  ECOMMERCE: 'ECOMMERCE',
+  MARKETPLACE: 'MARKETPLACE',
+  TELEFONE: 'TELEFONE',
+  WHATSAPP: 'WHATSAPP',
+  MANUAL: 'MANUAL',
+  OUTRO: 'OUTRO'
+};
+
+export type OrigemPedido = (typeof OrigemPedido)[keyof typeof OrigemPedido]
+
+
+export const StatusPedido: {
+  RASCUNHO: 'RASCUNHO',
+  PENDENTE: 'PENDENTE',
+  CONFIRMADO: 'CONFIRMADO',
+  EM_SEPARACAO: 'EM_SEPARACAO',
+  FATURADO: 'FATURADO',
+  ENVIADO: 'ENVIADO',
+  ENTREGUE: 'ENTREGUE',
+  CANCELADO: 'CANCELADO',
+  DEVOLVIDO: 'DEVOLVIDO'
+};
+
+export type StatusPedido = (typeof StatusPedido)[keyof typeof StatusPedido]
+
+
+export const StatusPagamento: {
+  PENDENTE: 'PENDENTE',
+  PAGO: 'PAGO',
+  PARCIAL: 'PARCIAL',
+  REEMBOLSADO: 'REEMBOLSADO',
+  CANCELADO: 'CANCELADO'
+};
+
+export type StatusPagamento = (typeof StatusPagamento)[keyof typeof StatusPagamento]
+
+
+export const MetodoPagamento: {
+  DINHEIRO: 'DINHEIRO',
+  PIX: 'PIX',
+  CARTAO_CREDITO: 'CARTAO_CREDITO',
+  CARTAO_DEBITO: 'CARTAO_DEBITO',
+  BOLETO: 'BOLETO',
+  TRANSFERENCIA: 'TRANSFERENCIA'
+};
+
+export type MetodoPagamento = (typeof MetodoPagamento)[keyof typeof MetodoPagamento]
+
+
+export const TipoPagamento: {
+  CARTAO_CREDITO: 'CARTAO_CREDITO',
+  CARTAO_DEBITO: 'CARTAO_DEBITO',
+  BOLETO: 'BOLETO',
+  PIX: 'PIX',
+  TRANSFERENCIA: 'TRANSFERENCIA',
+  MARKETPLACE: 'MARKETPLACE',
+  DINHEIRO: 'DINHEIRO'
+};
+
+export type TipoPagamento = (typeof TipoPagamento)[keyof typeof TipoPagamento]
+
+
+export const StatusPagamentoDetalhado: {
+  PENDENTE: 'PENDENTE',
+  PROCESSANDO: 'PROCESSANDO',
+  APROVADO: 'APROVADO',
+  RECUSADO: 'RECUSADO',
+  ESTORNADO: 'ESTORNADO'
+};
+
+export type StatusPagamentoDetalhado = (typeof StatusPagamentoDetalhado)[keyof typeof StatusPagamentoDetalhado]
+
+
+export const MotivoDevolucao: {
+  DEFEITO: 'DEFEITO',
+  ARREPENDIMENTO: 'ARREPENDIMENTO',
+  TROCA: 'TROCA',
+  PRODUTO_ERRADO: 'PRODUTO_ERRADO',
+  OUTRO: 'OUTRO'
+};
+
+export type MotivoDevolucao = (typeof MotivoDevolucao)[keyof typeof MotivoDevolucao]
+
+
+export const StatusDevolucao: {
+  SOLICITADA: 'SOLICITADA',
+  APROVADA: 'APROVADA',
+  RECEBIDA: 'RECEBIDA',
+  REEMBOLSADA: 'REEMBOLSADA',
+  REJEITADA: 'REJEITADA'
+};
+
+export type StatusDevolucao = (typeof StatusDevolucao)[keyof typeof StatusDevolucao]
+
+}
+
+export type OrigemPedido = $Enums.OrigemPedido
+
+export const OrigemPedido: typeof $Enums.OrigemPedido
+
+export type StatusPedido = $Enums.StatusPedido
+
+export const StatusPedido: typeof $Enums.StatusPedido
+
+export type StatusPagamento = $Enums.StatusPagamento
+
+export const StatusPagamento: typeof $Enums.StatusPagamento
+
+export type MetodoPagamento = $Enums.MetodoPagamento
+
+export const MetodoPagamento: typeof $Enums.MetodoPagamento
+
+export type TipoPagamento = $Enums.TipoPagamento
+
+export const TipoPagamento: typeof $Enums.TipoPagamento
+
+export type StatusPagamentoDetalhado = $Enums.StatusPagamentoDetalhado
+
+export const StatusPagamentoDetalhado: typeof $Enums.StatusPagamentoDetalhado
+
+export type MotivoDevolucao = $Enums.MotivoDevolucao
+
+export const MotivoDevolucao: typeof $Enums.MotivoDevolucao
+
+export type StatusDevolucao = $Enums.StatusDevolucao
+
+export const StatusDevolucao: typeof $Enums.StatusDevolucao
 
 /**
  * ##  Prisma Client ʲˢ
@@ -197,6 +339,16 @@ export class PrismaClient<
     * ```
     */
   get historicoPedido(): Prisma.HistoricoPedidoDelegate<ExtArgs>;
+
+  /**
+   * `prisma.eventoProcessado`: Exposes CRUD operations for the **EventoProcessado** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more EventoProcessados
+    * const eventoProcessados = await prisma.eventoProcessado.findMany()
+    * ```
+    */
+  get eventoProcessado(): Prisma.EventoProcessadoDelegate<ExtArgs>;
 
   /**
    * `prisma.pagamento`: Exposes CRUD operations for the **Pagamento** model.
@@ -671,6 +823,7 @@ export namespace Prisma {
     Pedido: 'Pedido',
     ItemPedido: 'ItemPedido',
     HistoricoPedido: 'HistoricoPedido',
+    EventoProcessado: 'EventoProcessado',
     Pagamento: 'Pagamento',
     Devolucao: 'Devolucao',
     ItemDevolucao: 'ItemDevolucao'
@@ -689,7 +842,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "pedido" | "itemPedido" | "historicoPedido" | "pagamento" | "devolucao" | "itemDevolucao"
+      modelProps: "pedido" | "itemPedido" | "historicoPedido" | "eventoProcessado" | "pagamento" | "devolucao" | "itemDevolucao"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -900,6 +1053,76 @@ export namespace Prisma {
           count: {
             args: Prisma.HistoricoPedidoCountArgs<ExtArgs>
             result: $Utils.Optional<HistoricoPedidoCountAggregateOutputType> | number
+          }
+        }
+      }
+      EventoProcessado: {
+        payload: Prisma.$EventoProcessadoPayload<ExtArgs>
+        fields: Prisma.EventoProcessadoFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.EventoProcessadoFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.EventoProcessadoFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>
+          }
+          findFirst: {
+            args: Prisma.EventoProcessadoFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.EventoProcessadoFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>
+          }
+          findMany: {
+            args: Prisma.EventoProcessadoFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>[]
+          }
+          create: {
+            args: Prisma.EventoProcessadoCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>
+          }
+          createMany: {
+            args: Prisma.EventoProcessadoCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.EventoProcessadoCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>[]
+          }
+          delete: {
+            args: Prisma.EventoProcessadoDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>
+          }
+          update: {
+            args: Prisma.EventoProcessadoUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>
+          }
+          deleteMany: {
+            args: Prisma.EventoProcessadoDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.EventoProcessadoUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.EventoProcessadoUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>
+          }
+          aggregate: {
+            args: Prisma.EventoProcessadoAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateEventoProcessado>
+          }
+          groupBy: {
+            args: Prisma.EventoProcessadoGroupByArgs<ExtArgs>
+            result: $Utils.Optional<EventoProcessadoGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.EventoProcessadoCountArgs<ExtArgs>
+            result: $Utils.Optional<EventoProcessadoCountAggregateOutputType> | number
           }
         }
       }
@@ -1433,12 +1656,12 @@ export namespace Prisma {
     clienteNome: string | null
     clienteEmail: string | null
     clienteCpfCnpj: string | null
-    origem: string | null
+    origem: $Enums.OrigemPedido | null
     canalOrigem: string | null
     pedidoExternoId: string | null
-    status: string | null
-    statusPagamento: string | null
-    metodoPagamento: string | null
+    status: $Enums.StatusPedido | null
+    statusPagamento: $Enums.StatusPagamento | null
+    metodoPagamento: $Enums.MetodoPagamento | null
     parcelas: number | null
     valorProdutos: Decimal | null
     valorDesconto: Decimal | null
@@ -1469,12 +1692,12 @@ export namespace Prisma {
     clienteNome: string | null
     clienteEmail: string | null
     clienteCpfCnpj: string | null
-    origem: string | null
+    origem: $Enums.OrigemPedido | null
     canalOrigem: string | null
     pedidoExternoId: string | null
-    status: string | null
-    statusPagamento: string | null
-    metodoPagamento: string | null
+    status: $Enums.StatusPedido | null
+    statusPagamento: $Enums.StatusPagamento | null
+    metodoPagamento: $Enums.MetodoPagamento | null
     parcelas: number | null
     valorProdutos: Decimal | null
     valorDesconto: Decimal | null
@@ -1760,12 +1983,12 @@ export namespace Prisma {
     clienteNome: string
     clienteEmail: string | null
     clienteCpfCnpj: string | null
-    origem: string
+    origem: $Enums.OrigemPedido
     canalOrigem: string | null
     pedidoExternoId: string | null
-    status: string
-    statusPagamento: string
-    metodoPagamento: string | null
+    status: $Enums.StatusPedido
+    statusPagamento: $Enums.StatusPagamento
+    metodoPagamento: $Enums.MetodoPagamento | null
     parcelas: number
     valorProdutos: Decimal
     valorDesconto: Decimal
@@ -1949,12 +2172,12 @@ export namespace Prisma {
       clienteNome: string
       clienteEmail: string | null
       clienteCpfCnpj: string | null
-      origem: string
+      origem: $Enums.OrigemPedido
       canalOrigem: string | null
       pedidoExternoId: string | null
-      status: string
-      statusPagamento: string
-      metodoPagamento: string | null
+      status: $Enums.StatusPedido
+      statusPagamento: $Enums.StatusPagamento
+      metodoPagamento: $Enums.MetodoPagamento | null
       parcelas: number
       valorProdutos: Prisma.Decimal
       valorDesconto: Prisma.Decimal
@@ -2380,12 +2603,12 @@ export namespace Prisma {
     readonly clienteNome: FieldRef<"Pedido", 'String'>
     readonly clienteEmail: FieldRef<"Pedido", 'String'>
     readonly clienteCpfCnpj: FieldRef<"Pedido", 'String'>
-    readonly origem: FieldRef<"Pedido", 'String'>
+    readonly origem: FieldRef<"Pedido", 'OrigemPedido'>
     readonly canalOrigem: FieldRef<"Pedido", 'String'>
     readonly pedidoExternoId: FieldRef<"Pedido", 'String'>
-    readonly status: FieldRef<"Pedido", 'String'>
-    readonly statusPagamento: FieldRef<"Pedido", 'String'>
-    readonly metodoPagamento: FieldRef<"Pedido", 'String'>
+    readonly status: FieldRef<"Pedido", 'StatusPedido'>
+    readonly statusPagamento: FieldRef<"Pedido", 'StatusPagamento'>
+    readonly metodoPagamento: FieldRef<"Pedido", 'MetodoPagamento'>
     readonly parcelas: FieldRef<"Pedido", 'Int'>
     readonly valorProdutos: FieldRef<"Pedido", 'Decimal'>
     readonly valorDesconto: FieldRef<"Pedido", 'Decimal'>
@@ -2832,6 +3055,7 @@ export namespace Prisma {
     valorUnitario: Decimal | null
     valorDesconto: Decimal | null
     valorTotal: Decimal | null
+    precoCusto: Decimal | null
     peso: Decimal | null
     largura: Decimal | null
     altura: Decimal | null
@@ -2843,6 +3067,7 @@ export namespace Prisma {
     valorUnitario: Decimal | null
     valorDesconto: Decimal | null
     valorTotal: Decimal | null
+    precoCusto: Decimal | null
     peso: Decimal | null
     largura: Decimal | null
     altura: Decimal | null
@@ -2860,6 +3085,7 @@ export namespace Prisma {
     valorUnitario: Decimal | null
     valorDesconto: Decimal | null
     valorTotal: Decimal | null
+    precoCusto: Decimal | null
     peso: Decimal | null
     largura: Decimal | null
     altura: Decimal | null
@@ -2878,6 +3104,7 @@ export namespace Prisma {
     valorUnitario: Decimal | null
     valorDesconto: Decimal | null
     valorTotal: Decimal | null
+    precoCusto: Decimal | null
     peso: Decimal | null
     largura: Decimal | null
     altura: Decimal | null
@@ -2896,6 +3123,7 @@ export namespace Prisma {
     valorUnitario: number
     valorDesconto: number
     valorTotal: number
+    precoCusto: number
     peso: number
     largura: number
     altura: number
@@ -2910,6 +3138,7 @@ export namespace Prisma {
     valorUnitario?: true
     valorDesconto?: true
     valorTotal?: true
+    precoCusto?: true
     peso?: true
     largura?: true
     altura?: true
@@ -2921,6 +3150,7 @@ export namespace Prisma {
     valorUnitario?: true
     valorDesconto?: true
     valorTotal?: true
+    precoCusto?: true
     peso?: true
     largura?: true
     altura?: true
@@ -2938,6 +3168,7 @@ export namespace Prisma {
     valorUnitario?: true
     valorDesconto?: true
     valorTotal?: true
+    precoCusto?: true
     peso?: true
     largura?: true
     altura?: true
@@ -2956,6 +3187,7 @@ export namespace Prisma {
     valorUnitario?: true
     valorDesconto?: true
     valorTotal?: true
+    precoCusto?: true
     peso?: true
     largura?: true
     altura?: true
@@ -2974,6 +3206,7 @@ export namespace Prisma {
     valorUnitario?: true
     valorDesconto?: true
     valorTotal?: true
+    precoCusto?: true
     peso?: true
     largura?: true
     altura?: true
@@ -3079,6 +3312,7 @@ export namespace Prisma {
     valorUnitario: Decimal
     valorDesconto: Decimal
     valorTotal: Decimal
+    precoCusto: Decimal | null
     peso: Decimal | null
     largura: Decimal | null
     altura: Decimal | null
@@ -3116,6 +3350,7 @@ export namespace Prisma {
     valorUnitario?: boolean
     valorDesconto?: boolean
     valorTotal?: boolean
+    precoCusto?: boolean
     peso?: boolean
     largura?: boolean
     altura?: boolean
@@ -3137,6 +3372,7 @@ export namespace Prisma {
     valorUnitario?: boolean
     valorDesconto?: boolean
     valorTotal?: boolean
+    precoCusto?: boolean
     peso?: boolean
     largura?: boolean
     altura?: boolean
@@ -3156,6 +3392,7 @@ export namespace Prisma {
     valorUnitario?: boolean
     valorDesconto?: boolean
     valorTotal?: boolean
+    precoCusto?: boolean
     peso?: boolean
     largura?: boolean
     altura?: boolean
@@ -3189,6 +3426,7 @@ export namespace Prisma {
       valorUnitario: Prisma.Decimal
       valorDesconto: Prisma.Decimal
       valorTotal: Prisma.Decimal
+      precoCusto: Prisma.Decimal | null
       peso: Prisma.Decimal | null
       largura: Prisma.Decimal | null
       altura: Prisma.Decimal | null
@@ -3599,6 +3837,7 @@ export namespace Prisma {
     readonly valorUnitario: FieldRef<"ItemPedido", 'Decimal'>
     readonly valorDesconto: FieldRef<"ItemPedido", 'Decimal'>
     readonly valorTotal: FieldRef<"ItemPedido", 'Decimal'>
+    readonly precoCusto: FieldRef<"ItemPedido", 'Decimal'>
     readonly peso: FieldRef<"ItemPedido", 'Decimal'>
     readonly largura: FieldRef<"ItemPedido", 'Decimal'>
     readonly altura: FieldRef<"ItemPedido", 'Decimal'>
@@ -4934,6 +5173,890 @@ export namespace Prisma {
 
 
   /**
+   * Model EventoProcessado
+   */
+
+  export type AggregateEventoProcessado = {
+    _count: EventoProcessadoCountAggregateOutputType | null
+    _min: EventoProcessadoMinAggregateOutputType | null
+    _max: EventoProcessadoMaxAggregateOutputType | null
+  }
+
+  export type EventoProcessadoMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    evento: string | null
+    referenciaId: string | null
+    processadoEm: Date | null
+  }
+
+  export type EventoProcessadoMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    evento: string | null
+    referenciaId: string | null
+    processadoEm: Date | null
+  }
+
+  export type EventoProcessadoCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    evento: number
+    referenciaId: number
+    processadoEm: number
+    _all: number
+  }
+
+
+  export type EventoProcessadoMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    evento?: true
+    referenciaId?: true
+    processadoEm?: true
+  }
+
+  export type EventoProcessadoMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    evento?: true
+    referenciaId?: true
+    processadoEm?: true
+  }
+
+  export type EventoProcessadoCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    evento?: true
+    referenciaId?: true
+    processadoEm?: true
+    _all?: true
+  }
+
+  export type EventoProcessadoAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EventoProcessado to aggregate.
+     */
+    where?: EventoProcessadoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventoProcessados to fetch.
+     */
+    orderBy?: EventoProcessadoOrderByWithRelationInput | EventoProcessadoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: EventoProcessadoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventoProcessados from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventoProcessados.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned EventoProcessados
+    **/
+    _count?: true | EventoProcessadoCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: EventoProcessadoMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: EventoProcessadoMaxAggregateInputType
+  }
+
+  export type GetEventoProcessadoAggregateType<T extends EventoProcessadoAggregateArgs> = {
+        [P in keyof T & keyof AggregateEventoProcessado]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateEventoProcessado[P]>
+      : GetScalarType<T[P], AggregateEventoProcessado[P]>
+  }
+
+
+
+
+  export type EventoProcessadoGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EventoProcessadoWhereInput
+    orderBy?: EventoProcessadoOrderByWithAggregationInput | EventoProcessadoOrderByWithAggregationInput[]
+    by: EventoProcessadoScalarFieldEnum[] | EventoProcessadoScalarFieldEnum
+    having?: EventoProcessadoScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: EventoProcessadoCountAggregateInputType | true
+    _min?: EventoProcessadoMinAggregateInputType
+    _max?: EventoProcessadoMaxAggregateInputType
+  }
+
+  export type EventoProcessadoGroupByOutputType = {
+    id: string
+    tenantId: string
+    evento: string
+    referenciaId: string
+    processadoEm: Date
+    _count: EventoProcessadoCountAggregateOutputType | null
+    _min: EventoProcessadoMinAggregateOutputType | null
+    _max: EventoProcessadoMaxAggregateOutputType | null
+  }
+
+  type GetEventoProcessadoGroupByPayload<T extends EventoProcessadoGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<EventoProcessadoGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof EventoProcessadoGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], EventoProcessadoGroupByOutputType[P]>
+            : GetScalarType<T[P], EventoProcessadoGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type EventoProcessadoSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    evento?: boolean
+    referenciaId?: boolean
+    processadoEm?: boolean
+  }, ExtArgs["result"]["eventoProcessado"]>
+
+  export type EventoProcessadoSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    evento?: boolean
+    referenciaId?: boolean
+    processadoEm?: boolean
+  }, ExtArgs["result"]["eventoProcessado"]>
+
+  export type EventoProcessadoSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    evento?: boolean
+    referenciaId?: boolean
+    processadoEm?: boolean
+  }
+
+
+  export type $EventoProcessadoPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "EventoProcessado"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      /**
+       * Nome lógico do evento consumido (ex. "estoque.reservado", "estoque.insuficiente").
+       */
+      evento: string
+      /**
+       * Identificador do agregado de referência (ex. pedidoId).
+       */
+      referenciaId: string
+      processadoEm: Date
+    }, ExtArgs["result"]["eventoProcessado"]>
+    composites: {}
+  }
+
+  type EventoProcessadoGetPayload<S extends boolean | null | undefined | EventoProcessadoDefaultArgs> = $Result.GetResult<Prisma.$EventoProcessadoPayload, S>
+
+  type EventoProcessadoCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<EventoProcessadoFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: EventoProcessadoCountAggregateInputType | true
+    }
+
+  export interface EventoProcessadoDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EventoProcessado'], meta: { name: 'EventoProcessado' } }
+    /**
+     * Find zero or one EventoProcessado that matches the filter.
+     * @param {EventoProcessadoFindUniqueArgs} args - Arguments to find a EventoProcessado
+     * @example
+     * // Get one EventoProcessado
+     * const eventoProcessado = await prisma.eventoProcessado.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends EventoProcessadoFindUniqueArgs>(args: SelectSubset<T, EventoProcessadoFindUniqueArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one EventoProcessado that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {EventoProcessadoFindUniqueOrThrowArgs} args - Arguments to find a EventoProcessado
+     * @example
+     * // Get one EventoProcessado
+     * const eventoProcessado = await prisma.eventoProcessado.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends EventoProcessadoFindUniqueOrThrowArgs>(args: SelectSubset<T, EventoProcessadoFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first EventoProcessado that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventoProcessadoFindFirstArgs} args - Arguments to find a EventoProcessado
+     * @example
+     * // Get one EventoProcessado
+     * const eventoProcessado = await prisma.eventoProcessado.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends EventoProcessadoFindFirstArgs>(args?: SelectSubset<T, EventoProcessadoFindFirstArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first EventoProcessado that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventoProcessadoFindFirstOrThrowArgs} args - Arguments to find a EventoProcessado
+     * @example
+     * // Get one EventoProcessado
+     * const eventoProcessado = await prisma.eventoProcessado.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends EventoProcessadoFindFirstOrThrowArgs>(args?: SelectSubset<T, EventoProcessadoFindFirstOrThrowArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more EventoProcessados that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventoProcessadoFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all EventoProcessados
+     * const eventoProcessados = await prisma.eventoProcessado.findMany()
+     * 
+     * // Get first 10 EventoProcessados
+     * const eventoProcessados = await prisma.eventoProcessado.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const eventoProcessadoWithIdOnly = await prisma.eventoProcessado.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends EventoProcessadoFindManyArgs>(args?: SelectSubset<T, EventoProcessadoFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a EventoProcessado.
+     * @param {EventoProcessadoCreateArgs} args - Arguments to create a EventoProcessado.
+     * @example
+     * // Create one EventoProcessado
+     * const EventoProcessado = await prisma.eventoProcessado.create({
+     *   data: {
+     *     // ... data to create a EventoProcessado
+     *   }
+     * })
+     * 
+     */
+    create<T extends EventoProcessadoCreateArgs>(args: SelectSubset<T, EventoProcessadoCreateArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many EventoProcessados.
+     * @param {EventoProcessadoCreateManyArgs} args - Arguments to create many EventoProcessados.
+     * @example
+     * // Create many EventoProcessados
+     * const eventoProcessado = await prisma.eventoProcessado.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends EventoProcessadoCreateManyArgs>(args?: SelectSubset<T, EventoProcessadoCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many EventoProcessados and returns the data saved in the database.
+     * @param {EventoProcessadoCreateManyAndReturnArgs} args - Arguments to create many EventoProcessados.
+     * @example
+     * // Create many EventoProcessados
+     * const eventoProcessado = await prisma.eventoProcessado.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many EventoProcessados and only return the `id`
+     * const eventoProcessadoWithIdOnly = await prisma.eventoProcessado.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends EventoProcessadoCreateManyAndReturnArgs>(args?: SelectSubset<T, EventoProcessadoCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a EventoProcessado.
+     * @param {EventoProcessadoDeleteArgs} args - Arguments to delete one EventoProcessado.
+     * @example
+     * // Delete one EventoProcessado
+     * const EventoProcessado = await prisma.eventoProcessado.delete({
+     *   where: {
+     *     // ... filter to delete one EventoProcessado
+     *   }
+     * })
+     * 
+     */
+    delete<T extends EventoProcessadoDeleteArgs>(args: SelectSubset<T, EventoProcessadoDeleteArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one EventoProcessado.
+     * @param {EventoProcessadoUpdateArgs} args - Arguments to update one EventoProcessado.
+     * @example
+     * // Update one EventoProcessado
+     * const eventoProcessado = await prisma.eventoProcessado.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends EventoProcessadoUpdateArgs>(args: SelectSubset<T, EventoProcessadoUpdateArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more EventoProcessados.
+     * @param {EventoProcessadoDeleteManyArgs} args - Arguments to filter EventoProcessados to delete.
+     * @example
+     * // Delete a few EventoProcessados
+     * const { count } = await prisma.eventoProcessado.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends EventoProcessadoDeleteManyArgs>(args?: SelectSubset<T, EventoProcessadoDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EventoProcessados.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventoProcessadoUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many EventoProcessados
+     * const eventoProcessado = await prisma.eventoProcessado.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends EventoProcessadoUpdateManyArgs>(args: SelectSubset<T, EventoProcessadoUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one EventoProcessado.
+     * @param {EventoProcessadoUpsertArgs} args - Arguments to update or create a EventoProcessado.
+     * @example
+     * // Update or create a EventoProcessado
+     * const eventoProcessado = await prisma.eventoProcessado.upsert({
+     *   create: {
+     *     // ... data to create a EventoProcessado
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the EventoProcessado we want to update
+     *   }
+     * })
+     */
+    upsert<T extends EventoProcessadoUpsertArgs>(args: SelectSubset<T, EventoProcessadoUpsertArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of EventoProcessados.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventoProcessadoCountArgs} args - Arguments to filter EventoProcessados to count.
+     * @example
+     * // Count the number of EventoProcessados
+     * const count = await prisma.eventoProcessado.count({
+     *   where: {
+     *     // ... the filter for the EventoProcessados we want to count
+     *   }
+     * })
+    **/
+    count<T extends EventoProcessadoCountArgs>(
+      args?: Subset<T, EventoProcessadoCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], EventoProcessadoCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a EventoProcessado.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventoProcessadoAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends EventoProcessadoAggregateArgs>(args: Subset<T, EventoProcessadoAggregateArgs>): Prisma.PrismaPromise<GetEventoProcessadoAggregateType<T>>
+
+    /**
+     * Group by EventoProcessado.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventoProcessadoGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends EventoProcessadoGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: EventoProcessadoGroupByArgs['orderBy'] }
+        : { orderBy?: EventoProcessadoGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, EventoProcessadoGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEventoProcessadoGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the EventoProcessado model
+   */
+  readonly fields: EventoProcessadoFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for EventoProcessado.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__EventoProcessadoClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the EventoProcessado model
+   */ 
+  interface EventoProcessadoFieldRefs {
+    readonly id: FieldRef<"EventoProcessado", 'String'>
+    readonly tenantId: FieldRef<"EventoProcessado", 'String'>
+    readonly evento: FieldRef<"EventoProcessado", 'String'>
+    readonly referenciaId: FieldRef<"EventoProcessado", 'String'>
+    readonly processadoEm: FieldRef<"EventoProcessado", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * EventoProcessado findUnique
+   */
+  export type EventoProcessadoFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * Filter, which EventoProcessado to fetch.
+     */
+    where: EventoProcessadoWhereUniqueInput
+  }
+
+  /**
+   * EventoProcessado findUniqueOrThrow
+   */
+  export type EventoProcessadoFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * Filter, which EventoProcessado to fetch.
+     */
+    where: EventoProcessadoWhereUniqueInput
+  }
+
+  /**
+   * EventoProcessado findFirst
+   */
+  export type EventoProcessadoFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * Filter, which EventoProcessado to fetch.
+     */
+    where?: EventoProcessadoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventoProcessados to fetch.
+     */
+    orderBy?: EventoProcessadoOrderByWithRelationInput | EventoProcessadoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EventoProcessados.
+     */
+    cursor?: EventoProcessadoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventoProcessados from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventoProcessados.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EventoProcessados.
+     */
+    distinct?: EventoProcessadoScalarFieldEnum | EventoProcessadoScalarFieldEnum[]
+  }
+
+  /**
+   * EventoProcessado findFirstOrThrow
+   */
+  export type EventoProcessadoFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * Filter, which EventoProcessado to fetch.
+     */
+    where?: EventoProcessadoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventoProcessados to fetch.
+     */
+    orderBy?: EventoProcessadoOrderByWithRelationInput | EventoProcessadoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EventoProcessados.
+     */
+    cursor?: EventoProcessadoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventoProcessados from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventoProcessados.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EventoProcessados.
+     */
+    distinct?: EventoProcessadoScalarFieldEnum | EventoProcessadoScalarFieldEnum[]
+  }
+
+  /**
+   * EventoProcessado findMany
+   */
+  export type EventoProcessadoFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * Filter, which EventoProcessados to fetch.
+     */
+    where?: EventoProcessadoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventoProcessados to fetch.
+     */
+    orderBy?: EventoProcessadoOrderByWithRelationInput | EventoProcessadoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing EventoProcessados.
+     */
+    cursor?: EventoProcessadoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventoProcessados from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventoProcessados.
+     */
+    skip?: number
+    distinct?: EventoProcessadoScalarFieldEnum | EventoProcessadoScalarFieldEnum[]
+  }
+
+  /**
+   * EventoProcessado create
+   */
+  export type EventoProcessadoCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * The data needed to create a EventoProcessado.
+     */
+    data: XOR<EventoProcessadoCreateInput, EventoProcessadoUncheckedCreateInput>
+  }
+
+  /**
+   * EventoProcessado createMany
+   */
+  export type EventoProcessadoCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many EventoProcessados.
+     */
+    data: EventoProcessadoCreateManyInput | EventoProcessadoCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * EventoProcessado createManyAndReturn
+   */
+  export type EventoProcessadoCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many EventoProcessados.
+     */
+    data: EventoProcessadoCreateManyInput | EventoProcessadoCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * EventoProcessado update
+   */
+  export type EventoProcessadoUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * The data needed to update a EventoProcessado.
+     */
+    data: XOR<EventoProcessadoUpdateInput, EventoProcessadoUncheckedUpdateInput>
+    /**
+     * Choose, which EventoProcessado to update.
+     */
+    where: EventoProcessadoWhereUniqueInput
+  }
+
+  /**
+   * EventoProcessado updateMany
+   */
+  export type EventoProcessadoUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update EventoProcessados.
+     */
+    data: XOR<EventoProcessadoUpdateManyMutationInput, EventoProcessadoUncheckedUpdateManyInput>
+    /**
+     * Filter which EventoProcessados to update
+     */
+    where?: EventoProcessadoWhereInput
+  }
+
+  /**
+   * EventoProcessado upsert
+   */
+  export type EventoProcessadoUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * The filter to search for the EventoProcessado to update in case it exists.
+     */
+    where: EventoProcessadoWhereUniqueInput
+    /**
+     * In case the EventoProcessado found by the `where` argument doesn't exist, create a new EventoProcessado with this data.
+     */
+    create: XOR<EventoProcessadoCreateInput, EventoProcessadoUncheckedCreateInput>
+    /**
+     * In case the EventoProcessado was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<EventoProcessadoUpdateInput, EventoProcessadoUncheckedUpdateInput>
+  }
+
+  /**
+   * EventoProcessado delete
+   */
+  export type EventoProcessadoDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * Filter which EventoProcessado to delete.
+     */
+    where: EventoProcessadoWhereUniqueInput
+  }
+
+  /**
+   * EventoProcessado deleteMany
+   */
+  export type EventoProcessadoDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EventoProcessados to delete
+     */
+    where?: EventoProcessadoWhereInput
+  }
+
+  /**
+   * EventoProcessado without action
+   */
+  export type EventoProcessadoDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+  }
+
+
+  /**
    * Model Pagamento
    */
 
@@ -4959,8 +6082,8 @@ export namespace Prisma {
     id: string | null
     pedidoId: string | null
     tenantId: string | null
-    tipo: string | null
-    status: string | null
+    tipo: $Enums.TipoPagamento | null
+    status: $Enums.StatusPagamentoDetalhado | null
     valor: Decimal | null
     parcelas: number | null
     gateway: string | null
@@ -4974,8 +6097,8 @@ export namespace Prisma {
     id: string | null
     pedidoId: string | null
     tenantId: string | null
-    tipo: string | null
-    status: string | null
+    tipo: $Enums.TipoPagamento | null
+    status: $Enums.StatusPagamentoDetalhado | null
     valor: Decimal | null
     parcelas: number | null
     gateway: string | null
@@ -5150,8 +6273,8 @@ export namespace Prisma {
     id: string
     pedidoId: string
     tenantId: string
-    tipo: string
-    status: string
+    tipo: $Enums.TipoPagamento
+    status: $Enums.StatusPagamentoDetalhado
     valor: Decimal
     parcelas: number
     gateway: string | null
@@ -5247,8 +6370,8 @@ export namespace Prisma {
       id: string
       pedidoId: string
       tenantId: string
-      tipo: string
-      status: string
+      tipo: $Enums.TipoPagamento
+      status: $Enums.StatusPagamentoDetalhado
       valor: Prisma.Decimal
       parcelas: number
       gateway: string | null
@@ -5654,8 +6777,8 @@ export namespace Prisma {
     readonly id: FieldRef<"Pagamento", 'String'>
     readonly pedidoId: FieldRef<"Pagamento", 'String'>
     readonly tenantId: FieldRef<"Pagamento", 'String'>
-    readonly tipo: FieldRef<"Pagamento", 'String'>
-    readonly status: FieldRef<"Pagamento", 'String'>
+    readonly tipo: FieldRef<"Pagamento", 'TipoPagamento'>
+    readonly status: FieldRef<"Pagamento", 'StatusPagamentoDetalhado'>
     readonly valor: FieldRef<"Pagamento", 'Decimal'>
     readonly parcelas: FieldRef<"Pagamento", 'Int'>
     readonly gateway: FieldRef<"Pagamento", 'String'>
@@ -6020,8 +7143,8 @@ export namespace Prisma {
     id: string | null
     pedidoId: string | null
     tenantId: string | null
-    motivo: string | null
-    status: string | null
+    motivo: $Enums.MotivoDevolucao | null
+    status: $Enums.StatusDevolucao | null
     valorReembolso: Decimal | null
     codigoRastreioRetorno: string | null
     observacao: string | null
@@ -6033,8 +7156,8 @@ export namespace Prisma {
     id: string | null
     pedidoId: string | null
     tenantId: string | null
-    motivo: string | null
-    status: string | null
+    motivo: $Enums.MotivoDevolucao | null
+    status: $Enums.StatusDevolucao | null
     valorReembolso: Decimal | null
     codigoRastreioRetorno: string | null
     observacao: string | null
@@ -6195,8 +7318,8 @@ export namespace Prisma {
     id: string
     pedidoId: string
     tenantId: string
-    motivo: string
-    status: string
+    motivo: $Enums.MotivoDevolucao
+    status: $Enums.StatusDevolucao
     valorReembolso: Decimal
     codigoRastreioRetorno: string | null
     observacao: string | null
@@ -6285,8 +7408,8 @@ export namespace Prisma {
       id: string
       pedidoId: string
       tenantId: string
-      motivo: string
-      status: string
+      motivo: $Enums.MotivoDevolucao
+      status: $Enums.StatusDevolucao
       valorReembolso: Prisma.Decimal
       codigoRastreioRetorno: string | null
       observacao: string | null
@@ -6690,8 +7813,8 @@ export namespace Prisma {
     readonly id: FieldRef<"Devolucao", 'String'>
     readonly pedidoId: FieldRef<"Devolucao", 'String'>
     readonly tenantId: FieldRef<"Devolucao", 'String'>
-    readonly motivo: FieldRef<"Devolucao", 'String'>
-    readonly status: FieldRef<"Devolucao", 'String'>
+    readonly motivo: FieldRef<"Devolucao", 'MotivoDevolucao'>
+    readonly status: FieldRef<"Devolucao", 'StatusDevolucao'>
     readonly valorReembolso: FieldRef<"Devolucao", 'Decimal'>
     readonly codigoRastreioRetorno: FieldRef<"Devolucao", 'String'>
     readonly observacao: FieldRef<"Devolucao", 'String'>
@@ -7074,7 +8197,7 @@ export namespace Prisma {
     devolucaoId: string | null
     itemPedidoId: string | null
     quantidade: number | null
-    motivo: string | null
+    motivo: $Enums.MotivoDevolucao | null
     criadoEm: Date | null
   }
 
@@ -7083,7 +8206,7 @@ export namespace Prisma {
     devolucaoId: string | null
     itemPedidoId: string | null
     quantidade: number | null
-    motivo: string | null
+    motivo: $Enums.MotivoDevolucao | null
     criadoEm: Date | null
   }
 
@@ -7225,7 +8348,7 @@ export namespace Prisma {
     devolucaoId: string
     itemPedidoId: string
     quantidade: number
-    motivo: string
+    motivo: $Enums.MotivoDevolucao
     criadoEm: Date
     _count: ItemDevolucaoCountAggregateOutputType | null
     _avg: ItemDevolucaoAvgAggregateOutputType | null
@@ -7299,7 +8422,7 @@ export namespace Prisma {
       devolucaoId: string
       itemPedidoId: string
       quantidade: number
-      motivo: string
+      motivo: $Enums.MotivoDevolucao
       criadoEm: Date
     }, ExtArgs["result"]["itemDevolucao"]>
     composites: {}
@@ -7700,7 +8823,7 @@ export namespace Prisma {
     readonly devolucaoId: FieldRef<"ItemDevolucao", 'String'>
     readonly itemPedidoId: FieldRef<"ItemDevolucao", 'String'>
     readonly quantidade: FieldRef<"ItemDevolucao", 'Int'>
-    readonly motivo: FieldRef<"ItemDevolucao", 'String'>
+    readonly motivo: FieldRef<"ItemDevolucao", 'MotivoDevolucao'>
     readonly criadoEm: FieldRef<"ItemDevolucao", 'DateTime'>
   }
     
@@ -8099,6 +9222,7 @@ export namespace Prisma {
     valorUnitario: 'valorUnitario',
     valorDesconto: 'valorDesconto',
     valorTotal: 'valorTotal',
+    precoCusto: 'precoCusto',
     peso: 'peso',
     largura: 'largura',
     altura: 'altura',
@@ -8122,6 +9246,17 @@ export namespace Prisma {
   };
 
   export type HistoricoPedidoScalarFieldEnum = (typeof HistoricoPedidoScalarFieldEnum)[keyof typeof HistoricoPedidoScalarFieldEnum]
+
+
+  export const EventoProcessadoScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    evento: 'evento',
+    referenciaId: 'referenciaId',
+    processadoEm: 'processadoEm'
+  };
+
+  export type EventoProcessadoScalarFieldEnum = (typeof EventoProcessadoScalarFieldEnum)[keyof typeof EventoProcessadoScalarFieldEnum]
 
 
   export const PagamentoScalarFieldEnum: {
@@ -8246,6 +9381,62 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'OrigemPedido'
+   */
+  export type EnumOrigemPedidoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrigemPedido'>
+    
+
+
+  /**
+   * Reference to a field of type 'OrigemPedido[]'
+   */
+  export type ListEnumOrigemPedidoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrigemPedido[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusPedido'
+   */
+  export type EnumStatusPedidoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusPedido'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusPedido[]'
+   */
+  export type ListEnumStatusPedidoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusPedido[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusPagamento'
+   */
+  export type EnumStatusPagamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusPagamento'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusPagamento[]'
+   */
+  export type ListEnumStatusPagamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusPagamento[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'MetodoPagamento'
+   */
+  export type EnumMetodoPagamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MetodoPagamento'>
+    
+
+
+  /**
+   * Reference to a field of type 'MetodoPagamento[]'
+   */
+  export type ListEnumMetodoPagamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MetodoPagamento[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Decimal'
    */
   export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
@@ -8281,6 +9472,62 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'TipoPagamento'
+   */
+  export type EnumTipoPagamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoPagamento'>
+    
+
+
+  /**
+   * Reference to a field of type 'TipoPagamento[]'
+   */
+  export type ListEnumTipoPagamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoPagamento[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusPagamentoDetalhado'
+   */
+  export type EnumStatusPagamentoDetalhadoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusPagamentoDetalhado'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusPagamentoDetalhado[]'
+   */
+  export type ListEnumStatusPagamentoDetalhadoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusPagamentoDetalhado[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'MotivoDevolucao'
+   */
+  export type EnumMotivoDevolucaoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MotivoDevolucao'>
+    
+
+
+  /**
+   * Reference to a field of type 'MotivoDevolucao[]'
+   */
+  export type ListEnumMotivoDevolucaoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MotivoDevolucao[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusDevolucao'
+   */
+  export type EnumStatusDevolucaoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusDevolucao'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusDevolucao[]'
+   */
+  export type ListEnumStatusDevolucaoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusDevolucao[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -8308,12 +9555,12 @@ export namespace Prisma {
     clienteNome?: StringFilter<"Pedido"> | string
     clienteEmail?: StringNullableFilter<"Pedido"> | string | null
     clienteCpfCnpj?: StringNullableFilter<"Pedido"> | string | null
-    origem?: StringFilter<"Pedido"> | string
+    origem?: EnumOrigemPedidoFilter<"Pedido"> | $Enums.OrigemPedido
     canalOrigem?: StringNullableFilter<"Pedido"> | string | null
     pedidoExternoId?: StringNullableFilter<"Pedido"> | string | null
-    status?: StringFilter<"Pedido"> | string
-    statusPagamento?: StringFilter<"Pedido"> | string
-    metodoPagamento?: StringNullableFilter<"Pedido"> | string | null
+    status?: EnumStatusPedidoFilter<"Pedido"> | $Enums.StatusPedido
+    statusPagamento?: EnumStatusPagamentoFilter<"Pedido"> | $Enums.StatusPagamento
+    metodoPagamento?: EnumMetodoPagamentoNullableFilter<"Pedido"> | $Enums.MetodoPagamento | null
     parcelas?: IntFilter<"Pedido"> | number
     valorProdutos?: DecimalFilter<"Pedido"> | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFilter<"Pedido"> | Decimal | DecimalJsLike | number | string
@@ -8395,11 +9642,11 @@ export namespace Prisma {
     clienteNome?: StringFilter<"Pedido"> | string
     clienteEmail?: StringNullableFilter<"Pedido"> | string | null
     clienteCpfCnpj?: StringNullableFilter<"Pedido"> | string | null
-    origem?: StringFilter<"Pedido"> | string
+    origem?: EnumOrigemPedidoFilter<"Pedido"> | $Enums.OrigemPedido
     canalOrigem?: StringNullableFilter<"Pedido"> | string | null
-    status?: StringFilter<"Pedido"> | string
-    statusPagamento?: StringFilter<"Pedido"> | string
-    metodoPagamento?: StringNullableFilter<"Pedido"> | string | null
+    status?: EnumStatusPedidoFilter<"Pedido"> | $Enums.StatusPedido
+    statusPagamento?: EnumStatusPagamentoFilter<"Pedido"> | $Enums.StatusPagamento
+    metodoPagamento?: EnumMetodoPagamentoNullableFilter<"Pedido"> | $Enums.MetodoPagamento | null
     parcelas?: IntFilter<"Pedido"> | number
     valorProdutos?: DecimalFilter<"Pedido"> | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFilter<"Pedido"> | Decimal | DecimalJsLike | number | string
@@ -8480,12 +9727,12 @@ export namespace Prisma {
     clienteNome?: StringWithAggregatesFilter<"Pedido"> | string
     clienteEmail?: StringNullableWithAggregatesFilter<"Pedido"> | string | null
     clienteCpfCnpj?: StringNullableWithAggregatesFilter<"Pedido"> | string | null
-    origem?: StringWithAggregatesFilter<"Pedido"> | string
+    origem?: EnumOrigemPedidoWithAggregatesFilter<"Pedido"> | $Enums.OrigemPedido
     canalOrigem?: StringNullableWithAggregatesFilter<"Pedido"> | string | null
     pedidoExternoId?: StringNullableWithAggregatesFilter<"Pedido"> | string | null
-    status?: StringWithAggregatesFilter<"Pedido"> | string
-    statusPagamento?: StringWithAggregatesFilter<"Pedido"> | string
-    metodoPagamento?: StringNullableWithAggregatesFilter<"Pedido"> | string | null
+    status?: EnumStatusPedidoWithAggregatesFilter<"Pedido"> | $Enums.StatusPedido
+    statusPagamento?: EnumStatusPagamentoWithAggregatesFilter<"Pedido"> | $Enums.StatusPagamento
+    metodoPagamento?: EnumMetodoPagamentoNullableWithAggregatesFilter<"Pedido"> | $Enums.MetodoPagamento | null
     parcelas?: IntWithAggregatesFilter<"Pedido"> | number
     valorProdutos?: DecimalWithAggregatesFilter<"Pedido"> | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalWithAggregatesFilter<"Pedido"> | Decimal | DecimalJsLike | number | string
@@ -8523,6 +9770,7 @@ export namespace Prisma {
     valorUnitario?: DecimalFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string
     valorTotal?: DecimalFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string
+    precoCusto?: DecimalNullableFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
     peso?: DecimalNullableFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
     largura?: DecimalNullableFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
     altura?: DecimalNullableFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
@@ -8543,6 +9791,7 @@ export namespace Prisma {
     valorUnitario?: SortOrder
     valorDesconto?: SortOrder
     valorTotal?: SortOrder
+    precoCusto?: SortOrderInput | SortOrder
     peso?: SortOrderInput | SortOrder
     largura?: SortOrderInput | SortOrder
     altura?: SortOrderInput | SortOrder
@@ -8566,6 +9815,7 @@ export namespace Prisma {
     valorUnitario?: DecimalFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string
     valorTotal?: DecimalFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string
+    precoCusto?: DecimalNullableFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
     peso?: DecimalNullableFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
     largura?: DecimalNullableFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
     altura?: DecimalNullableFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
@@ -8586,6 +9836,7 @@ export namespace Prisma {
     valorUnitario?: SortOrder
     valorDesconto?: SortOrder
     valorTotal?: SortOrder
+    precoCusto?: SortOrderInput | SortOrder
     peso?: SortOrderInput | SortOrder
     largura?: SortOrderInput | SortOrder
     altura?: SortOrderInput | SortOrder
@@ -8612,6 +9863,7 @@ export namespace Prisma {
     valorUnitario?: DecimalWithAggregatesFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalWithAggregatesFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string
     valorTotal?: DecimalWithAggregatesFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string
+    precoCusto?: DecimalNullableWithAggregatesFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
     peso?: DecimalNullableWithAggregatesFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
     largura?: DecimalNullableWithAggregatesFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
     altura?: DecimalNullableWithAggregatesFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
@@ -8694,6 +9946,59 @@ export namespace Prisma {
     criadoEm?: DateTimeWithAggregatesFilter<"HistoricoPedido"> | Date | string
   }
 
+  export type EventoProcessadoWhereInput = {
+    AND?: EventoProcessadoWhereInput | EventoProcessadoWhereInput[]
+    OR?: EventoProcessadoWhereInput[]
+    NOT?: EventoProcessadoWhereInput | EventoProcessadoWhereInput[]
+    id?: UuidFilter<"EventoProcessado"> | string
+    tenantId?: UuidFilter<"EventoProcessado"> | string
+    evento?: StringFilter<"EventoProcessado"> | string
+    referenciaId?: StringFilter<"EventoProcessado"> | string
+    processadoEm?: DateTimeFilter<"EventoProcessado"> | Date | string
+  }
+
+  export type EventoProcessadoOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    evento?: SortOrder
+    referenciaId?: SortOrder
+    processadoEm?: SortOrder
+  }
+
+  export type EventoProcessadoWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    evento_referenciaId?: EventoProcessadoEvento_referenciaIdCompoundUniqueInput
+    AND?: EventoProcessadoWhereInput | EventoProcessadoWhereInput[]
+    OR?: EventoProcessadoWhereInput[]
+    NOT?: EventoProcessadoWhereInput | EventoProcessadoWhereInput[]
+    tenantId?: UuidFilter<"EventoProcessado"> | string
+    evento?: StringFilter<"EventoProcessado"> | string
+    referenciaId?: StringFilter<"EventoProcessado"> | string
+    processadoEm?: DateTimeFilter<"EventoProcessado"> | Date | string
+  }, "id" | "evento_referenciaId">
+
+  export type EventoProcessadoOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    evento?: SortOrder
+    referenciaId?: SortOrder
+    processadoEm?: SortOrder
+    _count?: EventoProcessadoCountOrderByAggregateInput
+    _max?: EventoProcessadoMaxOrderByAggregateInput
+    _min?: EventoProcessadoMinOrderByAggregateInput
+  }
+
+  export type EventoProcessadoScalarWhereWithAggregatesInput = {
+    AND?: EventoProcessadoScalarWhereWithAggregatesInput | EventoProcessadoScalarWhereWithAggregatesInput[]
+    OR?: EventoProcessadoScalarWhereWithAggregatesInput[]
+    NOT?: EventoProcessadoScalarWhereWithAggregatesInput | EventoProcessadoScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"EventoProcessado"> | string
+    tenantId?: UuidWithAggregatesFilter<"EventoProcessado"> | string
+    evento?: StringWithAggregatesFilter<"EventoProcessado"> | string
+    referenciaId?: StringWithAggregatesFilter<"EventoProcessado"> | string
+    processadoEm?: DateTimeWithAggregatesFilter<"EventoProcessado"> | Date | string
+  }
+
   export type PagamentoWhereInput = {
     AND?: PagamentoWhereInput | PagamentoWhereInput[]
     OR?: PagamentoWhereInput[]
@@ -8701,8 +10006,8 @@ export namespace Prisma {
     id?: UuidFilter<"Pagamento"> | string
     pedidoId?: UuidFilter<"Pagamento"> | string
     tenantId?: UuidFilter<"Pagamento"> | string
-    tipo?: StringFilter<"Pagamento"> | string
-    status?: StringFilter<"Pagamento"> | string
+    tipo?: EnumTipoPagamentoFilter<"Pagamento"> | $Enums.TipoPagamento
+    status?: EnumStatusPagamentoDetalhadoFilter<"Pagamento"> | $Enums.StatusPagamentoDetalhado
     valor?: DecimalFilter<"Pagamento"> | Decimal | DecimalJsLike | number | string
     parcelas?: IntFilter<"Pagamento"> | number
     gateway?: StringNullableFilter<"Pagamento"> | string | null
@@ -8738,8 +10043,8 @@ export namespace Prisma {
     NOT?: PagamentoWhereInput | PagamentoWhereInput[]
     pedidoId?: UuidFilter<"Pagamento"> | string
     tenantId?: UuidFilter<"Pagamento"> | string
-    tipo?: StringFilter<"Pagamento"> | string
-    status?: StringFilter<"Pagamento"> | string
+    tipo?: EnumTipoPagamentoFilter<"Pagamento"> | $Enums.TipoPagamento
+    status?: EnumStatusPagamentoDetalhadoFilter<"Pagamento"> | $Enums.StatusPagamentoDetalhado
     valor?: DecimalFilter<"Pagamento"> | Decimal | DecimalJsLike | number | string
     parcelas?: IntFilter<"Pagamento"> | number
     gateway?: StringNullableFilter<"Pagamento"> | string | null
@@ -8779,8 +10084,8 @@ export namespace Prisma {
     id?: UuidWithAggregatesFilter<"Pagamento"> | string
     pedidoId?: UuidWithAggregatesFilter<"Pagamento"> | string
     tenantId?: UuidWithAggregatesFilter<"Pagamento"> | string
-    tipo?: StringWithAggregatesFilter<"Pagamento"> | string
-    status?: StringWithAggregatesFilter<"Pagamento"> | string
+    tipo?: EnumTipoPagamentoWithAggregatesFilter<"Pagamento"> | $Enums.TipoPagamento
+    status?: EnumStatusPagamentoDetalhadoWithAggregatesFilter<"Pagamento"> | $Enums.StatusPagamentoDetalhado
     valor?: DecimalWithAggregatesFilter<"Pagamento"> | Decimal | DecimalJsLike | number | string
     parcelas?: IntWithAggregatesFilter<"Pagamento"> | number
     gateway?: StringNullableWithAggregatesFilter<"Pagamento"> | string | null
@@ -8798,8 +10103,8 @@ export namespace Prisma {
     id?: UuidFilter<"Devolucao"> | string
     pedidoId?: UuidFilter<"Devolucao"> | string
     tenantId?: UuidFilter<"Devolucao"> | string
-    motivo?: StringFilter<"Devolucao"> | string
-    status?: StringFilter<"Devolucao"> | string
+    motivo?: EnumMotivoDevolucaoFilter<"Devolucao"> | $Enums.MotivoDevolucao
+    status?: EnumStatusDevolucaoFilter<"Devolucao"> | $Enums.StatusDevolucao
     valorReembolso?: DecimalFilter<"Devolucao"> | Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: StringNullableFilter<"Devolucao"> | string | null
     observacao?: StringNullableFilter<"Devolucao"> | string | null
@@ -8831,8 +10136,8 @@ export namespace Prisma {
     NOT?: DevolucaoWhereInput | DevolucaoWhereInput[]
     pedidoId?: UuidFilter<"Devolucao"> | string
     tenantId?: UuidFilter<"Devolucao"> | string
-    motivo?: StringFilter<"Devolucao"> | string
-    status?: StringFilter<"Devolucao"> | string
+    motivo?: EnumMotivoDevolucaoFilter<"Devolucao"> | $Enums.MotivoDevolucao
+    status?: EnumStatusDevolucaoFilter<"Devolucao"> | $Enums.StatusDevolucao
     valorReembolso?: DecimalFilter<"Devolucao"> | Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: StringNullableFilter<"Devolucao"> | string | null
     observacao?: StringNullableFilter<"Devolucao"> | string | null
@@ -8867,8 +10172,8 @@ export namespace Prisma {
     id?: UuidWithAggregatesFilter<"Devolucao"> | string
     pedidoId?: UuidWithAggregatesFilter<"Devolucao"> | string
     tenantId?: UuidWithAggregatesFilter<"Devolucao"> | string
-    motivo?: StringWithAggregatesFilter<"Devolucao"> | string
-    status?: StringWithAggregatesFilter<"Devolucao"> | string
+    motivo?: EnumMotivoDevolucaoWithAggregatesFilter<"Devolucao"> | $Enums.MotivoDevolucao
+    status?: EnumStatusDevolucaoWithAggregatesFilter<"Devolucao"> | $Enums.StatusDevolucao
     valorReembolso?: DecimalWithAggregatesFilter<"Devolucao"> | Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: StringNullableWithAggregatesFilter<"Devolucao"> | string | null
     observacao?: StringNullableWithAggregatesFilter<"Devolucao"> | string | null
@@ -8884,7 +10189,7 @@ export namespace Prisma {
     devolucaoId?: UuidFilter<"ItemDevolucao"> | string
     itemPedidoId?: UuidFilter<"ItemDevolucao"> | string
     quantidade?: IntFilter<"ItemDevolucao"> | number
-    motivo?: StringFilter<"ItemDevolucao"> | string
+    motivo?: EnumMotivoDevolucaoFilter<"ItemDevolucao"> | $Enums.MotivoDevolucao
     criadoEm?: DateTimeFilter<"ItemDevolucao"> | Date | string
     devolucao?: XOR<DevolucaoRelationFilter, DevolucaoWhereInput>
     itemPedido?: XOR<ItemPedidoRelationFilter, ItemPedidoWhereInput>
@@ -8909,7 +10214,7 @@ export namespace Prisma {
     devolucaoId?: UuidFilter<"ItemDevolucao"> | string
     itemPedidoId?: UuidFilter<"ItemDevolucao"> | string
     quantidade?: IntFilter<"ItemDevolucao"> | number
-    motivo?: StringFilter<"ItemDevolucao"> | string
+    motivo?: EnumMotivoDevolucaoFilter<"ItemDevolucao"> | $Enums.MotivoDevolucao
     criadoEm?: DateTimeFilter<"ItemDevolucao"> | Date | string
     devolucao?: XOR<DevolucaoRelationFilter, DevolucaoWhereInput>
     itemPedido?: XOR<ItemPedidoRelationFilter, ItemPedidoWhereInput>
@@ -8937,7 +10242,7 @@ export namespace Prisma {
     devolucaoId?: UuidWithAggregatesFilter<"ItemDevolucao"> | string
     itemPedidoId?: UuidWithAggregatesFilter<"ItemDevolucao"> | string
     quantidade?: IntWithAggregatesFilter<"ItemDevolucao"> | number
-    motivo?: StringWithAggregatesFilter<"ItemDevolucao"> | string
+    motivo?: EnumMotivoDevolucaoWithAggregatesFilter<"ItemDevolucao"> | $Enums.MotivoDevolucao
     criadoEm?: DateTimeWithAggregatesFilter<"ItemDevolucao"> | Date | string
   }
 
@@ -8949,12 +10254,12 @@ export namespace Prisma {
     clienteNome: string
     clienteEmail?: string | null
     clienteCpfCnpj?: string | null
-    origem?: string
+    origem?: $Enums.OrigemPedido
     canalOrigem?: string | null
     pedidoExternoId?: string | null
-    status?: string
-    statusPagamento?: string
-    metodoPagamento?: string | null
+    status?: $Enums.StatusPedido
+    statusPagamento?: $Enums.StatusPagamento
+    metodoPagamento?: $Enums.MetodoPagamento | null
     parcelas?: number
     valorProdutos?: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
@@ -8990,12 +10295,12 @@ export namespace Prisma {
     clienteNome: string
     clienteEmail?: string | null
     clienteCpfCnpj?: string | null
-    origem?: string
+    origem?: $Enums.OrigemPedido
     canalOrigem?: string | null
     pedidoExternoId?: string | null
-    status?: string
-    statusPagamento?: string
-    metodoPagamento?: string | null
+    status?: $Enums.StatusPedido
+    statusPagamento?: $Enums.StatusPagamento
+    metodoPagamento?: $Enums.MetodoPagamento | null
     parcelas?: number
     valorProdutos?: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
@@ -9031,12 +10336,12 @@ export namespace Prisma {
     clienteNome?: StringFieldUpdateOperationsInput | string
     clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
     clienteCpfCnpj?: NullableStringFieldUpdateOperationsInput | string | null
-    origem?: StringFieldUpdateOperationsInput | string
+    origem?: EnumOrigemPedidoFieldUpdateOperationsInput | $Enums.OrigemPedido
     canalOrigem?: NullableStringFieldUpdateOperationsInput | string | null
     pedidoExternoId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    statusPagamento?: StringFieldUpdateOperationsInput | string
-    metodoPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
+    statusPagamento?: EnumStatusPagamentoFieldUpdateOperationsInput | $Enums.StatusPagamento
+    metodoPagamento?: NullableEnumMetodoPagamentoFieldUpdateOperationsInput | $Enums.MetodoPagamento | null
     parcelas?: IntFieldUpdateOperationsInput | number
     valorProdutos?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -9072,12 +10377,12 @@ export namespace Prisma {
     clienteNome?: StringFieldUpdateOperationsInput | string
     clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
     clienteCpfCnpj?: NullableStringFieldUpdateOperationsInput | string | null
-    origem?: StringFieldUpdateOperationsInput | string
+    origem?: EnumOrigemPedidoFieldUpdateOperationsInput | $Enums.OrigemPedido
     canalOrigem?: NullableStringFieldUpdateOperationsInput | string | null
     pedidoExternoId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    statusPagamento?: StringFieldUpdateOperationsInput | string
-    metodoPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
+    statusPagamento?: EnumStatusPagamentoFieldUpdateOperationsInput | $Enums.StatusPagamento
+    metodoPagamento?: NullableEnumMetodoPagamentoFieldUpdateOperationsInput | $Enums.MetodoPagamento | null
     parcelas?: IntFieldUpdateOperationsInput | number
     valorProdutos?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -9113,12 +10418,12 @@ export namespace Prisma {
     clienteNome: string
     clienteEmail?: string | null
     clienteCpfCnpj?: string | null
-    origem?: string
+    origem?: $Enums.OrigemPedido
     canalOrigem?: string | null
     pedidoExternoId?: string | null
-    status?: string
-    statusPagamento?: string
-    metodoPagamento?: string | null
+    status?: $Enums.StatusPedido
+    statusPagamento?: $Enums.StatusPagamento
+    metodoPagamento?: $Enums.MetodoPagamento | null
     parcelas?: number
     valorProdutos?: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
@@ -9150,12 +10455,12 @@ export namespace Prisma {
     clienteNome?: StringFieldUpdateOperationsInput | string
     clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
     clienteCpfCnpj?: NullableStringFieldUpdateOperationsInput | string | null
-    origem?: StringFieldUpdateOperationsInput | string
+    origem?: EnumOrigemPedidoFieldUpdateOperationsInput | $Enums.OrigemPedido
     canalOrigem?: NullableStringFieldUpdateOperationsInput | string | null
     pedidoExternoId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    statusPagamento?: StringFieldUpdateOperationsInput | string
-    metodoPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
+    statusPagamento?: EnumStatusPagamentoFieldUpdateOperationsInput | $Enums.StatusPagamento
+    metodoPagamento?: NullableEnumMetodoPagamentoFieldUpdateOperationsInput | $Enums.MetodoPagamento | null
     parcelas?: IntFieldUpdateOperationsInput | number
     valorProdutos?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -9187,12 +10492,12 @@ export namespace Prisma {
     clienteNome?: StringFieldUpdateOperationsInput | string
     clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
     clienteCpfCnpj?: NullableStringFieldUpdateOperationsInput | string | null
-    origem?: StringFieldUpdateOperationsInput | string
+    origem?: EnumOrigemPedidoFieldUpdateOperationsInput | $Enums.OrigemPedido
     canalOrigem?: NullableStringFieldUpdateOperationsInput | string | null
     pedidoExternoId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    statusPagamento?: StringFieldUpdateOperationsInput | string
-    metodoPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
+    statusPagamento?: EnumStatusPagamentoFieldUpdateOperationsInput | $Enums.StatusPagamento
+    metodoPagamento?: NullableEnumMetodoPagamentoFieldUpdateOperationsInput | $Enums.MetodoPagamento | null
     parcelas?: IntFieldUpdateOperationsInput | number
     valorProdutos?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -9226,6 +10531,7 @@ export namespace Prisma {
     valorUnitario: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
     valorTotal: Decimal | DecimalJsLike | number | string
+    precoCusto?: Decimal | DecimalJsLike | number | string | null
     peso?: Decimal | DecimalJsLike | number | string | null
     largura?: Decimal | DecimalJsLike | number | string | null
     altura?: Decimal | DecimalJsLike | number | string | null
@@ -9246,6 +10552,7 @@ export namespace Prisma {
     valorUnitario: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
     valorTotal: Decimal | DecimalJsLike | number | string
+    precoCusto?: Decimal | DecimalJsLike | number | string | null
     peso?: Decimal | DecimalJsLike | number | string | null
     largura?: Decimal | DecimalJsLike | number | string | null
     altura?: Decimal | DecimalJsLike | number | string | null
@@ -9264,6 +10571,7 @@ export namespace Prisma {
     valorUnitario?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorTotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoCusto?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     largura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     altura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -9284,6 +10592,7 @@ export namespace Prisma {
     valorUnitario?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorTotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoCusto?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     largura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     altura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -9303,6 +10612,7 @@ export namespace Prisma {
     valorUnitario: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
     valorTotal: Decimal | DecimalJsLike | number | string
+    precoCusto?: Decimal | DecimalJsLike | number | string | null
     peso?: Decimal | DecimalJsLike | number | string | null
     largura?: Decimal | DecimalJsLike | number | string | null
     altura?: Decimal | DecimalJsLike | number | string | null
@@ -9320,6 +10630,7 @@ export namespace Prisma {
     valorUnitario?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorTotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoCusto?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     largura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     altura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -9338,6 +10649,7 @@ export namespace Prisma {
     valorUnitario?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorTotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoCusto?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     largura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     altura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -9428,11 +10740,67 @@ export namespace Prisma {
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type EventoProcessadoCreateInput = {
+    id?: string
+    tenantId: string
+    evento: string
+    referenciaId: string
+    processadoEm?: Date | string
+  }
+
+  export type EventoProcessadoUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    evento: string
+    referenciaId: string
+    processadoEm?: Date | string
+  }
+
+  export type EventoProcessadoUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    evento?: StringFieldUpdateOperationsInput | string
+    referenciaId?: StringFieldUpdateOperationsInput | string
+    processadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventoProcessadoUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    evento?: StringFieldUpdateOperationsInput | string
+    referenciaId?: StringFieldUpdateOperationsInput | string
+    processadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventoProcessadoCreateManyInput = {
+    id?: string
+    tenantId: string
+    evento: string
+    referenciaId: string
+    processadoEm?: Date | string
+  }
+
+  export type EventoProcessadoUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    evento?: StringFieldUpdateOperationsInput | string
+    referenciaId?: StringFieldUpdateOperationsInput | string
+    processadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventoProcessadoUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    evento?: StringFieldUpdateOperationsInput | string
+    referenciaId?: StringFieldUpdateOperationsInput | string
+    processadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type PagamentoCreateInput = {
     id?: string
     tenantId: string
-    tipo: string
-    status?: string
+    tipo: $Enums.TipoPagamento
+    status?: $Enums.StatusPagamentoDetalhado
     valor: Decimal | DecimalJsLike | number | string
     parcelas?: number
     gateway?: string | null
@@ -9448,8 +10816,8 @@ export namespace Prisma {
     id?: string
     pedidoId: string
     tenantId: string
-    tipo: string
-    status?: string
+    tipo: $Enums.TipoPagamento
+    status?: $Enums.StatusPagamentoDetalhado
     valor: Decimal | DecimalJsLike | number | string
     parcelas?: number
     gateway?: string | null
@@ -9463,8 +10831,8 @@ export namespace Prisma {
   export type PagamentoUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoPagamentoFieldUpdateOperationsInput | $Enums.TipoPagamento
+    status?: EnumStatusPagamentoDetalhadoFieldUpdateOperationsInput | $Enums.StatusPagamentoDetalhado
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     parcelas?: IntFieldUpdateOperationsInput | number
     gateway?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9480,8 +10848,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     pedidoId?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoPagamentoFieldUpdateOperationsInput | $Enums.TipoPagamento
+    status?: EnumStatusPagamentoDetalhadoFieldUpdateOperationsInput | $Enums.StatusPagamentoDetalhado
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     parcelas?: IntFieldUpdateOperationsInput | number
     gateway?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9496,8 +10864,8 @@ export namespace Prisma {
     id?: string
     pedidoId: string
     tenantId: string
-    tipo: string
-    status?: string
+    tipo: $Enums.TipoPagamento
+    status?: $Enums.StatusPagamentoDetalhado
     valor: Decimal | DecimalJsLike | number | string
     parcelas?: number
     gateway?: string | null
@@ -9511,8 +10879,8 @@ export namespace Prisma {
   export type PagamentoUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoPagamentoFieldUpdateOperationsInput | $Enums.TipoPagamento
+    status?: EnumStatusPagamentoDetalhadoFieldUpdateOperationsInput | $Enums.StatusPagamentoDetalhado
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     parcelas?: IntFieldUpdateOperationsInput | number
     gateway?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9527,8 +10895,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     pedidoId?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoPagamentoFieldUpdateOperationsInput | $Enums.TipoPagamento
+    status?: EnumStatusPagamentoDetalhadoFieldUpdateOperationsInput | $Enums.StatusPagamentoDetalhado
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     parcelas?: IntFieldUpdateOperationsInput | number
     gateway?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9542,8 +10910,8 @@ export namespace Prisma {
   export type DevolucaoCreateInput = {
     id?: string
     tenantId: string
-    motivo: string
-    status?: string
+    motivo: $Enums.MotivoDevolucao
+    status?: $Enums.StatusDevolucao
     valorReembolso: Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: string | null
     observacao?: string | null
@@ -9557,8 +10925,8 @@ export namespace Prisma {
     id?: string
     pedidoId: string
     tenantId: string
-    motivo: string
-    status?: string
+    motivo: $Enums.MotivoDevolucao
+    status?: $Enums.StatusDevolucao
     valorReembolso: Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: string | null
     observacao?: string | null
@@ -9570,8 +10938,8 @@ export namespace Prisma {
   export type DevolucaoUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    motivo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
+    status?: EnumStatusDevolucaoFieldUpdateOperationsInput | $Enums.StatusDevolucao
     valorReembolso?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: NullableStringFieldUpdateOperationsInput | string | null
     observacao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9585,8 +10953,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     pedidoId?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    motivo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
+    status?: EnumStatusDevolucaoFieldUpdateOperationsInput | $Enums.StatusDevolucao
     valorReembolso?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: NullableStringFieldUpdateOperationsInput | string | null
     observacao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9599,8 +10967,8 @@ export namespace Prisma {
     id?: string
     pedidoId: string
     tenantId: string
-    motivo: string
-    status?: string
+    motivo: $Enums.MotivoDevolucao
+    status?: $Enums.StatusDevolucao
     valorReembolso: Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: string | null
     observacao?: string | null
@@ -9611,8 +10979,8 @@ export namespace Prisma {
   export type DevolucaoUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    motivo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
+    status?: EnumStatusDevolucaoFieldUpdateOperationsInput | $Enums.StatusDevolucao
     valorReembolso?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: NullableStringFieldUpdateOperationsInput | string | null
     observacao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9624,8 +10992,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     pedidoId?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    motivo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
+    status?: EnumStatusDevolucaoFieldUpdateOperationsInput | $Enums.StatusDevolucao
     valorReembolso?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: NullableStringFieldUpdateOperationsInput | string | null
     observacao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9636,7 +11004,7 @@ export namespace Prisma {
   export type ItemDevolucaoCreateInput = {
     id?: string
     quantidade: number
-    motivo: string
+    motivo: $Enums.MotivoDevolucao
     criadoEm?: Date | string
     devolucao: DevolucaoCreateNestedOneWithoutItensInput
     itemPedido: ItemPedidoCreateNestedOneWithoutItensDevolvidosInput
@@ -9647,14 +11015,14 @@ export namespace Prisma {
     devolucaoId: string
     itemPedidoId: string
     quantidade: number
-    motivo: string
+    motivo: $Enums.MotivoDevolucao
     criadoEm?: Date | string
   }
 
   export type ItemDevolucaoUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     quantidade?: IntFieldUpdateOperationsInput | number
-    motivo?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     devolucao?: DevolucaoUpdateOneRequiredWithoutItensNestedInput
     itemPedido?: ItemPedidoUpdateOneRequiredWithoutItensDevolvidosNestedInput
@@ -9665,7 +11033,7 @@ export namespace Prisma {
     devolucaoId?: StringFieldUpdateOperationsInput | string
     itemPedidoId?: StringFieldUpdateOperationsInput | string
     quantidade?: IntFieldUpdateOperationsInput | number
-    motivo?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -9674,14 +11042,14 @@ export namespace Prisma {
     devolucaoId: string
     itemPedidoId: string
     quantidade: number
-    motivo: string
+    motivo: $Enums.MotivoDevolucao
     criadoEm?: Date | string
   }
 
   export type ItemDevolucaoUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     quantidade?: IntFieldUpdateOperationsInput | number
-    motivo?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -9690,7 +11058,7 @@ export namespace Prisma {
     devolucaoId?: StringFieldUpdateOperationsInput | string
     itemPedidoId?: StringFieldUpdateOperationsInput | string
     quantidade?: IntFieldUpdateOperationsInput | number
-    motivo?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -9757,6 +11125,34 @@ export namespace Prisma {
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type EnumOrigemPedidoFilter<$PrismaModel = never> = {
+    equals?: $Enums.OrigemPedido | EnumOrigemPedidoFieldRefInput<$PrismaModel>
+    in?: $Enums.OrigemPedido[] | ListEnumOrigemPedidoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OrigemPedido[] | ListEnumOrigemPedidoFieldRefInput<$PrismaModel>
+    not?: NestedEnumOrigemPedidoFilter<$PrismaModel> | $Enums.OrigemPedido
+  }
+
+  export type EnumStatusPedidoFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusPedido | EnumStatusPedidoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusPedido[] | ListEnumStatusPedidoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusPedido[] | ListEnumStatusPedidoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusPedidoFilter<$PrismaModel> | $Enums.StatusPedido
+  }
+
+  export type EnumStatusPagamentoFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusPagamento | EnumStatusPagamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusPagamento[] | ListEnumStatusPagamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusPagamento[] | ListEnumStatusPagamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusPagamentoFilter<$PrismaModel> | $Enums.StatusPagamento
+  }
+
+  export type EnumMetodoPagamentoNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.MetodoPagamento | EnumMetodoPagamentoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.MetodoPagamento[] | ListEnumMetodoPagamentoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.MetodoPagamento[] | ListEnumMetodoPagamentoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumMetodoPagamentoNullableFilter<$PrismaModel> | $Enums.MetodoPagamento | null
   }
 
   export type DecimalFilter<$PrismaModel = never> = {
@@ -10086,6 +11482,46 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
+  export type EnumOrigemPedidoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.OrigemPedido | EnumOrigemPedidoFieldRefInput<$PrismaModel>
+    in?: $Enums.OrigemPedido[] | ListEnumOrigemPedidoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OrigemPedido[] | ListEnumOrigemPedidoFieldRefInput<$PrismaModel>
+    not?: NestedEnumOrigemPedidoWithAggregatesFilter<$PrismaModel> | $Enums.OrigemPedido
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumOrigemPedidoFilter<$PrismaModel>
+    _max?: NestedEnumOrigemPedidoFilter<$PrismaModel>
+  }
+
+  export type EnumStatusPedidoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusPedido | EnumStatusPedidoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusPedido[] | ListEnumStatusPedidoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusPedido[] | ListEnumStatusPedidoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusPedidoWithAggregatesFilter<$PrismaModel> | $Enums.StatusPedido
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusPedidoFilter<$PrismaModel>
+    _max?: NestedEnumStatusPedidoFilter<$PrismaModel>
+  }
+
+  export type EnumStatusPagamentoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusPagamento | EnumStatusPagamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusPagamento[] | ListEnumStatusPagamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusPagamento[] | ListEnumStatusPagamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusPagamentoWithAggregatesFilter<$PrismaModel> | $Enums.StatusPagamento
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusPagamentoFilter<$PrismaModel>
+    _max?: NestedEnumStatusPagamentoFilter<$PrismaModel>
+  }
+
+  export type EnumMetodoPagamentoNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MetodoPagamento | EnumMetodoPagamentoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.MetodoPagamento[] | ListEnumMetodoPagamentoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.MetodoPagamento[] | ListEnumMetodoPagamentoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumMetodoPagamentoNullableWithAggregatesFilter<$PrismaModel> | $Enums.MetodoPagamento | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumMetodoPagamentoNullableFilter<$PrismaModel>
+    _max?: NestedEnumMetodoPagamentoNullableFilter<$PrismaModel>
+  }
+
   export type DecimalWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
@@ -10208,6 +11644,7 @@ export namespace Prisma {
     valorUnitario?: SortOrder
     valorDesconto?: SortOrder
     valorTotal?: SortOrder
+    precoCusto?: SortOrder
     peso?: SortOrder
     largura?: SortOrder
     altura?: SortOrder
@@ -10220,6 +11657,7 @@ export namespace Prisma {
     valorUnitario?: SortOrder
     valorDesconto?: SortOrder
     valorTotal?: SortOrder
+    precoCusto?: SortOrder
     peso?: SortOrder
     largura?: SortOrder
     altura?: SortOrder
@@ -10237,6 +11675,7 @@ export namespace Prisma {
     valorUnitario?: SortOrder
     valorDesconto?: SortOrder
     valorTotal?: SortOrder
+    precoCusto?: SortOrder
     peso?: SortOrder
     largura?: SortOrder
     altura?: SortOrder
@@ -10255,6 +11694,7 @@ export namespace Prisma {
     valorUnitario?: SortOrder
     valorDesconto?: SortOrder
     valorTotal?: SortOrder
+    precoCusto?: SortOrder
     peso?: SortOrder
     largura?: SortOrder
     altura?: SortOrder
@@ -10267,6 +11707,7 @@ export namespace Prisma {
     valorUnitario?: SortOrder
     valorDesconto?: SortOrder
     valorTotal?: SortOrder
+    precoCusto?: SortOrder
     peso?: SortOrder
     largura?: SortOrder
     altura?: SortOrder
@@ -10321,6 +11762,49 @@ export namespace Prisma {
     descricao?: SortOrder
     usuarioId?: SortOrder
     criadoEm?: SortOrder
+  }
+
+  export type EventoProcessadoEvento_referenciaIdCompoundUniqueInput = {
+    evento: string
+    referenciaId: string
+  }
+
+  export type EventoProcessadoCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    evento?: SortOrder
+    referenciaId?: SortOrder
+    processadoEm?: SortOrder
+  }
+
+  export type EventoProcessadoMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    evento?: SortOrder
+    referenciaId?: SortOrder
+    processadoEm?: SortOrder
+  }
+
+  export type EventoProcessadoMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    evento?: SortOrder
+    referenciaId?: SortOrder
+    processadoEm?: SortOrder
+  }
+
+  export type EnumTipoPagamentoFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoPagamento | EnumTipoPagamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoPagamentoFilter<$PrismaModel> | $Enums.TipoPagamento
+  }
+
+  export type EnumStatusPagamentoDetalhadoFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusPagamentoDetalhado | EnumStatusPagamentoDetalhadoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusPagamentoDetalhado[] | ListEnumStatusPagamentoDetalhadoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusPagamentoDetalhado[] | ListEnumStatusPagamentoDetalhadoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusPagamentoDetalhadoFilter<$PrismaModel> | $Enums.StatusPagamentoDetalhado
   }
 
   export type PagamentoCountOrderByAggregateInput = {
@@ -10379,6 +11863,40 @@ export namespace Prisma {
     parcelas?: SortOrder
   }
 
+  export type EnumTipoPagamentoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoPagamento | EnumTipoPagamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoPagamentoWithAggregatesFilter<$PrismaModel> | $Enums.TipoPagamento
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTipoPagamentoFilter<$PrismaModel>
+    _max?: NestedEnumTipoPagamentoFilter<$PrismaModel>
+  }
+
+  export type EnumStatusPagamentoDetalhadoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusPagamentoDetalhado | EnumStatusPagamentoDetalhadoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusPagamentoDetalhado[] | ListEnumStatusPagamentoDetalhadoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusPagamentoDetalhado[] | ListEnumStatusPagamentoDetalhadoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusPagamentoDetalhadoWithAggregatesFilter<$PrismaModel> | $Enums.StatusPagamentoDetalhado
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusPagamentoDetalhadoFilter<$PrismaModel>
+    _max?: NestedEnumStatusPagamentoDetalhadoFilter<$PrismaModel>
+  }
+
+  export type EnumMotivoDevolucaoFilter<$PrismaModel = never> = {
+    equals?: $Enums.MotivoDevolucao | EnumMotivoDevolucaoFieldRefInput<$PrismaModel>
+    in?: $Enums.MotivoDevolucao[] | ListEnumMotivoDevolucaoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MotivoDevolucao[] | ListEnumMotivoDevolucaoFieldRefInput<$PrismaModel>
+    not?: NestedEnumMotivoDevolucaoFilter<$PrismaModel> | $Enums.MotivoDevolucao
+  }
+
+  export type EnumStatusDevolucaoFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusDevolucao | EnumStatusDevolucaoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusDevolucao[] | ListEnumStatusDevolucaoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusDevolucao[] | ListEnumStatusDevolucaoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusDevolucaoFilter<$PrismaModel> | $Enums.StatusDevolucao
+  }
+
   export type DevolucaoCountOrderByAggregateInput = {
     id?: SortOrder
     pedidoId?: SortOrder
@@ -10424,6 +11942,26 @@ export namespace Prisma {
 
   export type DevolucaoSumOrderByAggregateInput = {
     valorReembolso?: SortOrder
+  }
+
+  export type EnumMotivoDevolucaoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MotivoDevolucao | EnumMotivoDevolucaoFieldRefInput<$PrismaModel>
+    in?: $Enums.MotivoDevolucao[] | ListEnumMotivoDevolucaoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MotivoDevolucao[] | ListEnumMotivoDevolucaoFieldRefInput<$PrismaModel>
+    not?: NestedEnumMotivoDevolucaoWithAggregatesFilter<$PrismaModel> | $Enums.MotivoDevolucao
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumMotivoDevolucaoFilter<$PrismaModel>
+    _max?: NestedEnumMotivoDevolucaoFilter<$PrismaModel>
+  }
+
+  export type EnumStatusDevolucaoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusDevolucao | EnumStatusDevolucaoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusDevolucao[] | ListEnumStatusDevolucaoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusDevolucao[] | ListEnumStatusDevolucaoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusDevolucaoWithAggregatesFilter<$PrismaModel> | $Enums.StatusDevolucao
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusDevolucaoFilter<$PrismaModel>
+    _max?: NestedEnumStatusDevolucaoFilter<$PrismaModel>
   }
 
   export type DevolucaoRelationFilter = {
@@ -10541,6 +12079,22 @@ export namespace Prisma {
 
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
+  }
+
+  export type EnumOrigemPedidoFieldUpdateOperationsInput = {
+    set?: $Enums.OrigemPedido
+  }
+
+  export type EnumStatusPedidoFieldUpdateOperationsInput = {
+    set?: $Enums.StatusPedido
+  }
+
+  export type EnumStatusPagamentoFieldUpdateOperationsInput = {
+    set?: $Enums.StatusPagamento
+  }
+
+  export type NullableEnumMetodoPagamentoFieldUpdateOperationsInput = {
+    set?: $Enums.MetodoPagamento | null
   }
 
   export type DecimalFieldUpdateOperationsInput = {
@@ -10763,6 +12317,14 @@ export namespace Prisma {
     connect?: PedidoWhereUniqueInput
   }
 
+  export type EnumTipoPagamentoFieldUpdateOperationsInput = {
+    set?: $Enums.TipoPagamento
+  }
+
+  export type EnumStatusPagamentoDetalhadoFieldUpdateOperationsInput = {
+    set?: $Enums.StatusPagamentoDetalhado
+  }
+
   export type PedidoUpdateOneRequiredWithoutPagamentosNestedInput = {
     create?: XOR<PedidoCreateWithoutPagamentosInput, PedidoUncheckedCreateWithoutPagamentosInput>
     connectOrCreate?: PedidoCreateOrConnectWithoutPagamentosInput
@@ -10789,6 +12351,14 @@ export namespace Prisma {
     connectOrCreate?: ItemDevolucaoCreateOrConnectWithoutDevolucaoInput | ItemDevolucaoCreateOrConnectWithoutDevolucaoInput[]
     createMany?: ItemDevolucaoCreateManyDevolucaoInputEnvelope
     connect?: ItemDevolucaoWhereUniqueInput | ItemDevolucaoWhereUniqueInput[]
+  }
+
+  export type EnumMotivoDevolucaoFieldUpdateOperationsInput = {
+    set?: $Enums.MotivoDevolucao
+  }
+
+  export type EnumStatusDevolucaoFieldUpdateOperationsInput = {
+    set?: $Enums.StatusDevolucao
   }
 
   export type PedidoUpdateOneRequiredWithoutDevolucoesNestedInput = {
@@ -10914,6 +12484,34 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type NestedEnumOrigemPedidoFilter<$PrismaModel = never> = {
+    equals?: $Enums.OrigemPedido | EnumOrigemPedidoFieldRefInput<$PrismaModel>
+    in?: $Enums.OrigemPedido[] | ListEnumOrigemPedidoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OrigemPedido[] | ListEnumOrigemPedidoFieldRefInput<$PrismaModel>
+    not?: NestedEnumOrigemPedidoFilter<$PrismaModel> | $Enums.OrigemPedido
+  }
+
+  export type NestedEnumStatusPedidoFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusPedido | EnumStatusPedidoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusPedido[] | ListEnumStatusPedidoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusPedido[] | ListEnumStatusPedidoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusPedidoFilter<$PrismaModel> | $Enums.StatusPedido
+  }
+
+  export type NestedEnumStatusPagamentoFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusPagamento | EnumStatusPagamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusPagamento[] | ListEnumStatusPagamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusPagamento[] | ListEnumStatusPagamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusPagamentoFilter<$PrismaModel> | $Enums.StatusPagamento
+  }
+
+  export type NestedEnumMetodoPagamentoNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.MetodoPagamento | EnumMetodoPagamentoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.MetodoPagamento[] | ListEnumMetodoPagamentoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.MetodoPagamento[] | ListEnumMetodoPagamentoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumMetodoPagamentoNullableFilter<$PrismaModel> | $Enums.MetodoPagamento | null
   }
 
   export type NestedDecimalFilter<$PrismaModel = never> = {
@@ -11049,6 +12647,46 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
+  export type NestedEnumOrigemPedidoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.OrigemPedido | EnumOrigemPedidoFieldRefInput<$PrismaModel>
+    in?: $Enums.OrigemPedido[] | ListEnumOrigemPedidoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OrigemPedido[] | ListEnumOrigemPedidoFieldRefInput<$PrismaModel>
+    not?: NestedEnumOrigemPedidoWithAggregatesFilter<$PrismaModel> | $Enums.OrigemPedido
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumOrigemPedidoFilter<$PrismaModel>
+    _max?: NestedEnumOrigemPedidoFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStatusPedidoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusPedido | EnumStatusPedidoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusPedido[] | ListEnumStatusPedidoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusPedido[] | ListEnumStatusPedidoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusPedidoWithAggregatesFilter<$PrismaModel> | $Enums.StatusPedido
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusPedidoFilter<$PrismaModel>
+    _max?: NestedEnumStatusPedidoFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStatusPagamentoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusPagamento | EnumStatusPagamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusPagamento[] | ListEnumStatusPagamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusPagamento[] | ListEnumStatusPagamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusPagamentoWithAggregatesFilter<$PrismaModel> | $Enums.StatusPagamento
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusPagamentoFilter<$PrismaModel>
+    _max?: NestedEnumStatusPagamentoFilter<$PrismaModel>
+  }
+
+  export type NestedEnumMetodoPagamentoNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MetodoPagamento | EnumMetodoPagamentoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.MetodoPagamento[] | ListEnumMetodoPagamentoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.MetodoPagamento[] | ListEnumMetodoPagamentoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumMetodoPagamentoNullableWithAggregatesFilter<$PrismaModel> | $Enums.MetodoPagamento | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumMetodoPagamentoNullableFilter<$PrismaModel>
+    _max?: NestedEnumMetodoPagamentoNullableFilter<$PrismaModel>
+  }
+
   export type NestedDecimalWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
@@ -11169,6 +12807,74 @@ export namespace Prisma {
     _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
+  export type NestedEnumTipoPagamentoFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoPagamento | EnumTipoPagamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoPagamentoFilter<$PrismaModel> | $Enums.TipoPagamento
+  }
+
+  export type NestedEnumStatusPagamentoDetalhadoFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusPagamentoDetalhado | EnumStatusPagamentoDetalhadoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusPagamentoDetalhado[] | ListEnumStatusPagamentoDetalhadoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusPagamentoDetalhado[] | ListEnumStatusPagamentoDetalhadoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusPagamentoDetalhadoFilter<$PrismaModel> | $Enums.StatusPagamentoDetalhado
+  }
+
+  export type NestedEnumTipoPagamentoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoPagamento | EnumTipoPagamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoPagamentoWithAggregatesFilter<$PrismaModel> | $Enums.TipoPagamento
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTipoPagamentoFilter<$PrismaModel>
+    _max?: NestedEnumTipoPagamentoFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStatusPagamentoDetalhadoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusPagamentoDetalhado | EnumStatusPagamentoDetalhadoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusPagamentoDetalhado[] | ListEnumStatusPagamentoDetalhadoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusPagamentoDetalhado[] | ListEnumStatusPagamentoDetalhadoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusPagamentoDetalhadoWithAggregatesFilter<$PrismaModel> | $Enums.StatusPagamentoDetalhado
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusPagamentoDetalhadoFilter<$PrismaModel>
+    _max?: NestedEnumStatusPagamentoDetalhadoFilter<$PrismaModel>
+  }
+
+  export type NestedEnumMotivoDevolucaoFilter<$PrismaModel = never> = {
+    equals?: $Enums.MotivoDevolucao | EnumMotivoDevolucaoFieldRefInput<$PrismaModel>
+    in?: $Enums.MotivoDevolucao[] | ListEnumMotivoDevolucaoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MotivoDevolucao[] | ListEnumMotivoDevolucaoFieldRefInput<$PrismaModel>
+    not?: NestedEnumMotivoDevolucaoFilter<$PrismaModel> | $Enums.MotivoDevolucao
+  }
+
+  export type NestedEnumStatusDevolucaoFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusDevolucao | EnumStatusDevolucaoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusDevolucao[] | ListEnumStatusDevolucaoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusDevolucao[] | ListEnumStatusDevolucaoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusDevolucaoFilter<$PrismaModel> | $Enums.StatusDevolucao
+  }
+
+  export type NestedEnumMotivoDevolucaoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MotivoDevolucao | EnumMotivoDevolucaoFieldRefInput<$PrismaModel>
+    in?: $Enums.MotivoDevolucao[] | ListEnumMotivoDevolucaoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MotivoDevolucao[] | ListEnumMotivoDevolucaoFieldRefInput<$PrismaModel>
+    not?: NestedEnumMotivoDevolucaoWithAggregatesFilter<$PrismaModel> | $Enums.MotivoDevolucao
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumMotivoDevolucaoFilter<$PrismaModel>
+    _max?: NestedEnumMotivoDevolucaoFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStatusDevolucaoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusDevolucao | EnumStatusDevolucaoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusDevolucao[] | ListEnumStatusDevolucaoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusDevolucao[] | ListEnumStatusDevolucaoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusDevolucaoWithAggregatesFilter<$PrismaModel> | $Enums.StatusDevolucao
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusDevolucaoFilter<$PrismaModel>
+    _max?: NestedEnumStatusDevolucaoFilter<$PrismaModel>
+  }
+
   export type ItemPedidoCreateWithoutPedidoInput = {
     id?: string
     produtoId: string
@@ -11179,6 +12885,7 @@ export namespace Prisma {
     valorUnitario: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
     valorTotal: Decimal | DecimalJsLike | number | string
+    precoCusto?: Decimal | DecimalJsLike | number | string | null
     peso?: Decimal | DecimalJsLike | number | string | null
     largura?: Decimal | DecimalJsLike | number | string | null
     altura?: Decimal | DecimalJsLike | number | string | null
@@ -11197,6 +12904,7 @@ export namespace Prisma {
     valorUnitario: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
     valorTotal: Decimal | DecimalJsLike | number | string
+    precoCusto?: Decimal | DecimalJsLike | number | string | null
     peso?: Decimal | DecimalJsLike | number | string | null
     largura?: Decimal | DecimalJsLike | number | string | null
     altura?: Decimal | DecimalJsLike | number | string | null
@@ -11250,8 +12958,8 @@ export namespace Prisma {
   export type PagamentoCreateWithoutPedidoInput = {
     id?: string
     tenantId: string
-    tipo: string
-    status?: string
+    tipo: $Enums.TipoPagamento
+    status?: $Enums.StatusPagamentoDetalhado
     valor: Decimal | DecimalJsLike | number | string
     parcelas?: number
     gateway?: string | null
@@ -11265,8 +12973,8 @@ export namespace Prisma {
   export type PagamentoUncheckedCreateWithoutPedidoInput = {
     id?: string
     tenantId: string
-    tipo: string
-    status?: string
+    tipo: $Enums.TipoPagamento
+    status?: $Enums.StatusPagamentoDetalhado
     valor: Decimal | DecimalJsLike | number | string
     parcelas?: number
     gateway?: string | null
@@ -11290,8 +12998,8 @@ export namespace Prisma {
   export type DevolucaoCreateWithoutPedidoInput = {
     id?: string
     tenantId: string
-    motivo: string
-    status?: string
+    motivo: $Enums.MotivoDevolucao
+    status?: $Enums.StatusDevolucao
     valorReembolso: Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: string | null
     observacao?: string | null
@@ -11303,8 +13011,8 @@ export namespace Prisma {
   export type DevolucaoUncheckedCreateWithoutPedidoInput = {
     id?: string
     tenantId: string
-    motivo: string
-    status?: string
+    motivo: $Enums.MotivoDevolucao
+    status?: $Enums.StatusDevolucao
     valorReembolso: Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: string | null
     observacao?: string | null
@@ -11353,6 +13061,7 @@ export namespace Prisma {
     valorUnitario?: DecimalFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string
     valorTotal?: DecimalFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string
+    precoCusto?: DecimalNullableFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
     peso?: DecimalNullableFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
     largura?: DecimalNullableFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
     altura?: DecimalNullableFilter<"ItemPedido"> | Decimal | DecimalJsLike | number | string | null
@@ -11414,8 +13123,8 @@ export namespace Prisma {
     id?: UuidFilter<"Pagamento"> | string
     pedidoId?: UuidFilter<"Pagamento"> | string
     tenantId?: UuidFilter<"Pagamento"> | string
-    tipo?: StringFilter<"Pagamento"> | string
-    status?: StringFilter<"Pagamento"> | string
+    tipo?: EnumTipoPagamentoFilter<"Pagamento"> | $Enums.TipoPagamento
+    status?: EnumStatusPagamentoDetalhadoFilter<"Pagamento"> | $Enums.StatusPagamentoDetalhado
     valor?: DecimalFilter<"Pagamento"> | Decimal | DecimalJsLike | number | string
     parcelas?: IntFilter<"Pagamento"> | number
     gateway?: StringNullableFilter<"Pagamento"> | string | null
@@ -11449,8 +13158,8 @@ export namespace Prisma {
     id?: UuidFilter<"Devolucao"> | string
     pedidoId?: UuidFilter<"Devolucao"> | string
     tenantId?: UuidFilter<"Devolucao"> | string
-    motivo?: StringFilter<"Devolucao"> | string
-    status?: StringFilter<"Devolucao"> | string
+    motivo?: EnumMotivoDevolucaoFilter<"Devolucao"> | $Enums.MotivoDevolucao
+    status?: EnumStatusDevolucaoFilter<"Devolucao"> | $Enums.StatusDevolucao
     valorReembolso?: DecimalFilter<"Devolucao"> | Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: StringNullableFilter<"Devolucao"> | string | null
     observacao?: StringNullableFilter<"Devolucao"> | string | null
@@ -11466,12 +13175,12 @@ export namespace Prisma {
     clienteNome: string
     clienteEmail?: string | null
     clienteCpfCnpj?: string | null
-    origem?: string
+    origem?: $Enums.OrigemPedido
     canalOrigem?: string | null
     pedidoExternoId?: string | null
-    status?: string
-    statusPagamento?: string
-    metodoPagamento?: string | null
+    status?: $Enums.StatusPedido
+    statusPagamento?: $Enums.StatusPagamento
+    metodoPagamento?: $Enums.MetodoPagamento | null
     parcelas?: number
     valorProdutos?: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
@@ -11506,12 +13215,12 @@ export namespace Prisma {
     clienteNome: string
     clienteEmail?: string | null
     clienteCpfCnpj?: string | null
-    origem?: string
+    origem?: $Enums.OrigemPedido
     canalOrigem?: string | null
     pedidoExternoId?: string | null
-    status?: string
-    statusPagamento?: string
-    metodoPagamento?: string | null
+    status?: $Enums.StatusPedido
+    statusPagamento?: $Enums.StatusPagamento
+    metodoPagamento?: $Enums.MetodoPagamento | null
     parcelas?: number
     valorProdutos?: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
@@ -11546,7 +13255,7 @@ export namespace Prisma {
   export type ItemDevolucaoCreateWithoutItemPedidoInput = {
     id?: string
     quantidade: number
-    motivo: string
+    motivo: $Enums.MotivoDevolucao
     criadoEm?: Date | string
     devolucao: DevolucaoCreateNestedOneWithoutItensInput
   }
@@ -11555,7 +13264,7 @@ export namespace Prisma {
     id?: string
     devolucaoId: string
     quantidade: number
-    motivo: string
+    motivo: $Enums.MotivoDevolucao
     criadoEm?: Date | string
   }
 
@@ -11588,12 +13297,12 @@ export namespace Prisma {
     clienteNome?: StringFieldUpdateOperationsInput | string
     clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
     clienteCpfCnpj?: NullableStringFieldUpdateOperationsInput | string | null
-    origem?: StringFieldUpdateOperationsInput | string
+    origem?: EnumOrigemPedidoFieldUpdateOperationsInput | $Enums.OrigemPedido
     canalOrigem?: NullableStringFieldUpdateOperationsInput | string | null
     pedidoExternoId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    statusPagamento?: StringFieldUpdateOperationsInput | string
-    metodoPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
+    statusPagamento?: EnumStatusPagamentoFieldUpdateOperationsInput | $Enums.StatusPagamento
+    metodoPagamento?: NullableEnumMetodoPagamentoFieldUpdateOperationsInput | $Enums.MetodoPagamento | null
     parcelas?: IntFieldUpdateOperationsInput | number
     valorProdutos?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -11628,12 +13337,12 @@ export namespace Prisma {
     clienteNome?: StringFieldUpdateOperationsInput | string
     clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
     clienteCpfCnpj?: NullableStringFieldUpdateOperationsInput | string | null
-    origem?: StringFieldUpdateOperationsInput | string
+    origem?: EnumOrigemPedidoFieldUpdateOperationsInput | $Enums.OrigemPedido
     canalOrigem?: NullableStringFieldUpdateOperationsInput | string | null
     pedidoExternoId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    statusPagamento?: StringFieldUpdateOperationsInput | string
-    metodoPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
+    statusPagamento?: EnumStatusPagamentoFieldUpdateOperationsInput | $Enums.StatusPagamento
+    metodoPagamento?: NullableEnumMetodoPagamentoFieldUpdateOperationsInput | $Enums.MetodoPagamento | null
     parcelas?: IntFieldUpdateOperationsInput | number
     valorProdutos?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -11684,7 +13393,7 @@ export namespace Prisma {
     devolucaoId?: UuidFilter<"ItemDevolucao"> | string
     itemPedidoId?: UuidFilter<"ItemDevolucao"> | string
     quantidade?: IntFilter<"ItemDevolucao"> | number
-    motivo?: StringFilter<"ItemDevolucao"> | string
+    motivo?: EnumMotivoDevolucaoFilter<"ItemDevolucao"> | $Enums.MotivoDevolucao
     criadoEm?: DateTimeFilter<"ItemDevolucao"> | Date | string
   }
 
@@ -11696,12 +13405,12 @@ export namespace Prisma {
     clienteNome: string
     clienteEmail?: string | null
     clienteCpfCnpj?: string | null
-    origem?: string
+    origem?: $Enums.OrigemPedido
     canalOrigem?: string | null
     pedidoExternoId?: string | null
-    status?: string
-    statusPagamento?: string
-    metodoPagamento?: string | null
+    status?: $Enums.StatusPedido
+    statusPagamento?: $Enums.StatusPagamento
+    metodoPagamento?: $Enums.MetodoPagamento | null
     parcelas?: number
     valorProdutos?: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
@@ -11736,12 +13445,12 @@ export namespace Prisma {
     clienteNome: string
     clienteEmail?: string | null
     clienteCpfCnpj?: string | null
-    origem?: string
+    origem?: $Enums.OrigemPedido
     canalOrigem?: string | null
     pedidoExternoId?: string | null
-    status?: string
-    statusPagamento?: string
-    metodoPagamento?: string | null
+    status?: $Enums.StatusPedido
+    statusPagamento?: $Enums.StatusPagamento
+    metodoPagamento?: $Enums.MetodoPagamento | null
     parcelas?: number
     valorProdutos?: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
@@ -11792,12 +13501,12 @@ export namespace Prisma {
     clienteNome?: StringFieldUpdateOperationsInput | string
     clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
     clienteCpfCnpj?: NullableStringFieldUpdateOperationsInput | string | null
-    origem?: StringFieldUpdateOperationsInput | string
+    origem?: EnumOrigemPedidoFieldUpdateOperationsInput | $Enums.OrigemPedido
     canalOrigem?: NullableStringFieldUpdateOperationsInput | string | null
     pedidoExternoId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    statusPagamento?: StringFieldUpdateOperationsInput | string
-    metodoPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
+    statusPagamento?: EnumStatusPagamentoFieldUpdateOperationsInput | $Enums.StatusPagamento
+    metodoPagamento?: NullableEnumMetodoPagamentoFieldUpdateOperationsInput | $Enums.MetodoPagamento | null
     parcelas?: IntFieldUpdateOperationsInput | number
     valorProdutos?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -11832,12 +13541,12 @@ export namespace Prisma {
     clienteNome?: StringFieldUpdateOperationsInput | string
     clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
     clienteCpfCnpj?: NullableStringFieldUpdateOperationsInput | string | null
-    origem?: StringFieldUpdateOperationsInput | string
+    origem?: EnumOrigemPedidoFieldUpdateOperationsInput | $Enums.OrigemPedido
     canalOrigem?: NullableStringFieldUpdateOperationsInput | string | null
     pedidoExternoId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    statusPagamento?: StringFieldUpdateOperationsInput | string
-    metodoPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
+    statusPagamento?: EnumStatusPagamentoFieldUpdateOperationsInput | $Enums.StatusPagamento
+    metodoPagamento?: NullableEnumMetodoPagamentoFieldUpdateOperationsInput | $Enums.MetodoPagamento | null
     parcelas?: IntFieldUpdateOperationsInput | number
     valorProdutos?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -11872,12 +13581,12 @@ export namespace Prisma {
     clienteNome: string
     clienteEmail?: string | null
     clienteCpfCnpj?: string | null
-    origem?: string
+    origem?: $Enums.OrigemPedido
     canalOrigem?: string | null
     pedidoExternoId?: string | null
-    status?: string
-    statusPagamento?: string
-    metodoPagamento?: string | null
+    status?: $Enums.StatusPedido
+    statusPagamento?: $Enums.StatusPagamento
+    metodoPagamento?: $Enums.MetodoPagamento | null
     parcelas?: number
     valorProdutos?: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
@@ -11912,12 +13621,12 @@ export namespace Prisma {
     clienteNome: string
     clienteEmail?: string | null
     clienteCpfCnpj?: string | null
-    origem?: string
+    origem?: $Enums.OrigemPedido
     canalOrigem?: string | null
     pedidoExternoId?: string | null
-    status?: string
-    statusPagamento?: string
-    metodoPagamento?: string | null
+    status?: $Enums.StatusPedido
+    statusPagamento?: $Enums.StatusPagamento
+    metodoPagamento?: $Enums.MetodoPagamento | null
     parcelas?: number
     valorProdutos?: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
@@ -11968,12 +13677,12 @@ export namespace Prisma {
     clienteNome?: StringFieldUpdateOperationsInput | string
     clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
     clienteCpfCnpj?: NullableStringFieldUpdateOperationsInput | string | null
-    origem?: StringFieldUpdateOperationsInput | string
+    origem?: EnumOrigemPedidoFieldUpdateOperationsInput | $Enums.OrigemPedido
     canalOrigem?: NullableStringFieldUpdateOperationsInput | string | null
     pedidoExternoId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    statusPagamento?: StringFieldUpdateOperationsInput | string
-    metodoPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
+    statusPagamento?: EnumStatusPagamentoFieldUpdateOperationsInput | $Enums.StatusPagamento
+    metodoPagamento?: NullableEnumMetodoPagamentoFieldUpdateOperationsInput | $Enums.MetodoPagamento | null
     parcelas?: IntFieldUpdateOperationsInput | number
     valorProdutos?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -12008,12 +13717,12 @@ export namespace Prisma {
     clienteNome?: StringFieldUpdateOperationsInput | string
     clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
     clienteCpfCnpj?: NullableStringFieldUpdateOperationsInput | string | null
-    origem?: StringFieldUpdateOperationsInput | string
+    origem?: EnumOrigemPedidoFieldUpdateOperationsInput | $Enums.OrigemPedido
     canalOrigem?: NullableStringFieldUpdateOperationsInput | string | null
     pedidoExternoId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    statusPagamento?: StringFieldUpdateOperationsInput | string
-    metodoPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
+    statusPagamento?: EnumStatusPagamentoFieldUpdateOperationsInput | $Enums.StatusPagamento
+    metodoPagamento?: NullableEnumMetodoPagamentoFieldUpdateOperationsInput | $Enums.MetodoPagamento | null
     parcelas?: IntFieldUpdateOperationsInput | number
     valorProdutos?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -12048,12 +13757,12 @@ export namespace Prisma {
     clienteNome: string
     clienteEmail?: string | null
     clienteCpfCnpj?: string | null
-    origem?: string
+    origem?: $Enums.OrigemPedido
     canalOrigem?: string | null
     pedidoExternoId?: string | null
-    status?: string
-    statusPagamento?: string
-    metodoPagamento?: string | null
+    status?: $Enums.StatusPedido
+    statusPagamento?: $Enums.StatusPagamento
+    metodoPagamento?: $Enums.MetodoPagamento | null
     parcelas?: number
     valorProdutos?: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
@@ -12088,12 +13797,12 @@ export namespace Prisma {
     clienteNome: string
     clienteEmail?: string | null
     clienteCpfCnpj?: string | null
-    origem?: string
+    origem?: $Enums.OrigemPedido
     canalOrigem?: string | null
     pedidoExternoId?: string | null
-    status?: string
-    statusPagamento?: string
-    metodoPagamento?: string | null
+    status?: $Enums.StatusPedido
+    statusPagamento?: $Enums.StatusPagamento
+    metodoPagamento?: $Enums.MetodoPagamento | null
     parcelas?: number
     valorProdutos?: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
@@ -12128,7 +13837,7 @@ export namespace Prisma {
   export type ItemDevolucaoCreateWithoutDevolucaoInput = {
     id?: string
     quantidade: number
-    motivo: string
+    motivo: $Enums.MotivoDevolucao
     criadoEm?: Date | string
     itemPedido: ItemPedidoCreateNestedOneWithoutItensDevolvidosInput
   }
@@ -12137,7 +13846,7 @@ export namespace Prisma {
     id?: string
     itemPedidoId: string
     quantidade: number
-    motivo: string
+    motivo: $Enums.MotivoDevolucao
     criadoEm?: Date | string
   }
 
@@ -12170,12 +13879,12 @@ export namespace Prisma {
     clienteNome?: StringFieldUpdateOperationsInput | string
     clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
     clienteCpfCnpj?: NullableStringFieldUpdateOperationsInput | string | null
-    origem?: StringFieldUpdateOperationsInput | string
+    origem?: EnumOrigemPedidoFieldUpdateOperationsInput | $Enums.OrigemPedido
     canalOrigem?: NullableStringFieldUpdateOperationsInput | string | null
     pedidoExternoId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    statusPagamento?: StringFieldUpdateOperationsInput | string
-    metodoPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
+    statusPagamento?: EnumStatusPagamentoFieldUpdateOperationsInput | $Enums.StatusPagamento
+    metodoPagamento?: NullableEnumMetodoPagamentoFieldUpdateOperationsInput | $Enums.MetodoPagamento | null
     parcelas?: IntFieldUpdateOperationsInput | number
     valorProdutos?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -12210,12 +13919,12 @@ export namespace Prisma {
     clienteNome?: StringFieldUpdateOperationsInput | string
     clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
     clienteCpfCnpj?: NullableStringFieldUpdateOperationsInput | string | null
-    origem?: StringFieldUpdateOperationsInput | string
+    origem?: EnumOrigemPedidoFieldUpdateOperationsInput | $Enums.OrigemPedido
     canalOrigem?: NullableStringFieldUpdateOperationsInput | string | null
     pedidoExternoId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    statusPagamento?: StringFieldUpdateOperationsInput | string
-    metodoPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
+    statusPagamento?: EnumStatusPagamentoFieldUpdateOperationsInput | $Enums.StatusPagamento
+    metodoPagamento?: NullableEnumMetodoPagamentoFieldUpdateOperationsInput | $Enums.MetodoPagamento | null
     parcelas?: IntFieldUpdateOperationsInput | number
     valorProdutos?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -12261,8 +13970,8 @@ export namespace Prisma {
   export type DevolucaoCreateWithoutItensInput = {
     id?: string
     tenantId: string
-    motivo: string
-    status?: string
+    motivo: $Enums.MotivoDevolucao
+    status?: $Enums.StatusDevolucao
     valorReembolso: Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: string | null
     observacao?: string | null
@@ -12275,8 +13984,8 @@ export namespace Prisma {
     id?: string
     pedidoId: string
     tenantId: string
-    motivo: string
-    status?: string
+    motivo: $Enums.MotivoDevolucao
+    status?: $Enums.StatusDevolucao
     valorReembolso: Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: string | null
     observacao?: string | null
@@ -12299,6 +14008,7 @@ export namespace Prisma {
     valorUnitario: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
     valorTotal: Decimal | DecimalJsLike | number | string
+    precoCusto?: Decimal | DecimalJsLike | number | string | null
     peso?: Decimal | DecimalJsLike | number | string | null
     largura?: Decimal | DecimalJsLike | number | string | null
     altura?: Decimal | DecimalJsLike | number | string | null
@@ -12318,6 +14028,7 @@ export namespace Prisma {
     valorUnitario: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
     valorTotal: Decimal | DecimalJsLike | number | string
+    precoCusto?: Decimal | DecimalJsLike | number | string | null
     peso?: Decimal | DecimalJsLike | number | string | null
     largura?: Decimal | DecimalJsLike | number | string | null
     altura?: Decimal | DecimalJsLike | number | string | null
@@ -12344,8 +14055,8 @@ export namespace Prisma {
   export type DevolucaoUpdateWithoutItensInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    motivo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
+    status?: EnumStatusDevolucaoFieldUpdateOperationsInput | $Enums.StatusDevolucao
     valorReembolso?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: NullableStringFieldUpdateOperationsInput | string | null
     observacao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12358,8 +14069,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     pedidoId?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    motivo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
+    status?: EnumStatusDevolucaoFieldUpdateOperationsInput | $Enums.StatusDevolucao
     valorReembolso?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: NullableStringFieldUpdateOperationsInput | string | null
     observacao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12388,6 +14099,7 @@ export namespace Prisma {
     valorUnitario?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorTotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoCusto?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     largura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     altura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -12407,6 +14119,7 @@ export namespace Prisma {
     valorUnitario?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorTotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoCusto?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     largura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     altura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -12424,6 +14137,7 @@ export namespace Prisma {
     valorUnitario: Decimal | DecimalJsLike | number | string
     valorDesconto?: Decimal | DecimalJsLike | number | string
     valorTotal: Decimal | DecimalJsLike | number | string
+    precoCusto?: Decimal | DecimalJsLike | number | string | null
     peso?: Decimal | DecimalJsLike | number | string | null
     largura?: Decimal | DecimalJsLike | number | string | null
     altura?: Decimal | DecimalJsLike | number | string | null
@@ -12445,8 +14159,8 @@ export namespace Prisma {
   export type PagamentoCreateManyPedidoInput = {
     id?: string
     tenantId: string
-    tipo: string
-    status?: string
+    tipo: $Enums.TipoPagamento
+    status?: $Enums.StatusPagamentoDetalhado
     valor: Decimal | DecimalJsLike | number | string
     parcelas?: number
     gateway?: string | null
@@ -12460,8 +14174,8 @@ export namespace Prisma {
   export type DevolucaoCreateManyPedidoInput = {
     id?: string
     tenantId: string
-    motivo: string
-    status?: string
+    motivo: $Enums.MotivoDevolucao
+    status?: $Enums.StatusDevolucao
     valorReembolso: Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: string | null
     observacao?: string | null
@@ -12479,6 +14193,7 @@ export namespace Prisma {
     valorUnitario?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorTotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoCusto?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     largura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     altura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -12497,6 +14212,7 @@ export namespace Prisma {
     valorUnitario?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorTotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoCusto?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     largura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     altura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -12515,6 +14231,7 @@ export namespace Prisma {
     valorUnitario?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorDesconto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorTotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoCusto?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     largura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     altura?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -12558,8 +14275,8 @@ export namespace Prisma {
   export type PagamentoUpdateWithoutPedidoInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoPagamentoFieldUpdateOperationsInput | $Enums.TipoPagamento
+    status?: EnumStatusPagamentoDetalhadoFieldUpdateOperationsInput | $Enums.StatusPagamentoDetalhado
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     parcelas?: IntFieldUpdateOperationsInput | number
     gateway?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12573,8 +14290,8 @@ export namespace Prisma {
   export type PagamentoUncheckedUpdateWithoutPedidoInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoPagamentoFieldUpdateOperationsInput | $Enums.TipoPagamento
+    status?: EnumStatusPagamentoDetalhadoFieldUpdateOperationsInput | $Enums.StatusPagamentoDetalhado
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     parcelas?: IntFieldUpdateOperationsInput | number
     gateway?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12588,8 +14305,8 @@ export namespace Prisma {
   export type PagamentoUncheckedUpdateManyWithoutPedidoInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoPagamentoFieldUpdateOperationsInput | $Enums.TipoPagamento
+    status?: EnumStatusPagamentoDetalhadoFieldUpdateOperationsInput | $Enums.StatusPagamentoDetalhado
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     parcelas?: IntFieldUpdateOperationsInput | number
     gateway?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12603,8 +14320,8 @@ export namespace Prisma {
   export type DevolucaoUpdateWithoutPedidoInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    motivo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
+    status?: EnumStatusDevolucaoFieldUpdateOperationsInput | $Enums.StatusDevolucao
     valorReembolso?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: NullableStringFieldUpdateOperationsInput | string | null
     observacao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12616,8 +14333,8 @@ export namespace Prisma {
   export type DevolucaoUncheckedUpdateWithoutPedidoInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    motivo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
+    status?: EnumStatusDevolucaoFieldUpdateOperationsInput | $Enums.StatusDevolucao
     valorReembolso?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: NullableStringFieldUpdateOperationsInput | string | null
     observacao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12629,8 +14346,8 @@ export namespace Prisma {
   export type DevolucaoUncheckedUpdateManyWithoutPedidoInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    motivo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
+    status?: EnumStatusDevolucaoFieldUpdateOperationsInput | $Enums.StatusDevolucao
     valorReembolso?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codigoRastreioRetorno?: NullableStringFieldUpdateOperationsInput | string | null
     observacao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12642,14 +14359,14 @@ export namespace Prisma {
     id?: string
     devolucaoId: string
     quantidade: number
-    motivo: string
+    motivo: $Enums.MotivoDevolucao
     criadoEm?: Date | string
   }
 
   export type ItemDevolucaoUpdateWithoutItemPedidoInput = {
     id?: StringFieldUpdateOperationsInput | string
     quantidade?: IntFieldUpdateOperationsInput | number
-    motivo?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     devolucao?: DevolucaoUpdateOneRequiredWithoutItensNestedInput
   }
@@ -12658,7 +14375,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     devolucaoId?: StringFieldUpdateOperationsInput | string
     quantidade?: IntFieldUpdateOperationsInput | number
-    motivo?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -12666,7 +14383,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     devolucaoId?: StringFieldUpdateOperationsInput | string
     quantidade?: IntFieldUpdateOperationsInput | number
-    motivo?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -12674,14 +14391,14 @@ export namespace Prisma {
     id?: string
     itemPedidoId: string
     quantidade: number
-    motivo: string
+    motivo: $Enums.MotivoDevolucao
     criadoEm?: Date | string
   }
 
   export type ItemDevolucaoUpdateWithoutDevolucaoInput = {
     id?: StringFieldUpdateOperationsInput | string
     quantidade?: IntFieldUpdateOperationsInput | number
-    motivo?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     itemPedido?: ItemPedidoUpdateOneRequiredWithoutItensDevolvidosNestedInput
   }
@@ -12690,7 +14407,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     itemPedidoId?: StringFieldUpdateOperationsInput | string
     quantidade?: IntFieldUpdateOperationsInput | number
-    motivo?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -12698,7 +14415,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     itemPedidoId?: StringFieldUpdateOperationsInput | string
     quantidade?: IntFieldUpdateOperationsInput | number
-    motivo?: StringFieldUpdateOperationsInput | string
+    motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -12731,6 +14448,10 @@ export namespace Prisma {
      * @deprecated Use HistoricoPedidoDefaultArgs instead
      */
     export type HistoricoPedidoArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = HistoricoPedidoDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use EventoProcessadoDefaultArgs instead
+     */
+    export type EventoProcessadoArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = EventoProcessadoDefaultArgs<ExtArgs>
     /**
      * @deprecated Use PagamentoDefaultArgs instead
      */

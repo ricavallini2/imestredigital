@@ -135,17 +135,24 @@ export class KafkaProducerService {
 
   /**
    * Publica evento de pedido faturado (após NF-e autorizada).
+   *
+   * Payload PLANO (contrato canônico da saga): { tenantId, pedidoId,
+   * notaFiscalId?, valorTotal?, timestamp }. O `valorTotal` é propagado para
+   * o financial-service gerar a conta a RECEBER com o valor real do pedido.
+   * `notaFiscalId` e `valorTotal` são opcionais para retrocompatibilidade.
    */
   async publicarPedidoFaturado(
     tenantId: string,
     pedidoId: string,
-    notaFiscalId: string,
+    notaFiscalId?: string,
+    valorTotal?: number,
   ): Promise<void> {
     try {
       this.kafkaClient.emit(TOPICOS_PEDIDO.PEDIDO_FATURADO, {
         tenantId,
         pedidoId,
         notaFiscalId,
+        valorTotal,
         timestamp: new Date().toISOString(),
       });
     } catch (erro) {

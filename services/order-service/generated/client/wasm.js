@@ -170,6 +170,7 @@ exports.Prisma.ItemPedidoScalarFieldEnum = {
   valorUnitario: 'valorUnitario',
   valorDesconto: 'valorDesconto',
   valorTotal: 'valorTotal',
+  precoCusto: 'precoCusto',
   peso: 'peso',
   largura: 'largura',
   altura: 'altura',
@@ -187,6 +188,14 @@ exports.Prisma.HistoricoPedidoScalarFieldEnum = {
   usuarioId: 'usuarioId',
   dadosExtras: 'dadosExtras',
   criadoEm: 'criadoEm'
+};
+
+exports.Prisma.EventoProcessadoScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  evento: 'evento',
+  referenciaId: 'referenciaId',
+  processadoEm: 'processadoEm'
 };
 
 exports.Prisma.PagamentoScalarFieldEnum = {
@@ -252,12 +261,84 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.OrigemPedido = exports.$Enums.OrigemPedido = {
+  LOJA_FISICA: 'LOJA_FISICA',
+  ECOMMERCE: 'ECOMMERCE',
+  MARKETPLACE: 'MARKETPLACE',
+  TELEFONE: 'TELEFONE',
+  WHATSAPP: 'WHATSAPP',
+  MANUAL: 'MANUAL',
+  OUTRO: 'OUTRO'
+};
 
+exports.StatusPedido = exports.$Enums.StatusPedido = {
+  RASCUNHO: 'RASCUNHO',
+  PENDENTE: 'PENDENTE',
+  CONFIRMADO: 'CONFIRMADO',
+  EM_SEPARACAO: 'EM_SEPARACAO',
+  FATURADO: 'FATURADO',
+  ENVIADO: 'ENVIADO',
+  ENTREGUE: 'ENTREGUE',
+  CANCELADO: 'CANCELADO',
+  DEVOLVIDO: 'DEVOLVIDO'
+};
+
+exports.StatusPagamento = exports.$Enums.StatusPagamento = {
+  PENDENTE: 'PENDENTE',
+  PAGO: 'PAGO',
+  PARCIAL: 'PARCIAL',
+  REEMBOLSADO: 'REEMBOLSADO',
+  CANCELADO: 'CANCELADO'
+};
+
+exports.MetodoPagamento = exports.$Enums.MetodoPagamento = {
+  DINHEIRO: 'DINHEIRO',
+  PIX: 'PIX',
+  CARTAO_CREDITO: 'CARTAO_CREDITO',
+  CARTAO_DEBITO: 'CARTAO_DEBITO',
+  BOLETO: 'BOLETO',
+  TRANSFERENCIA: 'TRANSFERENCIA'
+};
+
+exports.TipoPagamento = exports.$Enums.TipoPagamento = {
+  CARTAO_CREDITO: 'CARTAO_CREDITO',
+  CARTAO_DEBITO: 'CARTAO_DEBITO',
+  BOLETO: 'BOLETO',
+  PIX: 'PIX',
+  TRANSFERENCIA: 'TRANSFERENCIA',
+  MARKETPLACE: 'MARKETPLACE',
+  DINHEIRO: 'DINHEIRO'
+};
+
+exports.StatusPagamentoDetalhado = exports.$Enums.StatusPagamentoDetalhado = {
+  PENDENTE: 'PENDENTE',
+  PROCESSANDO: 'PROCESSANDO',
+  APROVADO: 'APROVADO',
+  RECUSADO: 'RECUSADO',
+  ESTORNADO: 'ESTORNADO'
+};
+
+exports.MotivoDevolucao = exports.$Enums.MotivoDevolucao = {
+  DEFEITO: 'DEFEITO',
+  ARREPENDIMENTO: 'ARREPENDIMENTO',
+  TROCA: 'TROCA',
+  PRODUTO_ERRADO: 'PRODUTO_ERRADO',
+  OUTRO: 'OUTRO'
+};
+
+exports.StatusDevolucao = exports.$Enums.StatusDevolucao = {
+  SOLICITADA: 'SOLICITADA',
+  APROVADA: 'APROVADA',
+  RECEBIDA: 'RECEBIDA',
+  REEMBOLSADA: 'REEMBOLSADA',
+  REJEITADA: 'REJEITADA'
+};
 
 exports.Prisma.ModelName = {
   Pedido: 'Pedido',
   ItemPedido: 'ItemPedido',
   HistoricoPedido: 'HistoricoPedido',
+  EventoProcessado: 'EventoProcessado',
   Pagamento: 'Pagamento',
   Devolucao: 'Devolucao',
   ItemDevolucao: 'ItemDevolucao'

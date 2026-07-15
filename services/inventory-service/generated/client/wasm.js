@@ -143,6 +143,8 @@ exports.Prisma.SaldoEstoqueScalarFieldEnum = {
   quantidadeFisica: 'quantidadeFisica',
   reservado: 'reservado',
   estoqueMinimo: 'estoqueMinimo',
+  lote: 'lote',
+  numeroSerie: 'numeroSerie',
   atualizadoEm: 'atualizadoEm'
 };
 
@@ -150,10 +152,19 @@ exports.Prisma.ReservaEstoqueScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
   produtoId: 'produtoId',
+  depositoId: 'depositoId',
   pedidoId: 'pedidoId',
   quantidade: 'quantidade',
   status: 'status',
   criadoEm: 'criadoEm'
+};
+
+exports.Prisma.EventoProcessadoScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  evento: 'evento',
+  referenciaId: 'referenciaId',
+  processadoEm: 'processadoEm'
 };
 
 exports.Prisma.MovimentacaoScalarFieldEnum = {
@@ -166,6 +177,7 @@ exports.Prisma.MovimentacaoScalarFieldEnum = {
   quantidade: 'quantidade',
   custoUnitario: 'custoUnitario',
   observacao: 'observacao',
+  usuarioId: 'usuarioId',
   criadoEm: 'criadoEm'
 };
 
@@ -183,12 +195,42 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.StatusReserva = exports.$Enums.StatusReserva = {
+  ATIVA: 'ATIVA',
+  CONFIRMADA: 'CONFIRMADA',
+  CANCELADA: 'CANCELADA',
+  EXPIRADA: 'EXPIRADA'
+};
 
+exports.TipoMovimentacao = exports.$Enums.TipoMovimentacao = {
+  ENTRADA: 'ENTRADA',
+  SAIDA: 'SAIDA',
+  AJUSTE: 'AJUSTE',
+  TRANSFERENCIA: 'TRANSFERENCIA',
+  DEVOLUCAO: 'DEVOLUCAO',
+  RESERVA: 'RESERVA'
+};
+
+exports.MotivoMovimentacao = exports.$Enums.MotivoMovimentacao = {
+  COMPRA: 'COMPRA',
+  VENDA: 'VENDA',
+  AJUSTE_INVENTARIO: 'AJUSTE_INVENTARIO',
+  TRANSFERENCIA_DEPOSITO: 'TRANSFERENCIA_DEPOSITO',
+  DEVOLUCAO_CLIENTE: 'DEVOLUCAO_CLIENTE',
+  DEVOLUCAO_FORNECEDOR: 'DEVOLUCAO_FORNECEDOR',
+  DEVOLUCAO: 'DEVOLUCAO',
+  PERDA: 'PERDA',
+  AVARIA: 'AVARIA',
+  CONSUMO: 'CONSUMO',
+  PRODUCAO: 'PRODUCAO',
+  OUTRO: 'OUTRO'
+};
 
 exports.Prisma.ModelName = {
   Deposito: 'Deposito',
   SaldoEstoque: 'SaldoEstoque',
   ReservaEstoque: 'ReservaEstoque',
+  EventoProcessado: 'EventoProcessado',
   Movimentacao: 'Movimentacao'
 };
 

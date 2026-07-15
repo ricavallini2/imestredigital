@@ -3,10 +3,22 @@
  * CRUD de depósitos/armazéns do tenant.
  */
 
-import { Controller, Get, Post, Put, Param, Body, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  Request,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { DepositoService } from './deposito.service';
 import { CriarDepositoDto } from '../../dtos/deposito/criar-deposito.dto';
+import { AtualizarDepositoDto } from '../../dtos/deposito/atualizar-deposito.dto';
 
 @ApiTags('depositos')
 @ApiBearerAuth()
@@ -24,5 +36,24 @@ export class DepositoController {
   @ApiOperation({ summary: 'Criar novo depósito' })
   async criar(@Request() req: any, @Body() dto: CriarDepositoDto) {
     return this.depositoService.criar(req.tenantId, dto);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Atualizar depósito' })
+  @ApiParam({ name: 'id', description: 'UUID do depósito' })
+  async atualizar(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Body() dto: AtualizarDepositoDto,
+  ) {
+    return this.depositoService.atualizar(req.tenantId, id, dto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Remover depósito (soft delete)' })
+  @ApiParam({ name: 'id', description: 'UUID do depósito' })
+  async remover(@Request() req: any, @Param('id') id: string) {
+    await this.depositoService.remover(req.tenantId, id);
   }
 }

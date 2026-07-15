@@ -25,8 +25,19 @@ import { useAnuncios, useAtualizarAnuncio, Anuncio, StatusAnuncio } from '@/hook
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const brl = (v: number) =>
-  v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+// Defensivo: em modo microserviços o backend real serializa Decimal como
+// string e pode omitir métricas — nunca quebrar por valor ausente.
+const n = (v?: number | string | null) => {
+  const x = typeof v === 'string' ? Number(v) : v;
+  return Number.isFinite(x) ? (x as number) : 0;
+};
+
+const brl = (v?: number | string | null) =>
+  n(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+const pct1 = (v?: number | string | null) => `${n(v).toFixed(1)}%`;
+
+const inteiro = (v?: number | string | null) => n(v).toLocaleString('pt-BR');
 
 const CANAL_CONFIG: Record<string, { emoji: string; cor: string; corText: string }> = {
   MERCADO_LIVRE: { emoji: '🟠', cor: 'bg-yellow-100 dark:bg-yellow-900/30', corText: 'text-yellow-700 dark:text-yellow-400' },
@@ -36,12 +47,14 @@ const CANAL_CONFIG: Record<string, { emoji: string; cor: string; corText: string
   MAGALU:        { emoji: '🔵', cor: 'bg-blue-100   dark:bg-blue-900/30',   corText: 'text-blue-700   dark:text-blue-400'   },
 };
 
+// Rótulos do enum Prisma `StatusAnuncio` (marketplace-service).
 const STATUS_CONFIG: Record<StatusAnuncio, { label: string; cls: string }> = {
-  ATIVO:       { label: 'Ativo',       cls: 'bg-green-100  text-green-700  dark:bg-green-900/30  dark:text-green-400'  },
-  PAUSADO:     { label: 'Pausado',     cls: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
-  SEM_ESTOQUE: { label: 'Sem Estoque', cls: 'bg-red-100    text-red-700    dark:bg-red-900/30    dark:text-red-400'    },
-  REMOVIDO:    { label: 'Removido',    cls: 'bg-slate-100  text-slate-600  dark:bg-slate-700     dark:text-slate-400'  },
-  BLOQUEADO:   { label: 'Bloqueado',   cls: 'bg-red-200    text-red-800    dark:bg-red-900/40    dark:text-red-300'    },
+  ATIVO:     { label: 'Ativo',     cls: 'bg-green-100  text-green-700  dark:bg-green-900/30  dark:text-green-400'  },
+  PAUSADO:   { label: 'Pausado',   cls: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
+  PENDENTE:  { label: 'Pendente',  cls: 'bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400'   },
+  ENCERRADO: { label: 'Encerrado', cls: 'bg-slate-100  text-slate-600  dark:bg-slate-700     dark:text-slate-400'  },
+  REMOVIDO:  { label: 'Removido',  cls: 'bg-slate-200  text-slate-700  dark:bg-slate-700     dark:text-slate-300'  },
+  ERRO:      { label: 'Erro',      cls: 'bg-red-100    text-red-700    dark:bg-red-900/30    dark:text-red-400'    },
 };
 
 const TAXA_CANAL: Record<string, number> = {
@@ -52,9 +65,9 @@ const TAXA_CANAL: Record<string, number> = {
   MAGALU:        16,
 };
 
-function precoLiquido(preco: number, canal: string) {
+function precoLiquido(preco: number | string | null | undefined, canal: string) {
   const taxa = TAXA_CANAL[canal] ?? 0;
-  return preco * (1 - taxa / 100);
+  return n(preco) * (1 - taxa / 100);
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -73,8 +86,10 @@ interface EditarPrecoModalProps {
 }
 
 function EditarPrecoModal({ anuncio, onClose, onSave, salvando }: EditarPrecoModalProps) {
-  const [preco, setPreco]         = useState(anuncio.preco.toString());
-  const [precoPromo, setPrecoPromo] = useState(anuncio.precoPromocional?.toString() ?? '');
+  const [preco, setPreco]         = useState(n(anuncio.preco).toString());
+  const [precoPromo, setPrecoPromo] = useState(
+    anuncio.precoPromocional != null ? n(anuncio.precoPromocional).toString() : '',
+  );
 
   const taxa = TAXA_CANAL[anuncio.canal] ?? 0;
   const precoNum = parseFloat(preco) || 0;
@@ -174,11 +189,11 @@ function EditarPrecoModal({ anuncio, onClose, onSave, salvando }: EditarPrecoMod
 
 const LIMITE = 12;
 const STATUS_CHIPS: { label: string; value: string }[] = [
-  { label: 'Todos',      value: '' },
-  { label: 'Ativo',      value: 'ATIVO' },
-  { label: 'Pausado',    value: 'PAUSADO' },
-  { label: 'Sem Estoque', value: 'SEM_ESTOQUE' },
-  { label: 'Bloqueado',  value: 'BLOQUEADO' },
+  { label: 'Todos',     value: '' },
+  { label: 'Ativo',     value: 'ATIVO' },
+  { label: 'Pausado',   value: 'PAUSADO' },
+  { label: 'Pendente',  value: 'PENDENTE' },
+  { label: 'Removido',  value: 'REMOVIDO' },
 ];
 
 export default function AnunciosPage() {
@@ -212,8 +227,8 @@ function AnunciosContent() {
 
   // Summary counts (from full data, approximate from current page)
   const ativos      = anuncios.filter((a) => a.status === 'ATIVO').length;
-  const semEstoque  = anuncios.filter((a) => a.status === 'SEM_ESTOQUE').length;
-  const receita30d  = anuncios.reduce((s, a) => s + a.receita30d, 0);
+  const semEstoque  = anuncios.filter((a) => n(a.estoque) === 0).length;
+  const receita30d  = anuncios.reduce((s, a) => s + n(a.receita30d), 0);
 
   const handleToggleStatus = async (anuncio: Anuncio) => {
     const novoStatus: StatusAnuncio =
@@ -430,14 +445,14 @@ function AnunciosContent() {
                       <td className="px-4 py-3 text-right">
                         <span
                           className={`font-bold ${
-                            anuncio.estoque === 0
+                            n(anuncio.estoque) === 0
                               ? 'text-red-600 dark:text-red-400'
-                              : anuncio.estoque <= 3
+                              : n(anuncio.estoque) <= 3
                               ? 'text-yellow-600 dark:text-yellow-400'
                               : 'text-slate-800 dark:text-slate-200'
                           }`}
                         >
-                          {anuncio.estoque}
+                          {n(anuncio.estoque)}
                         </span>
                       </td>
 
@@ -452,25 +467,25 @@ function AnunciosContent() {
 
                       {/* Impressões */}
                       <td className="hidden px-4 py-3 text-right text-slate-600 dark:text-slate-400 sm:table-cell">
-                        {anuncio.impressoes.toLocaleString('pt-BR')}
+                        {inteiro(anuncio.impressoes)}
                       </td>
 
                       {/* Conversão */}
                       <td className="hidden px-4 py-3 text-right md:table-cell">
                         <span
                           className={`font-medium ${
-                            anuncio.conversao >= 3
+                            n(anuncio.conversao) >= 3
                               ? 'text-green-600 dark:text-green-400'
                               : 'text-slate-600 dark:text-slate-400'
                           }`}
                         >
-                          {anuncio.conversao.toFixed(1)}%
+                          {pct1(anuncio.conversao)}
                         </span>
                       </td>
 
                       {/* Vendas 30d */}
                       <td className="hidden px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-300 lg:table-cell">
-                        {anuncio.vendas30d}
+                        {n(anuncio.vendas30d)}
                       </td>
 
                       {/* Receita 30d */}

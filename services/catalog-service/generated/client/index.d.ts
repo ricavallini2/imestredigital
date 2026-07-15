@@ -39,6 +39,21 @@ export type AtributoVariacao = $Result.DefaultSelection<Prisma.$AtributoVariacao
  */
 export type ImagemVariacao = $Result.DefaultSelection<Prisma.$ImagemVariacaoPayload>
 /**
+ * Model Grade
+ * Grade de tamanhos reutilizável (padrão varejo BR).
+ * Agrupa uma lista ordenada de tamanhos (ex: 33..44, PP..XXG) que o usuário
+ * aplica a um produto para gerar a matriz de variações. É POR TENANT: a mesma
+ * grade "Camiseta" existe de forma independente em cada empresa.
+ */
+export type Grade = $Result.DefaultSelection<Prisma.$GradePayload>
+/**
+ * Model GradeTamanho
+ * Tamanho individual de uma grade (ex: '38', 'PP', '33/34').
+ * A ordem preserva a sequência natural definida pelo usuário (a lista não é
+ * necessariamente ordenável alfabética ou numericamente — ex: PP < P < M).
+ */
+export type GradeTamanho = $Result.DefaultSelection<Prisma.$GradeTamanhoPayload>
+/**
  * Model Categoria
  * Categoria de produto com suporte a hierarquia
  */
@@ -48,6 +63,26 @@ export type Categoria = $Result.DefaultSelection<Prisma.$CategoriaPayload>
  * Marca de produto
  */
 export type Marca = $Result.DefaultSelection<Prisma.$MarcaPayload>
+
+/**
+ * Enums
+ */
+export namespace $Enums {
+  export const StatusProduto: {
+  ATIVO: 'ATIVO',
+  INATIVO: 'INATIVO',
+  RASCUNHO: 'RASCUNHO',
+  ESGOTADO: 'ESGOTADO',
+  DESCONTINUADO: 'DESCONTINUADO'
+};
+
+export type StatusProduto = (typeof StatusProduto)[keyof typeof StatusProduto]
+
+}
+
+export type StatusProduto = $Enums.StatusProduto
+
+export const StatusProduto: typeof $Enums.StatusProduto
 
 /**
  * ##  Prisma Client ʲˢ
@@ -221,6 +256,26 @@ export class PrismaClient<
     * ```
     */
   get imagemVariacao(): Prisma.ImagemVariacaoDelegate<ExtArgs>;
+
+  /**
+   * `prisma.grade`: Exposes CRUD operations for the **Grade** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Grades
+    * const grades = await prisma.grade.findMany()
+    * ```
+    */
+  get grade(): Prisma.GradeDelegate<ExtArgs>;
+
+  /**
+   * `prisma.gradeTamanho`: Exposes CRUD operations for the **GradeTamanho** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GradeTamanhos
+    * const gradeTamanhos = await prisma.gradeTamanho.findMany()
+    * ```
+    */
+  get gradeTamanho(): Prisma.GradeTamanhoDelegate<ExtArgs>;
 
   /**
    * `prisma.categoria`: Exposes CRUD operations for the **Categoria** model.
@@ -687,6 +742,8 @@ export namespace Prisma {
     VariacaoProduto: 'VariacaoProduto',
     AtributoVariacao: 'AtributoVariacao',
     ImagemVariacao: 'ImagemVariacao',
+    Grade: 'Grade',
+    GradeTamanho: 'GradeTamanho',
     Categoria: 'Categoria',
     Marca: 'Marca'
   };
@@ -704,7 +761,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "produto" | "imagemProduto" | "variacaoProduto" | "atributoVariacao" | "imagemVariacao" | "categoria" | "marca"
+      modelProps: "produto" | "imagemProduto" | "variacaoProduto" | "atributoVariacao" | "imagemVariacao" | "grade" | "gradeTamanho" | "categoria" | "marca"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1055,6 +1112,146 @@ export namespace Prisma {
           count: {
             args: Prisma.ImagemVariacaoCountArgs<ExtArgs>
             result: $Utils.Optional<ImagemVariacaoCountAggregateOutputType> | number
+          }
+        }
+      }
+      Grade: {
+        payload: Prisma.$GradePayload<ExtArgs>
+        fields: Prisma.GradeFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GradeFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GradeFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradePayload>
+          }
+          findFirst: {
+            args: Prisma.GradeFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GradeFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradePayload>
+          }
+          findMany: {
+            args: Prisma.GradeFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradePayload>[]
+          }
+          create: {
+            args: Prisma.GradeCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradePayload>
+          }
+          createMany: {
+            args: Prisma.GradeCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GradeCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradePayload>[]
+          }
+          delete: {
+            args: Prisma.GradeDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradePayload>
+          }
+          update: {
+            args: Prisma.GradeUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradePayload>
+          }
+          deleteMany: {
+            args: Prisma.GradeDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GradeUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.GradeUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradePayload>
+          }
+          aggregate: {
+            args: Prisma.GradeAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGrade>
+          }
+          groupBy: {
+            args: Prisma.GradeGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GradeGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GradeCountArgs<ExtArgs>
+            result: $Utils.Optional<GradeCountAggregateOutputType> | number
+          }
+        }
+      }
+      GradeTamanho: {
+        payload: Prisma.$GradeTamanhoPayload<ExtArgs>
+        fields: Prisma.GradeTamanhoFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GradeTamanhoFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradeTamanhoPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GradeTamanhoFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradeTamanhoPayload>
+          }
+          findFirst: {
+            args: Prisma.GradeTamanhoFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradeTamanhoPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GradeTamanhoFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradeTamanhoPayload>
+          }
+          findMany: {
+            args: Prisma.GradeTamanhoFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradeTamanhoPayload>[]
+          }
+          create: {
+            args: Prisma.GradeTamanhoCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradeTamanhoPayload>
+          }
+          createMany: {
+            args: Prisma.GradeTamanhoCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GradeTamanhoCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradeTamanhoPayload>[]
+          }
+          delete: {
+            args: Prisma.GradeTamanhoDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradeTamanhoPayload>
+          }
+          update: {
+            args: Prisma.GradeTamanhoUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradeTamanhoPayload>
+          }
+          deleteMany: {
+            args: Prisma.GradeTamanhoDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GradeTamanhoUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.GradeTamanhoUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GradeTamanhoPayload>
+          }
+          aggregate: {
+            args: Prisma.GradeTamanhoAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGradeTamanho>
+          }
+          groupBy: {
+            args: Prisma.GradeTamanhoGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GradeTamanhoGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GradeTamanhoCountArgs<ExtArgs>
+            result: $Utils.Optional<GradeTamanhoCountAggregateOutputType> | number
           }
         }
       }
@@ -1435,6 +1632,37 @@ export namespace Prisma {
 
 
   /**
+   * Count Type GradeCountOutputType
+   */
+
+  export type GradeCountOutputType = {
+    tamanhos: number
+  }
+
+  export type GradeCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tamanhos?: boolean | GradeCountOutputTypeCountTamanhosArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * GradeCountOutputType without action
+   */
+  export type GradeCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GradeCountOutputType
+     */
+    select?: GradeCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * GradeCountOutputType without action
+   */
+  export type GradeCountOutputTypeCountTamanhosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GradeTamanhoWhereInput
+  }
+
+
+  /**
    * Count Type CategoriaCountOutputType
    */
 
@@ -1523,9 +1751,10 @@ export namespace Prisma {
 
   export type ProdutoAvgAggregateOutputType = {
     origem: number | null
-    precoCusto: number | null
-    precoVenda: number | null
-    precoPromocional: number | null
+    precoCusto: Decimal | null
+    precoVenda: Decimal | null
+    precoPromocional: Decimal | null
+    estoqueMinimo: number | null
     peso: number | null
     altura: number | null
     largura: number | null
@@ -1534,9 +1763,10 @@ export namespace Prisma {
 
   export type ProdutoSumAggregateOutputType = {
     origem: number | null
-    precoCusto: number | null
-    precoVenda: number | null
-    precoPromocional: number | null
+    precoCusto: Decimal | null
+    precoVenda: Decimal | null
+    precoPromocional: Decimal | null
+    estoqueMinimo: number | null
     peso: number | null
     altura: number | null
     largura: number | null
@@ -1551,13 +1781,15 @@ export namespace Prisma {
     nome: string | null
     descricao: string | null
     descricaoCurta: string | null
-    status: string | null
+    status: $Enums.StatusProduto | null
     ncm: string | null
     cest: string | null
     origem: number | null
-    precoCusto: number | null
-    precoVenda: number | null
-    precoPromocional: number | null
+    precoCusto: Decimal | null
+    precoVenda: Decimal | null
+    precoPromocional: Decimal | null
+    estoqueMinimo: number | null
+    unidadeMedida: string | null
     peso: number | null
     altura: number | null
     largura: number | null
@@ -1578,13 +1810,15 @@ export namespace Prisma {
     nome: string | null
     descricao: string | null
     descricaoCurta: string | null
-    status: string | null
+    status: $Enums.StatusProduto | null
     ncm: string | null
     cest: string | null
     origem: number | null
-    precoCusto: number | null
-    precoVenda: number | null
-    precoPromocional: number | null
+    precoCusto: Decimal | null
+    precoVenda: Decimal | null
+    precoPromocional: Decimal | null
+    estoqueMinimo: number | null
+    unidadeMedida: string | null
     peso: number | null
     altura: number | null
     largura: number | null
@@ -1612,6 +1846,8 @@ export namespace Prisma {
     precoCusto: number
     precoVenda: number
     precoPromocional: number
+    estoqueMinimo: number
+    unidadeMedida: number
     peso: number
     altura: number
     largura: number
@@ -1632,6 +1868,7 @@ export namespace Prisma {
     precoCusto?: true
     precoVenda?: true
     precoPromocional?: true
+    estoqueMinimo?: true
     peso?: true
     altura?: true
     largura?: true
@@ -1643,6 +1880,7 @@ export namespace Prisma {
     precoCusto?: true
     precoVenda?: true
     precoPromocional?: true
+    estoqueMinimo?: true
     peso?: true
     altura?: true
     largura?: true
@@ -1664,6 +1902,8 @@ export namespace Prisma {
     precoCusto?: true
     precoVenda?: true
     precoPromocional?: true
+    estoqueMinimo?: true
+    unidadeMedida?: true
     peso?: true
     altura?: true
     largura?: true
@@ -1691,6 +1931,8 @@ export namespace Prisma {
     precoCusto?: true
     precoVenda?: true
     precoPromocional?: true
+    estoqueMinimo?: true
+    unidadeMedida?: true
     peso?: true
     altura?: true
     largura?: true
@@ -1718,6 +1960,8 @@ export namespace Prisma {
     precoCusto?: true
     precoVenda?: true
     precoPromocional?: true
+    estoqueMinimo?: true
+    unidadeMedida?: true
     peso?: true
     altura?: true
     largura?: true
@@ -1826,13 +2070,15 @@ export namespace Prisma {
     nome: string
     descricao: string
     descricaoCurta: string | null
-    status: string
+    status: $Enums.StatusProduto
     ncm: string
     cest: string | null
     origem: number
-    precoCusto: number
-    precoVenda: number
-    precoPromocional: number | null
+    precoCusto: Decimal
+    precoVenda: Decimal
+    precoPromocional: Decimal | null
+    estoqueMinimo: number
+    unidadeMedida: string
     peso: number
     altura: number
     largura: number
@@ -1880,6 +2126,8 @@ export namespace Prisma {
     precoCusto?: boolean
     precoVenda?: boolean
     precoPromocional?: boolean
+    estoqueMinimo?: boolean
+    unidadeMedida?: boolean
     peso?: boolean
     altura?: boolean
     largura?: boolean
@@ -1913,6 +2161,8 @@ export namespace Prisma {
     precoCusto?: boolean
     precoVenda?: boolean
     precoPromocional?: boolean
+    estoqueMinimo?: boolean
+    unidadeMedida?: boolean
     peso?: boolean
     altura?: boolean
     largura?: boolean
@@ -1943,6 +2193,8 @@ export namespace Prisma {
     precoCusto?: boolean
     precoVenda?: boolean
     precoPromocional?: boolean
+    estoqueMinimo?: boolean
+    unidadeMedida?: boolean
     peso?: boolean
     altura?: boolean
     largura?: boolean
@@ -1984,13 +2236,15 @@ export namespace Prisma {
       nome: string
       descricao: string
       descricaoCurta: string | null
-      status: string
+      status: $Enums.StatusProduto
       ncm: string
       cest: string | null
       origem: number
-      precoCusto: number
-      precoVenda: number
-      precoPromocional: number | null
+      precoCusto: Prisma.Decimal
+      precoVenda: Prisma.Decimal
+      precoPromocional: Prisma.Decimal | null
+      estoqueMinimo: number
+      unidadeMedida: string
       peso: number
       altura: number
       largura: number
@@ -2406,13 +2660,15 @@ export namespace Prisma {
     readonly nome: FieldRef<"Produto", 'String'>
     readonly descricao: FieldRef<"Produto", 'String'>
     readonly descricaoCurta: FieldRef<"Produto", 'String'>
-    readonly status: FieldRef<"Produto", 'String'>
+    readonly status: FieldRef<"Produto", 'StatusProduto'>
     readonly ncm: FieldRef<"Produto", 'String'>
     readonly cest: FieldRef<"Produto", 'String'>
     readonly origem: FieldRef<"Produto", 'Int'>
-    readonly precoCusto: FieldRef<"Produto", 'Int'>
-    readonly precoVenda: FieldRef<"Produto", 'Int'>
-    readonly precoPromocional: FieldRef<"Produto", 'Int'>
+    readonly precoCusto: FieldRef<"Produto", 'Decimal'>
+    readonly precoVenda: FieldRef<"Produto", 'Decimal'>
+    readonly precoPromocional: FieldRef<"Produto", 'Decimal'>
+    readonly estoqueMinimo: FieldRef<"Produto", 'Int'>
+    readonly unidadeMedida: FieldRef<"Produto", 'String'>
     readonly peso: FieldRef<"Produto", 'Int'>
     readonly altura: FieldRef<"Produto", 'Float'>
     readonly largura: FieldRef<"Produto", 'Float'>
@@ -3827,12 +4083,12 @@ export namespace Prisma {
   }
 
   export type VariacaoProdutoAvgAggregateOutputType = {
-    precoVenda: number | null
+    precoVenda: Decimal | null
     peso: number | null
   }
 
   export type VariacaoProdutoSumAggregateOutputType = {
-    precoVenda: number | null
+    precoVenda: Decimal | null
     peso: number | null
   }
 
@@ -3842,7 +4098,7 @@ export namespace Prisma {
     sku: string | null
     gtin: string | null
     nome: string | null
-    precoVenda: number | null
+    precoVenda: Decimal | null
     peso: number | null
     criadoEm: Date | null
     atualizadoEm: Date | null
@@ -3854,7 +4110,7 @@ export namespace Prisma {
     sku: string | null
     gtin: string | null
     nome: string | null
-    precoVenda: number | null
+    precoVenda: Decimal | null
     peso: number | null
     criadoEm: Date | null
     atualizadoEm: Date | null
@@ -4013,7 +4269,7 @@ export namespace Prisma {
     sku: string
     gtin: string | null
     nome: string
-    precoVenda: number | null
+    precoVenda: Decimal | null
     peso: number | null
     criadoEm: Date
     atualizadoEm: Date
@@ -4102,7 +4358,7 @@ export namespace Prisma {
       sku: string
       gtin: string | null
       nome: string
-      precoVenda: number | null
+      precoVenda: Prisma.Decimal | null
       peso: number | null
       criadoEm: Date
       atualizadoEm: Date
@@ -4507,7 +4763,7 @@ export namespace Prisma {
     readonly sku: FieldRef<"VariacaoProduto", 'String'>
     readonly gtin: FieldRef<"VariacaoProduto", 'String'>
     readonly nome: FieldRef<"VariacaoProduto", 'String'>
-    readonly precoVenda: FieldRef<"VariacaoProduto", 'Int'>
+    readonly precoVenda: FieldRef<"VariacaoProduto", 'Decimal'>
     readonly peso: FieldRef<"VariacaoProduto", 'Int'>
     readonly criadoEm: FieldRef<"VariacaoProduto", 'DateTime'>
     readonly atualizadoEm: FieldRef<"VariacaoProduto", 'DateTime'>
@@ -6760,6 +7016,1933 @@ export namespace Prisma {
 
 
   /**
+   * Model Grade
+   */
+
+  export type AggregateGrade = {
+    _count: GradeCountAggregateOutputType | null
+    _min: GradeMinAggregateOutputType | null
+    _max: GradeMaxAggregateOutputType | null
+  }
+
+  export type GradeMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    nome: string | null
+    descricao: string | null
+    ativa: boolean | null
+    criadoEm: Date | null
+    atualizadoEm: Date | null
+  }
+
+  export type GradeMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    nome: string | null
+    descricao: string | null
+    ativa: boolean | null
+    criadoEm: Date | null
+    atualizadoEm: Date | null
+  }
+
+  export type GradeCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    nome: number
+    descricao: number
+    ativa: number
+    criadoEm: number
+    atualizadoEm: number
+    _all: number
+  }
+
+
+  export type GradeMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    nome?: true
+    descricao?: true
+    ativa?: true
+    criadoEm?: true
+    atualizadoEm?: true
+  }
+
+  export type GradeMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    nome?: true
+    descricao?: true
+    ativa?: true
+    criadoEm?: true
+    atualizadoEm?: true
+  }
+
+  export type GradeCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    nome?: true
+    descricao?: true
+    ativa?: true
+    criadoEm?: true
+    atualizadoEm?: true
+    _all?: true
+  }
+
+  export type GradeAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Grade to aggregate.
+     */
+    where?: GradeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Grades to fetch.
+     */
+    orderBy?: GradeOrderByWithRelationInput | GradeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GradeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Grades from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Grades.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Grades
+    **/
+    _count?: true | GradeCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GradeMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GradeMaxAggregateInputType
+  }
+
+  export type GetGradeAggregateType<T extends GradeAggregateArgs> = {
+        [P in keyof T & keyof AggregateGrade]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGrade[P]>
+      : GetScalarType<T[P], AggregateGrade[P]>
+  }
+
+
+
+
+  export type GradeGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GradeWhereInput
+    orderBy?: GradeOrderByWithAggregationInput | GradeOrderByWithAggregationInput[]
+    by: GradeScalarFieldEnum[] | GradeScalarFieldEnum
+    having?: GradeScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GradeCountAggregateInputType | true
+    _min?: GradeMinAggregateInputType
+    _max?: GradeMaxAggregateInputType
+  }
+
+  export type GradeGroupByOutputType = {
+    id: string
+    tenantId: string
+    nome: string
+    descricao: string | null
+    ativa: boolean
+    criadoEm: Date
+    atualizadoEm: Date
+    _count: GradeCountAggregateOutputType | null
+    _min: GradeMinAggregateOutputType | null
+    _max: GradeMaxAggregateOutputType | null
+  }
+
+  type GetGradeGroupByPayload<T extends GradeGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GradeGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GradeGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GradeGroupByOutputType[P]>
+            : GetScalarType<T[P], GradeGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GradeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    nome?: boolean
+    descricao?: boolean
+    ativa?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+    tamanhos?: boolean | Grade$tamanhosArgs<ExtArgs>
+    _count?: boolean | GradeCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["grade"]>
+
+  export type GradeSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    nome?: boolean
+    descricao?: boolean
+    ativa?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }, ExtArgs["result"]["grade"]>
+
+  export type GradeSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    nome?: boolean
+    descricao?: boolean
+    ativa?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }
+
+  export type GradeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tamanhos?: boolean | Grade$tamanhosArgs<ExtArgs>
+    _count?: boolean | GradeCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type GradeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $GradePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Grade"
+    objects: {
+      tamanhos: Prisma.$GradeTamanhoPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      nome: string
+      descricao: string | null
+      ativa: boolean
+      criadoEm: Date
+      atualizadoEm: Date
+    }, ExtArgs["result"]["grade"]>
+    composites: {}
+  }
+
+  type GradeGetPayload<S extends boolean | null | undefined | GradeDefaultArgs> = $Result.GetResult<Prisma.$GradePayload, S>
+
+  type GradeCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<GradeFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: GradeCountAggregateInputType | true
+    }
+
+  export interface GradeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Grade'], meta: { name: 'Grade' } }
+    /**
+     * Find zero or one Grade that matches the filter.
+     * @param {GradeFindUniqueArgs} args - Arguments to find a Grade
+     * @example
+     * // Get one Grade
+     * const grade = await prisma.grade.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GradeFindUniqueArgs>(args: SelectSubset<T, GradeFindUniqueArgs<ExtArgs>>): Prisma__GradeClient<$Result.GetResult<Prisma.$GradePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one Grade that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {GradeFindUniqueOrThrowArgs} args - Arguments to find a Grade
+     * @example
+     * // Get one Grade
+     * const grade = await prisma.grade.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GradeFindUniqueOrThrowArgs>(args: SelectSubset<T, GradeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GradeClient<$Result.GetResult<Prisma.$GradePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first Grade that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GradeFindFirstArgs} args - Arguments to find a Grade
+     * @example
+     * // Get one Grade
+     * const grade = await prisma.grade.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GradeFindFirstArgs>(args?: SelectSubset<T, GradeFindFirstArgs<ExtArgs>>): Prisma__GradeClient<$Result.GetResult<Prisma.$GradePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first Grade that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GradeFindFirstOrThrowArgs} args - Arguments to find a Grade
+     * @example
+     * // Get one Grade
+     * const grade = await prisma.grade.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GradeFindFirstOrThrowArgs>(args?: SelectSubset<T, GradeFindFirstOrThrowArgs<ExtArgs>>): Prisma__GradeClient<$Result.GetResult<Prisma.$GradePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more Grades that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GradeFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Grades
+     * const grades = await prisma.grade.findMany()
+     * 
+     * // Get first 10 Grades
+     * const grades = await prisma.grade.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const gradeWithIdOnly = await prisma.grade.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GradeFindManyArgs>(args?: SelectSubset<T, GradeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GradePayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a Grade.
+     * @param {GradeCreateArgs} args - Arguments to create a Grade.
+     * @example
+     * // Create one Grade
+     * const Grade = await prisma.grade.create({
+     *   data: {
+     *     // ... data to create a Grade
+     *   }
+     * })
+     * 
+     */
+    create<T extends GradeCreateArgs>(args: SelectSubset<T, GradeCreateArgs<ExtArgs>>): Prisma__GradeClient<$Result.GetResult<Prisma.$GradePayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many Grades.
+     * @param {GradeCreateManyArgs} args - Arguments to create many Grades.
+     * @example
+     * // Create many Grades
+     * const grade = await prisma.grade.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GradeCreateManyArgs>(args?: SelectSubset<T, GradeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Grades and returns the data saved in the database.
+     * @param {GradeCreateManyAndReturnArgs} args - Arguments to create many Grades.
+     * @example
+     * // Create many Grades
+     * const grade = await prisma.grade.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Grades and only return the `id`
+     * const gradeWithIdOnly = await prisma.grade.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GradeCreateManyAndReturnArgs>(args?: SelectSubset<T, GradeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GradePayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a Grade.
+     * @param {GradeDeleteArgs} args - Arguments to delete one Grade.
+     * @example
+     * // Delete one Grade
+     * const Grade = await prisma.grade.delete({
+     *   where: {
+     *     // ... filter to delete one Grade
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GradeDeleteArgs>(args: SelectSubset<T, GradeDeleteArgs<ExtArgs>>): Prisma__GradeClient<$Result.GetResult<Prisma.$GradePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one Grade.
+     * @param {GradeUpdateArgs} args - Arguments to update one Grade.
+     * @example
+     * // Update one Grade
+     * const grade = await prisma.grade.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GradeUpdateArgs>(args: SelectSubset<T, GradeUpdateArgs<ExtArgs>>): Prisma__GradeClient<$Result.GetResult<Prisma.$GradePayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more Grades.
+     * @param {GradeDeleteManyArgs} args - Arguments to filter Grades to delete.
+     * @example
+     * // Delete a few Grades
+     * const { count } = await prisma.grade.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GradeDeleteManyArgs>(args?: SelectSubset<T, GradeDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Grades.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GradeUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Grades
+     * const grade = await prisma.grade.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GradeUpdateManyArgs>(args: SelectSubset<T, GradeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Grade.
+     * @param {GradeUpsertArgs} args - Arguments to update or create a Grade.
+     * @example
+     * // Update or create a Grade
+     * const grade = await prisma.grade.upsert({
+     *   create: {
+     *     // ... data to create a Grade
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Grade we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GradeUpsertArgs>(args: SelectSubset<T, GradeUpsertArgs<ExtArgs>>): Prisma__GradeClient<$Result.GetResult<Prisma.$GradePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of Grades.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GradeCountArgs} args - Arguments to filter Grades to count.
+     * @example
+     * // Count the number of Grades
+     * const count = await prisma.grade.count({
+     *   where: {
+     *     // ... the filter for the Grades we want to count
+     *   }
+     * })
+    **/
+    count<T extends GradeCountArgs>(
+      args?: Subset<T, GradeCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GradeCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Grade.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GradeAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GradeAggregateArgs>(args: Subset<T, GradeAggregateArgs>): Prisma.PrismaPromise<GetGradeAggregateType<T>>
+
+    /**
+     * Group by Grade.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GradeGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GradeGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GradeGroupByArgs['orderBy'] }
+        : { orderBy?: GradeGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GradeGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGradeGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Grade model
+   */
+  readonly fields: GradeFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Grade.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GradeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    tamanhos<T extends Grade$tamanhosArgs<ExtArgs> = {}>(args?: Subset<T, Grade$tamanhosArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GradeTamanhoPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Grade model
+   */ 
+  interface GradeFieldRefs {
+    readonly id: FieldRef<"Grade", 'String'>
+    readonly tenantId: FieldRef<"Grade", 'String'>
+    readonly nome: FieldRef<"Grade", 'String'>
+    readonly descricao: FieldRef<"Grade", 'String'>
+    readonly ativa: FieldRef<"Grade", 'Boolean'>
+    readonly criadoEm: FieldRef<"Grade", 'DateTime'>
+    readonly atualizadoEm: FieldRef<"Grade", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Grade findUnique
+   */
+  export type GradeFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grade
+     */
+    select?: GradeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeInclude<ExtArgs> | null
+    /**
+     * Filter, which Grade to fetch.
+     */
+    where: GradeWhereUniqueInput
+  }
+
+  /**
+   * Grade findUniqueOrThrow
+   */
+  export type GradeFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grade
+     */
+    select?: GradeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeInclude<ExtArgs> | null
+    /**
+     * Filter, which Grade to fetch.
+     */
+    where: GradeWhereUniqueInput
+  }
+
+  /**
+   * Grade findFirst
+   */
+  export type GradeFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grade
+     */
+    select?: GradeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeInclude<ExtArgs> | null
+    /**
+     * Filter, which Grade to fetch.
+     */
+    where?: GradeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Grades to fetch.
+     */
+    orderBy?: GradeOrderByWithRelationInput | GradeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Grades.
+     */
+    cursor?: GradeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Grades from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Grades.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Grades.
+     */
+    distinct?: GradeScalarFieldEnum | GradeScalarFieldEnum[]
+  }
+
+  /**
+   * Grade findFirstOrThrow
+   */
+  export type GradeFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grade
+     */
+    select?: GradeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeInclude<ExtArgs> | null
+    /**
+     * Filter, which Grade to fetch.
+     */
+    where?: GradeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Grades to fetch.
+     */
+    orderBy?: GradeOrderByWithRelationInput | GradeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Grades.
+     */
+    cursor?: GradeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Grades from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Grades.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Grades.
+     */
+    distinct?: GradeScalarFieldEnum | GradeScalarFieldEnum[]
+  }
+
+  /**
+   * Grade findMany
+   */
+  export type GradeFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grade
+     */
+    select?: GradeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeInclude<ExtArgs> | null
+    /**
+     * Filter, which Grades to fetch.
+     */
+    where?: GradeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Grades to fetch.
+     */
+    orderBy?: GradeOrderByWithRelationInput | GradeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Grades.
+     */
+    cursor?: GradeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Grades from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Grades.
+     */
+    skip?: number
+    distinct?: GradeScalarFieldEnum | GradeScalarFieldEnum[]
+  }
+
+  /**
+   * Grade create
+   */
+  export type GradeCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grade
+     */
+    select?: GradeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Grade.
+     */
+    data: XOR<GradeCreateInput, GradeUncheckedCreateInput>
+  }
+
+  /**
+   * Grade createMany
+   */
+  export type GradeCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Grades.
+     */
+    data: GradeCreateManyInput | GradeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Grade createManyAndReturn
+   */
+  export type GradeCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grade
+     */
+    select?: GradeSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many Grades.
+     */
+    data: GradeCreateManyInput | GradeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Grade update
+   */
+  export type GradeUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grade
+     */
+    select?: GradeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Grade.
+     */
+    data: XOR<GradeUpdateInput, GradeUncheckedUpdateInput>
+    /**
+     * Choose, which Grade to update.
+     */
+    where: GradeWhereUniqueInput
+  }
+
+  /**
+   * Grade updateMany
+   */
+  export type GradeUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Grades.
+     */
+    data: XOR<GradeUpdateManyMutationInput, GradeUncheckedUpdateManyInput>
+    /**
+     * Filter which Grades to update
+     */
+    where?: GradeWhereInput
+  }
+
+  /**
+   * Grade upsert
+   */
+  export type GradeUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grade
+     */
+    select?: GradeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Grade to update in case it exists.
+     */
+    where: GradeWhereUniqueInput
+    /**
+     * In case the Grade found by the `where` argument doesn't exist, create a new Grade with this data.
+     */
+    create: XOR<GradeCreateInput, GradeUncheckedCreateInput>
+    /**
+     * In case the Grade was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GradeUpdateInput, GradeUncheckedUpdateInput>
+  }
+
+  /**
+   * Grade delete
+   */
+  export type GradeDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grade
+     */
+    select?: GradeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeInclude<ExtArgs> | null
+    /**
+     * Filter which Grade to delete.
+     */
+    where: GradeWhereUniqueInput
+  }
+
+  /**
+   * Grade deleteMany
+   */
+  export type GradeDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Grades to delete
+     */
+    where?: GradeWhereInput
+  }
+
+  /**
+   * Grade.tamanhos
+   */
+  export type Grade$tamanhosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GradeTamanho
+     */
+    select?: GradeTamanhoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeTamanhoInclude<ExtArgs> | null
+    where?: GradeTamanhoWhereInput
+    orderBy?: GradeTamanhoOrderByWithRelationInput | GradeTamanhoOrderByWithRelationInput[]
+    cursor?: GradeTamanhoWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: GradeTamanhoScalarFieldEnum | GradeTamanhoScalarFieldEnum[]
+  }
+
+  /**
+   * Grade without action
+   */
+  export type GradeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Grade
+     */
+    select?: GradeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model GradeTamanho
+   */
+
+  export type AggregateGradeTamanho = {
+    _count: GradeTamanhoCountAggregateOutputType | null
+    _avg: GradeTamanhoAvgAggregateOutputType | null
+    _sum: GradeTamanhoSumAggregateOutputType | null
+    _min: GradeTamanhoMinAggregateOutputType | null
+    _max: GradeTamanhoMaxAggregateOutputType | null
+  }
+
+  export type GradeTamanhoAvgAggregateOutputType = {
+    ordem: number | null
+  }
+
+  export type GradeTamanhoSumAggregateOutputType = {
+    ordem: number | null
+  }
+
+  export type GradeTamanhoMinAggregateOutputType = {
+    id: string | null
+    gradeId: string | null
+    valor: string | null
+    ordem: number | null
+  }
+
+  export type GradeTamanhoMaxAggregateOutputType = {
+    id: string | null
+    gradeId: string | null
+    valor: string | null
+    ordem: number | null
+  }
+
+  export type GradeTamanhoCountAggregateOutputType = {
+    id: number
+    gradeId: number
+    valor: number
+    ordem: number
+    _all: number
+  }
+
+
+  export type GradeTamanhoAvgAggregateInputType = {
+    ordem?: true
+  }
+
+  export type GradeTamanhoSumAggregateInputType = {
+    ordem?: true
+  }
+
+  export type GradeTamanhoMinAggregateInputType = {
+    id?: true
+    gradeId?: true
+    valor?: true
+    ordem?: true
+  }
+
+  export type GradeTamanhoMaxAggregateInputType = {
+    id?: true
+    gradeId?: true
+    valor?: true
+    ordem?: true
+  }
+
+  export type GradeTamanhoCountAggregateInputType = {
+    id?: true
+    gradeId?: true
+    valor?: true
+    ordem?: true
+    _all?: true
+  }
+
+  export type GradeTamanhoAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GradeTamanho to aggregate.
+     */
+    where?: GradeTamanhoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GradeTamanhos to fetch.
+     */
+    orderBy?: GradeTamanhoOrderByWithRelationInput | GradeTamanhoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GradeTamanhoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GradeTamanhos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GradeTamanhos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GradeTamanhos
+    **/
+    _count?: true | GradeTamanhoCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GradeTamanhoAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GradeTamanhoSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GradeTamanhoMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GradeTamanhoMaxAggregateInputType
+  }
+
+  export type GetGradeTamanhoAggregateType<T extends GradeTamanhoAggregateArgs> = {
+        [P in keyof T & keyof AggregateGradeTamanho]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGradeTamanho[P]>
+      : GetScalarType<T[P], AggregateGradeTamanho[P]>
+  }
+
+
+
+
+  export type GradeTamanhoGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GradeTamanhoWhereInput
+    orderBy?: GradeTamanhoOrderByWithAggregationInput | GradeTamanhoOrderByWithAggregationInput[]
+    by: GradeTamanhoScalarFieldEnum[] | GradeTamanhoScalarFieldEnum
+    having?: GradeTamanhoScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GradeTamanhoCountAggregateInputType | true
+    _avg?: GradeTamanhoAvgAggregateInputType
+    _sum?: GradeTamanhoSumAggregateInputType
+    _min?: GradeTamanhoMinAggregateInputType
+    _max?: GradeTamanhoMaxAggregateInputType
+  }
+
+  export type GradeTamanhoGroupByOutputType = {
+    id: string
+    gradeId: string
+    valor: string
+    ordem: number
+    _count: GradeTamanhoCountAggregateOutputType | null
+    _avg: GradeTamanhoAvgAggregateOutputType | null
+    _sum: GradeTamanhoSumAggregateOutputType | null
+    _min: GradeTamanhoMinAggregateOutputType | null
+    _max: GradeTamanhoMaxAggregateOutputType | null
+  }
+
+  type GetGradeTamanhoGroupByPayload<T extends GradeTamanhoGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GradeTamanhoGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GradeTamanhoGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GradeTamanhoGroupByOutputType[P]>
+            : GetScalarType<T[P], GradeTamanhoGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GradeTamanhoSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    gradeId?: boolean
+    valor?: boolean
+    ordem?: boolean
+    grade?: boolean | GradeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["gradeTamanho"]>
+
+  export type GradeTamanhoSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    gradeId?: boolean
+    valor?: boolean
+    ordem?: boolean
+    grade?: boolean | GradeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["gradeTamanho"]>
+
+  export type GradeTamanhoSelectScalar = {
+    id?: boolean
+    gradeId?: boolean
+    valor?: boolean
+    ordem?: boolean
+  }
+
+  export type GradeTamanhoInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    grade?: boolean | GradeDefaultArgs<ExtArgs>
+  }
+  export type GradeTamanhoIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    grade?: boolean | GradeDefaultArgs<ExtArgs>
+  }
+
+  export type $GradeTamanhoPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GradeTamanho"
+    objects: {
+      grade: Prisma.$GradePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      gradeId: string
+      valor: string
+      ordem: number
+    }, ExtArgs["result"]["gradeTamanho"]>
+    composites: {}
+  }
+
+  type GradeTamanhoGetPayload<S extends boolean | null | undefined | GradeTamanhoDefaultArgs> = $Result.GetResult<Prisma.$GradeTamanhoPayload, S>
+
+  type GradeTamanhoCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<GradeTamanhoFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: GradeTamanhoCountAggregateInputType | true
+    }
+
+  export interface GradeTamanhoDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GradeTamanho'], meta: { name: 'GradeTamanho' } }
+    /**
+     * Find zero or one GradeTamanho that matches the filter.
+     * @param {GradeTamanhoFindUniqueArgs} args - Arguments to find a GradeTamanho
+     * @example
+     * // Get one GradeTamanho
+     * const gradeTamanho = await prisma.gradeTamanho.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GradeTamanhoFindUniqueArgs>(args: SelectSubset<T, GradeTamanhoFindUniqueArgs<ExtArgs>>): Prisma__GradeTamanhoClient<$Result.GetResult<Prisma.$GradeTamanhoPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one GradeTamanho that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {GradeTamanhoFindUniqueOrThrowArgs} args - Arguments to find a GradeTamanho
+     * @example
+     * // Get one GradeTamanho
+     * const gradeTamanho = await prisma.gradeTamanho.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GradeTamanhoFindUniqueOrThrowArgs>(args: SelectSubset<T, GradeTamanhoFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GradeTamanhoClient<$Result.GetResult<Prisma.$GradeTamanhoPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first GradeTamanho that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GradeTamanhoFindFirstArgs} args - Arguments to find a GradeTamanho
+     * @example
+     * // Get one GradeTamanho
+     * const gradeTamanho = await prisma.gradeTamanho.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GradeTamanhoFindFirstArgs>(args?: SelectSubset<T, GradeTamanhoFindFirstArgs<ExtArgs>>): Prisma__GradeTamanhoClient<$Result.GetResult<Prisma.$GradeTamanhoPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first GradeTamanho that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GradeTamanhoFindFirstOrThrowArgs} args - Arguments to find a GradeTamanho
+     * @example
+     * // Get one GradeTamanho
+     * const gradeTamanho = await prisma.gradeTamanho.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GradeTamanhoFindFirstOrThrowArgs>(args?: SelectSubset<T, GradeTamanhoFindFirstOrThrowArgs<ExtArgs>>): Prisma__GradeTamanhoClient<$Result.GetResult<Prisma.$GradeTamanhoPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more GradeTamanhos that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GradeTamanhoFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GradeTamanhos
+     * const gradeTamanhos = await prisma.gradeTamanho.findMany()
+     * 
+     * // Get first 10 GradeTamanhos
+     * const gradeTamanhos = await prisma.gradeTamanho.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const gradeTamanhoWithIdOnly = await prisma.gradeTamanho.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends GradeTamanhoFindManyArgs>(args?: SelectSubset<T, GradeTamanhoFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GradeTamanhoPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a GradeTamanho.
+     * @param {GradeTamanhoCreateArgs} args - Arguments to create a GradeTamanho.
+     * @example
+     * // Create one GradeTamanho
+     * const GradeTamanho = await prisma.gradeTamanho.create({
+     *   data: {
+     *     // ... data to create a GradeTamanho
+     *   }
+     * })
+     * 
+     */
+    create<T extends GradeTamanhoCreateArgs>(args: SelectSubset<T, GradeTamanhoCreateArgs<ExtArgs>>): Prisma__GradeTamanhoClient<$Result.GetResult<Prisma.$GradeTamanhoPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many GradeTamanhos.
+     * @param {GradeTamanhoCreateManyArgs} args - Arguments to create many GradeTamanhos.
+     * @example
+     * // Create many GradeTamanhos
+     * const gradeTamanho = await prisma.gradeTamanho.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GradeTamanhoCreateManyArgs>(args?: SelectSubset<T, GradeTamanhoCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GradeTamanhos and returns the data saved in the database.
+     * @param {GradeTamanhoCreateManyAndReturnArgs} args - Arguments to create many GradeTamanhos.
+     * @example
+     * // Create many GradeTamanhos
+     * const gradeTamanho = await prisma.gradeTamanho.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GradeTamanhos and only return the `id`
+     * const gradeTamanhoWithIdOnly = await prisma.gradeTamanho.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GradeTamanhoCreateManyAndReturnArgs>(args?: SelectSubset<T, GradeTamanhoCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GradeTamanhoPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a GradeTamanho.
+     * @param {GradeTamanhoDeleteArgs} args - Arguments to delete one GradeTamanho.
+     * @example
+     * // Delete one GradeTamanho
+     * const GradeTamanho = await prisma.gradeTamanho.delete({
+     *   where: {
+     *     // ... filter to delete one GradeTamanho
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GradeTamanhoDeleteArgs>(args: SelectSubset<T, GradeTamanhoDeleteArgs<ExtArgs>>): Prisma__GradeTamanhoClient<$Result.GetResult<Prisma.$GradeTamanhoPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one GradeTamanho.
+     * @param {GradeTamanhoUpdateArgs} args - Arguments to update one GradeTamanho.
+     * @example
+     * // Update one GradeTamanho
+     * const gradeTamanho = await prisma.gradeTamanho.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GradeTamanhoUpdateArgs>(args: SelectSubset<T, GradeTamanhoUpdateArgs<ExtArgs>>): Prisma__GradeTamanhoClient<$Result.GetResult<Prisma.$GradeTamanhoPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more GradeTamanhos.
+     * @param {GradeTamanhoDeleteManyArgs} args - Arguments to filter GradeTamanhos to delete.
+     * @example
+     * // Delete a few GradeTamanhos
+     * const { count } = await prisma.gradeTamanho.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GradeTamanhoDeleteManyArgs>(args?: SelectSubset<T, GradeTamanhoDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GradeTamanhos.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GradeTamanhoUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GradeTamanhos
+     * const gradeTamanho = await prisma.gradeTamanho.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GradeTamanhoUpdateManyArgs>(args: SelectSubset<T, GradeTamanhoUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one GradeTamanho.
+     * @param {GradeTamanhoUpsertArgs} args - Arguments to update or create a GradeTamanho.
+     * @example
+     * // Update or create a GradeTamanho
+     * const gradeTamanho = await prisma.gradeTamanho.upsert({
+     *   create: {
+     *     // ... data to create a GradeTamanho
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GradeTamanho we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GradeTamanhoUpsertArgs>(args: SelectSubset<T, GradeTamanhoUpsertArgs<ExtArgs>>): Prisma__GradeTamanhoClient<$Result.GetResult<Prisma.$GradeTamanhoPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of GradeTamanhos.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GradeTamanhoCountArgs} args - Arguments to filter GradeTamanhos to count.
+     * @example
+     * // Count the number of GradeTamanhos
+     * const count = await prisma.gradeTamanho.count({
+     *   where: {
+     *     // ... the filter for the GradeTamanhos we want to count
+     *   }
+     * })
+    **/
+    count<T extends GradeTamanhoCountArgs>(
+      args?: Subset<T, GradeTamanhoCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GradeTamanhoCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GradeTamanho.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GradeTamanhoAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GradeTamanhoAggregateArgs>(args: Subset<T, GradeTamanhoAggregateArgs>): Prisma.PrismaPromise<GetGradeTamanhoAggregateType<T>>
+
+    /**
+     * Group by GradeTamanho.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GradeTamanhoGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GradeTamanhoGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GradeTamanhoGroupByArgs['orderBy'] }
+        : { orderBy?: GradeTamanhoGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GradeTamanhoGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGradeTamanhoGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GradeTamanho model
+   */
+  readonly fields: GradeTamanhoFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GradeTamanho.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GradeTamanhoClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    grade<T extends GradeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, GradeDefaultArgs<ExtArgs>>): Prisma__GradeClient<$Result.GetResult<Prisma.$GradePayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GradeTamanho model
+   */ 
+  interface GradeTamanhoFieldRefs {
+    readonly id: FieldRef<"GradeTamanho", 'String'>
+    readonly gradeId: FieldRef<"GradeTamanho", 'String'>
+    readonly valor: FieldRef<"GradeTamanho", 'String'>
+    readonly ordem: FieldRef<"GradeTamanho", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GradeTamanho findUnique
+   */
+  export type GradeTamanhoFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GradeTamanho
+     */
+    select?: GradeTamanhoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeTamanhoInclude<ExtArgs> | null
+    /**
+     * Filter, which GradeTamanho to fetch.
+     */
+    where: GradeTamanhoWhereUniqueInput
+  }
+
+  /**
+   * GradeTamanho findUniqueOrThrow
+   */
+  export type GradeTamanhoFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GradeTamanho
+     */
+    select?: GradeTamanhoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeTamanhoInclude<ExtArgs> | null
+    /**
+     * Filter, which GradeTamanho to fetch.
+     */
+    where: GradeTamanhoWhereUniqueInput
+  }
+
+  /**
+   * GradeTamanho findFirst
+   */
+  export type GradeTamanhoFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GradeTamanho
+     */
+    select?: GradeTamanhoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeTamanhoInclude<ExtArgs> | null
+    /**
+     * Filter, which GradeTamanho to fetch.
+     */
+    where?: GradeTamanhoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GradeTamanhos to fetch.
+     */
+    orderBy?: GradeTamanhoOrderByWithRelationInput | GradeTamanhoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GradeTamanhos.
+     */
+    cursor?: GradeTamanhoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GradeTamanhos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GradeTamanhos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GradeTamanhos.
+     */
+    distinct?: GradeTamanhoScalarFieldEnum | GradeTamanhoScalarFieldEnum[]
+  }
+
+  /**
+   * GradeTamanho findFirstOrThrow
+   */
+  export type GradeTamanhoFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GradeTamanho
+     */
+    select?: GradeTamanhoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeTamanhoInclude<ExtArgs> | null
+    /**
+     * Filter, which GradeTamanho to fetch.
+     */
+    where?: GradeTamanhoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GradeTamanhos to fetch.
+     */
+    orderBy?: GradeTamanhoOrderByWithRelationInput | GradeTamanhoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GradeTamanhos.
+     */
+    cursor?: GradeTamanhoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GradeTamanhos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GradeTamanhos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GradeTamanhos.
+     */
+    distinct?: GradeTamanhoScalarFieldEnum | GradeTamanhoScalarFieldEnum[]
+  }
+
+  /**
+   * GradeTamanho findMany
+   */
+  export type GradeTamanhoFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GradeTamanho
+     */
+    select?: GradeTamanhoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeTamanhoInclude<ExtArgs> | null
+    /**
+     * Filter, which GradeTamanhos to fetch.
+     */
+    where?: GradeTamanhoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GradeTamanhos to fetch.
+     */
+    orderBy?: GradeTamanhoOrderByWithRelationInput | GradeTamanhoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GradeTamanhos.
+     */
+    cursor?: GradeTamanhoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GradeTamanhos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GradeTamanhos.
+     */
+    skip?: number
+    distinct?: GradeTamanhoScalarFieldEnum | GradeTamanhoScalarFieldEnum[]
+  }
+
+  /**
+   * GradeTamanho create
+   */
+  export type GradeTamanhoCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GradeTamanho
+     */
+    select?: GradeTamanhoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeTamanhoInclude<ExtArgs> | null
+    /**
+     * The data needed to create a GradeTamanho.
+     */
+    data: XOR<GradeTamanhoCreateInput, GradeTamanhoUncheckedCreateInput>
+  }
+
+  /**
+   * GradeTamanho createMany
+   */
+  export type GradeTamanhoCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GradeTamanhos.
+     */
+    data: GradeTamanhoCreateManyInput | GradeTamanhoCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GradeTamanho createManyAndReturn
+   */
+  export type GradeTamanhoCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GradeTamanho
+     */
+    select?: GradeTamanhoSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many GradeTamanhos.
+     */
+    data: GradeTamanhoCreateManyInput | GradeTamanhoCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeTamanhoIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * GradeTamanho update
+   */
+  export type GradeTamanhoUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GradeTamanho
+     */
+    select?: GradeTamanhoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeTamanhoInclude<ExtArgs> | null
+    /**
+     * The data needed to update a GradeTamanho.
+     */
+    data: XOR<GradeTamanhoUpdateInput, GradeTamanhoUncheckedUpdateInput>
+    /**
+     * Choose, which GradeTamanho to update.
+     */
+    where: GradeTamanhoWhereUniqueInput
+  }
+
+  /**
+   * GradeTamanho updateMany
+   */
+  export type GradeTamanhoUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GradeTamanhos.
+     */
+    data: XOR<GradeTamanhoUpdateManyMutationInput, GradeTamanhoUncheckedUpdateManyInput>
+    /**
+     * Filter which GradeTamanhos to update
+     */
+    where?: GradeTamanhoWhereInput
+  }
+
+  /**
+   * GradeTamanho upsert
+   */
+  export type GradeTamanhoUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GradeTamanho
+     */
+    select?: GradeTamanhoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeTamanhoInclude<ExtArgs> | null
+    /**
+     * The filter to search for the GradeTamanho to update in case it exists.
+     */
+    where: GradeTamanhoWhereUniqueInput
+    /**
+     * In case the GradeTamanho found by the `where` argument doesn't exist, create a new GradeTamanho with this data.
+     */
+    create: XOR<GradeTamanhoCreateInput, GradeTamanhoUncheckedCreateInput>
+    /**
+     * In case the GradeTamanho was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GradeTamanhoUpdateInput, GradeTamanhoUncheckedUpdateInput>
+  }
+
+  /**
+   * GradeTamanho delete
+   */
+  export type GradeTamanhoDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GradeTamanho
+     */
+    select?: GradeTamanhoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeTamanhoInclude<ExtArgs> | null
+    /**
+     * Filter which GradeTamanho to delete.
+     */
+    where: GradeTamanhoWhereUniqueInput
+  }
+
+  /**
+   * GradeTamanho deleteMany
+   */
+  export type GradeTamanhoDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GradeTamanhos to delete
+     */
+    where?: GradeTamanhoWhereInput
+  }
+
+  /**
+   * GradeTamanho without action
+   */
+  export type GradeTamanhoDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GradeTamanho
+     */
+    select?: GradeTamanhoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: GradeTamanhoInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model Categoria
    */
 
@@ -8852,6 +11035,8 @@ export namespace Prisma {
     precoCusto: 'precoCusto',
     precoVenda: 'precoVenda',
     precoPromocional: 'precoPromocional',
+    estoqueMinimo: 'estoqueMinimo',
+    unidadeMedida: 'unidadeMedida',
     peso: 'peso',
     altura: 'altura',
     largura: 'largura',
@@ -8915,6 +11100,29 @@ export namespace Prisma {
   };
 
   export type ImagemVariacaoScalarFieldEnum = (typeof ImagemVariacaoScalarFieldEnum)[keyof typeof ImagemVariacaoScalarFieldEnum]
+
+
+  export const GradeScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    nome: 'nome',
+    descricao: 'descricao',
+    ativa: 'ativa',
+    criadoEm: 'criadoEm',
+    atualizadoEm: 'atualizadoEm'
+  };
+
+  export type GradeScalarFieldEnum = (typeof GradeScalarFieldEnum)[keyof typeof GradeScalarFieldEnum]
+
+
+  export const GradeTamanhoScalarFieldEnum: {
+    id: 'id',
+    gradeId: 'gradeId',
+    valor: 'valor',
+    ordem: 'ordem'
+  };
+
+  export type GradeTamanhoScalarFieldEnum = (typeof GradeTamanhoScalarFieldEnum)[keyof typeof GradeTamanhoScalarFieldEnum]
 
 
   export const CategoriaScalarFieldEnum: {
@@ -8990,6 +11198,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'StatusProduto'
+   */
+  export type EnumStatusProdutoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusProduto'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusProduto[]'
+   */
+  export type ListEnumStatusProdutoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusProduto[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -9000,6 +11222,20 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Decimal'
+   */
+  export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+  /**
+   * Reference to a field of type 'Decimal[]'
+   */
+  export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
     
 
 
@@ -9052,13 +11288,15 @@ export namespace Prisma {
     nome?: StringFilter<"Produto"> | string
     descricao?: StringFilter<"Produto"> | string
     descricaoCurta?: StringNullableFilter<"Produto"> | string | null
-    status?: StringFilter<"Produto"> | string
+    status?: EnumStatusProdutoFilter<"Produto"> | $Enums.StatusProduto
     ncm?: StringFilter<"Produto"> | string
     cest?: StringNullableFilter<"Produto"> | string | null
     origem?: IntFilter<"Produto"> | number
-    precoCusto?: IntFilter<"Produto"> | number
-    precoVenda?: IntFilter<"Produto"> | number
-    precoPromocional?: IntNullableFilter<"Produto"> | number | null
+    precoCusto?: DecimalFilter<"Produto"> | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFilter<"Produto"> | Decimal | DecimalJsLike | number | string
+    precoPromocional?: DecimalNullableFilter<"Produto"> | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFilter<"Produto"> | number
+    unidadeMedida?: StringFilter<"Produto"> | string
     peso?: IntFilter<"Produto"> | number
     altura?: FloatFilter<"Produto"> | number
     largura?: FloatFilter<"Produto"> | number
@@ -9091,6 +11329,8 @@ export namespace Prisma {
     precoCusto?: SortOrder
     precoVenda?: SortOrder
     precoPromocional?: SortOrderInput | SortOrder
+    estoqueMinimo?: SortOrder
+    unidadeMedida?: SortOrder
     peso?: SortOrder
     altura?: SortOrder
     largura?: SortOrder
@@ -9120,13 +11360,15 @@ export namespace Prisma {
     nome?: StringFilter<"Produto"> | string
     descricao?: StringFilter<"Produto"> | string
     descricaoCurta?: StringNullableFilter<"Produto"> | string | null
-    status?: StringFilter<"Produto"> | string
+    status?: EnumStatusProdutoFilter<"Produto"> | $Enums.StatusProduto
     ncm?: StringFilter<"Produto"> | string
     cest?: StringNullableFilter<"Produto"> | string | null
     origem?: IntFilter<"Produto"> | number
-    precoCusto?: IntFilter<"Produto"> | number
-    precoVenda?: IntFilter<"Produto"> | number
-    precoPromocional?: IntNullableFilter<"Produto"> | number | null
+    precoCusto?: DecimalFilter<"Produto"> | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFilter<"Produto"> | Decimal | DecimalJsLike | number | string
+    precoPromocional?: DecimalNullableFilter<"Produto"> | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFilter<"Produto"> | number
+    unidadeMedida?: StringFilter<"Produto"> | string
     peso?: IntFilter<"Produto"> | number
     altura?: FloatFilter<"Produto"> | number
     largura?: FloatFilter<"Produto"> | number
@@ -9159,6 +11401,8 @@ export namespace Prisma {
     precoCusto?: SortOrder
     precoVenda?: SortOrder
     precoPromocional?: SortOrderInput | SortOrder
+    estoqueMinimo?: SortOrder
+    unidadeMedida?: SortOrder
     peso?: SortOrder
     altura?: SortOrder
     largura?: SortOrder
@@ -9188,13 +11432,15 @@ export namespace Prisma {
     nome?: StringWithAggregatesFilter<"Produto"> | string
     descricao?: StringWithAggregatesFilter<"Produto"> | string
     descricaoCurta?: StringNullableWithAggregatesFilter<"Produto"> | string | null
-    status?: StringWithAggregatesFilter<"Produto"> | string
+    status?: EnumStatusProdutoWithAggregatesFilter<"Produto"> | $Enums.StatusProduto
     ncm?: StringWithAggregatesFilter<"Produto"> | string
     cest?: StringNullableWithAggregatesFilter<"Produto"> | string | null
     origem?: IntWithAggregatesFilter<"Produto"> | number
-    precoCusto?: IntWithAggregatesFilter<"Produto"> | number
-    precoVenda?: IntWithAggregatesFilter<"Produto"> | number
-    precoPromocional?: IntNullableWithAggregatesFilter<"Produto"> | number | null
+    precoCusto?: DecimalWithAggregatesFilter<"Produto"> | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalWithAggregatesFilter<"Produto"> | Decimal | DecimalJsLike | number | string
+    precoPromocional?: DecimalNullableWithAggregatesFilter<"Produto"> | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntWithAggregatesFilter<"Produto"> | number
+    unidadeMedida?: StringWithAggregatesFilter<"Produto"> | string
     peso?: IntWithAggregatesFilter<"Produto"> | number
     altura?: FloatWithAggregatesFilter<"Produto"> | number
     largura?: FloatWithAggregatesFilter<"Produto"> | number
@@ -9289,7 +11535,7 @@ export namespace Prisma {
     sku?: StringFilter<"VariacaoProduto"> | string
     gtin?: StringNullableFilter<"VariacaoProduto"> | string | null
     nome?: StringFilter<"VariacaoProduto"> | string
-    precoVenda?: IntNullableFilter<"VariacaoProduto"> | number | null
+    precoVenda?: DecimalNullableFilter<"VariacaoProduto"> | Decimal | DecimalJsLike | number | string | null
     peso?: IntNullableFilter<"VariacaoProduto"> | number | null
     criadoEm?: DateTimeFilter<"VariacaoProduto"> | Date | string
     atualizadoEm?: DateTimeFilter<"VariacaoProduto"> | Date | string
@@ -9315,6 +11561,7 @@ export namespace Prisma {
 
   export type VariacaoProdutoWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    produtoId_sku?: VariacaoProdutoProdutoIdSkuCompoundUniqueInput
     AND?: VariacaoProdutoWhereInput | VariacaoProdutoWhereInput[]
     OR?: VariacaoProdutoWhereInput[]
     NOT?: VariacaoProdutoWhereInput | VariacaoProdutoWhereInput[]
@@ -9322,14 +11569,14 @@ export namespace Prisma {
     sku?: StringFilter<"VariacaoProduto"> | string
     gtin?: StringNullableFilter<"VariacaoProduto"> | string | null
     nome?: StringFilter<"VariacaoProduto"> | string
-    precoVenda?: IntNullableFilter<"VariacaoProduto"> | number | null
+    precoVenda?: DecimalNullableFilter<"VariacaoProduto"> | Decimal | DecimalJsLike | number | string | null
     peso?: IntNullableFilter<"VariacaoProduto"> | number | null
     criadoEm?: DateTimeFilter<"VariacaoProduto"> | Date | string
     atualizadoEm?: DateTimeFilter<"VariacaoProduto"> | Date | string
     produto?: XOR<ProdutoRelationFilter, ProdutoWhereInput>
     atributos?: AtributoVariacaoListRelationFilter
     imagens?: ImagemVariacaoListRelationFilter
-  }, "id">
+  }, "id" | "produtoId_sku">
 
   export type VariacaoProdutoOrderByWithAggregationInput = {
     id?: SortOrder
@@ -9357,7 +11604,7 @@ export namespace Prisma {
     sku?: StringWithAggregatesFilter<"VariacaoProduto"> | string
     gtin?: StringNullableWithAggregatesFilter<"VariacaoProduto"> | string | null
     nome?: StringWithAggregatesFilter<"VariacaoProduto"> | string
-    precoVenda?: IntNullableWithAggregatesFilter<"VariacaoProduto"> | number | null
+    precoVenda?: DecimalNullableWithAggregatesFilter<"VariacaoProduto"> | Decimal | DecimalJsLike | number | string | null
     peso?: IntNullableWithAggregatesFilter<"VariacaoProduto"> | number | null
     criadoEm?: DateTimeWithAggregatesFilter<"VariacaoProduto"> | Date | string
     atualizadoEm?: DateTimeWithAggregatesFilter<"VariacaoProduto"> | Date | string
@@ -9463,6 +11710,125 @@ export namespace Prisma {
     variacaoId?: UuidWithAggregatesFilter<"ImagemVariacao"> | string
     url?: StringWithAggregatesFilter<"ImagemVariacao"> | string
     ordem?: IntWithAggregatesFilter<"ImagemVariacao"> | number
+  }
+
+  export type GradeWhereInput = {
+    AND?: GradeWhereInput | GradeWhereInput[]
+    OR?: GradeWhereInput[]
+    NOT?: GradeWhereInput | GradeWhereInput[]
+    id?: UuidFilter<"Grade"> | string
+    tenantId?: UuidFilter<"Grade"> | string
+    nome?: StringFilter<"Grade"> | string
+    descricao?: StringNullableFilter<"Grade"> | string | null
+    ativa?: BoolFilter<"Grade"> | boolean
+    criadoEm?: DateTimeFilter<"Grade"> | Date | string
+    atualizadoEm?: DateTimeFilter<"Grade"> | Date | string
+    tamanhos?: GradeTamanhoListRelationFilter
+  }
+
+  export type GradeOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    nome?: SortOrder
+    descricao?: SortOrderInput | SortOrder
+    ativa?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+    tamanhos?: GradeTamanhoOrderByRelationAggregateInput
+  }
+
+  export type GradeWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    tenantId_nome?: GradeTenantIdNomeCompoundUniqueInput
+    AND?: GradeWhereInput | GradeWhereInput[]
+    OR?: GradeWhereInput[]
+    NOT?: GradeWhereInput | GradeWhereInput[]
+    tenantId?: UuidFilter<"Grade"> | string
+    nome?: StringFilter<"Grade"> | string
+    descricao?: StringNullableFilter<"Grade"> | string | null
+    ativa?: BoolFilter<"Grade"> | boolean
+    criadoEm?: DateTimeFilter<"Grade"> | Date | string
+    atualizadoEm?: DateTimeFilter<"Grade"> | Date | string
+    tamanhos?: GradeTamanhoListRelationFilter
+  }, "id" | "tenantId_nome">
+
+  export type GradeOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    nome?: SortOrder
+    descricao?: SortOrderInput | SortOrder
+    ativa?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+    _count?: GradeCountOrderByAggregateInput
+    _max?: GradeMaxOrderByAggregateInput
+    _min?: GradeMinOrderByAggregateInput
+  }
+
+  export type GradeScalarWhereWithAggregatesInput = {
+    AND?: GradeScalarWhereWithAggregatesInput | GradeScalarWhereWithAggregatesInput[]
+    OR?: GradeScalarWhereWithAggregatesInput[]
+    NOT?: GradeScalarWhereWithAggregatesInput | GradeScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"Grade"> | string
+    tenantId?: UuidWithAggregatesFilter<"Grade"> | string
+    nome?: StringWithAggregatesFilter<"Grade"> | string
+    descricao?: StringNullableWithAggregatesFilter<"Grade"> | string | null
+    ativa?: BoolWithAggregatesFilter<"Grade"> | boolean
+    criadoEm?: DateTimeWithAggregatesFilter<"Grade"> | Date | string
+    atualizadoEm?: DateTimeWithAggregatesFilter<"Grade"> | Date | string
+  }
+
+  export type GradeTamanhoWhereInput = {
+    AND?: GradeTamanhoWhereInput | GradeTamanhoWhereInput[]
+    OR?: GradeTamanhoWhereInput[]
+    NOT?: GradeTamanhoWhereInput | GradeTamanhoWhereInput[]
+    id?: UuidFilter<"GradeTamanho"> | string
+    gradeId?: UuidFilter<"GradeTamanho"> | string
+    valor?: StringFilter<"GradeTamanho"> | string
+    ordem?: IntFilter<"GradeTamanho"> | number
+    grade?: XOR<GradeRelationFilter, GradeWhereInput>
+  }
+
+  export type GradeTamanhoOrderByWithRelationInput = {
+    id?: SortOrder
+    gradeId?: SortOrder
+    valor?: SortOrder
+    ordem?: SortOrder
+    grade?: GradeOrderByWithRelationInput
+  }
+
+  export type GradeTamanhoWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    gradeId_valor?: GradeTamanhoGradeIdValorCompoundUniqueInput
+    AND?: GradeTamanhoWhereInput | GradeTamanhoWhereInput[]
+    OR?: GradeTamanhoWhereInput[]
+    NOT?: GradeTamanhoWhereInput | GradeTamanhoWhereInput[]
+    gradeId?: UuidFilter<"GradeTamanho"> | string
+    valor?: StringFilter<"GradeTamanho"> | string
+    ordem?: IntFilter<"GradeTamanho"> | number
+    grade?: XOR<GradeRelationFilter, GradeWhereInput>
+  }, "id" | "gradeId_valor">
+
+  export type GradeTamanhoOrderByWithAggregationInput = {
+    id?: SortOrder
+    gradeId?: SortOrder
+    valor?: SortOrder
+    ordem?: SortOrder
+    _count?: GradeTamanhoCountOrderByAggregateInput
+    _avg?: GradeTamanhoAvgOrderByAggregateInput
+    _max?: GradeTamanhoMaxOrderByAggregateInput
+    _min?: GradeTamanhoMinOrderByAggregateInput
+    _sum?: GradeTamanhoSumOrderByAggregateInput
+  }
+
+  export type GradeTamanhoScalarWhereWithAggregatesInput = {
+    AND?: GradeTamanhoScalarWhereWithAggregatesInput | GradeTamanhoScalarWhereWithAggregatesInput[]
+    OR?: GradeTamanhoScalarWhereWithAggregatesInput[]
+    NOT?: GradeTamanhoScalarWhereWithAggregatesInput | GradeTamanhoScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"GradeTamanho"> | string
+    gradeId?: UuidWithAggregatesFilter<"GradeTamanho"> | string
+    valor?: StringWithAggregatesFilter<"GradeTamanho"> | string
+    ordem?: IntWithAggregatesFilter<"GradeTamanho"> | number
   }
 
   export type CategoriaWhereInput = {
@@ -9628,13 +11994,15 @@ export namespace Prisma {
     nome: string
     descricao: string
     descricaoCurta?: string | null
-    status?: string
+    status?: $Enums.StatusProduto
     ncm: string
     cest?: string | null
     origem?: number
-    precoCusto: number
-    precoVenda: number
-    precoPromocional?: number | null
+    precoCusto: Decimal | DecimalJsLike | number | string
+    precoVenda: Decimal | DecimalJsLike | number | string
+    precoPromocional?: Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: number
+    unidadeMedida?: string
     peso: number
     altura: number
     largura: number
@@ -9658,13 +12026,15 @@ export namespace Prisma {
     nome: string
     descricao: string
     descricaoCurta?: string | null
-    status?: string
+    status?: $Enums.StatusProduto
     ncm: string
     cest?: string | null
     origem?: number
-    precoCusto: number
-    precoVenda: number
-    precoPromocional?: number | null
+    precoCusto: Decimal | DecimalJsLike | number | string
+    precoVenda: Decimal | DecimalJsLike | number | string
+    precoPromocional?: Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: number
+    unidadeMedida?: string
     peso: number
     altura: number
     largura: number
@@ -9688,13 +12058,15 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
     descricaoCurta?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusProdutoFieldUpdateOperationsInput | $Enums.StatusProduto
     ncm?: StringFieldUpdateOperationsInput | string
     cest?: NullableStringFieldUpdateOperationsInput | string | null
     origem?: IntFieldUpdateOperationsInput | number
-    precoCusto?: IntFieldUpdateOperationsInput | number
-    precoVenda?: IntFieldUpdateOperationsInput | number
-    precoPromocional?: NullableIntFieldUpdateOperationsInput | number | null
+    precoCusto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoPromocional?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFieldUpdateOperationsInput | number
+    unidadeMedida?: StringFieldUpdateOperationsInput | string
     peso?: IntFieldUpdateOperationsInput | number
     altura?: FloatFieldUpdateOperationsInput | number
     largura?: FloatFieldUpdateOperationsInput | number
@@ -9718,13 +12090,15 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
     descricaoCurta?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusProdutoFieldUpdateOperationsInput | $Enums.StatusProduto
     ncm?: StringFieldUpdateOperationsInput | string
     cest?: NullableStringFieldUpdateOperationsInput | string | null
     origem?: IntFieldUpdateOperationsInput | number
-    precoCusto?: IntFieldUpdateOperationsInput | number
-    precoVenda?: IntFieldUpdateOperationsInput | number
-    precoPromocional?: NullableIntFieldUpdateOperationsInput | number | null
+    precoCusto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoPromocional?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFieldUpdateOperationsInput | number
+    unidadeMedida?: StringFieldUpdateOperationsInput | string
     peso?: IntFieldUpdateOperationsInput | number
     altura?: FloatFieldUpdateOperationsInput | number
     largura?: FloatFieldUpdateOperationsInput | number
@@ -9748,13 +12122,15 @@ export namespace Prisma {
     nome: string
     descricao: string
     descricaoCurta?: string | null
-    status?: string
+    status?: $Enums.StatusProduto
     ncm: string
     cest?: string | null
     origem?: number
-    precoCusto: number
-    precoVenda: number
-    precoPromocional?: number | null
+    precoCusto: Decimal | DecimalJsLike | number | string
+    precoVenda: Decimal | DecimalJsLike | number | string
+    precoPromocional?: Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: number
+    unidadeMedida?: string
     peso: number
     altura: number
     largura: number
@@ -9776,13 +12152,15 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
     descricaoCurta?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusProdutoFieldUpdateOperationsInput | $Enums.StatusProduto
     ncm?: StringFieldUpdateOperationsInput | string
     cest?: NullableStringFieldUpdateOperationsInput | string | null
     origem?: IntFieldUpdateOperationsInput | number
-    precoCusto?: IntFieldUpdateOperationsInput | number
-    precoVenda?: IntFieldUpdateOperationsInput | number
-    precoPromocional?: NullableIntFieldUpdateOperationsInput | number | null
+    precoCusto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoPromocional?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFieldUpdateOperationsInput | number
+    unidadeMedida?: StringFieldUpdateOperationsInput | string
     peso?: IntFieldUpdateOperationsInput | number
     altura?: FloatFieldUpdateOperationsInput | number
     largura?: FloatFieldUpdateOperationsInput | number
@@ -9802,13 +12180,15 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
     descricaoCurta?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusProdutoFieldUpdateOperationsInput | $Enums.StatusProduto
     ncm?: StringFieldUpdateOperationsInput | string
     cest?: NullableStringFieldUpdateOperationsInput | string | null
     origem?: IntFieldUpdateOperationsInput | number
-    precoCusto?: IntFieldUpdateOperationsInput | number
-    precoVenda?: IntFieldUpdateOperationsInput | number
-    precoPromocional?: NullableIntFieldUpdateOperationsInput | number | null
+    precoCusto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoPromocional?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFieldUpdateOperationsInput | number
+    unidadeMedida?: StringFieldUpdateOperationsInput | string
     peso?: IntFieldUpdateOperationsInput | number
     altura?: FloatFieldUpdateOperationsInput | number
     largura?: FloatFieldUpdateOperationsInput | number
@@ -9903,7 +12283,7 @@ export namespace Prisma {
     sku: string
     gtin?: string | null
     nome: string
-    precoVenda?: number | null
+    precoVenda?: Decimal | DecimalJsLike | number | string | null
     peso?: number | null
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -9918,7 +12298,7 @@ export namespace Prisma {
     sku: string
     gtin?: string | null
     nome: string
-    precoVenda?: number | null
+    precoVenda?: Decimal | DecimalJsLike | number | string | null
     peso?: number | null
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -9931,7 +12311,7 @@ export namespace Prisma {
     sku?: StringFieldUpdateOperationsInput | string
     gtin?: NullableStringFieldUpdateOperationsInput | string | null
     nome?: StringFieldUpdateOperationsInput | string
-    precoVenda?: NullableIntFieldUpdateOperationsInput | number | null
+    precoVenda?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableIntFieldUpdateOperationsInput | number | null
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9946,7 +12326,7 @@ export namespace Prisma {
     sku?: StringFieldUpdateOperationsInput | string
     gtin?: NullableStringFieldUpdateOperationsInput | string | null
     nome?: StringFieldUpdateOperationsInput | string
-    precoVenda?: NullableIntFieldUpdateOperationsInput | number | null
+    precoVenda?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableIntFieldUpdateOperationsInput | number | null
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9960,7 +12340,7 @@ export namespace Prisma {
     sku: string
     gtin?: string | null
     nome: string
-    precoVenda?: number | null
+    precoVenda?: Decimal | DecimalJsLike | number | string | null
     peso?: number | null
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -9971,7 +12351,7 @@ export namespace Prisma {
     sku?: StringFieldUpdateOperationsInput | string
     gtin?: NullableStringFieldUpdateOperationsInput | string | null
     nome?: StringFieldUpdateOperationsInput | string
-    precoVenda?: NullableIntFieldUpdateOperationsInput | number | null
+    precoVenda?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableIntFieldUpdateOperationsInput | number | null
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9983,7 +12363,7 @@ export namespace Prisma {
     sku?: StringFieldUpdateOperationsInput | string
     gtin?: NullableStringFieldUpdateOperationsInput | string | null
     nome?: StringFieldUpdateOperationsInput | string
-    precoVenda?: NullableIntFieldUpdateOperationsInput | number | null
+    precoVenda?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableIntFieldUpdateOperationsInput | number | null
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10082,6 +12462,128 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     variacaoId?: StringFieldUpdateOperationsInput | string
     url?: StringFieldUpdateOperationsInput | string
+    ordem?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type GradeCreateInput = {
+    id?: string
+    tenantId: string
+    nome: string
+    descricao?: string | null
+    ativa?: boolean
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+    tamanhos?: GradeTamanhoCreateNestedManyWithoutGradeInput
+  }
+
+  export type GradeUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    nome: string
+    descricao?: string | null
+    ativa?: boolean
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+    tamanhos?: GradeTamanhoUncheckedCreateNestedManyWithoutGradeInput
+  }
+
+  export type GradeUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    nome?: StringFieldUpdateOperationsInput | string
+    descricao?: NullableStringFieldUpdateOperationsInput | string | null
+    ativa?: BoolFieldUpdateOperationsInput | boolean
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    tamanhos?: GradeTamanhoUpdateManyWithoutGradeNestedInput
+  }
+
+  export type GradeUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    nome?: StringFieldUpdateOperationsInput | string
+    descricao?: NullableStringFieldUpdateOperationsInput | string | null
+    ativa?: BoolFieldUpdateOperationsInput | boolean
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    tamanhos?: GradeTamanhoUncheckedUpdateManyWithoutGradeNestedInput
+  }
+
+  export type GradeCreateManyInput = {
+    id?: string
+    tenantId: string
+    nome: string
+    descricao?: string | null
+    ativa?: boolean
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type GradeUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    nome?: StringFieldUpdateOperationsInput | string
+    descricao?: NullableStringFieldUpdateOperationsInput | string | null
+    ativa?: BoolFieldUpdateOperationsInput | boolean
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GradeUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    nome?: StringFieldUpdateOperationsInput | string
+    descricao?: NullableStringFieldUpdateOperationsInput | string | null
+    ativa?: BoolFieldUpdateOperationsInput | boolean
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GradeTamanhoCreateInput = {
+    id?: string
+    valor: string
+    ordem?: number
+    grade: GradeCreateNestedOneWithoutTamanhosInput
+  }
+
+  export type GradeTamanhoUncheckedCreateInput = {
+    id?: string
+    gradeId: string
+    valor: string
+    ordem?: number
+  }
+
+  export type GradeTamanhoUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    valor?: StringFieldUpdateOperationsInput | string
+    ordem?: IntFieldUpdateOperationsInput | number
+    grade?: GradeUpdateOneRequiredWithoutTamanhosNestedInput
+  }
+
+  export type GradeTamanhoUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    gradeId?: StringFieldUpdateOperationsInput | string
+    valor?: StringFieldUpdateOperationsInput | string
+    ordem?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type GradeTamanhoCreateManyInput = {
+    id?: string
+    gradeId: string
+    valor: string
+    ordem?: number
+  }
+
+  export type GradeTamanhoUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    valor?: StringFieldUpdateOperationsInput | string
+    ordem?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type GradeTamanhoUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    gradeId?: StringFieldUpdateOperationsInput | string
+    valor?: StringFieldUpdateOperationsInput | string
     ordem?: IntFieldUpdateOperationsInput | number
   }
 
@@ -10299,6 +12801,13 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type EnumStatusProdutoFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusProduto | EnumStatusProdutoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusProduto[] | ListEnumStatusProdutoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusProduto[] | ListEnumStatusProdutoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusProdutoFilter<$PrismaModel> | $Enums.StatusProduto
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -10310,15 +12819,26 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  export type DecimalFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+  }
+
+  export type DecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
   }
 
   export type FloatFilter<$PrismaModel = never> = {
@@ -10418,6 +12938,8 @@ export namespace Prisma {
     precoCusto?: SortOrder
     precoVenda?: SortOrder
     precoPromocional?: SortOrder
+    estoqueMinimo?: SortOrder
+    unidadeMedida?: SortOrder
     peso?: SortOrder
     altura?: SortOrder
     largura?: SortOrder
@@ -10436,6 +12958,7 @@ export namespace Prisma {
     precoCusto?: SortOrder
     precoVenda?: SortOrder
     precoPromocional?: SortOrder
+    estoqueMinimo?: SortOrder
     peso?: SortOrder
     altura?: SortOrder
     largura?: SortOrder
@@ -10457,6 +12980,8 @@ export namespace Prisma {
     precoCusto?: SortOrder
     precoVenda?: SortOrder
     precoPromocional?: SortOrder
+    estoqueMinimo?: SortOrder
+    unidadeMedida?: SortOrder
     peso?: SortOrder
     altura?: SortOrder
     largura?: SortOrder
@@ -10484,6 +13009,8 @@ export namespace Prisma {
     precoCusto?: SortOrder
     precoVenda?: SortOrder
     precoPromocional?: SortOrder
+    estoqueMinimo?: SortOrder
+    unidadeMedida?: SortOrder
     peso?: SortOrder
     altura?: SortOrder
     largura?: SortOrder
@@ -10501,6 +13028,7 @@ export namespace Prisma {
     precoCusto?: SortOrder
     precoVenda?: SortOrder
     precoPromocional?: SortOrder
+    estoqueMinimo?: SortOrder
     peso?: SortOrder
     altura?: SortOrder
     largura?: SortOrder
@@ -10558,6 +13086,16 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
+  export type EnumStatusProdutoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusProduto | EnumStatusProdutoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusProduto[] | ListEnumStatusProdutoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusProduto[] | ListEnumStatusProdutoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusProdutoWithAggregatesFilter<$PrismaModel> | $Enums.StatusProduto
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusProdutoFilter<$PrismaModel>
+    _max?: NestedEnumStatusProdutoFilter<$PrismaModel>
+  }
+
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -10574,20 +13112,36 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+  export type DecimalWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedDecimalFilter<$PrismaModel>
+    _sum?: NestedDecimalFilter<$PrismaModel>
+    _min?: NestedDecimalFilter<$PrismaModel>
+    _max?: NestedDecimalFilter<$PrismaModel>
+  }
+
+  export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
     _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type FloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -10694,6 +13248,17 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type AtributoVariacaoListRelationFilter = {
     every?: AtributoVariacaoWhereInput
     some?: AtributoVariacaoWhereInput
@@ -10712,6 +13277,11 @@ export namespace Prisma {
 
   export type ImagemVariacaoOrderByRelationAggregateInput = {
     _count?: SortOrder
+  }
+
+  export type VariacaoProdutoProdutoIdSkuCompoundUniqueInput = {
+    produtoId: string
+    sku: string
   }
 
   export type VariacaoProdutoCountOrderByAggregateInput = {
@@ -10758,6 +13328,22 @@ export namespace Prisma {
   export type VariacaoProdutoSumOrderByAggregateInput = {
     precoVenda?: SortOrder
     peso?: SortOrder
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type VariacaoProdutoRelationFilter = {
@@ -10812,6 +13398,90 @@ export namespace Prisma {
   }
 
   export type ImagemVariacaoSumOrderByAggregateInput = {
+    ordem?: SortOrder
+  }
+
+  export type GradeTamanhoListRelationFilter = {
+    every?: GradeTamanhoWhereInput
+    some?: GradeTamanhoWhereInput
+    none?: GradeTamanhoWhereInput
+  }
+
+  export type GradeTamanhoOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type GradeTenantIdNomeCompoundUniqueInput = {
+    tenantId: string
+    nome: string
+  }
+
+  export type GradeCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    nome?: SortOrder
+    descricao?: SortOrder
+    ativa?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type GradeMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    nome?: SortOrder
+    descricao?: SortOrder
+    ativa?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type GradeMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    nome?: SortOrder
+    descricao?: SortOrder
+    ativa?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type GradeRelationFilter = {
+    is?: GradeWhereInput
+    isNot?: GradeWhereInput
+  }
+
+  export type GradeTamanhoGradeIdValorCompoundUniqueInput = {
+    gradeId: string
+    valor: string
+  }
+
+  export type GradeTamanhoCountOrderByAggregateInput = {
+    id?: SortOrder
+    gradeId?: SortOrder
+    valor?: SortOrder
+    ordem?: SortOrder
+  }
+
+  export type GradeTamanhoAvgOrderByAggregateInput = {
+    ordem?: SortOrder
+  }
+
+  export type GradeTamanhoMaxOrderByAggregateInput = {
+    id?: SortOrder
+    gradeId?: SortOrder
+    valor?: SortOrder
+    ordem?: SortOrder
+  }
+
+  export type GradeTamanhoMinOrderByAggregateInput = {
+    id?: SortOrder
+    gradeId?: SortOrder
+    valor?: SortOrder
+    ordem?: SortOrder
+  }
+
+  export type GradeTamanhoSumOrderByAggregateInput = {
     ordem?: SortOrder
   }
 
@@ -10979,6 +13649,10 @@ export namespace Prisma {
     set?: string | null
   }
 
+  export type EnumStatusProdutoFieldUpdateOperationsInput = {
+    set?: $Enums.StatusProduto
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -10987,12 +13661,20 @@ export namespace Prisma {
     divide?: number
   }
 
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
+  export type DecimalFieldUpdateOperationsInput = {
+    set?: Decimal | DecimalJsLike | number | string
+    increment?: Decimal | DecimalJsLike | number | string
+    decrement?: Decimal | DecimalJsLike | number | string
+    multiply?: Decimal | DecimalJsLike | number | string
+    divide?: Decimal | DecimalJsLike | number | string
+  }
+
+  export type NullableDecimalFieldUpdateOperationsInput = {
+    set?: Decimal | DecimalJsLike | number | string | null
+    increment?: Decimal | DecimalJsLike | number | string
+    decrement?: Decimal | DecimalJsLike | number | string
+    multiply?: Decimal | DecimalJsLike | number | string
+    divide?: Decimal | DecimalJsLike | number | string
   }
 
   export type FloatFieldUpdateOperationsInput = {
@@ -11138,6 +13820,14 @@ export namespace Prisma {
     connect?: ImagemVariacaoWhereUniqueInput | ImagemVariacaoWhereUniqueInput[]
   }
 
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type ProdutoUpdateOneRequiredWithoutVariacoesNestedInput = {
     create?: XOR<ProdutoCreateWithoutVariacoesInput, ProdutoUncheckedCreateWithoutVariacoesInput>
     connectOrCreate?: ProdutoCreateOrConnectWithoutVariacoesInput
@@ -11228,6 +13918,62 @@ export namespace Prisma {
     upsert?: VariacaoProdutoUpsertWithoutImagensInput
     connect?: VariacaoProdutoWhereUniqueInput
     update?: XOR<XOR<VariacaoProdutoUpdateToOneWithWhereWithoutImagensInput, VariacaoProdutoUpdateWithoutImagensInput>, VariacaoProdutoUncheckedUpdateWithoutImagensInput>
+  }
+
+  export type GradeTamanhoCreateNestedManyWithoutGradeInput = {
+    create?: XOR<GradeTamanhoCreateWithoutGradeInput, GradeTamanhoUncheckedCreateWithoutGradeInput> | GradeTamanhoCreateWithoutGradeInput[] | GradeTamanhoUncheckedCreateWithoutGradeInput[]
+    connectOrCreate?: GradeTamanhoCreateOrConnectWithoutGradeInput | GradeTamanhoCreateOrConnectWithoutGradeInput[]
+    createMany?: GradeTamanhoCreateManyGradeInputEnvelope
+    connect?: GradeTamanhoWhereUniqueInput | GradeTamanhoWhereUniqueInput[]
+  }
+
+  export type GradeTamanhoUncheckedCreateNestedManyWithoutGradeInput = {
+    create?: XOR<GradeTamanhoCreateWithoutGradeInput, GradeTamanhoUncheckedCreateWithoutGradeInput> | GradeTamanhoCreateWithoutGradeInput[] | GradeTamanhoUncheckedCreateWithoutGradeInput[]
+    connectOrCreate?: GradeTamanhoCreateOrConnectWithoutGradeInput | GradeTamanhoCreateOrConnectWithoutGradeInput[]
+    createMany?: GradeTamanhoCreateManyGradeInputEnvelope
+    connect?: GradeTamanhoWhereUniqueInput | GradeTamanhoWhereUniqueInput[]
+  }
+
+  export type GradeTamanhoUpdateManyWithoutGradeNestedInput = {
+    create?: XOR<GradeTamanhoCreateWithoutGradeInput, GradeTamanhoUncheckedCreateWithoutGradeInput> | GradeTamanhoCreateWithoutGradeInput[] | GradeTamanhoUncheckedCreateWithoutGradeInput[]
+    connectOrCreate?: GradeTamanhoCreateOrConnectWithoutGradeInput | GradeTamanhoCreateOrConnectWithoutGradeInput[]
+    upsert?: GradeTamanhoUpsertWithWhereUniqueWithoutGradeInput | GradeTamanhoUpsertWithWhereUniqueWithoutGradeInput[]
+    createMany?: GradeTamanhoCreateManyGradeInputEnvelope
+    set?: GradeTamanhoWhereUniqueInput | GradeTamanhoWhereUniqueInput[]
+    disconnect?: GradeTamanhoWhereUniqueInput | GradeTamanhoWhereUniqueInput[]
+    delete?: GradeTamanhoWhereUniqueInput | GradeTamanhoWhereUniqueInput[]
+    connect?: GradeTamanhoWhereUniqueInput | GradeTamanhoWhereUniqueInput[]
+    update?: GradeTamanhoUpdateWithWhereUniqueWithoutGradeInput | GradeTamanhoUpdateWithWhereUniqueWithoutGradeInput[]
+    updateMany?: GradeTamanhoUpdateManyWithWhereWithoutGradeInput | GradeTamanhoUpdateManyWithWhereWithoutGradeInput[]
+    deleteMany?: GradeTamanhoScalarWhereInput | GradeTamanhoScalarWhereInput[]
+  }
+
+  export type GradeTamanhoUncheckedUpdateManyWithoutGradeNestedInput = {
+    create?: XOR<GradeTamanhoCreateWithoutGradeInput, GradeTamanhoUncheckedCreateWithoutGradeInput> | GradeTamanhoCreateWithoutGradeInput[] | GradeTamanhoUncheckedCreateWithoutGradeInput[]
+    connectOrCreate?: GradeTamanhoCreateOrConnectWithoutGradeInput | GradeTamanhoCreateOrConnectWithoutGradeInput[]
+    upsert?: GradeTamanhoUpsertWithWhereUniqueWithoutGradeInput | GradeTamanhoUpsertWithWhereUniqueWithoutGradeInput[]
+    createMany?: GradeTamanhoCreateManyGradeInputEnvelope
+    set?: GradeTamanhoWhereUniqueInput | GradeTamanhoWhereUniqueInput[]
+    disconnect?: GradeTamanhoWhereUniqueInput | GradeTamanhoWhereUniqueInput[]
+    delete?: GradeTamanhoWhereUniqueInput | GradeTamanhoWhereUniqueInput[]
+    connect?: GradeTamanhoWhereUniqueInput | GradeTamanhoWhereUniqueInput[]
+    update?: GradeTamanhoUpdateWithWhereUniqueWithoutGradeInput | GradeTamanhoUpdateWithWhereUniqueWithoutGradeInput[]
+    updateMany?: GradeTamanhoUpdateManyWithWhereWithoutGradeInput | GradeTamanhoUpdateManyWithWhereWithoutGradeInput[]
+    deleteMany?: GradeTamanhoScalarWhereInput | GradeTamanhoScalarWhereInput[]
+  }
+
+  export type GradeCreateNestedOneWithoutTamanhosInput = {
+    create?: XOR<GradeCreateWithoutTamanhosInput, GradeUncheckedCreateWithoutTamanhosInput>
+    connectOrCreate?: GradeCreateOrConnectWithoutTamanhosInput
+    connect?: GradeWhereUniqueInput
+  }
+
+  export type GradeUpdateOneRequiredWithoutTamanhosNestedInput = {
+    create?: XOR<GradeCreateWithoutTamanhosInput, GradeUncheckedCreateWithoutTamanhosInput>
+    connectOrCreate?: GradeCreateOrConnectWithoutTamanhosInput
+    upsert?: GradeUpsertWithoutTamanhosInput
+    connect?: GradeWhereUniqueInput
+    update?: XOR<XOR<GradeUpdateToOneWithWhereWithoutTamanhosInput, GradeUpdateWithoutTamanhosInput>, GradeUncheckedUpdateWithoutTamanhosInput>
   }
 
   export type CategoriaCreateNestedOneWithoutSubcategoriasInput = {
@@ -11411,6 +14157,13 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type NestedEnumStatusProdutoFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusProduto | EnumStatusProdutoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusProduto[] | ListEnumStatusProdutoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusProduto[] | ListEnumStatusProdutoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusProdutoFilter<$PrismaModel> | $Enums.StatusProduto
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -11422,15 +14175,26 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  export type NestedDecimalFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+  }
+
+  export type NestedDecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
   }
 
   export type NestedFloatFilter<$PrismaModel = never> = {
@@ -11514,6 +14278,27 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedEnumStatusProdutoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusProduto | EnumStatusProdutoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusProduto[] | ListEnumStatusProdutoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusProduto[] | ListEnumStatusProdutoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusProdutoWithAggregatesFilter<$PrismaModel> | $Enums.StatusProduto
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusProdutoFilter<$PrismaModel>
+    _max?: NestedEnumStatusProdutoFilter<$PrismaModel>
+  }
+
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -11530,31 +14315,36 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
-  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
+  export type NestedDecimalWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedDecimalFilter<$PrismaModel>
+    _sum?: NestedDecimalFilter<$PrismaModel>
+    _min?: NestedDecimalFilter<$PrismaModel>
+    _max?: NestedDecimalFilter<$PrismaModel>
   }
 
-  export type NestedFloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -11612,6 +14402,33 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type CategoriaCreateWithoutProdutosInput = {
@@ -11707,7 +14524,7 @@ export namespace Prisma {
     sku: string
     gtin?: string | null
     nome: string
-    precoVenda?: number | null
+    precoVenda?: Decimal | DecimalJsLike | number | string | null
     peso?: number | null
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -11720,7 +14537,7 @@ export namespace Prisma {
     sku: string
     gtin?: string | null
     nome: string
-    precoVenda?: number | null
+    precoVenda?: Decimal | DecimalJsLike | number | string | null
     peso?: number | null
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -11863,7 +14680,7 @@ export namespace Prisma {
     sku?: StringFilter<"VariacaoProduto"> | string
     gtin?: StringNullableFilter<"VariacaoProduto"> | string | null
     nome?: StringFilter<"VariacaoProduto"> | string
-    precoVenda?: IntNullableFilter<"VariacaoProduto"> | number | null
+    precoVenda?: DecimalNullableFilter<"VariacaoProduto"> | Decimal | DecimalJsLike | number | string | null
     peso?: IntNullableFilter<"VariacaoProduto"> | number | null
     criadoEm?: DateTimeFilter<"VariacaoProduto"> | Date | string
     atualizadoEm?: DateTimeFilter<"VariacaoProduto"> | Date | string
@@ -11877,13 +14694,15 @@ export namespace Prisma {
     nome: string
     descricao: string
     descricaoCurta?: string | null
-    status?: string
+    status?: $Enums.StatusProduto
     ncm: string
     cest?: string | null
     origem?: number
-    precoCusto: number
-    precoVenda: number
-    precoPromocional?: number | null
+    precoCusto: Decimal | DecimalJsLike | number | string
+    precoVenda: Decimal | DecimalJsLike | number | string
+    precoPromocional?: Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: number
+    unidadeMedida?: string
     peso: number
     altura: number
     largura: number
@@ -11906,13 +14725,15 @@ export namespace Prisma {
     nome: string
     descricao: string
     descricaoCurta?: string | null
-    status?: string
+    status?: $Enums.StatusProduto
     ncm: string
     cest?: string | null
     origem?: number
-    precoCusto: number
-    precoVenda: number
-    precoPromocional?: number | null
+    precoCusto: Decimal | DecimalJsLike | number | string
+    precoVenda: Decimal | DecimalJsLike | number | string
+    precoPromocional?: Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: number
+    unidadeMedida?: string
     peso: number
     altura: number
     largura: number
@@ -11951,13 +14772,15 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
     descricaoCurta?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusProdutoFieldUpdateOperationsInput | $Enums.StatusProduto
     ncm?: StringFieldUpdateOperationsInput | string
     cest?: NullableStringFieldUpdateOperationsInput | string | null
     origem?: IntFieldUpdateOperationsInput | number
-    precoCusto?: IntFieldUpdateOperationsInput | number
-    precoVenda?: IntFieldUpdateOperationsInput | number
-    precoPromocional?: NullableIntFieldUpdateOperationsInput | number | null
+    precoCusto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoPromocional?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFieldUpdateOperationsInput | number
+    unidadeMedida?: StringFieldUpdateOperationsInput | string
     peso?: IntFieldUpdateOperationsInput | number
     altura?: FloatFieldUpdateOperationsInput | number
     largura?: FloatFieldUpdateOperationsInput | number
@@ -11980,13 +14803,15 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
     descricaoCurta?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusProdutoFieldUpdateOperationsInput | $Enums.StatusProduto
     ncm?: StringFieldUpdateOperationsInput | string
     cest?: NullableStringFieldUpdateOperationsInput | string | null
     origem?: IntFieldUpdateOperationsInput | number
-    precoCusto?: IntFieldUpdateOperationsInput | number
-    precoVenda?: IntFieldUpdateOperationsInput | number
-    precoPromocional?: NullableIntFieldUpdateOperationsInput | number | null
+    precoCusto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoPromocional?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFieldUpdateOperationsInput | number
+    unidadeMedida?: StringFieldUpdateOperationsInput | string
     peso?: IntFieldUpdateOperationsInput | number
     altura?: FloatFieldUpdateOperationsInput | number
     largura?: FloatFieldUpdateOperationsInput | number
@@ -12009,13 +14834,15 @@ export namespace Prisma {
     nome: string
     descricao: string
     descricaoCurta?: string | null
-    status?: string
+    status?: $Enums.StatusProduto
     ncm: string
     cest?: string | null
     origem?: number
-    precoCusto: number
-    precoVenda: number
-    precoPromocional?: number | null
+    precoCusto: Decimal | DecimalJsLike | number | string
+    precoVenda: Decimal | DecimalJsLike | number | string
+    precoPromocional?: Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: number
+    unidadeMedida?: string
     peso: number
     altura: number
     largura: number
@@ -12038,13 +14865,15 @@ export namespace Prisma {
     nome: string
     descricao: string
     descricaoCurta?: string | null
-    status?: string
+    status?: $Enums.StatusProduto
     ncm: string
     cest?: string | null
     origem?: number
-    precoCusto: number
-    precoVenda: number
-    precoPromocional?: number | null
+    precoCusto: Decimal | DecimalJsLike | number | string
+    precoVenda: Decimal | DecimalJsLike | number | string
+    precoPromocional?: Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: number
+    unidadeMedida?: string
     peso: number
     altura: number
     largura: number
@@ -12127,13 +14956,15 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
     descricaoCurta?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusProdutoFieldUpdateOperationsInput | $Enums.StatusProduto
     ncm?: StringFieldUpdateOperationsInput | string
     cest?: NullableStringFieldUpdateOperationsInput | string | null
     origem?: IntFieldUpdateOperationsInput | number
-    precoCusto?: IntFieldUpdateOperationsInput | number
-    precoVenda?: IntFieldUpdateOperationsInput | number
-    precoPromocional?: NullableIntFieldUpdateOperationsInput | number | null
+    precoCusto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoPromocional?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFieldUpdateOperationsInput | number
+    unidadeMedida?: StringFieldUpdateOperationsInput | string
     peso?: IntFieldUpdateOperationsInput | number
     altura?: FloatFieldUpdateOperationsInput | number
     largura?: FloatFieldUpdateOperationsInput | number
@@ -12156,13 +14987,15 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
     descricaoCurta?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusProdutoFieldUpdateOperationsInput | $Enums.StatusProduto
     ncm?: StringFieldUpdateOperationsInput | string
     cest?: NullableStringFieldUpdateOperationsInput | string | null
     origem?: IntFieldUpdateOperationsInput | number
-    precoCusto?: IntFieldUpdateOperationsInput | number
-    precoVenda?: IntFieldUpdateOperationsInput | number
-    precoPromocional?: NullableIntFieldUpdateOperationsInput | number | null
+    precoCusto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoPromocional?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFieldUpdateOperationsInput | number
+    unidadeMedida?: StringFieldUpdateOperationsInput | string
     peso?: IntFieldUpdateOperationsInput | number
     altura?: FloatFieldUpdateOperationsInput | number
     largura?: FloatFieldUpdateOperationsInput | number
@@ -12234,7 +15067,7 @@ export namespace Prisma {
     sku: string
     gtin?: string | null
     nome: string
-    precoVenda?: number | null
+    precoVenda?: Decimal | DecimalJsLike | number | string | null
     peso?: number | null
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -12248,7 +15081,7 @@ export namespace Prisma {
     sku: string
     gtin?: string | null
     nome: string
-    precoVenda?: number | null
+    precoVenda?: Decimal | DecimalJsLike | number | string | null
     peso?: number | null
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -12276,7 +15109,7 @@ export namespace Prisma {
     sku?: StringFieldUpdateOperationsInput | string
     gtin?: NullableStringFieldUpdateOperationsInput | string | null
     nome?: StringFieldUpdateOperationsInput | string
-    precoVenda?: NullableIntFieldUpdateOperationsInput | number | null
+    precoVenda?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableIntFieldUpdateOperationsInput | number | null
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12290,7 +15123,7 @@ export namespace Prisma {
     sku?: StringFieldUpdateOperationsInput | string
     gtin?: NullableStringFieldUpdateOperationsInput | string | null
     nome?: StringFieldUpdateOperationsInput | string
-    precoVenda?: NullableIntFieldUpdateOperationsInput | number | null
+    precoVenda?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableIntFieldUpdateOperationsInput | number | null
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12302,7 +15135,7 @@ export namespace Prisma {
     sku: string
     gtin?: string | null
     nome: string
-    precoVenda?: number | null
+    precoVenda?: Decimal | DecimalJsLike | number | string | null
     peso?: number | null
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -12316,7 +15149,7 @@ export namespace Prisma {
     sku: string
     gtin?: string | null
     nome: string
-    precoVenda?: number | null
+    precoVenda?: Decimal | DecimalJsLike | number | string | null
     peso?: number | null
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -12344,7 +15177,7 @@ export namespace Prisma {
     sku?: StringFieldUpdateOperationsInput | string
     gtin?: NullableStringFieldUpdateOperationsInput | string | null
     nome?: StringFieldUpdateOperationsInput | string
-    precoVenda?: NullableIntFieldUpdateOperationsInput | number | null
+    precoVenda?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableIntFieldUpdateOperationsInput | number | null
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12358,11 +15191,115 @@ export namespace Prisma {
     sku?: StringFieldUpdateOperationsInput | string
     gtin?: NullableStringFieldUpdateOperationsInput | string | null
     nome?: StringFieldUpdateOperationsInput | string
-    precoVenda?: NullableIntFieldUpdateOperationsInput | number | null
+    precoVenda?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableIntFieldUpdateOperationsInput | number | null
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atributos?: AtributoVariacaoUncheckedUpdateManyWithoutVariacaoNestedInput
+  }
+
+  export type GradeTamanhoCreateWithoutGradeInput = {
+    id?: string
+    valor: string
+    ordem?: number
+  }
+
+  export type GradeTamanhoUncheckedCreateWithoutGradeInput = {
+    id?: string
+    valor: string
+    ordem?: number
+  }
+
+  export type GradeTamanhoCreateOrConnectWithoutGradeInput = {
+    where: GradeTamanhoWhereUniqueInput
+    create: XOR<GradeTamanhoCreateWithoutGradeInput, GradeTamanhoUncheckedCreateWithoutGradeInput>
+  }
+
+  export type GradeTamanhoCreateManyGradeInputEnvelope = {
+    data: GradeTamanhoCreateManyGradeInput | GradeTamanhoCreateManyGradeInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type GradeTamanhoUpsertWithWhereUniqueWithoutGradeInput = {
+    where: GradeTamanhoWhereUniqueInput
+    update: XOR<GradeTamanhoUpdateWithoutGradeInput, GradeTamanhoUncheckedUpdateWithoutGradeInput>
+    create: XOR<GradeTamanhoCreateWithoutGradeInput, GradeTamanhoUncheckedCreateWithoutGradeInput>
+  }
+
+  export type GradeTamanhoUpdateWithWhereUniqueWithoutGradeInput = {
+    where: GradeTamanhoWhereUniqueInput
+    data: XOR<GradeTamanhoUpdateWithoutGradeInput, GradeTamanhoUncheckedUpdateWithoutGradeInput>
+  }
+
+  export type GradeTamanhoUpdateManyWithWhereWithoutGradeInput = {
+    where: GradeTamanhoScalarWhereInput
+    data: XOR<GradeTamanhoUpdateManyMutationInput, GradeTamanhoUncheckedUpdateManyWithoutGradeInput>
+  }
+
+  export type GradeTamanhoScalarWhereInput = {
+    AND?: GradeTamanhoScalarWhereInput | GradeTamanhoScalarWhereInput[]
+    OR?: GradeTamanhoScalarWhereInput[]
+    NOT?: GradeTamanhoScalarWhereInput | GradeTamanhoScalarWhereInput[]
+    id?: UuidFilter<"GradeTamanho"> | string
+    gradeId?: UuidFilter<"GradeTamanho"> | string
+    valor?: StringFilter<"GradeTamanho"> | string
+    ordem?: IntFilter<"GradeTamanho"> | number
+  }
+
+  export type GradeCreateWithoutTamanhosInput = {
+    id?: string
+    tenantId: string
+    nome: string
+    descricao?: string | null
+    ativa?: boolean
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type GradeUncheckedCreateWithoutTamanhosInput = {
+    id?: string
+    tenantId: string
+    nome: string
+    descricao?: string | null
+    ativa?: boolean
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type GradeCreateOrConnectWithoutTamanhosInput = {
+    where: GradeWhereUniqueInput
+    create: XOR<GradeCreateWithoutTamanhosInput, GradeUncheckedCreateWithoutTamanhosInput>
+  }
+
+  export type GradeUpsertWithoutTamanhosInput = {
+    update: XOR<GradeUpdateWithoutTamanhosInput, GradeUncheckedUpdateWithoutTamanhosInput>
+    create: XOR<GradeCreateWithoutTamanhosInput, GradeUncheckedCreateWithoutTamanhosInput>
+    where?: GradeWhereInput
+  }
+
+  export type GradeUpdateToOneWithWhereWithoutTamanhosInput = {
+    where?: GradeWhereInput
+    data: XOR<GradeUpdateWithoutTamanhosInput, GradeUncheckedUpdateWithoutTamanhosInput>
+  }
+
+  export type GradeUpdateWithoutTamanhosInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    nome?: StringFieldUpdateOperationsInput | string
+    descricao?: NullableStringFieldUpdateOperationsInput | string | null
+    ativa?: BoolFieldUpdateOperationsInput | boolean
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GradeUncheckedUpdateWithoutTamanhosInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    nome?: StringFieldUpdateOperationsInput | string
+    descricao?: NullableStringFieldUpdateOperationsInput | string | null
+    ativa?: BoolFieldUpdateOperationsInput | boolean
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CategoriaCreateWithoutSubcategoriasInput = {
@@ -12440,13 +15377,15 @@ export namespace Prisma {
     nome: string
     descricao: string
     descricaoCurta?: string | null
-    status?: string
+    status?: $Enums.StatusProduto
     ncm: string
     cest?: string | null
     origem?: number
-    precoCusto: number
-    precoVenda: number
-    precoPromocional?: number | null
+    precoCusto: Decimal | DecimalJsLike | number | string
+    precoVenda: Decimal | DecimalJsLike | number | string
+    precoPromocional?: Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: number
+    unidadeMedida?: string
     peso: number
     altura: number
     largura: number
@@ -12469,13 +15408,15 @@ export namespace Prisma {
     nome: string
     descricao: string
     descricaoCurta?: string | null
-    status?: string
+    status?: $Enums.StatusProduto
     ncm: string
     cest?: string | null
     origem?: number
-    precoCusto: number
-    precoVenda: number
-    precoPromocional?: number | null
+    precoCusto: Decimal | DecimalJsLike | number | string
+    precoVenda: Decimal | DecimalJsLike | number | string
+    precoPromocional?: Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: number
+    unidadeMedida?: string
     peso: number
     altura: number
     largura: number
@@ -12595,13 +15536,15 @@ export namespace Prisma {
     nome?: StringFilter<"Produto"> | string
     descricao?: StringFilter<"Produto"> | string
     descricaoCurta?: StringNullableFilter<"Produto"> | string | null
-    status?: StringFilter<"Produto"> | string
+    status?: EnumStatusProdutoFilter<"Produto"> | $Enums.StatusProduto
     ncm?: StringFilter<"Produto"> | string
     cest?: StringNullableFilter<"Produto"> | string | null
     origem?: IntFilter<"Produto"> | number
-    precoCusto?: IntFilter<"Produto"> | number
-    precoVenda?: IntFilter<"Produto"> | number
-    precoPromocional?: IntNullableFilter<"Produto"> | number | null
+    precoCusto?: DecimalFilter<"Produto"> | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFilter<"Produto"> | Decimal | DecimalJsLike | number | string
+    precoPromocional?: DecimalNullableFilter<"Produto"> | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFilter<"Produto"> | number
+    unidadeMedida?: StringFilter<"Produto"> | string
     peso?: IntFilter<"Produto"> | number
     altura?: FloatFilter<"Produto"> | number
     largura?: FloatFilter<"Produto"> | number
@@ -12623,13 +15566,15 @@ export namespace Prisma {
     nome: string
     descricao: string
     descricaoCurta?: string | null
-    status?: string
+    status?: $Enums.StatusProduto
     ncm: string
     cest?: string | null
     origem?: number
-    precoCusto: number
-    precoVenda: number
-    precoPromocional?: number | null
+    precoCusto: Decimal | DecimalJsLike | number | string
+    precoVenda: Decimal | DecimalJsLike | number | string
+    precoPromocional?: Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: number
+    unidadeMedida?: string
     peso: number
     altura: number
     largura: number
@@ -12652,13 +15597,15 @@ export namespace Prisma {
     nome: string
     descricao: string
     descricaoCurta?: string | null
-    status?: string
+    status?: $Enums.StatusProduto
     ncm: string
     cest?: string | null
     origem?: number
-    precoCusto: number
-    precoVenda: number
-    precoPromocional?: number | null
+    precoCusto: Decimal | DecimalJsLike | number | string
+    precoVenda: Decimal | DecimalJsLike | number | string
+    precoPromocional?: Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: number
+    unidadeMedida?: string
     peso: number
     altura: number
     largura: number
@@ -12714,7 +15661,7 @@ export namespace Prisma {
     sku: string
     gtin?: string | null
     nome: string
-    precoVenda?: number | null
+    precoVenda?: Decimal | DecimalJsLike | number | string | null
     peso?: number | null
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -12755,7 +15702,7 @@ export namespace Prisma {
     sku?: StringFieldUpdateOperationsInput | string
     gtin?: NullableStringFieldUpdateOperationsInput | string | null
     nome?: StringFieldUpdateOperationsInput | string
-    precoVenda?: NullableIntFieldUpdateOperationsInput | number | null
+    precoVenda?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableIntFieldUpdateOperationsInput | number | null
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12768,7 +15715,7 @@ export namespace Prisma {
     sku?: StringFieldUpdateOperationsInput | string
     gtin?: NullableStringFieldUpdateOperationsInput | string | null
     nome?: StringFieldUpdateOperationsInput | string
-    precoVenda?: NullableIntFieldUpdateOperationsInput | number | null
+    precoVenda?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableIntFieldUpdateOperationsInput | number | null
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12781,7 +15728,7 @@ export namespace Prisma {
     sku?: StringFieldUpdateOperationsInput | string
     gtin?: NullableStringFieldUpdateOperationsInput | string | null
     nome?: StringFieldUpdateOperationsInput | string
-    precoVenda?: NullableIntFieldUpdateOperationsInput | number | null
+    precoVenda?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     peso?: NullableIntFieldUpdateOperationsInput | number | null
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12835,6 +15782,30 @@ export namespace Prisma {
     ordem?: IntFieldUpdateOperationsInput | number
   }
 
+  export type GradeTamanhoCreateManyGradeInput = {
+    id?: string
+    valor: string
+    ordem?: number
+  }
+
+  export type GradeTamanhoUpdateWithoutGradeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    valor?: StringFieldUpdateOperationsInput | string
+    ordem?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type GradeTamanhoUncheckedUpdateWithoutGradeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    valor?: StringFieldUpdateOperationsInput | string
+    ordem?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type GradeTamanhoUncheckedUpdateManyWithoutGradeInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    valor?: StringFieldUpdateOperationsInput | string
+    ordem?: IntFieldUpdateOperationsInput | number
+  }
+
   export type CategoriaCreateManyCategoriaPaiInput = {
     id?: string
     tenantId: string
@@ -12854,13 +15825,15 @@ export namespace Prisma {
     nome: string
     descricao: string
     descricaoCurta?: string | null
-    status?: string
+    status?: $Enums.StatusProduto
     ncm: string
     cest?: string | null
     origem?: number
-    precoCusto: number
-    precoVenda: number
-    precoPromocional?: number | null
+    precoCusto: Decimal | DecimalJsLike | number | string
+    precoVenda: Decimal | DecimalJsLike | number | string
+    precoPromocional?: Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: number
+    unidadeMedida?: string
     peso: number
     altura: number
     largura: number
@@ -12918,13 +15891,15 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
     descricaoCurta?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusProdutoFieldUpdateOperationsInput | $Enums.StatusProduto
     ncm?: StringFieldUpdateOperationsInput | string
     cest?: NullableStringFieldUpdateOperationsInput | string | null
     origem?: IntFieldUpdateOperationsInput | number
-    precoCusto?: IntFieldUpdateOperationsInput | number
-    precoVenda?: IntFieldUpdateOperationsInput | number
-    precoPromocional?: NullableIntFieldUpdateOperationsInput | number | null
+    precoCusto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoPromocional?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFieldUpdateOperationsInput | number
+    unidadeMedida?: StringFieldUpdateOperationsInput | string
     peso?: IntFieldUpdateOperationsInput | number
     altura?: FloatFieldUpdateOperationsInput | number
     largura?: FloatFieldUpdateOperationsInput | number
@@ -12947,13 +15922,15 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
     descricaoCurta?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusProdutoFieldUpdateOperationsInput | $Enums.StatusProduto
     ncm?: StringFieldUpdateOperationsInput | string
     cest?: NullableStringFieldUpdateOperationsInput | string | null
     origem?: IntFieldUpdateOperationsInput | number
-    precoCusto?: IntFieldUpdateOperationsInput | number
-    precoVenda?: IntFieldUpdateOperationsInput | number
-    precoPromocional?: NullableIntFieldUpdateOperationsInput | number | null
+    precoCusto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoPromocional?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFieldUpdateOperationsInput | number
+    unidadeMedida?: StringFieldUpdateOperationsInput | string
     peso?: IntFieldUpdateOperationsInput | number
     altura?: FloatFieldUpdateOperationsInput | number
     largura?: FloatFieldUpdateOperationsInput | number
@@ -12976,13 +15953,15 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
     descricaoCurta?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusProdutoFieldUpdateOperationsInput | $Enums.StatusProduto
     ncm?: StringFieldUpdateOperationsInput | string
     cest?: NullableStringFieldUpdateOperationsInput | string | null
     origem?: IntFieldUpdateOperationsInput | number
-    precoCusto?: IntFieldUpdateOperationsInput | number
-    precoVenda?: IntFieldUpdateOperationsInput | number
-    precoPromocional?: NullableIntFieldUpdateOperationsInput | number | null
+    precoCusto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoPromocional?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFieldUpdateOperationsInput | number
+    unidadeMedida?: StringFieldUpdateOperationsInput | string
     peso?: IntFieldUpdateOperationsInput | number
     altura?: FloatFieldUpdateOperationsInput | number
     largura?: FloatFieldUpdateOperationsInput | number
@@ -13003,13 +15982,15 @@ export namespace Prisma {
     nome: string
     descricao: string
     descricaoCurta?: string | null
-    status?: string
+    status?: $Enums.StatusProduto
     ncm: string
     cest?: string | null
     origem?: number
-    precoCusto: number
-    precoVenda: number
-    precoPromocional?: number | null
+    precoCusto: Decimal | DecimalJsLike | number | string
+    precoVenda: Decimal | DecimalJsLike | number | string
+    precoPromocional?: Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: number
+    unidadeMedida?: string
     peso: number
     altura: number
     largura: number
@@ -13030,13 +16011,15 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
     descricaoCurta?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusProdutoFieldUpdateOperationsInput | $Enums.StatusProduto
     ncm?: StringFieldUpdateOperationsInput | string
     cest?: NullableStringFieldUpdateOperationsInput | string | null
     origem?: IntFieldUpdateOperationsInput | number
-    precoCusto?: IntFieldUpdateOperationsInput | number
-    precoVenda?: IntFieldUpdateOperationsInput | number
-    precoPromocional?: NullableIntFieldUpdateOperationsInput | number | null
+    precoCusto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoPromocional?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFieldUpdateOperationsInput | number
+    unidadeMedida?: StringFieldUpdateOperationsInput | string
     peso?: IntFieldUpdateOperationsInput | number
     altura?: FloatFieldUpdateOperationsInput | number
     largura?: FloatFieldUpdateOperationsInput | number
@@ -13059,13 +16042,15 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
     descricaoCurta?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusProdutoFieldUpdateOperationsInput | $Enums.StatusProduto
     ncm?: StringFieldUpdateOperationsInput | string
     cest?: NullableStringFieldUpdateOperationsInput | string | null
     origem?: IntFieldUpdateOperationsInput | number
-    precoCusto?: IntFieldUpdateOperationsInput | number
-    precoVenda?: IntFieldUpdateOperationsInput | number
-    precoPromocional?: NullableIntFieldUpdateOperationsInput | number | null
+    precoCusto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoPromocional?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFieldUpdateOperationsInput | number
+    unidadeMedida?: StringFieldUpdateOperationsInput | string
     peso?: IntFieldUpdateOperationsInput | number
     altura?: FloatFieldUpdateOperationsInput | number
     largura?: FloatFieldUpdateOperationsInput | number
@@ -13088,13 +16073,15 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
     descricaoCurta?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusProdutoFieldUpdateOperationsInput | $Enums.StatusProduto
     ncm?: StringFieldUpdateOperationsInput | string
     cest?: NullableStringFieldUpdateOperationsInput | string | null
     origem?: IntFieldUpdateOperationsInput | number
-    precoCusto?: IntFieldUpdateOperationsInput | number
-    precoVenda?: IntFieldUpdateOperationsInput | number
-    precoPromocional?: NullableIntFieldUpdateOperationsInput | number | null
+    precoCusto?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoVenda?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    precoPromocional?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    estoqueMinimo?: IntFieldUpdateOperationsInput | number
+    unidadeMedida?: StringFieldUpdateOperationsInput | string
     peso?: IntFieldUpdateOperationsInput | number
     altura?: FloatFieldUpdateOperationsInput | number
     largura?: FloatFieldUpdateOperationsInput | number
@@ -13120,6 +16107,10 @@ export namespace Prisma {
      * @deprecated Use VariacaoProdutoCountOutputTypeDefaultArgs instead
      */
     export type VariacaoProdutoCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = VariacaoProdutoCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use GradeCountOutputTypeDefaultArgs instead
+     */
+    export type GradeCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GradeCountOutputTypeDefaultArgs<ExtArgs>
     /**
      * @deprecated Use CategoriaCountOutputTypeDefaultArgs instead
      */
@@ -13148,6 +16139,14 @@ export namespace Prisma {
      * @deprecated Use ImagemVariacaoDefaultArgs instead
      */
     export type ImagemVariacaoArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ImagemVariacaoDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use GradeDefaultArgs instead
+     */
+    export type GradeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GradeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use GradeTamanhoDefaultArgs instead
+     */
+    export type GradeTamanhoArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = GradeTamanhoDefaultArgs<ExtArgs>
     /**
      * @deprecated Use CategoriaDefaultArgs instead
      */

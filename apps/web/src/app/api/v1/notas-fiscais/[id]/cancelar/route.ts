@@ -6,12 +6,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params;
   const nf = findNF(id);
   if (!nf) return NextResponse.json({ erro: 'NF-e não encontrada' }, { status: 404 });
-  if (!['EMITIDA', 'VALIDADA'].includes(nf.status)) {
+  if (!['AUTORIZADA', 'VALIDADA'].includes(nf.status)) {
     return NextResponse.json({ erro: `NF-e com status ${nf.status} não pode ser cancelada` }, { status: 422 });
   }
 
-  // Verifica prazo de 24h para emitidas
-  if (nf.status === 'EMITIDA' && nf.dataAutorizacao) {
+  // Verifica prazo de 24h para notas autorizadas
+  if (nf.status === 'AUTORIZADA' && nf.dataAutorizacao) {
     const horasDecorridas = (Date.now() - new Date(nf.dataAutorizacao).getTime()) / 3600000;
     if (horasDecorridas > 24) {
       return NextResponse.json({ erro: 'Prazo de 24 horas para cancelamento expirado. Emita uma Carta de Correção.' }, { status: 422 });

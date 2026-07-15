@@ -15,10 +15,12 @@ import {
   HttpCode,
   HttpStatus,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 import { PagamentoService } from './pagamento.service';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { RegistrarPagamentoDto, EstornarPagamentoDto } from '../../dtos/pagamento.dto';
 
 @ApiTags('pagamentos')
@@ -32,6 +34,7 @@ export class PagamentoController {
    * Registrar novo pagamento para um pedido.
    */
   @Post('pedido/:pedidoId')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Registrar pagamento',
@@ -51,6 +54,7 @@ export class PagamentoController {
    * Listar pagamentos de um pedido.
    */
   @Get('pedido/:pedidoId')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Listar pagamentos do pedido',
     description: 'Retorna todos os pagamentos registrados para um pedido',
@@ -68,6 +72,7 @@ export class PagamentoController {
    * Listar pagamentos do tenant com filtros.
    */
   @Get()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Listar pagamentos',
     description: 'Lista pagamentos com suporte a filtros e paginação',
@@ -85,6 +90,7 @@ export class PagamentoController {
    * Estornar pagamento.
    */
   @Patch(':id/estornar')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Estornar pagamento',
     description: 'Reverte um pagamento já realizado',
@@ -101,7 +107,14 @@ export class PagamentoController {
   /**
    * POST /pagamentos/webhook/:gateway
    * Receber webhook de gateway de pagamento.
-   * Endpoint público (sem autenticação).
+   *
+   * Endpoint PÚBLICO (sem JwtAuthGuard e excluído do TenantMiddleware): o
+   * gateway não envia JWT. A autenticação aqui é por assinatura do webhook.
+   *
+   * TODO(Fase 1): validar a assinatura HMAC do gateway e resolver o
+   * tenantId a partir do payload/credencial do webhook (não confiar em
+   * req.tenantId, que aqui é undefined). Implementar o processamento real
+   * em PagamentoService.processarWebhook (hoje é stub).
    */
   @Post('webhook/:gateway')
   @HttpCode(HttpStatus.OK)
@@ -110,11 +123,11 @@ export class PagamentoController {
     description: 'Recebe notificações de mudança de status do gateway',
   })
   async receberWebhook(
-    @Req() req: any,
     @Param('gateway') gateway: string,
     @Body() dados: any,
   ) {
-    const tenantId = req.tenantId;
+    // tenantId virá da validação da assinatura/payload do gateway (Fase 1).
+    const tenantId = dados?.tenantId;
     return this.pagamentoService.processarWebhook(tenantId, {
       ...dados,
       gateway,

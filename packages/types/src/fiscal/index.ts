@@ -5,24 +5,27 @@
 
 import { BaseEntity, EntityId, Moeda } from '../common';
 
-/** Tipos de documento fiscal */
+// Enums UPPERCASE espelhando o schema Prisma do fiscal-service.
+
+/** Tipos de documento fiscal (Prisma `TipoNotaFiscal` + CT-e/MDF-e). */
 export enum TipoDocumentoFiscal {
-  NFE = 'nfe',       // Nota Fiscal Eletrônica (produto)
-  NFSE = 'nfse',     // Nota Fiscal de Serviço Eletrônica
-  NFCE = 'nfce',     // Nota Fiscal ao Consumidor Eletrônica
-  CTE = 'cte',       // Conhecimento de Transporte Eletrônico
-  MDFE = 'mdfe',     // Manifesto de Documentos Fiscais Eletrônicos
+  NFE = 'NFE',       // Nota Fiscal Eletrônica (produto)
+  NFSE = 'NFSE',     // Nota Fiscal de Serviço Eletrônica
+  NFCE = 'NFCE',     // Nota Fiscal ao Consumidor Eletrônica
+  CTE = 'CTE',       // Conhecimento de Transporte Eletrônico
+  MDFE = 'MDFE',     // Manifesto de Documentos Fiscais Eletrônicos
 }
 
-/** Status da nota fiscal */
+/** Status da nota fiscal (Prisma `StatusNotaFiscal`). */
 export enum StatusNotaFiscal {
-  RASCUNHO = 'rascunho',
-  VALIDANDO = 'validando',
-  AUTORIZADA = 'autorizada',
-  REJEITADA = 'rejeitada',
-  CANCELADA = 'cancelada',
-  INUTILIZADA = 'inutilizada',
-  DENEGADA = 'denegada',
+  RASCUNHO = 'RASCUNHO',
+  VALIDADA = 'VALIDADA',
+  TRANSMITIDA = 'TRANSMITIDA',
+  AUTORIZADA = 'AUTORIZADA',
+  REJEITADA = 'REJEITADA',
+  CANCELADA = 'CANCELADA',
+  INUTILIZADA = 'INUTILIZADA',
+  DENEGADA = 'DENEGADA',
 }
 
 /** Nota fiscal */

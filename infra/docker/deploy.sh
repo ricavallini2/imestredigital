@@ -250,8 +250,18 @@ cmd_deploy() {
 
 cmd_migrate() {
     check_env
-    log_info "═══ Aplicando Schema ao Banco (prisma db push) ═══"
+    log_info "═══ Aplicando Schema ao Banco (estratégia segura) ═══"
 
+    # ─── Estratégia de migração SEM perda de dados ─────────────────────────
+    # 1. Preferimos `prisma migrate deploy`: aplica apenas migrations versionadas
+    #    (prisma/migrations/), é idempotente e NUNCA descarta dados.
+    # 2. Se o serviço ainda não tem migrations versionadas (primeiro deploy de
+    #    um schema greenfield), caímos para `prisma db push` — porém SEM a flag
+    #    `--accept-data-loss`. Contra um banco vazio isso cria as tabelas com
+    #    segurança; se o push exigisse uma mudança destrutiva, o Prisma aborta
+    #    em vez de apagar dados (comportamento desejado).
+    #
+    # NUNCA use `--accept-data-loss` num fluxo automático de produção.
     SERVICES=(
         "auth-service"
         "catalog-service"
@@ -266,10 +276,20 @@ cmd_migrate() {
     )
 
     for svc in "${SERVICES[@]}"; do
-        log_info "Schema push: $svc"
-        docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" \
-            exec -T "$svc" npx prisma db push --accept-data-loss 2>&1 | tail -5 || \
-            log_warn "db push falhou para $svc — verifique se o container está rodando"
+        log_info "Migração: $svc"
+        # Detecta se há migrations versionadas dentro do container.
+        if docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" \
+            exec -T "$svc" sh -c '[ -d prisma/migrations ] && [ -n "$(ls -A prisma/migrations 2>/dev/null)" ]'; then
+            log_info "  → migrations versionadas encontradas: prisma migrate deploy"
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" \
+                exec -T "$svc" npx prisma migrate deploy 2>&1 | tail -8 || \
+                log_warn "migrate deploy falhou para $svc — verifique os logs do container"
+        else
+            log_warn "  → sem migrations versionadas: fallback para 'prisma db push' (SEM --accept-data-loss)"
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" \
+                exec -T "$svc" npx prisma db push --skip-generate 2>&1 | tail -8 || \
+                log_warn "db push falhou para $svc — provável mudança destrutiva bloqueada (esperado se já havia dados)"
+        fi
     done
 
     log_ok "Schema aplicado em todos os serviços"

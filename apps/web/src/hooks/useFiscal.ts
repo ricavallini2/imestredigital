@@ -7,7 +7,7 @@ import {
   fiscalService,
   type ListarNotasFiscaisDTO,
   type CriarNotaFiscalDTO,
-  type ConfiguracaoFiscal,
+  type AtualizarConfiguracaoFiscalReal,
   type RegraFiscal,
 } from '@/services/fiscal.service';
 
@@ -21,6 +21,7 @@ export const fiscalKeys = {
   analiseIA:    ['fiscal', 'analise-ia'] as const,
   estatisticas: ['fiscal', 'estatisticas'] as const,
   config:       ['fiscal', 'config'] as const,
+  configReal:   ['fiscal', 'config-real'] as const,
   regras:       (busca?: string) => ['fiscal', 'regras', busca ?? ''] as const,
 };
 
@@ -125,7 +126,7 @@ export function useCancelarNF() {
   });
 }
 
-// ─── Configuração ─────────────────────────────────────────────────────────────
+// ─── Configuração (view-model legado: DANFE, emissão avulsa) ───────────────────
 export function useConfiguracaoFiscal() {
   return useQuery({
     queryKey: fiscalKeys.config,
@@ -133,13 +134,23 @@ export function useConfiguracaoFiscal() {
   });
 }
 
-export function useSalvarConfiguracao() {
+// ─── Configuração (shape real do backend: tela de configurações) ───────────────
+export function useConfiguracaoFiscalReal() {
+  return useQuery({
+    queryKey: fiscalKeys.configReal,
+    queryFn: () => fiscalService.obterConfiguracaoReal(),
+  });
+}
+
+export function useSalvarConfiguracaoFiscalReal() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<ConfiguracaoFiscal>) => fiscalService.salvarConfiguracao(data),
+    mutationFn: (data: AtualizarConfiguracaoFiscalReal) => fiscalService.salvarConfiguracaoReal(data),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: fiscalKeys.configReal });
       qc.invalidateQueries({ queryKey: fiscalKeys.config });
       qc.invalidateQueries({ queryKey: fiscalKeys.analiseIA });
+      qc.invalidateQueries({ queryKey: fiscalKeys.estatisticas });
     },
   });
 }

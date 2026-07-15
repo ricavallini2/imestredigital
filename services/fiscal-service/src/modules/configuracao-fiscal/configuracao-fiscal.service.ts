@@ -7,6 +7,7 @@ import { Injectable, BadRequestException, NotFoundException, Logger } from '@nes
 import { AtualizarConfiguracaoFiscalDto } from '../../dtos/configuracao-fiscal.dto';
 import { ConfiguracaoFiscalRepository } from './configuracao-fiscal.repository';
 import { AssinaturaService } from '../sefaz/assinatura.service';
+import { derivarCrt } from '../../utils/crt.util';
 
 @Injectable()
 export class ConfiguracaoFiscalService {
@@ -38,20 +39,30 @@ export class ConfiguracaoFiscalService {
   }
 
   /**
-   * Atualiza configuração fiscal.
+   * Atualiza configuração fiscal (cria se não existir).
+   *
+   * O CRT é derivado do regime tributário quando o cliente não o informa
+   * explicitamente, garantindo consistência com o grupo `emit` do XML NF-e.
    */
   async atualizarConfiguracao(tenantId: string, dados: AtualizarConfiguracaoFiscalDto) {
     try {
       this.logger.log(`Atualizando configuração fiscal do tenant ${tenantId}`);
 
+      // Preenche o CRT a partir do regime quando ausente (não sobrescreve um
+      // CRT informado manualmente).
+      const dadosNormalizados: AtualizarConfiguracaoFiscalDto = {
+        ...dados,
+        crt: dados.crt ?? derivarCrt(dados.regimeTributario),
+      };
+
       const configExistente = await this.repository.obter(tenantId);
       if (!configExistente) {
         // Cria nova configuração
-        return await this.repository.criar(tenantId, dados);
+        return await this.repository.criar(tenantId, dadosNormalizados);
       }
 
       // Atualiza existente
-      return await this.repository.atualizar(tenantId, dados);
+      return await this.repository.atualizar(tenantId, dadosNormalizados);
     } catch (erro) {
       this.logger.error('Erro ao atualizar configuração:', erro);
       throw erro;

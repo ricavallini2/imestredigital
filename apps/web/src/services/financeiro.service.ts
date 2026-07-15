@@ -140,6 +140,82 @@ export interface DreDados {
   };
 }
 
+// ─── Normalização ───────────────────────────────────────────────────────────
+
+/**
+ * Achata o DRE recebido do backend (e dos mocks), que vem em grupos aninhados
+ * (`receitas`, `deducoes`, `despesasOperacionais`, `resultadoFinanceiro`,
+ * `comparacao`), para o shape PLANO que a tela `financeiro/dre` consome
+ * (`vendasProdutos`, `salarios`, `impostosVenda`, `irCsll`, `mesAnterior`, ...).
+ *
+ * Tolerante: se o payload já vier plano, os campos aninhados ficam `undefined`
+ * e o fallback `??` preserva os valores planos existentes.
+ */
+function normalizarDRE(data: any): DreDados {
+  const d = data ?? {}
+  const rec = d.receitas ?? {}
+  const ded = d.deducoes ?? {}
+  const desp = d.despesasOperacionais ?? {}
+  const resFin = d.resultadoFinanceiro ?? {}
+  const comp = d.comparacao ?? d.mesAnterior ?? null
+
+  const n = (v: unknown): number => (typeof v === 'number' ? v : Number(v ?? 0) || 0)
+
+  // "Outras despesas" da tela absorve também "compras" (a UI não tem linha própria),
+  // garantindo que a soma reconcilie com o total operacional do backend.
+  const outrasDespesas = n(desp.outras ?? d.outrasDespesas) + n(desp.compras)
+
+  const mesAnterior = comp
+    ? {
+        receitaBruta: n(comp.receitaBruta),
+        lucroBruto: n(comp.lucroBruto),
+        margemBruta: n(comp.margemBruta),
+        ebitda: n(comp.ebitda),
+        margemEbitda: n(comp.margemEbitda),
+        resultadoLiquido: n(comp.resultadoLiquido),
+        margemLiquida: n(comp.margemLiquida),
+      }
+    : undefined
+
+  return {
+    periodo: d.periodo ?? '',
+    // Receitas
+    receitaBruta: n(d.receitaBruta ?? rec.total),
+    vendasProdutos: n(rec.vendas ?? d.vendasProdutos),
+    vendasMarketplaces: n(rec.marketplaces ?? d.vendasMarketplaces),
+    vendasServicos: n(rec.servicos ?? d.vendasServicos),
+    receitasFinanceiras: n(rec.financeiro ?? d.receitasFinanceiras),
+    outrasReceitas: n(rec.outras ?? d.outrasReceitas),
+    // Deduções
+    impostosVenda: n(ded.impostosSobreVenda ?? d.impostosVenda),
+    devolucoes: n(ded.devolucoes ?? d.devolucoes),
+    receitaLiquida: n(d.receitaLiquida),
+    // Custos
+    cmv: n(d.cmv),
+    lucroBruto: n(d.lucroBruto),
+    margemBruta: n(d.margemBruta),
+    // Despesas operacionais
+    salarios: n(desp.pessoal ?? d.salarios),
+    ocupacao: n(desp.ocupacao ?? d.ocupacao),
+    marketing: n(desp.marketing ?? d.marketing),
+    operacional: n(desp.operacional ?? d.operacional),
+    impostosTributos: n(desp.impostos ?? d.impostosTributos),
+    outrasDespesas,
+    totalDespesasOperacionais: n(desp.total ?? d.totalDespesasOperacionais),
+    ebitda: n(d.ebitda),
+    margemEbitda: n(d.margemEbitda),
+    // Resultado financeiro
+    receitasFinanceirasResult: n(resFin.receitas ?? d.receitasFinanceirasResult),
+    despesasFinanceiras: n(resFin.despesas ?? d.despesasFinanceiras),
+    resultadoFinanceiro: n(resFin.liquido ?? d.resultadoFinanceiro),
+    resultadoAntesIR: n(d.resultadoAntesIR),
+    irCsll: n(d.ir ?? d.irCsll),
+    resultadoLiquido: n(d.resultadoLiquido),
+    margemLiquida: n(d.margemLiquida),
+    mesAnterior,
+  }
+}
+
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 export const financeiroService = {
@@ -201,7 +277,7 @@ export const financeiroService = {
     const { data } = await api.get('/v1/financeiro/dre', {
       params: { mes, ano },
     });
-    return data;
+    return normalizarDRE(data);
   },
 
   // Contas Bancárias

@@ -4,12 +4,18 @@
  * ═══════════════════════════════════════════════════════════════
  */
 
-/** Status possíveis de um produto */
+/**
+ * Status possíveis de um produto.
+ *
+ * Fonte da verdade: enum `StatusProduto` do schema Prisma do catalog-service.
+ * Sempre UPPERCASE_SNAKE — mantido em sincronia com o Prisma e os mocks.
+ */
 export enum StatusProduto {
-  RASCUNHO = 'rascunho',
-  ATIVO = 'ativo',
-  INATIVO = 'inativo',
-  DESCONTINUADO = 'descontinuado',
+  RASCUNHO = 'RASCUNHO',
+  ATIVO = 'ATIVO',
+  INATIVO = 'INATIVO',
+  ESGOTADO = 'ESGOTADO',
+  DESCONTINUADO = 'DESCONTINUADO',
 }
 
 /** Produto completo com relacionamentos */

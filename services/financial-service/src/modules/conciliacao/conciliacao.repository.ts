@@ -5,6 +5,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import Decimal from 'decimal.js';
+import { StatusConciliacao } from '../../../generated/client';
 
 interface CriarConciliacaoInput {
   tenantId: string;
@@ -33,7 +34,7 @@ export class ConciliacaoRepository {
         dataFim: dados.dataFim,
         saldoInicial: dados.saldoInicial,
         saldoFinal: dados.saldoFinal,
-        status: dados.status || 'EM_ANDAMENTO',
+        status: (dados.status || 'EM_ANDAMENTO') as StatusConciliacao,
         divergencias: dados.divergencias || [],
       },
       include: {
@@ -65,17 +66,21 @@ export class ConciliacaoRepository {
 
   /**
    * Atualiza status da conciliação.
+   *
+   * Usa updateMany com { id, tenantId } para impedir escrita
+   * cross-tenant e retorna o registro já filtrado por tenant.
    */
   async atualizarStatus(id: string, tenantId: string, status: string, divergencias?: any) {
-    return this.prisma.conciliacaoBancaria.update({
-      where: { id },
+    await this.prisma.conciliacaoBancaria.updateMany({
+      where: { id, tenantId },
       data: {
-        status,
+        status: status as StatusConciliacao,
         divergencias: divergencias || [],
         atualizadoEm: new Date(),
       },
-      include: { conta: true },
     });
+
+    return this.buscarPorId(id, tenantId);
   }
 
   /**

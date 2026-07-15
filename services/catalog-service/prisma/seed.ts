@@ -6,7 +6,8 @@
  * Uso: npx prisma db seed
  */
 
-import { PrismaClient } from '../generated/client';
+import { PrismaClient, Prisma } from '../generated/client';
+import { garantirTextoIntegro } from '../src/common/texto-integro.util';
 
 const prisma = new PrismaClient();
 
@@ -33,32 +34,51 @@ const PROD_008 = '50000000-0000-0000-0000-000000000008';
 const PROD_009 = '50000000-0000-0000-0000-000000000009';
 const PROD_010 = '50000000-0000-0000-0000-000000000010';
 
+const GRADE_TENIS_ADULTO = '60000000-0000-0000-0000-000000000001';
+const GRADE_SANDALIA     = '60000000-0000-0000-0000-000000000002';
+const GRADE_CHINELO      = '60000000-0000-0000-0000-000000000003';
+const GRADE_CAMISETA     = '60000000-0000-0000-0000-000000000004';
+const GRADE_CALCA        = '60000000-0000-0000-0000-000000000005';
+
+/** Gera uma faixa numérica inclusiva como strings: intervalo(33, 44) => ['33'..'44']. */
+function intervalo(inicio: number, fim: number, passo = 1): string[] {
+  const valores: string[] = [];
+  for (let n = inicio; n <= fim; n += passo) valores.push(String(n));
+  return valores;
+}
+
+/**
+ * Gera tamanhos em PARES (padrão de chinelo/calça): paresBR(33, 44) =>
+ * ['33/34', '35/36', ..., '43/44']. O passo interno é 2 (par de números).
+ */
+function paresBR(inicio: number, fim: number): string[] {
+  const valores: string[] = [];
+  for (let n = inicio; n + 1 <= fim; n += 2) valores.push(`${n}/${n + 1}`);
+  return valores;
+}
+
 async function main() {
   console.log('🌱 Iniciando seed do Catalog Service...');
 
   // ─── Categorias ────────────────────────────────────────
-  const categorias = await Promise.all([
-    prisma.categoria.upsert({
-      where: { id: CAT_ELETRONICOS },
-      update: {},
-      create: { id: CAT_ELETRONICOS, tenantId: TENANT_ID, nome: 'Eletrônicos', slug: 'eletronicos', ativa: true },
-    }),
-    prisma.categoria.upsert({
-      where: { id: CAT_VESTUARIO },
-      update: {},
-      create: { id: CAT_VESTUARIO, tenantId: TENANT_ID, nome: 'Vestuário', slug: 'vestuario', ativa: true },
-    }),
-    prisma.categoria.upsert({
-      where: { id: CAT_CASA },
-      update: {},
-      create: { id: CAT_CASA, tenantId: TENANT_ID, nome: 'Casa e Decoração', slug: 'casa-decoracao', ativa: true },
-    }),
-    prisma.categoria.upsert({
-      where: { id: CAT_ESPORTES },
-      update: {},
-      create: { id: CAT_ESPORTES, tenantId: TENANT_ID, nome: 'Esportes e Lazer', slug: 'esportes-lazer', ativa: true },
-    }),
-  ]);
+  // Nomes acentuados (Eletrônicos, Vestuário, Decoração): o `update` reconcilia
+  // o nome a partir da fonte, curando corrupção em repouso em re-seeds.
+  const categoriasSeed = [
+    { id: CAT_ELETRONICOS, nome: 'Eletrônicos', slug: 'eletronicos' },
+    { id: CAT_VESTUARIO, nome: 'Vestuário', slug: 'vestuario' },
+    { id: CAT_CASA, nome: 'Casa e Decoração', slug: 'casa-decoracao' },
+    { id: CAT_ESPORTES, nome: 'Esportes e Lazer', slug: 'esportes-lazer' },
+  ];
+  garantirTextoIntegro(categoriasSeed, 'categorias');
+  const categorias = await Promise.all(
+    categoriasSeed.map((c) =>
+      prisma.categoria.upsert({
+        where: { id: c.id },
+        update: { nome: c.nome },
+        create: { id: c.id, tenantId: TENANT_ID, nome: c.nome, slug: c.slug, ativa: true },
+      }),
+    ),
+  );
 
   console.log(`  ✅ ${categorias.length} categorias criadas`);
 
@@ -84,7 +104,7 @@ async function main() {
   console.log(`  ✅ ${marcas.length} marcas criadas`);
 
   // ─── Produtos de Demonstração ──────────────────────────
-  const produtos = [
+  const produtos: Prisma.ProdutoUncheckedCreateInput[] = [
     {
       id: PROD_001,
       tenantId: TENANT_ID,
@@ -293,19 +313,101 @@ async function main() {
     },
   ];
 
+  // Guarda de integridade: aborta se algum texto (nome/descrição/tags/…) tiver
+  // sido corrompido para U+FFFD antes de chegar aqui. Impede persistir mojibake.
+  garantirTextoIntegro(produtos, 'produtos');
+
   for (const produto of produtos) {
+    // Self-healing idempotente: no re-seed, RECONCILIA os campos de texto
+    // canônicos a partir da fonte de verdade (este arquivo, em UTF-8).
+    //
+    // Antes o `update` era `{}` (no-op), o que tornava a corrupção em repouso
+    // PERMANENTE: uma linha cujo `nome` tivesse sido gravado como `efbfbd` por
+    // um seed/execução anterior mal-transcodificado jamais era corrigida por
+    // re-seeds. Reconciliando os campos textuais aqui, `npm run db:seed` volta a
+    // ser a ferramenta de reparo — sem tocar em campos operacionais (preço,
+    // status, estoque) que podem ter sido ajustados manualmente.
     await prisma.produto.upsert({
       where: { id: produto.id },
-      update: {},
+      update: {
+        nome: produto.nome,
+        descricao: produto.descricao,
+        descricaoCurta: produto.descricaoCurta,
+        tags: produto.tags,
+        metaTitulo: produto.metaTitulo,
+        metaDescricao: produto.metaDescricao,
+      },
       create: produto,
     });
   }
 
-  console.log(`  ✅ ${produtos.length} produtos criados`);
+  console.log(`  ✅ ${produtos.length} produtos criados/reconciliados`);
+
+  // ─── Grades de Tamanhos (padrão varejo BR) ─────────────
+  // Idempotente: upsert por id fixo; os tamanhos são criados junto na primeira
+  // execução (update vazio preserva ajustes manuais em re-seeds).
+  const grades: { id: string; nome: string; descricao: string; tamanhos: string[] }[] = [
+    {
+      id: GRADE_TENIS_ADULTO,
+      nome: 'Tênis Adulto',
+      descricao: 'Numeração de calçado adulto (33 a 44)',
+      tamanhos: intervalo(33, 44), // 33,34,...,44
+    },
+    {
+      id: GRADE_SANDALIA,
+      nome: 'Sandália',
+      descricao: 'Numeração de sandália (33 a 40)',
+      tamanhos: intervalo(33, 40), // 33,34,...,40
+    },
+    {
+      id: GRADE_CHINELO,
+      nome: 'Chinelo',
+      descricao: 'Numeração de chinelo em pares (33/34 a 43/44)',
+      tamanhos: paresBR(33, 44), // 33/34, 35/36, ..., 43/44
+    },
+    {
+      id: GRADE_CAMISETA,
+      nome: 'Camiseta',
+      descricao: 'Tamanhos de vestuário (PP a XXG)',
+      tamanhos: ['PP', 'P', 'M', 'G', 'GG', 'XG', 'XXG'],
+    },
+    {
+      id: GRADE_CALCA,
+      nome: 'Calça',
+      descricao: 'Numeração de calça em tamanhos pares (36 a 48)',
+      tamanhos: intervalo(36, 48, 2), // 36,38,40,42,44,46,48
+    },
+  ];
+
+  // Nomes/descrições acentuados (Tênis, Sandália, Calça): guarda + reconciliação.
+  garantirTextoIntegro(grades, 'grades');
+  for (const grade of grades) {
+    await prisma.grade.upsert({
+      where: { id: grade.id },
+      // Reconcilia nome/descrição (texto acentuado) sem recriar os tamanhos,
+      // preservando ordenação/ajustes manuais das linhas filhas.
+      update: { nome: grade.nome, descricao: grade.descricao },
+      create: {
+        id: grade.id,
+        tenantId: TENANT_ID,
+        nome: grade.nome,
+        descricao: grade.descricao,
+        ativa: true,
+        tamanhos: {
+          create: grade.tamanhos.map((valor, ordem) => ({ valor, ordem })),
+        },
+      },
+    });
+  }
+
+  console.log(`  ✅ ${grades.length} grades de tamanhos criadas`);
 
   console.log('');
   console.log('🎉 Seed do Catalog Service concluído!');
-  console.log(`   ${categorias.length} categorias | ${marcas.length} marcas | ${produtos.length} produtos`);
+  console.log(
+    `   ${categorias.length} categorias | ${marcas.length} marcas | ` +
+      `${produtos.length} produtos | ${grades.length} grades`,
+  );
 }
 
 main()

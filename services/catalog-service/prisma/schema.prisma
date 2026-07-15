@@ -23,6 +23,7 @@ enum StatusProduto {
   INATIVO
   RASCUNHO
   ESGOTADO
+  DESCONTINUADO
 }
 
 enum TipoVariacao {
@@ -156,6 +157,47 @@ model ImagemVariacao {
   ordem       Int             @default(0)
 
   @@map("imagens_variacao")
+}
+
+// ─── Grade de Tamanhos ────────────────────────────────────
+
+/// Grade de tamanhos reutilizável (padrão varejo BR).
+/// Agrupa uma lista ordenada de tamanhos (ex: 33..44, PP..XXG) que o usuário
+/// aplica a um produto para gerar a matriz de variações. É POR TENANT: a mesma
+/// grade "Camiseta" existe de forma independente em cada empresa.
+model Grade {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  nome         String
+  descricao    String?
+  ativa        Boolean  @default(true)
+
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  tamanhos     GradeTamanho[]
+
+  // Nome único por tenant (evita grades duplicadas na mesma empresa).
+  @@unique([tenantId, nome])
+  @@index([tenantId])
+  @@index([tenantId, ativa])
+  @@map("grades")
+}
+
+/// Tamanho individual de uma grade (ex: '38', 'PP', '33/34').
+/// A ordem preserva a sequência natural definida pelo usuário (a lista não é
+/// necessariamente ordenável alfabética ou numericamente — ex: PP < P < M).
+model GradeTamanho {
+  id       String @id @default(uuid()) @db.Uuid
+  gradeId  String @map("grade_id") @db.Uuid
+  grade    Grade  @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  valor    String
+  ordem    Int    @default(0)
+
+  // Valor único dentro da grade (não repete '38' na mesma grade).
+  @@unique([gradeId, valor])
+  @@index([gradeId])
+  @@map("grade_tamanhos")
 }
 
 // ─── Categoria ────────────────────────────────────────────

@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { SincronizacaoLog, TipoSincronizacao, StatusSincronizacao } from '../../../generated/client';
+import { SincronizacaoLog, StatusSincronizacao, Prisma } from '../../../generated/client';
 
 /**
- * Repository para SincronizacaoLog
+ * Repository para SincronizacaoLog.
+ * Writes escopados por tenantId (updateMany com where composto).
  */
 @Injectable()
 export class SincronizacaoRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async criar(dados: any): Promise<SincronizacaoLog> {
+  async criar(dados: Prisma.SincronizacaoLogUncheckedCreateInput): Promise<SincronizacaoLog> {
     return this.prisma.sincronizacaoLog.create({ data: dados });
   }
 
@@ -30,27 +31,32 @@ export class SincronizacaoRepository {
     });
   }
 
-  async atualizar(id: string, dados: Partial<SincronizacaoLog>): Promise<SincronizacaoLog> {
-    return this.prisma.sincronizacaoLog.update({
-      where: { id },
+  async atualizar(
+    id: string,
+    tenantId: string,
+    dados: Prisma.SincronizacaoLogUncheckedUpdateInput,
+  ): Promise<void> {
+    await this.prisma.sincronizacaoLog.updateMany({
+      where: { id, tenantId },
       data: dados,
     });
   }
 
   async finalizarLog(
     id: string,
+    tenantId: string,
     status: StatusSincronizacao,
     registrosProcessados: number,
     registrosErro: number,
-    detalhesErro?: any,
-  ): Promise<SincronizacaoLog> {
-    return this.prisma.sincronizacaoLog.update({
-      where: { id },
+    detalhesErro?: Prisma.InputJsonValue,
+  ): Promise<void> {
+    await this.prisma.sincronizacaoLog.updateMany({
+      where: { id, tenantId },
       data: {
         status,
         registrosProcessados,
         registrosErro,
-        detalhesErro: detalhesErro || [],
+        detalhesErro: detalhesErro ?? [],
         fimEm: new Date(),
       },
     });

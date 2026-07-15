@@ -15,6 +15,7 @@
     "noUnusedParameters": false,
     "skipLibCheck": true,
     "composite": false,
+    "incremental": false,
     "declaration": false,
     "declarationMap": false
   },

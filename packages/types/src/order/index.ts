@@ -1,37 +1,47 @@
 /**
  * Tipos do domínio de Pedidos (OMS - Order Management System).
  * Define o ciclo de vida completo de um pedido, da criação à entrega.
+ *
+ * FONTE DA VERDADE: o enum StatusPedido do Prisma (order-service), sempre
+ * UPPERCASE_SNAKE. Estes valores DEVEM espelhar exatamente
+ * services/order-service/prisma/schema.prisma e os mocks do frontend.
  */
 
 import { BaseEntity, EntityId, Moeda, Endereco } from '../common';
 
-/** Status do pedido no fluxo */
+/**
+ * Status do pedido no fluxo.
+ * Espelha 1:1 o enum StatusPedido do Prisma (order-service).
+ */
 export enum StatusPedido {
-  NOVO = 'novo',
-  APROVADO = 'aprovado',
-  EM_SEPARACAO = 'em_separacao',
-  SEPARADO = 'separado',
-  FATURADO = 'faturado',
-  EXPEDIDO = 'expedido',
-  EM_TRANSITO = 'em_transito',
-  ENTREGUE = 'entregue',
-  CANCELADO = 'cancelado',
-  DEVOLVIDO = 'devolvido',
+  RASCUNHO = 'RASCUNHO',
+  PENDENTE = 'PENDENTE',
+  CONFIRMADO = 'CONFIRMADO',
+  EM_SEPARACAO = 'EM_SEPARACAO',
+  FATURADO = 'FATURADO',
+  ENVIADO = 'ENVIADO',
+  ENTREGUE = 'ENTREGUE',
+  CANCELADO = 'CANCELADO',
+  DEVOLVIDO = 'DEVOLVIDO',
 }
 
-/** Canal de origem do pedido */
+/**
+ * Canal de origem do pedido.
+ *
+ * No Prisma, `canalOrigem` é uma string livre (não é enum), então este
+ * conjunto representa os canais atualmente suportados pelo produto, em
+ * UPPERCASE para alinhar com os mocks e o frontend. Novos canais podem ser
+ * adicionados aqui sem migração de banco.
+ */
 export enum CanalPedido {
-  MERCADO_LIVRE = 'mercado_livre',
-  SHOPEE = 'shopee',
-  AMAZON = 'amazon',
-  MAGALU = 'magalu',
-  AMERICANAS = 'americanas',
-  SHEIN = 'shein',
-  SHOPIFY = 'shopify',
-  NUVEMSHOP = 'nuvemshop',
-  WOOCOMMERCE = 'woocommerce',
-  PDV = 'pdv',
-  MANUAL = 'manual',
+  BALCAO = 'BALCAO',
+  INTERNA = 'INTERNA',
+  SHOPIFY = 'SHOPIFY',
+  MERCADO_LIVRE = 'MERCADO_LIVRE',
+  SHOPEE = 'SHOPEE',
+  AMAZON = 'AMAZON',
+  MAGALU = 'MAGALU',
+  OUTROS = 'OUTROS',
 }
 
 /** Pedido completo */

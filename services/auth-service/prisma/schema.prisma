@@ -30,6 +30,7 @@ enum StatusUsuario {
   INATIVO
   BLOQUEADO
   PENDENTE
+  REMOVIDO // Soft-delete: usuário removido do tenant, mantido para histórico
 }
 
 enum PlanoTenant {
@@ -43,6 +44,7 @@ enum StatusTenant {
   INATIVO
   SUSPENSO
   TRIAL
+  CANCELADO // Assinatura cancelada pelo cliente ou por inadimplência
 }
 
 // ─── Tenant (Empresa) ─────────────────────────────────────

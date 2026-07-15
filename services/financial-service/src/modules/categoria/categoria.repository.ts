@@ -4,6 +4,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma, TipoCategoriaFinanceira } from '../../../generated/client';
 
 interface CriarCategoriaInput {
   tenantId: string;
@@ -27,7 +28,7 @@ export class CategoriaRepository {
       data: {
         tenantId: dados.tenantId,
         nome: dados.nome,
-        tipo: dados.tipo,
+        tipo: dados.tipo as TipoCategoriaFinanceira,
         icone: dados.icone,
         cor: dados.cor,
         paiId: dados.paiId,
@@ -83,19 +84,27 @@ export class CategoriaRepository {
 
   /**
    * Atualiza categoria.
+   *
+   * Usa updateMany com { id, tenantId } para impedir escrita
+   * cross-tenant e retorna o registro já filtrado por tenant.
    */
   async atualizar(id: string, tenantId: string, dados: Partial<CriarCategoriaInput>) {
-    return this.prisma.categoriaFinanceira.update({
-      where: { id },
-      data: {
-        ...dados,
-        atualizadoEm: new Date(),
-      },
-      include: {
-        filhos: true,
-        pai: true,
-      },
+    const data: Prisma.CategoriaFinanceiraUpdateManyMutationInput = {
+      atualizadoEm: new Date(),
+    }
+
+    if (dados.nome !== undefined) data.nome = dados.nome
+    if (dados.tipo !== undefined) data.tipo = dados.tipo as TipoCategoriaFinanceira
+    if (dados.icone !== undefined) data.icone = dados.icone
+    if (dados.cor !== undefined) data.cor = dados.cor
+    if (dados.ativa !== undefined) data.ativa = dados.ativa
+
+    await this.prisma.categoriaFinanceira.updateMany({
+      where: { id, tenantId },
+      data,
     });
+
+    return this.buscarPorId(id, tenantId);
   }
 
   /**

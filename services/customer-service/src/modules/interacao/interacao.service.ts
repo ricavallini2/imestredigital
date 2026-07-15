@@ -100,7 +100,7 @@ export class InteracaoService {
     ]);
 
     return {
-      interacoes,
+      dados: interacoes,
       total,
       pagina,
       limite,

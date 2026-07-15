@@ -14,6 +14,17 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 
 import { PrismaService } from '../../prisma/prisma.service';
+import { resolverJwtSecret } from '../../../common/jwt-secret';
+
+/** Payload decodificado do JWT (assinatura já verificada pelo Passport). */
+interface JwtPayload {
+  sub: string; // ID do usuário
+  tenantId: string; // ID do tenant (empresa)
+  email: string; // Email do usuário
+  cargo: string; // Cargo/role (lowercase no token)
+  iat?: number;
+  exp?: number;
+}
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -26,8 +37,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       // Não ignora expiração — tokens expirados são rejeitados
       ignoreExpiration: false,
-      // Chave secreta para verificar assinatura
-      secretOrKey: configService.get('JWT_SECRET', 'dev-secret-trocar-em-producao'),
+      // Chave secreta para verificar a ASSINATURA do token (jwt.verify).
+      // Fail-fast em produção se JWT_SECRET estiver ausente.
+      secretOrKey: resolverJwtSecret(configService.get<string>('JWT_SECRET')),
       // Valida issuer e audience
       issuer: 'imestredigital',
       audience: 'imestredigital-api',
@@ -38,10 +50,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * Método chamado após o JWT ser decodificado com sucesso.
    * Valida se o usuário ainda existe e está ativo.
    *
-   * @param payload - Dados decodificados do JWT
+   * @param payload - Dados decodificados do JWT (assinatura já verificada)
    * @returns Objeto que será injetado em req.user
    */
-  async validate(payload: any) {
+  async validate(payload: JwtPayload) {
     // Verifica se o usuário ainda existe e está ativo
     const usuario = await this.prisma.usuario.findUnique({
       where: { id: payload.sub },
@@ -52,12 +64,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Token inválido ou usuário desativado');
     }
 
-    // Retorna dados que ficarão disponíveis em req.user
+    // Retorna dados que ficarão disponíveis em req.user.
+    // cargo em lowercase (contrato do JWT); a fonte da verdade continua
+    // sendo o banco, revalidado acima.
     return {
       usuarioId: payload.sub,
-      tenantId: payload.tenantId,
+      tenantId: usuario.tenantId,
       email: payload.email,
-      cargo: payload.cargo,
+      cargo: usuario.cargo.toLowerCase(),
     };
   }
 }

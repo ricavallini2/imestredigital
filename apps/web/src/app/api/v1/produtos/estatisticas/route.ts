@@ -5,6 +5,8 @@ export async function GET() {
   const ativos = PRODUTOS_MOCK.filter(p => p.status === 'ATIVO').length;
   const inativos = PRODUTOS_MOCK.filter(p => p.status === 'INATIVO').length;
   const rascunhos = PRODUTOS_MOCK.filter(p => p.status === 'RASCUNHO').length;
+  const esgotados = PRODUTOS_MOCK.filter(p => p.status === 'ESGOTADO').length;
+  const descontinuados = PRODUTOS_MOCK.filter(p => p.status === 'DESCONTINUADO').length;
   const semEstoque = PRODUTOS_MOCK.filter(p => p.estoque === 0).length;
   const estoqueMinimo = PRODUTOS_MOCK.filter(p => p.estoque > 0 && p.estoque <= p.estoqueMinimo).length;
   const valorCatalogo = PRODUTOS_MOCK.reduce((acc, p) => acc + p.preco * p.estoque, 0);
@@ -16,7 +18,7 @@ export async function GET() {
   ).map(([nome, total]) => ({ nome, total })).sort((a, b) => b.total - a.total);
 
   return NextResponse.json({
-    total: PRODUTOS_MOCK.length, ativos, inativos, rascunhos,
+    total: PRODUTOS_MOCK.length, ativos, inativos, rascunhos, esgotados, descontinuados,
     semEstoque, estoqueMinimo,
     valorCatalogo: parseFloat(valorCatalogo.toFixed(2)),
     receitaTotal: parseFloat(receitaTotal.toFixed(2)),

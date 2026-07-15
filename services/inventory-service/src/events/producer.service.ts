@@ -34,7 +34,12 @@ export class ProducerService {
   }
 
   /**
-   * Publica evento no Kafka.
+   * Publica evento no Kafka com ENVELOPE { tenantId, tipo, dados, timestamp }.
+   *
+   * Usado para eventos internos de alerta/observabilidade do próprio estoque
+   * (estoque baixo/zerado, transferência, saldo atualizado), cujo consumidor
+   * (quando houver) espera ler de `evento.dados.*` — mesmo padrão do catalog.
+   *
    * @param topico Nome do tópico
    * @param tenantId ID do tenant (usado como key para particionamento)
    * @param tipoEvento Tipo do evento (para logging)
@@ -59,9 +64,53 @@ export class ProducerService {
         ],
       });
 
-      this.logger.debug(`📤 Evento publicado: ${tipoEvento}`);
+      this.logger.debug(`📤 Evento publicado (envelope): ${tipoEvento}`);
     } catch (error) {
       this.logger.error(`Erro ao publicar evento: ${tipoEvento}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Publica evento no Kafka com payload PLANO (sem wrapper `.dados`).
+   *
+   * Contrato canônico da SAGA de pedidos: os eventos de estoque
+   * (estoque.reservado | estoque.insuficiente | estoque.liberado) são
+   * consumidos pelo order-service via `@EventPattern` do @nestjs/microservices,
+   * que lê os campos direto da raiz do payload (ex. `dados.pedidoId`,
+   * `dados.itensReservados`). Portanto NÃO usamos envelope aqui.
+   *
+   * O `tenantId` continua sendo a key de particionamento (ordenação por tenant).
+   *
+   * @param topico   Nome do tópico (ex. 'estoque.reservado')
+   * @param tenantId ID do tenant (também vai no corpo e como key)
+   * @param payload  Campos planos do evento (pedidoId, itens, etc.)
+   */
+  async publicarPlano(
+    topico: string,
+    tenantId: string,
+    payload: Record<string, unknown>,
+  ): Promise<void> {
+    try {
+      const evento = {
+        tenantId,
+        timestamp: new Date().toISOString(),
+        ...payload,
+      };
+
+      await this.producer.send({
+        topic: topico,
+        messages: [
+          {
+            key: tenantId,
+            value: JSON.stringify(evento),
+          },
+        ],
+      });
+
+      this.logger.debug(`📤 Evento publicado (plano): ${topico}`);
+    } catch (error) {
+      this.logger.error(`Erro ao publicar evento plano: ${topico}`, error);
       throw error;
     }
   }

@@ -23,15 +23,15 @@ function calcularHealthScore(canal: string, nome: string): HealthScore {
   const issues: HealthIssue[] = [];
   let score = 100;
 
-  if (!mkp) return { canal, nome, score: 0, issues: [{ tipo: 'DESCONECTADO', descricao: 'Marketplace não encontrado' }] };
+  if (!mkp) return { canal, nome, score: 0, issues: [{ tipo: 'INATIVA', descricao: 'Marketplace não encontrado' }] };
 
   if (mkp.status === 'ERRO') {
     score -= 40;
     issues.push({ tipo: 'CONEXAO', descricao: 'Erro na conexão com o marketplace' });
   }
-  if (mkp.status === 'PAUSADO') {
+  if (mkp.status === 'PENDENTE') {
     score -= 20;
-    issues.push({ tipo: 'PAUSADO', descricao: 'Marketplace pausado' });
+    issues.push({ tipo: 'PENDENTE', descricao: 'Conexão pendente' });
   }
   if (mkp.taxaResposta < 90) {
     score -= 15;
@@ -51,7 +51,7 @@ function calcularHealthScore(canal: string, nome: string): HealthScore {
   }
 
   const semEstoque = ANUNCIOS_MOCK.filter(
-    (a) => a.canal === canal && a.status === 'SEM_ESTOQUE',
+    (a) => a.canal === canal && a.estoque === 0,
   ).length;
   if (semEstoque > 0) {
     score -= Math.min(semEstoque * 3, 15);
@@ -68,7 +68,7 @@ export async function GET() {
   const totalAnuncios = ANUNCIOS_MOCK.filter((a) => a.status === 'ATIVO').length;
   const perguntasPendentes = PERGUNTAS_MOCK.filter((p) => p.status === 'PENDENTE').length;
 
-  const mkpsConectados = MARKETPLACES_MOCK.filter((m) => m.status === 'CONECTADO');
+  const mkpsConectados = MARKETPLACES_MOCK.filter((m) => m.status === 'ATIVA');
   const taxaRespostaMedia =
     mkpsConectados.length > 0
       ? Math.round(

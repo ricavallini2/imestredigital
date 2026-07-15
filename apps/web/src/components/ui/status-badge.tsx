@@ -28,10 +28,15 @@ const statusColors: Record<string, { bg: string; text: string; border: string }>
       text: 'text-blue-700 dark:text-blue-400',
       border: 'border-blue-200 dark:border-blue-800',
     },
-    SEPARANDO: {
+    EM_SEPARACAO: {
       bg: 'bg-purple-50 dark:bg-purple-900/20',
       text: 'text-purple-700 dark:text-purple-400',
       border: 'border-purple-200 dark:border-purple-800',
+    },
+    FATURADO: {
+      bg: 'bg-violet-50 dark:bg-violet-900/20',
+      text: 'text-violet-700 dark:text-violet-400',
+      border: 'border-violet-200 dark:border-violet-800',
     },
     ENVIADO: {
       bg: 'bg-indigo-50 dark:bg-indigo-900/20',
@@ -85,13 +90,13 @@ const statusColors: Record<string, { bg: string; text: string; border: string }>
       text: 'text-red-700 dark:text-red-400',
       border: 'border-red-200 dark:border-red-800',
     },
-    // Fiscal
-    EMITIDA: {
+    // Fiscal — StatusNotaFiscal (Prisma)
+    AUTORIZADA: {
       bg: 'bg-green-50 dark:bg-green-900/20',
       text: 'text-green-700 dark:text-green-400',
       border: 'border-green-200 dark:border-green-800',
     },
-    PROCESSANDO: {
+    TRANSMITIDA: {
       bg: 'bg-blue-50 dark:bg-blue-900/20',
       text: 'text-blue-700 dark:text-blue-400',
       border: 'border-blue-200 dark:border-blue-800',
@@ -106,8 +111,8 @@ const statusColors: Record<string, { bg: string; text: string; border: string }>
       text: 'text-slate-700 dark:text-slate-400',
       border: 'border-slate-200 dark:border-slate-800',
     },
-    // Marketplace
-    CONECTADO: {
+    // Marketplace — StatusConexao (Prisma)
+    ATIVA: {
       bg: 'bg-green-50 dark:bg-green-900/20',
       text: 'text-green-700 dark:text-green-400',
       border: 'border-green-200 dark:border-green-800',
@@ -117,10 +122,20 @@ const statusColors: Record<string, { bg: string; text: string; border: string }>
       text: 'text-red-700 dark:text-red-400',
       border: 'border-red-200 dark:border-red-800',
     },
-    DESCONECTADO: {
+    INATIVA: {
       bg: 'bg-slate-50 dark:bg-slate-900/20',
       text: 'text-slate-700 dark:text-slate-400',
       border: 'border-slate-200 dark:border-slate-800',
+    },
+    RECONECTANDO: {
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      text: 'text-blue-700 dark:text-blue-400',
+      border: 'border-blue-200 dark:border-blue-800',
+    },
+    EXPIRANDO: {
+      bg: 'bg-orange-50 dark:bg-orange-900/20',
+      text: 'text-orange-700 dark:text-orange-400',
+      border: 'border-orange-200 dark:border-orange-800',
     },
   };
 

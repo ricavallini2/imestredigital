@@ -5,30 +5,36 @@
 
 import { BaseEntity, EntityId, Moeda } from '../common';
 
-/** Tipo de lançamento financeiro */
+// Enums UPPERCASE espelhando o schema Prisma do financial-service.
+
+/** Tipo de lançamento financeiro (Prisma `TipoLancamento`). */
 export enum TipoLancamento {
-  RECEITA = 'receita',
-  DESPESA = 'despesa',
+  RECEITA = 'RECEITA',
+  DESPESA = 'DESPESA',
+  TRANSFERENCIA = 'TRANSFERENCIA',
 }
 
-/** Status do lançamento */
+/** Status do lançamento (Prisma `StatusLancamento`). */
 export enum StatusLancamento {
-  PENDENTE = 'pendente',
-  PAGO = 'pago',
-  ATRASADO = 'atrasado',
-  CANCELADO = 'cancelado',
-  PARCIAL = 'parcial',
+  PENDENTE = 'PENDENTE',
+  PAGO = 'PAGO',
+  ATRASADO = 'ATRASADO',
+  CANCELADO = 'CANCELADO',
+  PARCIAL = 'PARCIAL',
 }
 
-/** Forma de pagamento */
+/** Forma de pagamento (Prisma `FormaPagamento`). */
 export enum FormaPagamento {
-  DINHEIRO = 'dinheiro',
-  PIX = 'pix',
-  CARTAO_CREDITO = 'cartao_credito',
-  CARTAO_DEBITO = 'cartao_debito',
-  BOLETO = 'boleto',
-  TRANSFERENCIA = 'transferencia',
-  MARKETPLACE = 'marketplace',  // Repasse do marketplace
+  DINHEIRO = 'DINHEIRO',
+  PIX = 'PIX',
+  CARTAO_CREDITO = 'CARTAO_CREDITO',
+  CARTAO_DEBITO = 'CARTAO_DEBITO',
+  BOLETO = 'BOLETO',
+  TRANSFERENCIA = 'TRANSFERENCIA',
+  TED = 'TED',
+  DOC = 'DOC',
+  CHEQUE = 'CHEQUE',
+  OUTRO = 'OUTRO',
 }
 
 /** Lançamento financeiro (conta a pagar ou receber) */

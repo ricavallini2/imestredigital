@@ -1,14 +1,25 @@
 // Shared mock data for all clientes API routes
 export const TENANT_ID = '10000000-0000-0000-0000-000000000001';
 
+export type Papel = 'CLIENTE' | 'FORNECEDOR' | 'TRANSPORTADORA';
+
 export interface ClienteMock {
-  id: string; tenantId: string; tipo: string; nome: string;
-  razaoSocial?: string; cnpj?: string; cpf?: string;
-  email: string; telefone: string; celular?: string;
+  id: string; tenantId: string; papeis: Papel[]; tipo: string; nome: string;
+  nomeFantasia?: string; razaoSocial?: string; cnpj?: string; cpf?: string; rg?: string;
+  inscricaoEstadual?: string; ieIsento?: boolean; inscricaoMunicipal?: string;
+  regimeTributario?: string; dataNascimento?: string; genero?: string;
+  email: string; emailSecundario?: string; telefone: string; celular?: string;
   status: string; origem: string; score: number;
   totalCompras: number; quantidadePedidos: number;
   ultimaCompra: string | null; tags: string[];
   criadoEm: string; observacoes?: string;
+  // Grupo cliente
+  limiteCredito?: number; vendedorId?: string;
+  // Grupo fornecedor
+  prazoPagamento?: number; condicoesPagamento?: string; pixChave?: string;
+  categoriasFornecidas?: string[]; avaliacaoFornecedor?: number;
+  valorTotalComprasFornecedor?: number; totalComprasFornecedor?: number;
+  ultimaCompraFornecedor?: string;
   enderecos: EnderecoMock[]; contatos: ContatoMock[];
   interacoes: InteracaoMock[];
 }
@@ -40,14 +51,22 @@ declare global {
 const INITIAL_CLIENTES: ClienteMock[] = [
   {
     id: 'c0000001-0000-0000-0000-000000000001',
-    tenantId: TENANT_ID, tipo: 'PJ',
-    nome: 'Tech Solutions Ltda', razaoSocial: 'Tech Solutions Comércio e Serviços Ltda',
-    cnpj: '12.345.678/0001-90', email: 'contato@techsolutions.com.br',
+    tenantId: TENANT_ID, papeis: ['CLIENTE', 'FORNECEDOR'], tipo: 'PJ',
+    nome: 'Tech Solutions Ltda', nomeFantasia: 'Tech Solutions',
+    razaoSocial: 'Tech Solutions Comércio e Serviços Ltda',
+    cnpj: '12.345.678/0001-90',
+    inscricaoEstadual: '110.042.490.114', ieIsento: false,
+    inscricaoMunicipal: '1.234.567-8', regimeTributario: 'LUCRO_PRESUMIDO',
+    email: 'contato@techsolutions.com.br', emailSecundario: 'financeiro@techsolutions.com.br',
     telefone: '(11) 3456-7890', celular: '(11) 99999-0001',
     status: 'ATIVO', origem: 'INDICACAO', score: 87,
     totalCompras: 42500.00, quantidadePedidos: 8,
     ultimaCompra: d(15), tags: ['premium', 'b2b'],
     criadoEm: '2024-03-15T10:00:00Z', observacoes: 'Cliente estratégico, parceiro desde 2024.',
+    limiteCredito: 50000, vendedorId: 'v0000001',
+    prazoPagamento: 30, condicoesPagamento: '30/60/90', pixChave: '12345678000190',
+    categoriasFornecidas: ['Equipamentos', 'Serviços de TI'], avaliacaoFornecedor: 5,
+    valorTotalComprasFornecedor: 145000, totalComprasFornecedor: 12, ultimaCompraFornecedor: d(9),
     enderecos: [{
       id: 'e0001', tipo: 'Comercial', logradouro: 'Av. Paulista', numero: '1000',
       complemento: 'Sala 301', bairro: 'Bela Vista', cidade: 'São Paulo', estado: 'SP',
@@ -66,10 +85,12 @@ const INITIAL_CLIENTES: ClienteMock[] = [
   },
   {
     id: 'c0000002-0000-0000-0000-000000000001',
-    tenantId: TENANT_ID, tipo: 'PF',
-    nome: 'Ana Paula Rodrigues', cpf: '123.456.789-00',
+    tenantId: TENANT_ID, papeis: ['CLIENTE'], tipo: 'PF',
+    nome: 'Ana Paula Rodrigues', cpf: '123.456.789-00', rg: '12.345.678-9',
+    dataNascimento: '1990-04-12', genero: 'F',
     email: 'ana.rodrigues@gmail.com', telefone: '(11) 98765-4321',
     status: 'ATIVO', origem: 'SITE', score: 72,
+    limiteCredito: 5000,
     totalCompras: 8750.50, quantidadePedidos: 5,
     ultimaCompra: d(8), tags: ['recorrente'],
     criadoEm: '2024-06-20T14:00:00Z',
@@ -86,11 +107,15 @@ const INITIAL_CLIENTES: ClienteMock[] = [
   },
   {
     id: 'c0000003-0000-0000-0000-000000000001',
-    tenantId: TENANT_ID, tipo: 'PJ',
-    nome: 'Grupo Varejo Nacional', razaoSocial: 'Grupo Varejo Nacional S.A.',
-    cnpj: '98.765.432/0001-90', email: 'compras@gvn.com.br',
+    tenantId: TENANT_ID, papeis: ['CLIENTE'], tipo: 'PJ',
+    nome: 'Grupo Varejo Nacional', nomeFantasia: 'GVN',
+    razaoSocial: 'Grupo Varejo Nacional S.A.',
+    cnpj: '98.765.432/0001-90', inscricaoEstadual: '85.123.456', ieIsento: false,
+    regimeTributario: 'LUCRO_REAL',
+    email: 'compras@gvn.com.br',
     telefone: '(21) 2345-6789', celular: '(21) 99999-0003',
     status: 'ATIVO', origem: 'VENDA_DIRETA', score: 95,
+    limiteCredito: 200000,
     totalCompras: 128000.00, quantidadePedidos: 24,
     ultimaCompra: d(3), tags: ['premium', 'b2b', 'grande-conta'],
     criadoEm: '2023-11-01T09:00:00Z', observacoes: 'Grande conta. Contato preferencial via WhatsApp.',
@@ -111,8 +136,8 @@ const INITIAL_CLIENTES: ClienteMock[] = [
   },
   {
     id: 'c0000004-0000-0000-0000-000000000001',
-    tenantId: TENANT_ID, tipo: 'PF',
-    nome: 'Carlos Eduardo Mendes', cpf: '987.654.321-00',
+    tenantId: TENANT_ID, papeis: ['CLIENTE'], tipo: 'PF',
+    nome: 'Carlos Eduardo Mendes', cpf: '987.654.321-00', genero: 'M',
     email: 'carlos.mendes@outlook.com', telefone: '(31) 99876-5432',
     status: 'INATIVO', origem: 'INSTAGRAM', score: 28,
     totalCompras: 1200.00, quantidadePedidos: 1,
@@ -126,14 +151,21 @@ const INITIAL_CLIENTES: ClienteMock[] = [
   },
   {
     id: 'c0000005-0000-0000-0000-000000000001',
-    tenantId: TENANT_ID, tipo: 'PJ',
-    nome: 'Distribuidora Beta', razaoSocial: 'Beta Distribuição e Logística Ltda',
-    cnpj: '11.223.344/0001-55', email: 'pedidos@betadist.com.br',
+    tenantId: TENANT_ID, papeis: ['CLIENTE', 'FORNECEDOR'], tipo: 'PJ',
+    nome: 'Distribuidora Beta', nomeFantasia: 'Beta Dist',
+    razaoSocial: 'Beta Distribuição e Logística Ltda',
+    cnpj: '11.223.344/0001-55',
+    inscricaoEstadual: '', ieIsento: true, regimeTributario: 'SIMPLES_NACIONAL',
+    email: 'pedidos@betadist.com.br',
     telefone: '(41) 3456-7890',
     status: 'ATIVO', origem: 'FEIRA', score: 68,
     totalCompras: 35800.00, quantidadePedidos: 12,
     ultimaCompra: d(22), tags: ['b2b', 'distribuidor'],
     criadoEm: '2024-02-28T08:00:00Z',
+    limiteCredito: 30000,
+    prazoPagamento: 45, condicoesPagamento: '30/60/90', pixChave: 'pedidos@betadist.com.br',
+    categoriasFornecidas: ['Logística', 'Distribuição'], avaliacaoFornecedor: 4,
+    valorTotalComprasFornecedor: 56000, totalComprasFornecedor: 15, ultimaCompraFornecedor: d(18),
     enderecos: [{
       id: 'e0004', tipo: 'Comercial', logradouro: 'Rua XV de Novembro', numero: '500',
       bairro: 'Centro', cidade: 'Curitiba', estado: 'PR',
@@ -147,8 +179,9 @@ const INITIAL_CLIENTES: ClienteMock[] = [
   },
   {
     id: 'c0000006-0000-0000-0000-000000000001',
-    tenantId: TENANT_ID, tipo: 'PF',
+    tenantId: TENANT_ID, papeis: ['CLIENTE'], tipo: 'PF',
     nome: 'Fernanda Lima Costa', cpf: '456.789.123-00',
+    dataNascimento: '1985-09-30', genero: 'F',
     email: 'fernanda.lima@yahoo.com.br', telefone: '(51) 98234-5678',
     status: 'ATIVO', origem: 'INDICACAO', score: 55,
     totalCompras: 4300.00, quantidadePedidos: 3,

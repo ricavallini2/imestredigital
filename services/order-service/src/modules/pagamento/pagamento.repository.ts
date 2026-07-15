@@ -7,6 +7,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Decimal } from '@prisma/client/runtime/library';
+import { StatusPagamentoDetalhado } from '../../../generated/client';
 
 @Injectable()
 export class PagamentoRepository {
@@ -53,19 +54,26 @@ export class PagamentoRepository {
 
   /**
    * Atualizar status de pagamento.
+   *
+   * Write multi-tenant seguro: filtra por { id, tenantId } via updateMany
+   * e retorna o pagamento atualizado (buscado com o mesmo filtro de tenant).
    */
   async atualizarStatus(
     tenantId: string,
     pagamentoId: string,
     novoStatus: string,
   ) {
-    return this.prisma.pagamento.update({
-      where: { id: pagamentoId },
+    await this.prisma.pagamento.updateMany({
+      where: { id: pagamentoId, tenantId },
       data: {
-        status: novoStatus,
+        status: novoStatus as StatusPagamentoDetalhado,
         dataPagamento: novoStatus === 'PAGO' ? new Date() : undefined,
         atualizadoEm: new Date(),
       },
+    });
+
+    return this.prisma.pagamento.findFirst({
+      where: { id: pagamentoId, tenantId },
     });
   }
 
@@ -87,7 +95,7 @@ export class PagamentoRepository {
       if (dataFim) where.criadoEm.lte = new Date(dataFim);
     }
 
-    const [pagamentos, total] = await Promise.all([
+    const [dados, total] = await Promise.all([
       this.prisma.pagamento.findMany({
         where,
         skip,
@@ -97,14 +105,13 @@ export class PagamentoRepository {
       this.prisma.pagamento.count({ where }),
     ]);
 
+    // Envelope paginado canônico (Fase 0): { dados, total, pagina, limite, totalPaginas }
     return {
-      pagamentos,
-      paginacao: {
-        total,
-        pagina,
-        limite,
-        totalPaginas: Math.ceil(total / limite),
-      },
+      dados,
+      total,
+      pagina,
+      limite,
+      totalPaginas: Math.ceil(total / limite),
     };
   }
 }

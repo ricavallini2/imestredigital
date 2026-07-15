@@ -12,7 +12,7 @@ import { CriarClienteDto, AtualizarClienteDto, FiltroClienteDto } from '@/dtos/c
 import { validarCPF, limparCPF } from '@/utils/validar-cpf.util';
 import { validarCNPJ, limparCNPJ } from '@/utils/validar-cnpj.util';
 import { formatarCPF, formatarCNPJ } from '@/utils/formatar-documento.util';
-import { Cliente, TipoCliente } from '../../../generated/client';
+import { Cliente, TipoCliente, StatusCliente, OrigemCliente, RegimeTributario, Papel } from '../../../generated/client';
 
 @Injectable()
 export class ClienteService {
@@ -33,6 +33,10 @@ export class ClienteService {
    * @throws ConflictException - Se documento/email já existe
    */
   async criar(tenantId: string, dto: CriarClienteDto): Promise<Cliente> {
+    // Normaliza tipo: aceita PF/PJ como alias
+    if ((dto.tipo as string) === 'PF') dto.tipo = 'PESSOA_FISICA' as any;
+    if ((dto.tipo as string) === 'PJ') dto.tipo = 'PESSOA_JURIDICA' as any;
+
     // Valida tipo de cliente e documentos obrigatórios
     if (dto.tipo === 'PESSOA_FISICA') {
       if (!dto.cpf) {
@@ -82,17 +86,25 @@ export class ClienteService {
       }
     }
 
-    // Cria cliente
+    // Define papéis (cadastro unificado): default [CLIENTE]
+    const papeis = dto.papeis && dto.papeis.length > 0 ? dto.papeis : ['CLIENTE'];
+
+    // Cria cliente/parceiro
     const cliente = await this.prisma.cliente.create({
       data: {
         tenantId,
+        papeis: papeis as any,
         tipo: dto.tipo as TipoCliente,
         nome: dto.nome,
         nomeFantasia: dto.nomeFantasia,
         razaoSocial: dto.razaoSocial,
         cpf: dto.cpf,
         cnpj: dto.cnpj,
+        rg: dto.rg,
         inscricaoEstadual: dto.inscricaoEstadual,
+        ieIsento: dto.ieIsento ?? false,
+        inscricaoMunicipal: dto.inscricaoMunicipal,
+        ...(dto.regimeTributario ? { regimeTributario: dto.regimeTributario as any } : {}),
         email: dto.email,
         emailSecundario: dto.emailSecundario,
         telefone: dto.telefone,
@@ -101,8 +113,37 @@ export class ClienteService {
         genero: dto.genero,
         observacoes: dto.observacoes,
         tags: dto.tags || [],
+        ...(dto.origem ? { origem: dto.origem as any } : {}),
+        // Grupo CLIENTE
+        ...(dto.limiteCredito != null ? { limiteCredito: dto.limiteCredito } : {}),
+        vendedorId: dto.vendedorId,
+        // Grupo FORNECEDOR
+        prazoPagamento: dto.prazoPagamento,
+        condicoesPagamento: dto.condicoesPagamento,
+        pixChave: dto.pixChave,
+        categoriasFornecidas: dto.categoriasFornecidas || [],
+        avaliacaoFornecedor: dto.avaliacaoFornecedor,
       },
     });
+
+    // Cria endereço inline se fornecido
+    if (dto.endereco?.logradouro) {
+      await this.prisma.enderecoCliente.create({
+        data: {
+          tenantId,
+          clienteId: cliente.id,
+          tipo: (dto.endereco.tipo as any) ?? 'AMBOS',
+          logradouro: dto.endereco.logradouro,
+          numero: dto.endereco.numero ?? 'S/N',
+          complemento: dto.endereco.complemento,
+          bairro: dto.endereco.bairro ?? '',
+          cidade: dto.endereco.cidade ?? '',
+          estado: dto.endereco.estado ?? '',
+          cep: (dto.endereco.cep ?? '').replace(/\D/g, ''),
+          padrao: true,
+        },
+      });
+    }
 
     this.logger.log(`Cliente criado: ${cliente.id} para tenant ${tenantId}`);
 
@@ -120,7 +161,7 @@ export class ClienteService {
    * @returns Array de clientes e total de registros
    */
   async listar(tenantId: string, filtro: FiltroClienteDto) {
-    const { pagina = 1, limite = 20, busca, email, cpf, cnpj, status, origem, tags, ordenar = 'criadoEm', direcao = 'desc' } = filtro;
+    const { pagina = 1, limite = 20, busca, email, cpf, cnpj, papel, tipo, status, origem, tags, ordenar = 'criadoEm', direcao = 'desc' } = filtro as any;
 
     const skip = (pagina - 1) * limite;
 
@@ -137,6 +178,15 @@ export class ClienteService {
     if (email) where.email = email;
     if (cpf) where.cpf = limparCPF(cpf) || cpf;
     if (cnpj) where.cnpj = limparCNPJ(cnpj) || cnpj;
+
+    // Filtro por papel (cadastro unificado cliente/fornecedor)
+    if (papel) where.papeis = { has: papel };
+
+    // Filtro por tipo de pessoa — normaliza aliases PF/PJ
+    if (tipo) {
+      const tipoNormalizado = tipo === 'PF' ? 'PESSOA_FISICA' : tipo === 'PJ' ? 'PESSOA_JURIDICA' : tipo;
+      where.tipo = tipoNormalizado;
+    }
 
     if (status && status.length > 0) {
       where.status = { in: status };
@@ -167,7 +217,7 @@ export class ClienteService {
     ]);
 
     return {
-      clientes,
+      dados: clientes,
       total,
       pagina,
       limite,
@@ -277,11 +327,25 @@ export class ClienteService {
       }
     }
 
-    // Atualiza cliente
-    const clienteAtualizado = await this.prisma.cliente.update({
-      where: { id: clienteId },
-      data: dto,
+    // Atualiza cliente (updateMany + where com tenantId garante isolamento multi-tenant)
+    const { status, origem, regimeTributario, papeis, ...resto } = dto;
+    await this.prisma.cliente.updateMany({
+      where: { id: clienteId, tenantId },
+      data: {
+        ...resto,
+        ...(status ? { status: status as StatusCliente } : {}),
+        ...(origem ? { origem: origem as OrigemCliente } : {}),
+        ...(regimeTributario ? { regimeTributario: regimeTributario as RegimeTributario } : {}),
+        ...(papeis && papeis.length > 0 ? { papeis: papeis as unknown as Papel[] } : {}),
+      },
     });
+
+    const clienteAtualizado = await this.prisma.cliente.findFirst({
+      where: { id: clienteId, tenantId },
+    });
+    if (!clienteAtualizado) {
+      throw new NotFoundException('Cliente não encontrado');
+    }
 
     // Invalida cache
     await this.cache.remover(`cliente:${tenantId}:${clienteId}`);
@@ -380,6 +444,10 @@ export class ClienteService {
 
   /**
    * Obtém estatísticas gerais de clientes do tenant
+   *
+   * Retorna contagens (total/ativos/inativos/novos no mês) e
+   * agregações monetárias com base em `valorTotalCompras` (Decimal),
+   * que é o campo correto de valor financeiro acumulado por cliente.
    */
   async obterEstatisticas(tenantId: string) {
     const agora = new Date();
@@ -391,8 +459,8 @@ export class ClienteService {
       this.prisma.cliente.count({ where: { tenantId, criadoEm: { gte: inicioMes } } }),
       this.prisma.cliente.aggregate({
         where: { tenantId },
-        _sum: { totalCompras: true },
-        _avg: { totalCompras: true },
+        _sum: { valorTotalCompras: true, totalCompras: true },
+        _avg: { valorTotalCompras: true },
       }),
     ]);
 
@@ -401,8 +469,9 @@ export class ClienteService {
       ativos,
       inativos: total - ativos,
       novosEsteMes,
-      valorTotalCompras: Number(agregado._sum.totalCompras ?? 0),
-      ticketMedioCliente: Number(agregado._avg.totalCompras ?? 0),
+      valorTotalCompras: Number(agregado._sum.valorTotalCompras ?? 0),
+      ticketMedioCliente: Number(agregado._avg.valorTotalCompras ?? 0),
+      totalPedidos: Number(agregado._sum.totalCompras ?? 0),
     };
   }
 }

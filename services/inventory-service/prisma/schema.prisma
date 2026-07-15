@@ -32,8 +32,12 @@ enum MotivoMovimentacao {
   TRANSFERENCIA_DEPOSITO
   DEVOLUCAO_CLIENTE
   DEVOLUCAO_FORNECEDOR
+  DEVOLUCAO
   PERDA
+  AVARIA
+  CONSUMO
   PRODUCAO
+  OUTRO
 }
 
 enum StatusReserva {
@@ -94,6 +98,9 @@ model ReservaEstoque {
   id          String        @id @default(uuid()) @db.Uuid
   tenantId    String        @map("tenant_id") @db.Uuid
   produtoId   String        @map("produto_id") @db.Uuid
+  /// Depósito de onde o estoque foi reservado. Nulo apenas em reservas
+  /// legadas criadas antes da reserva passar a ser por depósito.
+  depositoId  String?       @map("deposito_id") @db.Uuid
   pedidoId    String        @map("pedido_id") @db.Uuid
   quantidade  Int
   status      StatusReserva @default(ATIVA)
@@ -103,6 +110,24 @@ model ReservaEstoque {
   @@index([tenantId, pedidoId])
   @@index([tenantId, produtoId])
   @@map("reservas_estoque")
+}
+
+/// Registro de eventos já processados (idempotência do consumo Kafka).
+/// Garante que o mesmo evento (ex. pedido.pago para um pedidoId) só produza
+/// efeito colateral uma única vez, mesmo com reentrega do broker.
+model EventoProcessado {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  /// Nome lógico do evento consumido (ex. "pedido.criado", "pedido.pago").
+  evento       String
+  /// Identificador do agregado de referência (ex. pedidoId).
+  referenciaId String   @map("referencia_id")
+
+  processadoEm DateTime @default(now()) @map("processado_em")
+
+  @@unique([evento, referenciaId], name: "evento_referenciaId")
+  @@index([tenantId])
+  @@map("eventos_processados")
 }
 
 /// Movimentação (histórico de entrada/saída/ajuste/transferência)
@@ -118,6 +143,7 @@ model Movimentacao {
   quantidade    Int      // Positivo = entrada, Negativo = saída
   custoUnitario Decimal? @db.Decimal(19, 2) @map("custo_unitario")
   observacao    String?
+  usuarioId     String?  @map("usuario_id") @db.Uuid // Autor da movimentação (auditoria); nulo em movimentações originadas por evento
 
   criadoEm      DateTime              @default(now()) @map("criado_em")
 

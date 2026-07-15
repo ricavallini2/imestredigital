@@ -2,7 +2,7 @@
  * DTOs para devoluções.
  */
 
-import { IsString, IsNumber, IsOptional, IsArray, ValidateNested, IsDecimal, Min } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsArray, ValidateNested, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ItemDevolucaoCreateDto {
@@ -45,7 +45,7 @@ export class ReceberDevolucaoDto {
 
 export class ReembolsarDevolucaoDto {
   @IsOptional()
-  @IsDecimal()
+  @IsNumber({ maxDecimalPlaces: 2 })
   valor?: number;
 
   @IsOptional()

@@ -6,7 +6,13 @@
  * Configura globalmente cache, Kafka e banco de dados.
  */
 
-import { Module } from '@nestjs/common';
+import {
+  Logger,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -23,8 +29,31 @@ import { FluxoCaixaModule } from './modules/fluxo-caixa/fluxo-caixa.module';
 import { DreModule } from './modules/dre/dre.module';
 import { ConciliacaoModule } from './modules/conciliacao/conciliacao.module';
 import { EventosModule } from './modules/eventos/eventos.module';
+import { RelatoriosModule } from './modules/relatorios/relatorios.module';
 import { HealthController } from './controllers/health.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { TenantMiddleware } from './middlewares/tenant.middleware';
+
+/**
+ * Resolve o segredo JWT aplicando a política de fail-fast (Fase 0):
+ * em produção o segredo é obrigatório; em desenvolvimento permite um
+ * default explícito com aviso no log. Nunca usa fallback silencioso.
+ */
+function resolverJwtSecret(config: ConfigService): string {
+  const secret = config.get<string>('JWT_SECRET');
+  if (secret) return secret;
+
+  if (config.get<string>('NODE_ENV') === 'production') {
+    throw new Error(
+      'JWT_SECRET é obrigatório em produção. Configure a variável de ambiente.',
+    );
+  }
+
+  new Logger('AppModule').warn(
+    'JWT_SECRET não definido — usando segredo de desenvolvimento. NÃO use em produção.',
+  );
+  return 'dev-secret-financial-local';
+}
 
 @Module({
   imports: [
@@ -42,7 +71,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       global: true,
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.get('JWT_SECRET', 'dev-secret-trocar-em-producao'),
+        secret: resolverJwtSecret(config),
         signOptions: {
           expiresIn: config.get('JWT_EXPIRATION', '1h'),
           issuer: 'imestredigital',
@@ -80,8 +109,23 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     DreModule,
     ConciliacaoModule,
     EventosModule,
+    RelatoriosModule,
   ],
   controllers: [HealthController],
   providers: [JwtStrategy],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  /**
+   * Aplica o TenantMiddleware a todas as rotas de negócio,
+   * excluindo health checks e documentação (rotas públicas).
+   */
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(TenantMiddleware)
+      .exclude(
+        { path: 'api/v1/health', method: RequestMethod.ALL },
+        { path: 'api/v1/health/(.*)', method: RequestMethod.ALL },
+      )
+      .forRoutes('api/v1/*');
+  }
+}

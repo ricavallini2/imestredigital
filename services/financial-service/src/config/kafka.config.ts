@@ -17,6 +17,7 @@ export const TOPICOS_KAFKA = {
   // ─── Consumidos de outros serviços ─────────────────────
   PEDIDO_PAGO: 'pedido.pago', // order-service
   PEDIDO_CANCELADO: 'pedido.cancelado', // order-service
+  PEDIDO_FATURADO: 'pedido.faturado', // order-service (NF-e autorizada → contas a receber)
   NOTA_AUTORIZADA: 'nota.autorizada', // fiscal-service
 } as const;
 

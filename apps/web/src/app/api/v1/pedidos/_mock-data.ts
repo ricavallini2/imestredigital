@@ -1,8 +1,12 @@
 // Mock data para o módulo de pedidos (dev sem order-service)
 // globalThis garante array compartilhado entre rotas no Next.js dev
+//
+// Enums alinhados ao Prisma (fonte da verdade — order-service). StatusPedido
+// espelha 1:1 o enum do schema: a fase de separação é um único estado
+// EM_SEPARACAO (não há SEPARANDO/SEPARADO separados).
 
 export type StatusPedido =
-  | 'PENDENTE' | 'CONFIRMADO' | 'SEPARANDO' | 'SEPARADO'
+  | 'RASCUNHO' | 'PENDENTE' | 'CONFIRMADO' | 'EM_SEPARACAO'
   | 'FATURADO' | 'ENVIADO' | 'ENTREGUE' | 'CANCELADO' | 'DEVOLVIDO';
 
 export type CanalPedido =
@@ -83,7 +87,7 @@ const INITIAL_PEDIDOS: PedidoMock[] = [
   {
     id: 'ped-004', numero: 'PED-2026-0004',
     cliente: 'Pedido ML #2234', clienteEmail: 'ml@email.com',
-    canal: 'MERCADO_LIVRE', status: 'SEPARANDO',
+    canal: 'MERCADO_LIVRE', status: 'EM_SEPARACAO',
     itens: 1, itensList: [
       { id: 'i005', produtoId: 'p0000006', produto: 'Polo Ralph Lauren Branca M', sku: 'POLO-CAMS-M-BR', quantidade: 3, precoUnitario: 349, desconto: 30, subtotal: 1017 },
     ],
@@ -156,7 +160,7 @@ const INITIAL_PEDIDOS: PedidoMock[] = [
   {
     id: 'ped-010', numero: 'PED-2026-0010',
     clienteId: 'c0000003', cliente: 'Distribuidora ABC', clienteEmail: 'compras@abc.com',
-    canal: 'INTERNA', status: 'SEPARADO',
+    canal: 'INTERNA', status: 'EM_SEPARACAO',
     itens: 3, itensList: [
       { id: 'i013', produtoId: 'p0000005', produto: 'Tênis Nike Air Max 270', sku: 'NIKE-AIRMAX-270-42', quantidade: 10, precoUnitario: 699, desconto: 200, subtotal: 6790 },
       { id: 'i014', produtoId: 'p0000006', produto: 'Polo Ralph Lauren Branca M', sku: 'POLO-CAMS-M-BR', quantidade: 20, precoUnitario: 349, desconto: 500, subtotal: 6480 },

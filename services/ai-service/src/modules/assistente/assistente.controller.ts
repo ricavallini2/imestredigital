@@ -17,6 +17,7 @@ import {
   Param,
   Query,
   Request,
+  UseGuards,
   BadRequestException,
 } from '@nestjs/common';
 import {
@@ -29,9 +30,11 @@ import { AssistenteService } from './assistente.service';
 import { IniciarConversaDTO } from './dtos/iniciar-conversa.dto';
 import { EnviarMensagemDTO } from './dtos/enviar-mensagem.dto';
 import { ComandoRapidoDTO } from './dtos/comando-rapido.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Assistente')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('assistente')
 export class AssistenteController {
   constructor(private service: AssistenteService) {}

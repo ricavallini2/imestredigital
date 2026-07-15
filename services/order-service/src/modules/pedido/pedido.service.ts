@@ -15,9 +15,8 @@
  * Máquina de estados valida transições permitidas entre status.
  */
 
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
 import { Decimal } from '@prisma/client/runtime/library';
-import { v4 as uuidv4 } from 'uuid';
 
 import { PedidoRepository } from './pedido.repository';
 import { KafkaProducerService } from '../kafka/kafka-producer.service';
@@ -27,6 +26,8 @@ import { FiltroPedidoDto } from '../../dtos/filtro-pedido.dto';
 
 @Injectable()
 export class PedidoService {
+  private readonly logger = new Logger(PedidoService.name);
+
   // Máquina de estados: transições permitidas
   private transicoePermitidas: Record<string, string[]> = {
     RASCUNHO: ['PENDENTE', 'CANCELADO'],
@@ -51,19 +52,13 @@ export class PedidoService {
    * Publica PEDIDO_CRIADO e inicia fluxo de reserva de estoque.
    */
   async criarPedido(tenantId: string, dto: CriarPedidoDto) {
-    // Calcular totais
-    let valorProdutos = 0;
-    let peso = 0;
+    // Monta os itens já com todos os valores em Decimal (fonte única de verdade
+    // para persistência, somatório e evento — sem recalcular com float).
+    const itensFormatados = dto.itens.map((item) => this.montarItemPedido(item));
 
-    for (const item of dto.itens) {
-      const subtotal = item.valorUnitario * item.quantidade;
-      valorProdutos += subtotal;
-      if (item.peso) peso += item.peso * item.quantidade;
-    }
-
-    const valorDesconto = dto.valorDesconto || 0;
-    const valorFrete = dto.valorFrete || 0;
-    const valorTotal = valorProdutos - valorDesconto + valorFrete;
+    // Totais calculados em Decimal a partir dos itens (sem acúmulo de erro de
+    // ponto flutuante). Desconto e frete do pedido também em Decimal.
+    const totais = this.calcularTotais(itensFormatados, dto.valorDesconto, dto.valorFrete);
 
     // Criar pedido
     const pedido = await this.pedidoRepository.criar(tenantId, {
@@ -76,31 +71,13 @@ export class PedidoService {
       clienteCpfCnpj: dto.clienteCpfCnpj,
       metodoPagamento: dto.metodoPagamento,
       parcelas: dto.parcelas || 1,
-      valorProdutos: new Decimal(valorProdutos),
-      valorDesconto: new Decimal(valorDesconto),
-      valorFrete: new Decimal(valorFrete),
-      valorTotal: new Decimal(valorTotal),
+      valorProdutos: totais.valorProdutos,
+      valorDesconto: totais.valorDesconto,
+      valorFrete: totais.valorFrete,
+      valorTotal: totais.valorTotal,
       enderecoEntrega: dto.enderecoEntrega,
       observacao: dto.observacao,
     });
-
-    // Adicionar itens
-    const itensFormatados = dto.itens.map((item) => ({
-      produtoId: item.produtoId,
-      variacaoId: item.variacaoId,
-      sku: item.sku,
-      titulo: item.titulo,
-      quantidade: item.quantidade,
-      valorUnitario: new Decimal(item.valorUnitario),
-      valorDesconto: new Decimal(item.valorDesconto || 0),
-      valorTotal: new Decimal(
-        (item.valorUnitario - (item.valorDesconto || 0)) * item.quantidade,
-      ),
-      peso: item.peso ? new Decimal(item.peso) : null,
-      largura: item.largura ? new Decimal(item.largura) : null,
-      altura: item.altura ? new Decimal(item.altura) : null,
-      comprimento: item.comprimento ? new Decimal(item.comprimento) : null,
-    }));
 
     await this.pedidoRepository.adicionarItens(pedido.id, itensFormatados);
 
@@ -113,16 +90,19 @@ export class PedidoService {
       'Pedido criado',
     );
 
-    // Publicar evento
+    // Publicar evento (contrato canônico da saga — payload PLANO consumido pelo
+    // inventory-service). Itens no formato { produtoId, quantidade, precoUnitario }.
     await this.kafkaProducer.publicarPedidoCriado(tenantId, pedido.id, {
       numero: pedido.numero,
+      clienteId: pedido.clienteId,
       cliente: pedido.clienteNome,
       itens: itensFormatados.map((i) => ({
         produtoId: i.produtoId,
         sku: i.sku,
         quantidade: i.quantidade,
+        precoUnitario: i.valorUnitario.toNumber(),
       })),
-      valorTotal: parseFloat(pedido.valorTotal.toString()),
+      valorTotal: pedido.valorTotal.toNumber(),
     });
 
     // Limpar cache de listagem
@@ -172,10 +152,7 @@ export class PedidoService {
    * Confirmar pedido após pagamento ser autorizado.
    * Se pedido está em PENDENTE, passa para CONFIRMADO automaticamente.
    */
-  async confirmarPedidoAposAutorizacao(
-    tenantId: string,
-    pedidoId: string,
-  ) {
+  async confirmarPedidoAposAutorizacao(tenantId: string, pedidoId: string) {
     const pedido = await this.validarExistencia(tenantId, pedidoId);
 
     if (pedido.status === 'PENDENTE') {
@@ -205,11 +182,7 @@ export class PedidoService {
       'Iniciada separação dos itens',
     );
 
-    await this.kafkaProducer.publicarPedidoSeparando(
-      tenantId,
-      pedidoId,
-      {},
-    );
+    await this.kafkaProducer.publicarPedidoSeparando(tenantId, pedidoId, {});
 
     await this.cache.deleteByPattern(`pedidos:${tenantId}:*`);
     await this.cache.delete(`pedido:${tenantId}:${pedidoId}`);
@@ -243,14 +216,18 @@ export class PedidoService {
 
     await this.kafkaProducer.publicarPedidoFaturar(tenantId, pedidoId, {
       numero: pedido.numero,
+      clienteId: pedido.clienteId,
       cliente: pedido.clienteNome,
+      clienteCpfCnpj: pedido.clienteCpfCnpj,
       itens: pedido.itens.map((i) => ({
+        produtoId: i.produtoId,
         sku: i.sku,
         titulo: i.titulo,
         quantidade: i.quantidade,
-        valorTotal: parseFloat(i.valorTotal.toString()),
+        valorUnitario: i.valorUnitario.toNumber(),
+        valorTotal: i.valorTotal.toNumber(),
       })),
-      valorTotal: parseFloat(pedido.valorTotal.toString()),
+      valorTotal: pedido.valorTotal.toNumber(),
     });
 
     await this.cache.delete(`pedido:${tenantId}:${pedidoId}`);
@@ -261,11 +238,7 @@ export class PedidoService {
   /**
    * Marcar pedido como FATURADO (chamado pelo consumidor de NOTA_AUTORIZADA).
    */
-  async marcarComoFaturado(
-    tenantId: string,
-    pedidoId: string,
-    notaFiscalId: string,
-  ) {
+  async marcarComoFaturado(tenantId: string, pedidoId: string, notaFiscalId: string) {
     const pedido = await this.validarExistencia(tenantId, pedidoId);
 
     // Atualizar status via repository
@@ -275,11 +248,8 @@ export class PedidoService {
       'FATURADO',
     );
 
-    // Atualizar notaFiscalId no banco
-    await this.pedidoRepository.prisma.pedido.update({
-      where: { id: pedidoId },
-      data: { notaFiscalId },
-    });
+    // Atualizar notaFiscalId no banco (write multi-tenant seguro)
+    await this.pedidoRepository.definirNotaFiscal(tenantId, pedidoId, notaFiscalId);
 
     await this.pedidoRepository.adicionarHistorico(
       pedidoId,
@@ -289,11 +259,7 @@ export class PedidoService {
       `Nota Fiscal ${notaFiscalId} autorizada`,
     );
 
-    await this.kafkaProducer.publicarPedidoFaturado(
-      tenantId,
-      pedidoId,
-      notaFiscalId,
-    );
+    await this.kafkaProducer.publicarPedidoFaturado(tenantId, pedidoId, notaFiscalId);
 
     await this.cache.deleteByPattern(`pedidos:${tenantId}:*`);
     await this.cache.delete(`pedido:${tenantId}:${pedidoId}`);
@@ -400,20 +366,11 @@ export class PedidoService {
       `Pedido cancelado: ${motivo}`,
     );
 
-    // Atualizar status do pedido
-    await this.pedidoRepository.prisma.pedido.update({
-      where: { id: pedidoId },
-      data: {
-        motivoCancelamento: motivo,
-      },
-    });
+    // Registrar motivo de cancelamento (write multi-tenant seguro)
+    await this.pedidoRepository.definirMotivoCancelamento(tenantId, pedidoId, motivo);
 
     // Publicar evento
-    await this.kafkaProducer.publicarPedidoCancelado(
-      tenantId,
-      pedidoId,
-      motivo,
-    );
+    await this.kafkaProducer.publicarPedidoCancelado(tenantId, pedidoId, motivo);
 
     await this.cache.deleteByPattern(`pedidos:${tenantId}:*`);
     await this.cache.delete(`pedido:${tenantId}:${pedidoId}`);
@@ -447,6 +404,48 @@ export class PedidoService {
   async listar(tenantId: string, filtros: FiltroPedidoDto) {
     const resultado = await this.pedidoRepository.listar(tenantId, filtros);
     return resultado;
+  }
+
+  /**
+   * Transição de status via endpoint de compatibilidade (PATCH /:id/status).
+   *
+   * Recebe o status ALVO (valores do enum Prisma) e delega para o método
+   * semântico correspondente, reaproveitando toda a validação da máquina
+   * de estados, histórico e publicação de eventos.
+   */
+  async transicionarStatus(
+    tenantId: string,
+    pedidoId: string,
+    dados: {
+      status: string;
+      rastreio?: string;
+      transportadora?: string;
+      motivo?: string;
+    },
+  ) {
+    switch (dados.status) {
+      case 'CONFIRMADO':
+        return this.confirmarPedido(tenantId, pedidoId);
+      case 'EM_SEPARACAO':
+        return this.iniciarSeparacao(tenantId, pedidoId);
+      case 'FATURADO':
+        return this.faturarPedido(tenantId, pedidoId);
+      case 'ENVIADO':
+        if (!dados.rastreio || !dados.transportadora) {
+          throw new BadRequestException(
+            'Código de rastreio e transportadora são obrigatórios para enviar o pedido',
+          );
+        }
+        return this.enviarPedido(tenantId, pedidoId, dados.rastreio, dados.transportadora);
+      case 'ENTREGUE':
+        return this.entregarPedido(tenantId, pedidoId);
+      case 'CANCELADO':
+        return this.cancelarPedido(tenantId, pedidoId, dados.motivo || 'Cancelado pelo usuário');
+      default:
+        throw new BadRequestException(
+          `Transição para o status ${dados.status} não é suportada por este endpoint`,
+        );
+    }
   }
 
   /**
@@ -544,6 +543,18 @@ export class PedidoService {
       descricao,
     );
 
+    // SAGA: ao FATURAR (NF-e autorizada) publica pedido.faturado com o valor
+    // real do pedido, para o financial-service gerar a conta a RECEBER.
+    // Payload PLANO canônico: { tenantId, pedidoId, notaFiscalId?, valorTotal }.
+    if (novoStatus === 'FATURADO') {
+      await this.kafkaProducer.publicarPedidoFaturado(
+        tenantId,
+        pedidoId,
+        pedidoAtualizado?.notaFiscalId ?? undefined,
+        pedidoAtualizado?.valorTotal?.toNumber(),
+      );
+    }
+
     await this.cache.deleteByPattern(`pedidos:${tenantId}:*`);
     await this.cache.delete(`pedido:${tenantId}:${pedidoId}`);
 
@@ -553,20 +564,194 @@ export class PedidoService {
   /**
    * Atualizar status de pagamento (helper privado).
    */
-  async atualizarStatusPagamento(
-    tenantId: string,
-    pedidoId: string,
-    novoStatus: string,
-  ) {
+  async atualizarStatusPagamento(tenantId: string, pedidoId: string, novoStatus: string) {
     await this.validarExistencia(tenantId, pedidoId);
-    await this.pedidoRepository.atualizarStatusPagamento(
-      tenantId,
-      pedidoId,
-      novoStatus,
-    );
+    await this.pedidoRepository.atualizarStatusPagamento(tenantId, pedidoId, novoStatus);
 
     await this.cache.delete(`pedido:${tenantId}:${pedidoId}`);
     await this.cache.deleteByPattern(`pedidos:${tenantId}:*`);
+  }
+
+  // ─── SAGA: Idempotência e Reações a Eventos de Estoque ──────
+
+  /**
+   * Idempotência do consumo Kafka: registra que um evento (por referenciaId,
+   * ex. pedidoId) foi processado. Retorna `true` na primeira vez (aplicar o
+   * efeito) ou `false` se já processado (ignorar reentrega do broker).
+   */
+  async registrarEvento(tenantId: string, evento: string, referenciaId: string): Promise<boolean> {
+    return this.pedidoRepository.registrarEventoProcessado(tenantId, evento, referenciaId);
+  }
+
+  /**
+   * SAGA — reação a `estoque.reservado` (inventory-service).
+   *
+   * O estoque foi garantido; o pedido avança na máquina de estados até
+   * EM_SEPARACAO, passando por CONFIRMADO quando necessário. Reaproveita os
+   * métodos semânticos (confirmarPedido/iniciarSeparacao), que já validam a
+   * transição, registram histórico e publicam os eventos correspondentes.
+   *
+   * Idempotente por ESTADO (além do dedup do consumidor):
+   * - já em EM_SEPARACAO ou posterior → no-op;
+   * - CANCELADO/DEVOLVIDO → no-op (não ressuscita pedido encerrado).
+   */
+  async reagirEstoqueReservado(
+    tenantId: string,
+    pedidoId: string,
+    itensReservados: number,
+  ): Promise<void> {
+    const pedido = await this.validarExistencia(tenantId, pedidoId);
+
+    // Estados terminais ou já além da separação: nada a fazer.
+    const jaSeparouOuAlem = [
+      'EM_SEPARACAO',
+      'FATURADO',
+      'ENVIADO',
+      'ENTREGUE',
+      'CANCELADO',
+      'DEVOLVIDO',
+    ];
+    if (jaSeparouOuAlem.includes(pedido.status)) {
+      this.logger.log(
+        `estoque.reservado [${pedidoId}] ignorado: status atual ${pedido.status} não requer avanço`,
+      );
+      return;
+    }
+
+    // Avança pela cadeia VÁLIDA da máquina de estados, um passo por vez:
+    // RASCUNHO → PENDENTE → CONFIRMADO → EM_SEPARACAO. Como um pedido recém
+    // criado nasce em RASCUNHO, o salto direto RASCUNHO→CONFIRMADO seria
+    // rejeitado por validarTransicao — por isso passamos por PENDENTE primeiro.
+    if (pedido.status === 'RASCUNHO') {
+      await this.submeterPedido(tenantId, pedidoId);
+    }
+    // Neste ponto o pedido está (no mínimo) em PENDENTE → CONFIRMADO.
+    await this.confirmarPedido(tenantId, pedidoId);
+    // CONFIRMADO → EM_SEPARACAO.
+    await this.iniciarSeparacao(tenantId, pedidoId);
+
+    this.logger.log(
+      `estoque.reservado [${pedidoId}]: ${itensReservados} item(ns) reservados → pedido em EM_SEPARACAO`,
+    );
+  }
+
+  /**
+   * Transição RASCUNHO → PENDENTE (pedido submetido, aguardando processamento).
+   * Não há evento semântico dedicado; aplica o status validando a transição e
+   * registra o histórico. Usado internamente pela saga para não saltar etapas
+   * da máquina de estados.
+   */
+  private async submeterPedido(tenantId: string, pedidoId: string) {
+    const pedido = await this.validarExistencia(tenantId, pedidoId);
+    this.validarTransicao(pedido.status, 'PENDENTE');
+
+    const pedidoAtualizado = await this.pedidoRepository.atualizarStatus(
+      tenantId,
+      pedidoId,
+      'PENDENTE',
+    );
+
+    await this.pedidoRepository.adicionarHistorico(
+      pedidoId,
+      tenantId,
+      pedido.status,
+      'PENDENTE',
+      'Pedido submetido para processamento',
+    );
+
+    await this.cache.deleteByPattern(`pedidos:${tenantId}:*`);
+    await this.cache.delete(`pedido:${tenantId}:${pedidoId}`);
+
+    return pedidoAtualizado;
+  }
+
+  /**
+   * SAGA — reação a `estoque.insuficiente` (inventory-service).
+   *
+   * Marca o pedido com pendência de estoque e registra o detalhe no histórico,
+   * sem violar a máquina de estados. O pedido é mantido/colocado em PENDENTE
+   * (aguardando reposição), permitindo nova tentativa de reserva depois.
+   *
+   * Se o pedido já estiver em estado terminal/avançado, apenas registra o
+   * histórico (não rebaixa o status).
+   */
+  async reagirEstoqueInsuficiente(
+    tenantId: string,
+    pedidoId: string,
+    itensFaltantes: Array<{
+      produtoId?: string;
+      sku?: string;
+      quantidadeFaltante?: number;
+    }>,
+  ): Promise<void> {
+    const pedido = await this.validarExistencia(tenantId, pedidoId);
+
+    const detalhe =
+      Array.isArray(itensFaltantes) && itensFaltantes.length > 0
+        ? itensFaltantes
+            .map((i) => `${i.sku ?? i.produtoId ?? 'item'} (${i.quantidadeFaltante ?? '?'} un)`)
+            .join(', ')
+        : 'itens não especificados';
+
+    const descricao = `Estoque insuficiente: ${detalhe}`;
+
+    // Estados em que faz sentido sinalizar pendência e permitir nova tentativa.
+    const podeRebaixarParaPendente = ['RASCUNHO', 'CONFIRMADO'];
+
+    if (podeRebaixarParaPendente.includes(pedido.status)) {
+      // Coloca em PENDENTE (aguardando reposição) — write direto + histórico,
+      // pois PENDENTE não é destino de transição semântica padrão.
+      await this.pedidoRepository.atualizarStatus(tenantId, pedidoId, 'PENDENTE');
+      await this.pedidoRepository.adicionarHistorico(
+        pedidoId,
+        tenantId,
+        pedido.status,
+        'PENDENTE',
+        descricao,
+      );
+    } else {
+      // PENDENTE (mantém) ou estados avançados/terminais: só registra o motivo.
+      await this.pedidoRepository.adicionarHistorico(
+        pedidoId,
+        tenantId,
+        pedido.status,
+        pedido.status,
+        descricao,
+      );
+    }
+
+    await this.cache.deleteByPattern(`pedidos:${tenantId}:*`);
+    await this.cache.delete(`pedido:${tenantId}:${pedidoId}`);
+
+    this.logger.warn(`estoque.insuficiente [${pedidoId}]: ${descricao}`);
+  }
+
+  /**
+   * SAGA — reação a `estoque.liberado` (inventory-service).
+   *
+   * Confirmação assíncrona de que as reservas do pedido foram liberadas após
+   * um cancelamento. O status CANCELADO já foi aplicado no fluxo de
+   * cancelamento; aqui apenas registramos a confirmação no histórico
+   * (observabilidade da saga), de forma idempotente.
+   */
+  async reagirEstoqueLiberado(
+    tenantId: string,
+    pedidoId: string,
+    itensLiberados: number,
+  ): Promise<void> {
+    const pedido = await this.validarExistencia(tenantId, pedidoId);
+
+    await this.pedidoRepository.adicionarHistorico(
+      pedidoId,
+      tenantId,
+      pedido.status,
+      pedido.status,
+      `Estoque liberado: ${itensLiberados} reserva(s) devolvida(s) ao disponível`,
+    );
+
+    await this.cache.delete(`pedido:${tenantId}:${pedidoId}`);
+
+    this.logger.log(`estoque.liberado [${pedidoId}]: ${itensLiberados} reserva(s) liberada(s)`);
   }
 
   // ─── Helpers Privados ────────────────────────────────────
@@ -588,9 +773,86 @@ export class PedidoService {
   private validarTransicao(statusAtual: string, statusNovo: string) {
     const permitidas = this.transicoePermitidas[statusAtual] || [];
     if (!permitidas.includes(statusNovo)) {
-      throw new BadRequestException(
-        `Transição de ${statusAtual} para ${statusNovo} não permitida`,
-      );
+      throw new BadRequestException(`Transição de ${statusAtual} para ${statusNovo} não permitida`);
     }
+  }
+
+  /**
+   * Monta um item do pedido com todos os valores monetários e dimensões em
+   * Decimal. O `valorTotal` do item é calculado uma única vez, em Decimal
+   * (`(valorUnitario - valorDesconto) * quantidade`), e reaproveitado como
+   * fonte única — evitando recomputar com float em qualquer ponto seguinte.
+   */
+  private montarItemPedido(item: {
+    produtoId: string;
+    variacaoId?: string;
+    sku: string;
+    titulo: string;
+    quantidade: number;
+    valorUnitario: number;
+    valorDesconto?: number;
+    peso?: number;
+    largura?: number;
+    altura?: number;
+    comprimento?: number;
+  }) {
+    const valorUnitario = new Decimal(item.valorUnitario);
+    const valorDesconto = new Decimal(item.valorDesconto || 0);
+    const valorTotal = valorUnitario.minus(valorDesconto).times(item.quantidade);
+
+    return {
+      produtoId: item.produtoId,
+      variacaoId: item.variacaoId,
+      sku: item.sku,
+      titulo: item.titulo,
+      quantidade: item.quantidade,
+      valorUnitario,
+      valorDesconto,
+      valorTotal,
+      peso: item.peso != null ? new Decimal(item.peso) : null,
+      largura: item.largura != null ? new Decimal(item.largura) : null,
+      altura: item.altura != null ? new Decimal(item.altura) : null,
+      comprimento: item.comprimento != null ? new Decimal(item.comprimento) : null,
+    };
+  }
+
+  /**
+   * Calcula os totais do pedido em Decimal (precisão exata, sem acúmulo de erro
+   * de ponto flutuante).
+   *
+   * - `valorProdutos` = Σ (valorTotal de cada item, já líquido do desconto do item)
+   * - `valorTotal`    = valorProdutos − valorDesconto (do pedido) + valorFrete
+   *
+   * Nota (mudança intencional): `valorProdutos` passa a somar o `valorTotal`
+   * LÍQUIDO de cada item — isto é, já descontado o desconto de linha. A versão
+   * anterior somava o bruto (valorUnitario × quantidade) e ignorava o desconto
+   * de item no total do pedido, o que fazia o total do pedido NÃO fechar com a
+   * soma dos itens quando havia desconto de linha (inconsistência fiscal). Aqui
+   * o total do pedido é sempre igual à soma dos itens + frete − desconto geral.
+   *
+   * O desconto do pedido é limitado (clamp) para não deixar `valorTotal`
+   * negativo caso o desconto informado exceda produtos + frete.
+   */
+  private calcularTotais(
+    itens: Array<{ valorTotal: Decimal }>,
+    valorDescontoPedido?: number,
+    valorFretePedido?: number,
+  ): {
+    valorProdutos: Decimal;
+    valorDesconto: Decimal;
+    valorFrete: Decimal;
+    valorTotal: Decimal;
+  } {
+    const valorProdutos = itens.reduce((acc, item) => acc.plus(item.valorTotal), new Decimal(0));
+    const valorFrete = new Decimal(valorFretePedido || 0);
+
+    // Nunca deixa o desconto do pedido ultrapassar produtos + frete.
+    const descontoInformado = new Decimal(valorDescontoPedido || 0);
+    const tetoDesconto = valorProdutos.plus(valorFrete);
+    const valorDesconto = Decimal.min(descontoInformado, tetoDesconto);
+
+    const valorTotal = valorProdutos.minus(valorDesconto).plus(valorFrete);
+
+    return { valorProdutos, valorDesconto, valorFrete, valorTotal };
   }
 }

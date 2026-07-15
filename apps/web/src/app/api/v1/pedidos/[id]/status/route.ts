@@ -2,16 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PEDIDOS_MOCK } from '../../_mock-data';
 import type { StatusPedido } from '../../_mock-data';
 
+// Máquina de estados espelhando o Prisma/backend (order-service).
+// A fase de separação é um único estado: EM_SEPARACAO.
 const TRANSICOES: Record<string, StatusPedido[]> = {
-  PENDENTE:   ['CONFIRMADO', 'CANCELADO'],
-  CONFIRMADO: ['SEPARANDO', 'CANCELADO'],
-  SEPARANDO:  ['SEPARADO',  'CANCELADO'],
-  SEPARADO:   ['FATURADO',  'CANCELADO'],
-  FATURADO:   ['ENVIADO',   'CANCELADO'],
-  ENVIADO:    ['ENTREGUE'],
-  ENTREGUE:   ['DEVOLVIDO'],
-  CANCELADO:  [],
-  DEVOLVIDO:  [],
+  RASCUNHO:     ['PENDENTE', 'CANCELADO'],
+  PENDENTE:     ['CONFIRMADO', 'CANCELADO'],
+  CONFIRMADO:   ['EM_SEPARACAO', 'CANCELADO'],
+  EM_SEPARACAO: ['FATURADO', 'CANCELADO'],
+  FATURADO:     ['ENVIADO', 'CANCELADO'],
+  ENVIADO:      ['ENTREGUE', 'CANCELADO'],
+  ENTREGUE:     ['DEVOLVIDO'],
+  CANCELADO:    [],
+  DEVOLVIDO:    [],
 };
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -31,6 +33,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const patch: Partial<typeof PEDIDOS_MOCK[0]> = { status: novoStatus, atualizadoEm: new Date().toISOString() };
   if (body.rastreio)       patch.rastreio       = body.rastreio;
   if (body.transportadora) patch.transportadora = body.transportadora;
+
+  // Ao cancelar, estorna o pagamento (se já estava pago) e registra o motivo.
+  if (novoStatus === 'CANCELADO') {
+    patch.statusPagamento = PEDIDOS_MOCK[idx].statusPagamento === 'PAGO' ? 'ESTORNADO' : 'PENDENTE';
+    if (body.motivo) {
+      patch.observacoes = (PEDIDOS_MOCK[idx].observacoes ?? '') + `\nCancelamento: ${body.motivo}`;
+    }
+  }
 
   PEDIDOS_MOCK[idx] = { ...PEDIDOS_MOCK[idx], ...patch };
   return NextResponse.json(PEDIDOS_MOCK[idx]);

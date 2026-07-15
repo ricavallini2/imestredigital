@@ -4,6 +4,7 @@
 
 import { IsString, IsNumber, IsOptional, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { TIPOS_CONTA } from '../enums';
 
 export class CriarContaDTO {
   @ApiProperty({
@@ -15,9 +16,9 @@ export class CriarContaDTO {
 
   @ApiProperty({
     description: 'Tipo de conta',
-    enum: ['CORRENTE', 'POUPANCA', 'CAIXA', 'CARTAO', 'DIGITAL'],
+    enum: TIPOS_CONTA,
   })
-  @IsEnum(['CORRENTE', 'POUPANCA', 'CAIXA', 'CARTAO', 'DIGITAL'])
+  @IsEnum(TIPOS_CONTA)
   tipo: string;
 
   @ApiProperty({

@@ -26,6 +26,7 @@ enum TipoNotificacao {
   PUSH
   WHATSAPP
   WEBHOOK
+  INTERNA
 }
 
 enum StatusNotificacao {
@@ -41,6 +42,8 @@ enum CanalNotificacao {
   SMS
   PUSH
   WHATSAPP
+  WEBHOOK
+  INTERNA
 }
 
 enum PrioridadeNotificacao {

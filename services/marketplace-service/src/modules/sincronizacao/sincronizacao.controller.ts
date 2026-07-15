@@ -13,7 +13,7 @@ import { TipoSincronizacao } from '../../../generated/client';
 
 @ApiTags('Sincronização')
 @ApiBearerAuth()
-@Controller('sincronizacao')
+@Controller('api/v1/sincronizacao')
 export class SincronizacaoController {
   private readonly logger = new Logger('SincronizacaoController');
 

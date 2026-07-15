@@ -6,7 +6,7 @@
  * Executar com: npm run db:seed
  */
 
-import { PrismaClient } from '../generated/client';
+import { Prisma, PrismaClient } from '../generated/client';
 
 const prisma = new PrismaClient();
 
@@ -18,7 +18,7 @@ async function main() {
   // ─── Conta Shopee Demo ──────────────────────────────────────
   const conta = await prisma.contaMarketplace.upsert({
     where: {
-      uk_conta_marketplace_tenant_plataforma_id: {
+      tenantId_plataforma_idExterno: {
         tenantId: TENANT_ID,
         plataforma: 'SHOPEE',
         idExterno: 'shopee_demo_12345',
@@ -47,7 +47,7 @@ async function main() {
   console.log('  ✅ ContaMarketplace (Shopee) criada');
 
   // ─── Anúncios Demo ────────────────────────────────────────────
-  const anuncios = [
+  const anuncios: Prisma.AnuncioMarketplaceUncheckedCreateInput[] = [
     {
       id: 'a0000000-0000-0000-0000-000000000001',
       tenantId: TENANT_ID,
@@ -94,9 +94,9 @@ async function main() {
   console.log(`  ✅ ${anuncios.length} AnunciosMarketplace criados`);
 
   // ─── Perguntas de Compradores ─────────────────────────────────
-  const perguntas = [
+  const perguntas: Prisma.PerguntaMarketplaceUncheckedCreateInput[] = [
     {
-      id: 'q0000000-0000-0000-0000-000000000001',
+      id: 'e0000000-0000-0000-0000-000000000001',
       tenantId: TENANT_ID,
       contaMarketplaceId: conta.id,
       anuncioId: 'a0000000-0000-0000-0000-000000000001',
@@ -109,7 +109,7 @@ async function main() {
       dataResposta: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     },
     {
-      id: 'q0000000-0000-0000-0000-000000000002',
+      id: 'e0000000-0000-0000-0000-000000000002',
       tenantId: TENANT_ID,
       contaMarketplaceId: conta.id,
       anuncioId: 'a0000000-0000-0000-0000-000000000001',
@@ -120,7 +120,7 @@ async function main() {
       dataEnvio: new Date(Date.now() - 4 * 60 * 60 * 1000),
     },
     {
-      id: 'q0000000-0000-0000-0000-000000000003',
+      id: 'e0000000-0000-0000-0000-000000000003',
       tenantId: TENANT_ID,
       contaMarketplaceId: conta.id,
       anuncioId: 'a0000000-0000-0000-0000-000000000002',

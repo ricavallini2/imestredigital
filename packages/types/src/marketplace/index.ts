@@ -5,26 +5,34 @@
 
 import { BaseEntity, EntityId } from '../common';
 
-/** Marketplaces suportados */
+/**
+ * Marketplaces suportados.
+ * UPPERCASE_SNAKE — espelha o enum PlataformaMarketplace do schema Prisma
+ * (services/marketplace-service). Fonte da verdade: Prisma.
+ */
 export enum MarketplaceSuportado {
-  MERCADO_LIVRE = 'mercado_livre',
-  SHOPEE = 'shopee',
-  AMAZON = 'amazon',
-  MAGALU = 'magalu',
-  AMERICANAS = 'americanas',
-  SHEIN = 'shein',
-  SHOPIFY = 'shopify',
-  NUVEMSHOP = 'nuvemshop',
-  WOOCOMMERCE = 'woocommerce',
+  MERCADO_LIVRE = 'MERCADO_LIVRE',
+  SHOPEE = 'SHOPEE',
+  AMAZON = 'AMAZON',
+  MAGALU = 'MAGALU',
+  AMERICANAS = 'AMERICANAS',
+  SHOPIFY = 'SHOPIFY',
+  SHEIN = 'SHEIN',
+  NUVEMSHOP = 'NUVEMSHOP',
+  WOOCOMMERCE = 'WOOCOMMERCE',
 }
 
-/** Status da conexão com o marketplace */
+/**
+ * Status da conexão com o marketplace.
+ * UPPERCASE — espelha o enum StatusConexao do schema Prisma.
+ */
 export enum StatusConexao {
-  ATIVA = 'ativa',
-  INATIVA = 'inativa',
-  ERRO = 'erro',
-  RECONECTANDO = 'reconectando',
-  EXPIRANDO = 'expirando',
+  ATIVA = 'ATIVA',
+  INATIVA = 'INATIVA',
+  PENDENTE = 'PENDENTE',
+  ERRO = 'ERRO',
+  RECONECTANDO = 'RECONECTANDO',
+  EXPIRANDO = 'EXPIRANDO',
 }
 
 /** Conexão do tenant com um marketplace */
@@ -68,11 +76,15 @@ export interface AnuncioMarketplace extends BaseEntity {
   ultimaSincronizacao?: Date;
 }
 
-/** Status do anúncio no marketplace */
+/**
+ * Status do anúncio no marketplace.
+ * UPPERCASE — espelha o enum StatusAnuncio do schema Prisma.
+ */
 export enum StatusAnuncio {
-  ATIVO = 'ativo',
-  PAUSADO = 'pausado',
-  ENCERRADO = 'encerrado',
-  PENDENTE = 'pendente',
-  ERRO = 'erro',
+  ATIVO = 'ATIVO',
+  PAUSADO = 'PAUSADO',
+  REMOVIDO = 'REMOVIDO',
+  PENDENTE = 'PENDENTE',
+  ENCERRADO = 'ENCERRADO',
+  ERRO = 'ERRO',
 }

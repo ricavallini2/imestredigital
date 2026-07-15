@@ -9,6 +9,9 @@ import { LancamentoRepository } from './lancamento.repository';
 import { CacheService } from '../cache/cache.service';
 import { ProdutorEventosService } from '../eventos/produtor-eventos.service';
 import { ContaRepository } from '../conta/conta.repository';
+import { PrismaService } from '../prisma/prisma.service';
+import { Prisma, FormaPagamento } from '../../../generated/client';
+import { TOPICOS_KAFKA } from '../../config/kafka.config';
 
 interface CriarLancamentoInput {
   tenantId: string;
@@ -44,6 +47,7 @@ export class LancamentoService {
     private contaRepository: ContaRepository,
     private cache: CacheService,
     private produtorEventos: ProdutorEventosService,
+    private prisma: PrismaService,
   ) {}
 
   /**
@@ -129,6 +133,95 @@ export class LancamentoService {
   }
 
   /**
+   * SAGA — reação a `pedido.faturado` (order-service).
+   *
+   * Cria a conta a RECEBER (categoria "Vendas", vínculo `pedidoId` e
+   * `notaFiscalId`, valores Decimal) quando a NF-e do pedido é autorizada.
+   *
+   * Idempotência em duas camadas (a de ESTADO é a garantia primária):
+   *  1. ESTADO: se já existe um RECEITA para o pedido, retorna-o sem recriar
+   *     — sobrevive a falhas parciais e a reentregas mesmo sem o fast-path;
+   *  2. eventos_processados: registrado após a criação como atalho barato
+   *     para descartar reentregas do broker sem tocar no banco de lançamentos.
+   *
+   * O valor vem do próprio evento (`valorTotal`). Evento degenerado sem valor
+   * (<= 0) é ignorado com aviso (nunca cria recebível inválido nem duplica).
+   *
+   * Retorna o lançamento (criado ou já existente), ou `null` quando ignorado.
+   */
+  async criarReceberDePedidoFaturado(input: {
+    tenantId: string
+    pedidoId: string
+    notaFiscalId?: string
+    valor: number
+    dataFaturamento?: Date | string
+    descricao?: string
+    cliente?: string
+  }) {
+    const { tenantId, pedidoId } = input
+
+    // Camada 1 (garantia primária): não duplica recebível de um pedido já
+    // faturado. Isolado por tenant no repositório.
+    const existente = await this.lancamentoRepository.buscarPorPedidoIdETipo(
+      tenantId,
+      pedidoId,
+      'RECEITA',
+    )
+    if (existente) {
+      this.logger.log(
+        `Recebível do pedido ${pedidoId} já existe (${existente.id}) — não recriado`,
+      )
+      // Garante o registro de dedup mesmo em históricos criados antes desta rota.
+      await this.lancamentoRepository.registrarEventoProcessado(
+        tenantId,
+        TOPICOS_KAFKA.PEDIDO_FATURADO,
+        pedidoId,
+      )
+      return existente
+    }
+
+    if (!(input.valor > 0)) {
+      this.logger.warn(
+        `pedido.faturado [${pedidoId}] sem valor válido (${input.valor}) — recebível não criado`,
+      )
+      return null
+    }
+
+    const dataFaturamento = input.dataFaturamento
+      ? new Date(input.dataFaturamento)
+      : new Date()
+
+    const lancamento = await this.criar({
+      tenantId,
+      tipo: 'RECEITA',
+      categoria: 'Vendas',
+      descricao: input.descricao ?? `Recebível - Pedido ${pedidoId}`,
+      valor: input.valor,
+      // Recebível em aberto: competência na data do faturamento.
+      dataVencimento: dataFaturamento,
+      dataCompetencia: dataFaturamento,
+      status: 'PENDENTE',
+      pedidoId,
+      notaFiscalId: input.notaFiscalId,
+      cliente: input.cliente,
+    })
+
+    // Camada 2 (fast-path): marca o evento como processado para descartar
+    // reentregas sem consultar lançamentos. Best-effort — a camada 1 já cobre.
+    await this.lancamentoRepository.registrarEventoProcessado(
+      tenantId,
+      TOPICOS_KAFKA.PEDIDO_FATURADO,
+      pedidoId,
+    )
+
+    this.logger.log(
+      `Recebível criado a partir do pedido faturado ${pedidoId}: ${lancamento.id}`,
+    )
+
+    return lancamento
+  }
+
+  /**
    * Busca lançamento por ID.
    */
   async buscarPorId(id: string, tenantId: string) {
@@ -141,10 +234,13 @@ export class LancamentoService {
 
   /**
    * Lista lançamentos com filtros e paginação.
+   *
+   * Retorna o envelope paginado canônico:
+   * { dados, total, pagina, limite, totalPaginas }.
    */
   async listar(tenantId: string, filtros: any, pagina: number = 1, limite: number = 20) {
-    const skip = (pagina - 1) * limite;
     const take = Math.min(limite, 100); // Máximo 100 itens por página
+    const skip = (pagina - 1) * take;
 
     const { lancamentos, total } = await this.lancamentoRepository.listar(
       tenantId,
@@ -154,13 +250,11 @@ export class LancamentoService {
     );
 
     return {
-      lancamentos,
-      paginacao: {
-        total,
-        pagina,
-        limite,
-        paginas: Math.ceil(total / limite),
-      },
+      dados: lancamentos,
+      total,
+      pagina,
+      limite: take,
+      totalPaginas: Math.ceil(total / take),
     };
   }
 
@@ -202,27 +296,24 @@ export class LancamentoService {
 
     const contaDef = contaId || lancamento.contaId;
 
-    // Atualizar lançamento
-    const atualizado = await this.lancamentoRepository.marcarComoPago(
+    // Marcar como pago e atualizar o saldo da conta de forma atômica:
+    // ou ambas as escritas ocorrem, ou nenhuma. Escopadas por tenantId.
+    const atualizado = await this.pagarComSaldoTransacional(
       id,
       tenantId,
       dataPagamento,
       contaDef,
+      lancamento.tipo,
+      new Decimal(lancamento.valor),
+      formaPagamento,
     );
-
-    // Atualizar saldo da conta
-    if (contaDef) {
-      await this.atualizarSaldoConta(
-        contaDef,
-        tenantId,
-        lancamento.tipo,
-        new Decimal(lancamento.valor),
-      );
-    }
 
     // Limpar cache
     await this.cache.remover(`lancamentos:${tenantId}`);
     await this.cache.remover(`lancamentos_atrasados:${tenantId}`);
+    if (contaDef) {
+      await this.cache.remover(`conta:${contaDef}:${tenantId}`);
+    }
 
     // Publicar evento
     await this.produtorEventos.publicarLancamentoPago({
@@ -383,7 +474,63 @@ export class LancamentoService {
   }
 
   /**
-   * Atualiza saldo da conta.
+   * Marca o lançamento como pago e ajusta o saldo da conta numa única
+   * transação. A leitura do saldo ocorre dentro da transação (evita
+   * read-modify-write inconsistente). Todas as escritas são escopadas
+   * por tenantId. Se não houver conta, apenas marca como pago.
+   */
+  private async pagarComSaldoTransacional(
+    id: string,
+    tenantId: string,
+    dataPagamento: Date,
+    contaId: string | null | undefined,
+    tipo: string,
+    valor: Decimal,
+    formaPagamento?: string,
+  ) {
+    await this.prisma.$transaction(async (tx) => {
+      const dadosPagamento: Prisma.LancamentoUncheckedUpdateManyInput = {
+        status: 'PAGO',
+        dataPagamento,
+        atualizadoEm: new Date(),
+      }
+
+      if (contaId) dadosPagamento.contaId = contaId
+      if (formaPagamento) {
+        dadosPagamento.formaPagamento = formaPagamento as FormaPagamento
+      }
+
+      await tx.lancamento.updateMany({
+        where: { id, tenantId },
+        data: dadosPagamento,
+      });
+
+      if (contaId) {
+        const conta = await tx.contaFinanceira.findFirst({
+          where: { id: contaId, tenantId },
+        });
+
+        if (conta) {
+          const novoSaldo = this.calcularNovoSaldo(
+            new Decimal(conta.saldoAtual),
+            tipo,
+            valor,
+          );
+
+          await tx.contaFinanceira.updateMany({
+            where: { id: contaId, tenantId },
+            data: { saldoAtual: novoSaldo, atualizadoEm: new Date() },
+          });
+        }
+      }
+    });
+
+    return this.lancamentoRepository.buscarPorId(id, tenantId);
+  }
+
+  /**
+   * Atualiza saldo da conta (usado quando um lançamento já nasce pago).
+   * Roda numa transação com re-leitura do saldo para consistência.
    */
   private async atualizarSaldoConta(
     contaId: string,
@@ -391,18 +538,42 @@ export class LancamentoService {
     tipo: string,
     valor: Decimal,
   ) {
-    const conta = await this.contaRepository.buscarPorId(contaId, tenantId);
-    if (!conta) return;
+    await this.prisma.$transaction(async (tx) => {
+      const conta = await tx.contaFinanceira.findFirst({
+        where: { id: contaId, tenantId },
+      });
+      if (!conta) return;
 
-    let novoSaldo = new Decimal(conta.saldoAtual);
+      const novoSaldo = this.calcularNovoSaldo(
+        new Decimal(conta.saldoAtual),
+        tipo,
+        valor,
+      );
 
-    if (tipo === 'RECEITA') {
-      novoSaldo = novoSaldo.plus(valor);
-    } else if (tipo === 'DESPESA' || tipo === 'TRANSFERENCIA') {
-      novoSaldo = novoSaldo.minus(valor);
-    }
+      await tx.contaFinanceira.updateMany({
+        where: { id: contaId, tenantId },
+        data: { saldoAtual: novoSaldo, atualizadoEm: new Date() },
+      });
+    });
 
-    await this.contaRepository.atualizarSaldo(contaId, tenantId, novoSaldo);
     await this.cache.remover(`conta:${contaId}:${tenantId}`);
+  }
+
+  /**
+   * Calcula o novo saldo aplicando o efeito do lançamento:
+   * RECEITA soma; DESPESA/TRANSFERENCIA subtrai.
+   */
+  private calcularNovoSaldo(
+    saldoAtual: Decimal,
+    tipo: string,
+    valor: Decimal,
+  ): Decimal {
+    if (tipo === 'RECEITA') {
+      return saldoAtual.plus(valor);
+    }
+    if (tipo === 'DESPESA' || tipo === 'TRANSFERENCIA') {
+      return saldoAtual.minus(valor);
+    }
+    return saldoAtual;
   }
 }

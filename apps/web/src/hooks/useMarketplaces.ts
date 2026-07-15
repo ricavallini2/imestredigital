@@ -23,6 +23,8 @@ export type {
   FiltrosAnuncios,
   FiltrosPerguntas,
   AtualizarAnuncioDto,
+  UrlAutorizacaoML,
+  ContaConectadaML,
 } from '@/services/marketplaces.service';
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
@@ -129,5 +131,44 @@ export function useStatsMarketplace() {
     queryKey: marketplacesKeys.stats(),
     queryFn: () => marketplacesService.obterStats(),
     staleTime: 2 * 60 * 1000,
+  });
+}
+
+// ─── useConectarMercadoLivre ──────────────────────────────────────────────────
+
+/**
+ * Inicia o fluxo OAuth do Mercado Livre: pede a URL de autorização ao backend
+ * e redireciona o navegador para o consentimento do seller. Em caso de erro
+ * (ex.: credenciais não configuradas), a mutation rejeita e a UI trata a
+ * mensagem retornada pelo backend.
+ */
+export function useConectarMercadoLivre() {
+  return useMutation({
+    mutationFn: async () => {
+      const { url } = await marketplacesService.obterUrlAutorizacaoML();
+      if (!url) throw new Error('URL de autorização não retornada pelo servidor.');
+      if (typeof window !== 'undefined') {
+        window.location.href = url;
+      }
+      return url;
+    },
+  });
+}
+
+// ─── useProcessarCallbackML ───────────────────────────────────────────────────
+
+/**
+ * Finaliza o OAuth do Mercado Livre trocando o `code` por tokens no backend.
+ * Usado pela página de retorno /dashboard/marketplaces/callback/mercadolivre.
+ */
+export function useProcessarCallbackML() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ code, state }: { code: string; state: string }) =>
+      marketplacesService.processarCallbackML(code, state),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: marketplacesKeys.lista() });
+      qc.invalidateQueries({ queryKey: marketplacesKeys.stats() });
+    },
   });
 }

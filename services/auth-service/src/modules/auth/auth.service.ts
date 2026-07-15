@@ -134,7 +134,8 @@ export class AuthService {
         id: resultado.usuario.id,
         nome: resultado.usuario.nome,
         email: resultado.usuario.email,
-        cargo: resultado.usuario.cargo,
+        // lowercase para bater com o payload JWT e o frontend
+        cargo: resultado.usuario.cargo.toLowerCase(),
       },
       ...tokens,
     };
@@ -196,7 +197,8 @@ export class AuthService {
         id: usuario.id,
         nome: usuario.nome,
         email: usuario.email,
-        cargo: usuario.cargo,
+        // lowercase para bater com o payload JWT e o frontend
+        cargo: usuario.cargo.toLowerCase(),
         tenant: {
           id: usuario.tenant.id,
           nome: usuario.tenant.nome,
@@ -322,8 +324,17 @@ export class AuthService {
    * - refresh_token: UUID armazenado no banco, duração longa (7d)
    */
   private async gerarTokens(payload: JwtPayload) {
+    // Normaliza o cargo para lowercase no token. O banco grava em
+    // UPPERCASE (fonte da verdade = enum Prisma), mas o payload JWT e o
+    // frontend usam lowercase (admin/gerente/operador/visualizador).
+    // O RolesGuard compara case-insensitive como dupla proteção.
+    const payloadNormalizado: JwtPayload = {
+      ...payload,
+      cargo: payload.cargo.toLowerCase(),
+    };
+
     // Access token (JWT assinado)
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign(payloadNormalizado);
 
     // Refresh token (UUID aleatório, armazenado no banco)
     const refreshToken = uuidv4();

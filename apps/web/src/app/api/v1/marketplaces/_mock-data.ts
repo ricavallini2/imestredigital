@@ -4,7 +4,8 @@ export interface MarketplaceMock {
   id: string;
   canal: 'MERCADO_LIVRE' | 'SHOPEE' | 'AMAZON' | 'SHOPIFY' | 'MAGALU';
   nome: string;
-  status: 'CONECTADO' | 'DESCONECTADO' | 'ERRO' | 'PAUSADO';
+  // Alinhado ao enum Prisma `StatusConexao` (marketplace-service).
+  status: 'ATIVA' | 'INATIVA' | 'PENDENTE' | 'ERRO' | 'RECONECTANDO' | 'EXPIRANDO';
   taxaPlataforma: number; // percentage, e.g. 13 for 13%
   sellerId: string;
   pedidosHoje: number;
@@ -32,7 +33,8 @@ export interface AnuncioMock {
   precoPromocional?: number;
   custoMedio: number;
   estoque: number;
-  status: 'ATIVO' | 'PAUSADO' | 'SEM_ESTOQUE' | 'REMOVIDO' | 'BLOQUEADO';
+  // Alinhado ao enum Prisma `StatusAnuncio` (marketplace-service).
+  status: 'ATIVO' | 'PAUSADO' | 'REMOVIDO' | 'PENDENTE' | 'ENCERRADO' | 'ERRO';
   impressoes: number;
   cliques: number;
   conversao: number; // percent
@@ -53,7 +55,8 @@ export interface PerguntaMock {
   comprador: string;
   pergunta: string;
   resposta?: string;
-  status: 'PENDENTE' | 'RESPONDIDA' | 'ARQUIVADA';
+  // Alinhado ao enum Prisma `StatusPerguntaMarketplace` (marketplace-service).
+  status: 'PENDENTE' | 'RESPONDIDA' | 'DELETADA';
   dataPergunta: string;
   dataResposta?: string;
   prioridade: 'NORMAL' | 'URGENTE';
@@ -91,7 +94,7 @@ const INITIAL_MARKETPLACES: MarketplaceMock[] = [
     id: 'mkp-001',
     canal: 'MERCADO_LIVRE',
     nome: 'Mercado Livre',
-    status: 'CONECTADO',
+    status: 'ATIVA',
     taxaPlataforma: 13,
     sellerId: 'ML-BR-123456789',
     pedidosHoje: 48,
@@ -112,7 +115,7 @@ const INITIAL_MARKETPLACES: MarketplaceMock[] = [
     id: 'mkp-002',
     canal: 'SHOPEE',
     nome: 'Shopee',
-    status: 'CONECTADO',
+    status: 'ATIVA',
     taxaPlataforma: 20,
     sellerId: 'SHP-BR-987654321',
     pedidosHoje: 31,
@@ -154,7 +157,7 @@ const INITIAL_MARKETPLACES: MarketplaceMock[] = [
     id: 'mkp-004',
     canal: 'SHOPIFY',
     nome: 'Shopify (Loja Própria)',
-    status: 'CONECTADO',
+    status: 'ATIVA',
     taxaPlataforma: 2, // payment gateway only
     sellerId: 'SHF-BR-111222333',
     pedidosHoje: 19,
@@ -387,7 +390,7 @@ const INITIAL_ANUNCIOS: AnuncioMock[] = [
     preco: 2399,
     custoMedio: 1350,
     estoque: 0,
-    status: 'SEM_ESTOQUE',
+    status: 'PAUSADO',
     impressoes: 634,
     cliques: 48,
     conversao: 0,
@@ -521,7 +524,7 @@ const INITIAL_ANUNCIOS: AnuncioMock[] = [
     preco: 869,
     custoMedio: 320,
     estoque: 5,
-    status: 'BLOQUEADO',
+    status: 'REMOVIDO',
     impressoes: 0,
     cliques: 0,
     conversao: 0,

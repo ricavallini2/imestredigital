@@ -43,7 +43,10 @@ enum FormaPagamento {
   CARTAO_DEBITO
   BOLETO
   TRANSFERENCIA
+  TED
+  DOC
   CHEQUE
+  OUTRO
 }
 
 enum TipoConta {
@@ -52,6 +55,7 @@ enum TipoConta {
   INVESTIMENTO
   CAIXA
   CARTAO
+  DIGITAL
 }
 
 // ─── Conta Financeira ─────────────────────────────────────────
@@ -257,6 +261,25 @@ model ConciliacaoBancaria {
   @@index([contaId])
   @@index([status])
   @@map("conciliacoes_bancarias")
+}
+
+// ─── Idempotência de Eventos Kafka ────────────────────────────
+/// Registra eventos já consumidos para garantir idempotência no processamento
+/// da SAGA (reentregas do broker não reaplicam o efeito colateral).
+/// Dedup por (evento, referenciaId) — ex. ("pedido.faturado", pedidoId).
+model EventoProcessado {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  /// Nome lógico do evento consumido (ex. "pedido.faturado", "pedido.pago").
+  evento       String
+  /// Identificador do agregado de referência (ex. pedidoId).
+  referenciaId String   @map("referencia_id")
+
+  processadoEm DateTime @default(now()) @map("processado_em")
+
+  @@unique([evento, referenciaId], name: "evento_referenciaId")
+  @@index([tenantId])
+  @@map("eventos_processados")
 }
 
 // ─── DRE (Demonstração de Resultado do Exercício) ─────────────

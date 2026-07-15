@@ -3,128 +3,286 @@
  * Controller Consumidor de Eventos - Kafka
  * ═══════════════════════════════════════════════════════════════
  *
- * Consome eventos de outros serviços e atualiza estado do order-service:
+ * Consome eventos de outros serviços e atualiza o estado do order-service:
  * - NOTA_AUTORIZADA (fiscal-service): marca pedido como FATURADO
- * - ESTOQUE_RESERVADO (inventory-service): inicia separação
- * - ESTOQUE_INSUFICIENTE (inventory-service): notifica problema
+ * - ESTOQUE_RESERVADO (inventory-service): avança o pedido para EM_SEPARACAO
+ * - ESTOQUE_INSUFICIENTE (inventory-service): sinaliza pendência de estoque
+ * - ESTOQUE_LIBERADO (inventory-service): confirma liberação de reservas
  * - MARKETPLACE_PEDIDO_RECEBIDO (marketplace-service): cria pedido novo
- * - PAGAMENTO_AUTORIZADO (payment-service): atualiza pagamento
+ * - PAGAMENTO_* (payment-service): atualiza pagamento
+ *
+ * Contrato da SAGA (payload PLANO, sem envelope `.dados`) — casa exatamente com
+ * o produtor do inventory-service (ProducerService.publicarPlano):
+ * - estoque.reservado    → { tenantId, pedidoId, itensReservados: [{ produtoId, sku, quantidade, depositoId }] }
+ * - estoque.insuficiente → { tenantId, pedidoId, itensFaltantes: [{ produtoId, sku, quantidadeSolicitada, disponivel, quantidadeFaltante }] }
+ * - estoque.liberado     → { tenantId, pedidoId, itens: [{ produtoId, quantidade, depositoId }] }
+ *
+ * Consumo IDEMPOTENTE: cada handler de estoque faz dedup por (evento, pedidoId)
+ * via PedidoService.registrarEvento (tabela eventos_processados). Reentregas do
+ * broker não reaplicam o efeito colateral.
  */
 
-import { Controller } from '@nestjs/common';
-import { EventPattern } from '@nestjs/microservices';
+import { Controller, Logger } from '@nestjs/common';
+import { EventPattern, Payload } from '@nestjs/microservices';
 import { PedidoService } from '../pedido/pedido.service';
 import { PagamentoService } from '../pagamento/pagamento.service';
 import { TOPICOS_CONSUMIDOS } from '../../config/kafka.config';
 
+// ─── Tipagem dos payloads consumidos (sem `any`) ───────────────
+
+/** nota.autorizada (fiscal-service). */
+interface EventoNotaAutorizada {
+  tenantId: string;
+  pedidoId: string;
+  notaFiscalId: string;
+  numero?: string | number;
+  serieNota?: string | number;
+}
+
+/** estoque.reservado (inventory-service). */
+interface EventoEstoqueReservado {
+  tenantId: string;
+  pedidoId: string;
+  itensReservados?: Array<{
+    produtoId: string;
+    sku?: string;
+    quantidade: number;
+    depositoId?: string;
+  }>;
+}
+
+/** estoque.insuficiente (inventory-service). */
+interface EventoEstoqueInsuficiente {
+  tenantId: string;
+  pedidoId: string;
+  itensFaltantes?: Array<{
+    produtoId?: string;
+    sku?: string;
+    quantidadeSolicitada?: number;
+    disponivel?: number;
+    quantidadeFaltante?: number;
+  }>;
+}
+
+/** estoque.liberado (inventory-service). */
+interface EventoEstoqueLiberado {
+  tenantId: string;
+  pedidoId: string;
+  itens?: Array<{ produtoId: string; quantidade: number; depositoId?: string }>;
+}
+
+/** marketplace.pedido.recebido (marketplace-service). */
+interface EventoMarketplacePedido {
+  tenantId: string;
+  pedidoExternoId: string;
+  canalOrigem?: string;
+  clienteNome: string;
+  clienteEmail?: string;
+  itens: Array<{
+    produtoId: string;
+    variacaoId?: string;
+    sku: string;
+    titulo: string;
+    quantidade: number;
+    valorUnitario: number;
+    peso?: number;
+    largura?: number;
+    altura?: number;
+    comprimento?: number;
+  }>;
+  valorTotal?: number;
+  enderecoEntrega?: Record<string, unknown>;
+}
+
+/** pagamento.autorizado (payment-service). */
+interface EventoPagamentoAutorizado {
+  tenantId: string;
+  pedidoId: string;
+  pagamentoId?: string;
+  tipo?: string;
+  valor: number;
+  gateway?: string;
+  transacaoExternaId?: string;
+  dadosGateway?: Record<string, unknown>;
+}
+
+/** pagamento.capturado / pagamento.recusado (payment-service). */
+interface EventoPagamento {
+  tenantId: string;
+  pedidoId: string;
+  motivo?: string;
+}
+
 @Controller()
 export class ConsumidorEventosController {
+  private readonly logger = new Logger(ConsumidorEventosController.name);
+
   constructor(
     private pedidoService: PedidoService,
     private pagamentoService: PagamentoService,
   ) {}
 
   /**
-   * Consome evento de Nota Fiscal Autorizada do fiscal-service.
-   * Marca o pedido como FATURADO quando NF-e é autorizada.
+   * Consome nota.autorizada do fiscal-service.
+   * Marca o pedido como FATURADO quando a NF-e é autorizada.
    */
   @EventPattern(TOPICOS_CONSUMIDOS.NOTA_AUTORIZADA)
-  async aoNotaAutorizada(dados: any) {
-    try {
-      const { tenantId, pedidoId, notaFiscalId, numero, serieNota } = dados;
+  async aoNotaAutorizada(@Payload() evento: EventoNotaAutorizada) {
+    if (!evento?.tenantId || !evento?.pedidoId) {
+      this.logger.warn('nota.autorizada ignorada: payload incompleto');
+      return;
+    }
 
-      // Atualiza pedido para FATURADO
+    try {
+      const novo = await this.pedidoService.registrarEvento(
+        evento.tenantId,
+        TOPICOS_CONSUMIDOS.NOTA_AUTORIZADA,
+        evento.pedidoId,
+      );
+      if (!novo) {
+        this.logger.log(`nota.autorizada [${evento.pedidoId}] já processada — ignorada`);
+        return;
+      }
+
       await this.pedidoService.atualizarStatusPedido(
-        tenantId,
-        pedidoId,
+        evento.tenantId,
+        evento.pedidoId,
         'FATURADO',
-        `Nota Fiscal ${serieNota}/${numero} autorizada. ID: ${notaFiscalId}`,
+        `Nota Fiscal ${evento.serieNota ?? ''}/${evento.numero ?? ''} autorizada. ID: ${evento.notaFiscalId}`,
       );
 
-      console.log(`✅ Pedido ${pedidoId} marcado como FATURADO (NF-e ${numero})`);
+      this.logger.log(
+        `Pedido ${evento.pedidoId} marcado como FATURADO (NF-e ${evento.numero ?? '?'})`,
+      );
     } catch (erro) {
-      console.error('Erro ao processar NOTA_AUTORIZADA:', erro);
+      this.logger.error(
+        `Erro ao processar nota.autorizada [${evento.pedidoId}]`,
+        erro instanceof Error ? erro.stack : String(erro),
+      );
     }
   }
 
   /**
-   * Consome evento de Estoque Reservado do inventory-service.
-   * Inicia a separação dos itens do pedido.
+   * Consome estoque.reservado do inventory-service.
+   * Avança o pedido para EM_SEPARACAO (via CONFIRMADO), respeitando a máquina
+   * de estados. Idempotente por (estoque.reservado, pedidoId).
    */
   @EventPattern(TOPICOS_CONSUMIDOS.ESTOQUE_RESERVADO)
-  async aoEstoqueReservado(dados: any) {
+  async aoEstoqueReservado(@Payload() evento: EventoEstoqueReservado) {
+    if (!evento?.tenantId || !evento?.pedidoId) {
+      this.logger.warn('estoque.reservado ignorado: payload incompleto');
+      return;
+    }
+
     try {
-      const { tenantId, pedidoId, itensReservados } = dados;
-
-      // Atualiza pedido para EM_SEPARACAO
-      await this.pedidoService.atualizarStatusPedido(
-        tenantId,
-        pedidoId,
-        'EM_SEPARACAO',
-        `Estoque reservado para ${itensReservados.length} itens`,
+      const novo = await this.pedidoService.registrarEvento(
+        evento.tenantId,
+        TOPICOS_CONSUMIDOS.ESTOQUE_RESERVADO,
+        evento.pedidoId,
       );
+      if (!novo) {
+        this.logger.log(`estoque.reservado [${evento.pedidoId}] já processado — ignorado`);
+        return;
+      }
 
-      console.log(
-        `📦 Pedido ${pedidoId} iniciando separação (${itensReservados.length} itens)`,
-      );
+      const qtd = evento.itensReservados?.length ?? 0;
+      await this.pedidoService.reagirEstoqueReservado(evento.tenantId, evento.pedidoId, qtd);
     } catch (erro) {
-      console.error('Erro ao processar ESTOQUE_RESERVADO:', erro);
+      this.logger.error(
+        `Erro ao processar estoque.reservado [${evento.pedidoId}]`,
+        erro instanceof Error ? erro.stack : String(erro),
+      );
     }
   }
 
   /**
-   * Consome evento de Estoque Insuficiente do inventory-service.
-   * Notifica sobre problema de estoque.
+   * Consome estoque.insuficiente do inventory-service.
+   * Sinaliza pendência de estoque no pedido e registra o detalhe no histórico.
+   * Idempotente por (estoque.insuficiente, pedidoId).
    */
   @EventPattern(TOPICOS_CONSUMIDOS.ESTOQUE_INSUFICIENTE)
-  async aoEstoqueInsuficiente(dados: any) {
+  async aoEstoqueInsuficiente(@Payload() evento: EventoEstoqueInsuficiente) {
+    if (!evento?.tenantId || !evento?.pedidoId) {
+      this.logger.warn('estoque.insuficiente ignorado: payload incompleto');
+      return;
+    }
+
     try {
-      const { tenantId, pedidoId, itensFaltantes } = dados;
-
-      // Atualiza status para PENDENTE com observação
-      const descricao = `Estoque insuficiente: ${itensFaltantes
-        .map((i: any) => `${i.sku} (${i.quantidadeFaltante} un)`)
-        .join(', ')}`;
-
-      await this.pedidoService.atualizarStatusPedido(
-        tenantId,
-        pedidoId,
-        'PENDENTE',
-        descricao,
+      const novo = await this.pedidoService.registrarEvento(
+        evento.tenantId,
+        TOPICOS_CONSUMIDOS.ESTOQUE_INSUFICIENTE,
+        evento.pedidoId,
       );
+      if (!novo) {
+        this.logger.log(`estoque.insuficiente [${evento.pedidoId}] já processado — ignorado`);
+        return;
+      }
 
-      console.log(`⚠️  Pedido ${pedidoId} com problema de estoque`);
+      await this.pedidoService.reagirEstoqueInsuficiente(
+        evento.tenantId,
+        evento.pedidoId,
+        evento.itensFaltantes ?? [],
+      );
     } catch (erro) {
-      console.error('Erro ao processar ESTOQUE_INSUFICIENTE:', erro);
+      this.logger.error(
+        `Erro ao processar estoque.insuficiente [${evento.pedidoId}]`,
+        erro instanceof Error ? erro.stack : String(erro),
+      );
     }
   }
 
   /**
-   * Consome evento de Pedido Recebido do marketplace-service.
-   * Cria novo pedido automaticamente.
+   * Consome estoque.liberado do inventory-service.
+   * Confirma (para observabilidade da saga) que as reservas do pedido foram
+   * liberadas após cancelamento. Idempotente por (estoque.liberado, pedidoId).
+   */
+  @EventPattern(TOPICOS_CONSUMIDOS.ESTOQUE_LIBERADO)
+  async aoEstoqueLiberado(@Payload() evento: EventoEstoqueLiberado) {
+    if (!evento?.tenantId || !evento?.pedidoId) {
+      this.logger.warn('estoque.liberado ignorado: payload incompleto');
+      return;
+    }
+
+    try {
+      const novo = await this.pedidoService.registrarEvento(
+        evento.tenantId,
+        TOPICOS_CONSUMIDOS.ESTOQUE_LIBERADO,
+        evento.pedidoId,
+      );
+      if (!novo) {
+        this.logger.log(`estoque.liberado [${evento.pedidoId}] já processado — ignorado`);
+        return;
+      }
+
+      const qtd = evento.itens?.length ?? 0;
+      await this.pedidoService.reagirEstoqueLiberado(evento.tenantId, evento.pedidoId, qtd);
+    } catch (erro) {
+      this.logger.error(
+        `Erro ao processar estoque.liberado [${evento.pedidoId}]`,
+        erro instanceof Error ? erro.stack : String(erro),
+      );
+    }
+  }
+
+  /**
+   * Consome marketplace.pedido.recebido do marketplace-service.
+   * Cria um novo pedido a partir do canal externo.
    */
   @EventPattern(TOPICOS_CONSUMIDOS.MARKETPLACE_PEDIDO_RECEBIDO)
-  async aoMarketplacePedidoRecebido(dados: any) {
-    try {
-      const {
-        tenantId,
-        pedidoExternoId,
-        canalOrigem,
-        clienteNome,
-        clienteEmail,
-        itens,
-        valorTotal,
-        enderecoEntrega,
-      } = dados;
+  async aoMarketplacePedidoRecebido(@Payload() evento: EventoMarketplacePedido) {
+    if (!evento?.tenantId || !evento?.pedidoExternoId || !Array.isArray(evento?.itens)) {
+      this.logger.warn('marketplace.pedido.recebido ignorado: payload incompleto');
+      return;
+    }
 
-      // Cria novo pedido a partir do marketplace
-      const novoPedido = await this.pedidoService.criarPedido(tenantId, {
+    try {
+      const novoPedido = await this.pedidoService.criarPedido(evento.tenantId, {
         origem: 'MARKETPLACE',
-        canalOrigem,
-        pedidoExternoId,
-        clienteNome,
-        clienteEmail,
-        itens: itens.map((i: any) => ({
+        canalOrigem: evento.canalOrigem,
+        pedidoExternoId: evento.pedidoExternoId,
+        clienteNome: evento.clienteNome,
+        clienteEmail: evento.clienteEmail,
+        itens: evento.itens.map((i) => ({
           produtoId: i.produtoId,
           variacaoId: i.variacaoId,
           sku: i.sku,
@@ -136,87 +294,100 @@ export class ConsumidorEventosController {
           altura: i.altura,
           comprimento: i.comprimento,
         })),
-        enderecoEntrega,
-      } as any);
+        enderecoEntrega: evento.enderecoEntrega as never,
+      });
 
-      console.log(
-        `🛒 Pedido criado do marketplace: ${novoPedido.id} (${canalOrigem}/${pedidoExternoId})`,
+      this.logger.log(
+        `Pedido criado do marketplace: ${novoPedido.id} (${evento.canalOrigem ?? '?'}/${evento.pedidoExternoId})`,
       );
     } catch (erro) {
-      console.error('Erro ao processar MARKETPLACE_PEDIDO_RECEBIDO:', erro);
+      this.logger.error(
+        `Erro ao processar marketplace.pedido.recebido [${evento.pedidoExternoId}]`,
+        erro instanceof Error ? erro.stack : String(erro),
+      );
     }
   }
 
   /**
-   * Consome evento de Pagamento Autorizado do payment-service.
-   * Atualiza status de pagamento.
+   * Consome pagamento.autorizado do payment-service.
+   * Registra o pagamento e confirma o pedido se ainda estiver PENDENTE.
    */
   @EventPattern(TOPICOS_CONSUMIDOS.PAGAMENTO_AUTORIZADO)
-  async aoPagamentoAutorizado(dados: any) {
+  async aoPagamentoAutorizado(@Payload() evento: EventoPagamentoAutorizado) {
+    if (!evento?.tenantId || !evento?.pedidoId) {
+      this.logger.warn('pagamento.autorizado ignorado: payload incompleto');
+      return;
+    }
+
     try {
-      const { tenantId, pedidoId, pagamentoId, valor, transacaoExternaId } = dados;
-
-      // Registra pagamento autorizado
-      await this.pagamentoService.registrarPagamento(tenantId, pedidoId, {
-        tipo: dados.tipo,
+      await this.pagamentoService.registrarPagamento(evento.tenantId, evento.pedidoId, {
+        tipo: evento.tipo ?? 'MARKETPLACE',
         status: 'APROVADO',
-        valor,
-        gateway: dados.gateway,
-        transacaoExternaId,
-        dadosGateway: dados.dadosGateway,
-      } as any);
+        valor: evento.valor,
+        gateway: evento.gateway,
+        transacaoExternaId: evento.transacaoExternaId,
+        dadosGateway: evento.dadosGateway,
+      });
 
-      // Atualiza status do pedido para CONFIRMADO se ainda está PENDENTE
-      await this.pedidoService.confirmarPedidoAposAutorizacao(tenantId, pedidoId);
+      // Confirma o pedido se ainda estiver PENDENTE.
+      await this.pedidoService.confirmarPedidoAposAutorizacao(evento.tenantId, evento.pedidoId);
 
-      console.log(`💳 Pagamento autorizado para pedido ${pedidoId}`);
+      this.logger.log(`Pagamento autorizado para pedido ${evento.pedidoId}`);
     } catch (erro) {
-      console.error('Erro ao processar PAGAMENTO_AUTORIZADO:', erro);
+      this.logger.error(
+        `Erro ao processar pagamento.autorizado [${evento.pedidoId}]`,
+        erro instanceof Error ? erro.stack : String(erro),
+      );
     }
   }
 
   /**
-   * Consome evento de Pagamento Capturado do payment-service.
-   * Marca pedido como PAGO.
+   * Consome pagamento.capturado do payment-service.
+   * Marca o pagamento do pedido como PAGO.
    */
   @EventPattern(TOPICOS_CONSUMIDOS.PAGAMENTO_CAPTURADO)
-  async aoPagamentoCapturado(dados: any) {
+  async aoPagamentoCapturado(@Payload() evento: EventoPagamento) {
+    if (!evento?.tenantId || !evento?.pedidoId) {
+      this.logger.warn('pagamento.capturado ignorado: payload incompleto');
+      return;
+    }
+
     try {
-      const { tenantId, pedidoId } = dados;
-
-      // Atualiza pedido para PAGO
-      await this.pedidoService.atualizarStatusPagamento(
-        tenantId,
-        pedidoId,
-        'PAGO',
-      );
-
-      console.log(`✅ Pedido ${pedidoId} marcado como PAGO`);
+      await this.pedidoService.atualizarStatusPagamento(evento.tenantId, evento.pedidoId, 'PAGO');
+      this.logger.log(`Pedido ${evento.pedidoId} marcado como PAGO`);
     } catch (erro) {
-      console.error('Erro ao processar PAGAMENTO_CAPTURADO:', erro);
+      this.logger.error(
+        `Erro ao processar pagamento.capturado [${evento.pedidoId}]`,
+        erro instanceof Error ? erro.stack : String(erro),
+      );
     }
   }
 
   /**
-   * Consome evento de Pagamento Recusado do payment-service.
+   * Consome pagamento.recusado do payment-service.
+   * Marca o pagamento do pedido como CANCELADO.
    */
   @EventPattern(TOPICOS_CONSUMIDOS.PAGAMENTO_RECUSADO)
-  async aoPagamentoRecusado(dados: any) {
-    try {
-      const { tenantId, pedidoId, motivo } = dados;
+  async aoPagamentoRecusado(@Payload() evento: EventoPagamento) {
+    if (!evento?.tenantId || !evento?.pedidoId) {
+      this.logger.warn('pagamento.recusado ignorado: payload incompleto');
+      return;
+    }
 
-      // Atualiza status de pagamento
+    try {
       await this.pedidoService.atualizarStatusPagamento(
-        tenantId,
-        pedidoId,
+        evento.tenantId,
+        evento.pedidoId,
         'CANCELADO',
       );
-
-      console.log(
-        `❌ Pagamento recusado para pedido ${pedidoId}: ${motivo}`,
+      this.logger.warn(
+        `Pagamento recusado para pedido ${evento.pedidoId}: ${evento.motivo ?? 'sem motivo'}`,
       );
     } catch (erro) {
-      console.error('Erro ao processar PAGAMENTO_RECUSADO:', erro);
+      this.logger.error(
+        `Erro ao processar pagamento.recusado [${evento.pedidoId}]`,
+        erro instanceof Error ? erro.stack : String(erro),
+      );
     }
   }
 }

@@ -85,11 +85,28 @@ export class ConsumidorEventosService implements OnModuleInit, OnModuleDestroy {
     topico: string,
     mensagem: { key: string; value: string; timestamp: string },
   ) {
-    const tenantId = mensagem.key || 'tenant-default';
+    let dados: Record<string, any>;
+    try {
+      dados = JSON.parse(mensagem.value);
+    } catch (erro) {
+      this.logger.error(
+        `Payload inválido em ${topico}: ${(erro as Error).message}`,
+      );
+      return;
+    }
+
+    // tenantId vem da chave da mensagem (roteamento) ou do próprio payload.
+    // Sem tenant identificável NÃO processamos — evita escrever dados sob um
+    // tenant fictício e vazá-los entre inquilinos.
+    const tenantId = mensagem.key || dados.tenantId;
+    if (!tenantId) {
+      this.logger.warn(
+        `Evento ${topico} descartado: sem tenantId na chave nem no payload`,
+      );
+      return;
+    }
 
     try {
-      const dados = JSON.parse(mensagem.value);
-
       this.logger.debug(
         `Evento recebido: ${topico} para tenant ${tenantId}`,
       );

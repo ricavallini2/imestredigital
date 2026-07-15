@@ -6,7 +6,7 @@
  * Executar com: npm run db:seed
  */
 
-import { PrismaClient } from '../generated/client';
+import { Prisma, PrismaClient } from '../generated/client';
 
 const prisma = new PrismaClient();
 
@@ -17,9 +17,9 @@ async function main() {
   console.log('🌱 Iniciando seed do AI Service...');
 
   // ─── Insights ─────────────────────────────────────────────────
-  const insights = [
+  const insights: Prisma.InsightIAUncheckedCreateInput[] = [
     {
-      id: 'i0000000-0000-0000-0000-000000000001',
+      id: 'a0000001-0000-0000-0000-000000000001',
       tenantId: TENANT_ID,
       tipo: 'ALERTA' as const,
       titulo: 'Estoque crítico: Notebook Gamer',
@@ -36,7 +36,7 @@ async function main() {
       acaoSugerida: 'Criar pedido de compra de ao menos 20 unidades com fornecedor preferencial.',
     },
     {
-      id: 'i0000000-0000-0000-0000-000000000002',
+      id: 'a0000001-0000-0000-0000-000000000002',
       tenantId: TENANT_ID,
       tipo: 'OPORTUNIDADE' as const,
       titulo: 'Alta demanda em Periféricos — Shopee',
@@ -53,7 +53,7 @@ async function main() {
       acaoSugerida: 'Aumentar estoque para 100 unidades e criar anúncio no Mercado Livre com preço competitivo.',
     },
     {
-      id: 'i0000000-0000-0000-0000-000000000003',
+      id: 'a0000001-0000-0000-0000-000000000003',
       tenantId: TENANT_ID,
       tipo: 'TENDENCIA' as const,
       titulo: 'Crescimento consistente em Tecnologia',
@@ -68,7 +68,7 @@ async function main() {
       acaoSugerida: 'Ampliar catálogo de produtos de tecnologia e criar campanhas focadas nesse segmento.',
     },
     {
-      id: 'i0000000-0000-0000-0000-000000000004',
+      id: 'a0000001-0000-0000-0000-000000000004',
       tenantId: TENANT_ID,
       tipo: 'ANOMALIA' as const,
       titulo: 'Pico incomum de devoluções',
@@ -95,9 +95,9 @@ async function main() {
   console.log(`  ✅ ${insights.length} InsightsIA criados`);
 
   // ─── Sugestões ─────────────────────────────────────────────────
-  const sugestoes = [
+  const sugestoes: Prisma.SugestaoIAUncheckedCreateInput[] = [
     {
-      id: 's0000000-0000-0000-0000-000000000001',
+      id: 'b0000001-0000-0000-0000-000000000001',
       tenantId: TENANT_ID,
       tipo: 'PRECO' as const,
       status: 'PENDENTE' as const,
@@ -111,7 +111,7 @@ async function main() {
       confianca: '0.8500',
     },
     {
-      id: 's0000000-0000-0000-0000-000000000002',
+      id: 'b0000001-0000-0000-0000-000000000002',
       tenantId: TENANT_ID,
       tipo: 'ESTOQUE' as const,
       status: 'PENDENTE' as const,
@@ -125,7 +125,7 @@ async function main() {
       confianca: '0.9200',
     },
     {
-      id: 's0000000-0000-0000-0000-000000000003',
+      id: 'b0000001-0000-0000-0000-000000000003',
       tenantId: TENANT_ID,
       tipo: 'MARKETING' as const,
       status: 'ACEITA' as const,
@@ -150,10 +150,10 @@ async function main() {
 
   // ─── Conversa de demonstração ─────────────────────────────────
   const conversa = await prisma.conversaIA.upsert({
-    where: { id: 'c0000000-0000-0000-0000-000000000001' },
+    where: { id: 'c0000001-0000-0000-0000-000000000001' },
     update: {},
     create: {
-      id: 'c0000000-0000-0000-0000-000000000001',
+      id: 'c0000001-0000-0000-0000-000000000001',
       tenantId: TENANT_ID,
       usuarioId: USER_ADMIN_ID,
       titulo: 'Análise de vendas de abril',
@@ -165,16 +165,18 @@ async function main() {
     },
   });
 
-  const mensagens = [
+  const mensagens: Prisma.MensagemIAUncheckedCreateInput[] = [
     {
+      id: 'd0000001-0000-0000-0000-000000000001',
       conversaId: conversa.id,
-      papel: 'USUARIO' as const,
+      papel: 'USUARIO',
       conteudo: 'Como foram as vendas em abril? Quais produtos se destacaram?',
       metadados: {},
     },
     {
+      id: 'd0000001-0000-0000-0000-000000000002',
       conversaId: conversa.id,
-      papel: 'ASSISTENTE' as const,
+      papel: 'ASSISTENTE',
       conteudo: 'Em abril, suas vendas totalizaram R$ 47.832,40 — um crescimento de 23% em relação a março. Os produtos destaque foram:\n\n1. **Mouse Gamer RGB** — 42 unidades (R$ 10.495,80)\n2. **Notebook Gamer 16GB** — 8 unidades (R$ 31.999,20)\n3. **Headset Pro 7.1** — 15 unidades (R$ 5.247,00)\n\nA categoria Tecnologia continua puxando o crescimento. Quer que eu analise algum produto específico ou sugira ações para maio?',
       metadados: {
         tokensUsados: 187,
@@ -185,7 +187,11 @@ async function main() {
   ];
 
   for (const msg of mensagens) {
-    await prisma.mensagemIA.create({ data: msg });
+    await prisma.mensagemIA.upsert({
+      where: { id: msg.id },
+      update: {},
+      create: msg,
+    })
   }
 
   console.log('  ✅ ConversaIA e MensagensIA criadas');

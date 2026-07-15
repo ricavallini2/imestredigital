@@ -25,6 +25,21 @@ enum TipoInsight {
   OPORTUNIDADE
   TENDENCIA
   ANOMALIA
+  // Categorias de domínio usadas pelo motor de insights (gerarInsightsDiarios)
+  VENDA
+  ESTOQUE
+  FINANCEIRO
+  FISCAL
+  MARKETPLACE
+  // Alinhamento com o contrato do frontend (types/index.ts usa PREVISAO)
+  PREVISAO
+}
+
+enum PrioridadeInsight {
+  BAIXA
+  MEDIA
+  ALTA
+  CRITICA
 }
 
 enum StatusInsight {
@@ -39,6 +54,11 @@ enum TipoSugestao {
   ESTOQUE
   MARKETING
   OPERACIONAL
+  // Tipos gerados pelo SugestaoService
+  DESCRICAO_PRODUTO
+  RESPOSTA_MARKETPLACE
+  TITULO_ANUNCIO
+  CLASSIFICACAO
 }
 
 enum StatusSugestao {
@@ -101,11 +121,14 @@ model InsightIA {
   id             String   @id @default(uuid()) @db.Uuid
   tenantId       String   @db.Uuid
 
-  // Tipo de insight: ALERTA, OPORTUNIDADE, TENDENCIA, ANOMALIA
+  // Tipo de insight: ALERTA, OPORTUNIDADE, TENDENCIA, ANOMALIA, VENDA, etc
   tipo           TipoInsight
 
   titulo         String   // Ex: "Produto com estoque crítico"
   descricao      String   @db.Text // Descrição detalhada
+
+  // Prioridade do insight (usada em todo o fluxo e no frontend)
+  prioridade     PrioridadeInsight @default(MEDIA)
 
   // Status do insight
   status         StatusInsight @default(ATIVO)
@@ -123,6 +146,7 @@ model InsightIA {
   @@index([tenantId])
   @@index([tenantId, tipo])
   @@index([tenantId, status])
+  @@index([tenantId, prioridade])
   @@index([criadoEm])
   @@map("insights_ia")
 }

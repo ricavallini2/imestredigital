@@ -8,7 +8,7 @@
  * - Um usuário admin (teste@teste.com / Senha123)
  */
 
-import { PrismaClient } from '../generated/client';
+import { PrismaClient, CargoUsuario } from '../generated/client';
 import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -65,7 +65,7 @@ async function main() {
     console.log(`✅ Usuário admin criado: teste@teste.com`);
 
     // Cria mais alguns usuários de teste com diferentes cargos
-    const usuarios = [
+    const usuarios: { id: string; nome: string; email: string; cargo: CargoUsuario }[] = [
       { id: USER_GERENTE_ID,  nome: 'Gerente Teste',     email: 'gerente@teste.com',     cargo: 'GERENTE' },
       { id: USER_OPERADOR_ID, nome: 'Operador Teste',    email: 'operador@teste.com',    cargo: 'OPERADOR' },
       { id: USER_VIEWER_ID,   nome: 'Visualizador Teste', email: 'visualizador@teste.com', cargo: 'VISUALIZADOR' },

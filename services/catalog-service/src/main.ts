@@ -69,8 +69,10 @@ async function bootstrap() {
     .setVersion('1.0')
     .addBearerAuth()
     .addTag('produtos', 'Gerenciamento de produtos')
+    .addTag('variacoes', 'Variações de produto (grade de tamanhos)')
     .addTag('categorias', 'Gerenciamento de categorias')
     .addTag('marcas', 'Gerenciamento de marcas')
+    .addTag('grades', 'Grades de tamanhos (padrão varejo)')
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

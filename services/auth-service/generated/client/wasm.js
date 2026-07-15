@@ -192,7 +192,34 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.PlanoTenant = exports.$Enums.PlanoTenant = {
+  STARTER: 'STARTER',
+  PROFISSIONAL: 'PROFISSIONAL',
+  ENTERPRISE: 'ENTERPRISE'
+};
 
+exports.StatusTenant = exports.$Enums.StatusTenant = {
+  ATIVO: 'ATIVO',
+  INATIVO: 'INATIVO',
+  SUSPENSO: 'SUSPENSO',
+  TRIAL: 'TRIAL',
+  CANCELADO: 'CANCELADO'
+};
+
+exports.CargoUsuario = exports.$Enums.CargoUsuario = {
+  ADMIN: 'ADMIN',
+  GERENTE: 'GERENTE',
+  OPERADOR: 'OPERADOR',
+  VISUALIZADOR: 'VISUALIZADOR'
+};
+
+exports.StatusUsuario = exports.$Enums.StatusUsuario = {
+  ATIVO: 'ATIVO',
+  INATIVO: 'INATIVO',
+  BLOQUEADO: 'BLOQUEADO',
+  PENDENTE: 'PENDENTE',
+  REMOVIDO: 'REMOVIDO'
+};
 
 exports.Prisma.ModelName = {
   Tenant: 'Tenant',

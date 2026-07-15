@@ -4,13 +4,14 @@
 
 import { IsString, IsNumber, IsDateString, IsOptional, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { TIPOS_LANCAMENTO, FORMAS_PAGAMENTO } from '../enums';
 
 export class CriarLancamentoDTO {
   @ApiProperty({
     description: 'Tipo do lançamento',
-    enum: ['RECEITA', 'DESPESA', 'TRANSFERENCIA'],
+    enum: TIPOS_LANCAMENTO,
   })
-  @IsEnum(['RECEITA', 'DESPESA', 'TRANSFERENCIA'])
+  @IsEnum(TIPOS_LANCAMENTO)
   tipo: string;
 
   @ApiProperty({
@@ -78,10 +79,10 @@ export class CriarLancamentoDTO {
 
   @ApiProperty({
     description: 'Forma de pagamento',
-    enum: ['PIX', 'TED', 'DOC', 'BOLETO', 'DINHEIRO', 'CARTAO'],
+    enum: FORMAS_PAGAMENTO,
     required: false,
   })
-  @IsString()
+  @IsEnum(FORMAS_PAGAMENTO)
   @IsOptional()
   formaPagamento?: string;
 

@@ -15,6 +15,7 @@ import {
   Body,
   Param,
   Request,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,9 +24,11 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { ClassificacaoService } from './classificacao.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Classificação')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('classificacao')
 export class ClassificacaoController {
   constructor(private service: ClassificacaoService) {}

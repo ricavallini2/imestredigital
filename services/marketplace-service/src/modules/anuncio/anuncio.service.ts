@@ -4,7 +4,9 @@ import { ContaMarketplaceRepository } from '../conta-marketplace/conta-marketpla
 import { IntegracaoFactory } from '../integracao/integracao.factory';
 import { ProdutorEventosService } from '../eventos/produtor-eventos.service';
 import { CacheService } from '../cache/cache.service';
-import { StatusAnuncio } from '../../../generated/client';
+import { StatusAnuncio, Prisma } from '../../../generated/client';
+import { FiltroAnuncioDto } from '../../dtos/filtro-anuncio.dto';
+import { RespostaPaginada, montarRespostaPaginada } from '../../common/resposta-paginada';
 
 /**
  * Serviço de gerenciamento de anúncios no marketplace
@@ -93,7 +95,7 @@ export class AnuncioService {
       const adapter = this.integracaoFactory.criar(conta.plataforma);
       await adapter.atualizarAnuncio(anuncio.idExterno, dados);
 
-      const anuncioAtualizado = await this.repository.atualizar(anuncioId, {
+      const anuncioAtualizado = await this.repository.atualizar(anuncioId, tenantId, {
         titulo: dados.titulo || anuncio.titulo,
         descricao: dados.descricao || anuncio.descricao,
         preco: dados.preco || anuncio.preco,
@@ -127,11 +129,12 @@ export class AnuncioService {
         anuncio.contaMarketplaceId,
         tenantId,
       );
+      if (!conta) throw new NotFoundException('Conta não encontrada');
 
       const adapter = this.integracaoFactory.criar(conta.plataforma);
       await adapter.pausarAnuncio(anuncio.idExterno);
 
-      return this.repository.atualizar(anuncioId, {
+      return this.repository.atualizar(anuncioId, tenantId, {
         status: StatusAnuncio.PAUSADO,
       });
     } catch (erro) {
@@ -152,11 +155,12 @@ export class AnuncioService {
         anuncio.contaMarketplaceId,
         tenantId,
       );
+      if (!conta) throw new NotFoundException('Conta não encontrada');
 
       const adapter = this.integracaoFactory.criar(conta.plataforma);
       await adapter.reativarAnuncio(anuncio.idExterno);
 
-      return this.repository.atualizar(anuncioId, {
+      return this.repository.atualizar(anuncioId, tenantId, {
         status: StatusAnuncio.ATIVO,
       });
     } catch (erro) {
@@ -177,11 +181,12 @@ export class AnuncioService {
         anuncio.contaMarketplaceId,
         tenantId,
       );
+      if (!conta) throw new NotFoundException('Conta não encontrada');
 
       const adapter = this.integracaoFactory.criar(conta.plataforma);
       await adapter.encerrarAnuncio(anuncio.idExterno);
 
-      return this.repository.atualizar(anuncioId, {
+      return this.repository.atualizar(anuncioId, tenantId, {
         status: StatusAnuncio.REMOVIDO,
       });
     } catch (erro) {
@@ -202,11 +207,12 @@ export class AnuncioService {
         anuncio.contaMarketplaceId,
         tenantId,
       );
+      if (!conta) throw new NotFoundException('Conta não encontrada');
 
       const adapter = this.integracaoFactory.criar(conta.plataforma);
       await adapter.atualizarEstoque(anuncio.idExterno, quantidade);
 
-      await this.repository.atualizar(anuncioId, {
+      await this.repository.atualizar(anuncioId, tenantId, {
         estoque: quantidade,
         ultimaSincronizacao: new Date(),
       });
@@ -238,13 +244,14 @@ export class AnuncioService {
         anuncio.contaMarketplaceId,
         tenantId,
       );
+      if (!conta) throw new NotFoundException('Conta não encontrada');
 
       const adapter = this.integracaoFactory.criar(conta.plataforma);
       await adapter.atualizarPreco(anuncio.idExterno, preco, precoPromocional);
 
-      await this.repository.atualizar(anuncioId, {
-        preco: preco as any,
-        precoPromocional: precoPromocional as any,
+      await this.repository.atualizar(anuncioId, tenantId, {
+        preco,
+        precoPromocional: precoPromocional ?? null,
         ultimaSincronizacao: new Date(),
       });
 
@@ -260,10 +267,28 @@ export class AnuncioService {
   }
 
   /**
-   * Lista anúncios
+   * Lista anúncios do tenant no envelope paginado canônico.
+   * Filtra por status e produtoId no nível do anúncio (marketplace vive na conta).
    */
-  async listar(tenantId: string, filtros?: any) {
-    return this.repository.listar(tenantId, filtros);
+  async listar(
+    tenantId: string,
+    filtros?: FiltroAnuncioDto,
+  ): Promise<RespostaPaginada<any>> {
+    const pagina = filtros?.pagina ?? 1;
+    const limite = filtros?.limite ?? 20;
+
+    const where: Prisma.AnuncioMarketplaceWhereInput = {}
+    if (filtros?.status) where.status = filtros.status
+    if (filtros?.produtoId) where.produtoId = filtros.produtoId
+
+    const { itens, total } = await this.repository.listarPaginado(
+      tenantId,
+      where,
+      pagina,
+      limite,
+    )
+
+    return montarRespostaPaginada(itens, total, pagina, limite)
   }
 
   /**

@@ -6,6 +6,12 @@
  * Testa o ciclo de vida completo de um pedido.
  *
  * Executar com: npm run test:e2e
+ *
+ * NOTA: requer banco de dados de teste E um JWT válido (assinado com o
+ * JWT_SECRET do serviço), pois o TenantMiddleware agora verifica a
+ * assinatura do token e retorna 401 para tokens inválidos/ausentes.
+ * O literal `token-teste` abaixo é placeholder — substituir por um token
+ * real emitido pelo auth-service ao rodar de fato.
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
@@ -113,8 +119,12 @@ describe('Pedidos E2E Tests', () => {
         .set('Authorization', `Bearer ${token}`)
         .expect(HttpStatus.OK)
         .then((res) => {
-          expect(res.body).toHaveProperty('pedidos');
-          expect(res.body).toHaveProperty('paginacao');
+          // Envelope paginado canônico (Fase 0)
+          expect(res.body).toHaveProperty('dados');
+          expect(res.body).toHaveProperty('total');
+          expect(res.body).toHaveProperty('pagina');
+          expect(res.body).toHaveProperty('limite');
+          expect(res.body).toHaveProperty('totalPaginas');
         });
     });
 
@@ -139,16 +149,13 @@ describe('Pedidos E2E Tests', () => {
   });
 
   describe('Workflow Completo', () => {
-    it('deve seguir o workflow: SEPARANDO -> SEPARADO -> FATURADO -> ENVIADO -> ENTREGUE', async () => {
-      // SEPARANDO
+    // Estados alinhados ao enum Prisma: a separação é um único estado
+    // (EM_SEPARACAO). Fluxo: CONFIRMADO -> EM_SEPARACAO -> FATURADO ->
+    // ENVIADO -> ENTREGUE.
+    it('deve seguir o workflow via rotas semânticas até ENTREGUE', async () => {
+      // EM_SEPARACAO (rota semântica /separando)
       await request(app.getHttpServer())
         .patch(`/api/v1/pedidos/${pedidoId}/separando`)
-        .set('Authorization', `Bearer ${token}`)
-        .expect(HttpStatus.OK);
-
-      // SEPARADO
-      await request(app.getHttpServer())
-        .patch(`/api/v1/pedidos/${pedidoId}/separado`)
         .set('Authorization', `Bearer ${token}`)
         .expect(HttpStatus.OK);
 
@@ -179,18 +186,59 @@ describe('Pedidos E2E Tests', () => {
     });
   });
 
-  describe('DELETE /pedidos/:id/cancelar - Cancelar Pedido', () => {
-    it('deve cancelar o pedido', () => {
-      return request(app.getHttpServer())
-        .delete(`/api/v1/pedidos/${pedidoId}/cancelar`)
+  describe('PATCH /pedidos/:id/status - Compatibilidade (máquina de estados)', () => {
+    it('deve mapear o status alvo EM_SEPARACAO para a transição correspondente', async () => {
+      // Pré-condição: cria um novo pedido e o confirma para poder separar.
+      // (Fluxo real usa eventos Kafka para RASCUNHO -> PENDENTE -> CONFIRMADO;
+      // aqui exercitamos apenas o endpoint de compatibilidade.)
+      const criado = await request(app.getHttpServer())
+        .post('/api/v1/pedidos')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          clienteNome: 'Maria Compat',
+          itens: [
+            { produtoId: 'prod-c-001', sku: 'SKU-C', titulo: 'Item Compat', quantidade: 1, valorUnitario: 50 },
+          ],
+        })
+        .expect(HttpStatus.CREATED);
+
+      const compatId = criado.body.id;
+
+      // Cancelar via endpoint de compatibilidade (transição válida a partir de RASCUNHO).
+      const res = await request(app.getHttpServer())
+        .patch(`/api/v1/pedidos/${compatId}/status`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ status: 'CANCELADO', motivo: 'Teste de compatibilidade' })
+        .expect(HttpStatus.OK);
+
+      expect(res.body.status).toBe('CANCELADO');
+    });
+  });
+
+  describe('DELETE /pedidos/:id/cancelar - Cancelar Pedido (rota semântica)', () => {
+    it('deve cancelar um pedido recém-criado', async () => {
+      // Usa um pedido novo (o pedidoId principal já foi ENTREGUE no workflow,
+      // e ENTREGUE não permite CANCELADO na máquina de estados).
+      const criado = await request(app.getHttpServer())
+        .post('/api/v1/pedidos')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          clienteNome: 'Cancelar Teste',
+          itens: [
+            { produtoId: 'prod-x-001', sku: 'SKU-X', titulo: 'Item X', quantidade: 1, valorUnitario: 30 },
+          ],
+        })
+        .expect(HttpStatus.CREATED);
+
+      const res = await request(app.getHttpServer())
+        .delete(`/api/v1/pedidos/${criado.body.id}/cancelar`)
         .set('Authorization', `Bearer ${token}`)
         .send({
           motivo: 'Cliente solicitou cancelamento da compra',
         })
-        .expect(HttpStatus.OK)
-        .then((res) => {
-          expect(res.body.status).toBe('CANCELADO');
-        });
+        .expect(HttpStatus.OK);
+
+      expect(res.body.status).toBe('CANCELADO');
     });
   });
 

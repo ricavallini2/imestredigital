@@ -82,6 +82,10 @@ services:
     restart: unless-stopped
     ports:
       - "8080:8080"
+    # O entrypoint grava o config em /tmp/config.yml antes de iniciar o console
+    # (padrão da documentação oficial — sem ele o container entra em crash-loop).
+    entrypoint: /bin/sh
+    command: -c 'echo "$$CONSOLE_CONFIG_FILE" > /tmp/config.yml; /app/console'
     environment:
       CONFIG_FILEPATH: /tmp/config.yml
       CONSOLE_CONFIG_FILE: |

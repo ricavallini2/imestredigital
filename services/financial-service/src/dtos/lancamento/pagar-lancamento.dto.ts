@@ -2,8 +2,9 @@
  * DTO para registrar pagamento de lançamento.
  */
 
-import { IsString, IsNumber, IsDateString, IsOptional } from 'class-validator';
+import { IsString, IsNumber, IsDateString, IsOptional, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { FORMAS_PAGAMENTO } from '../enums';
 
 export class PagarLancamentoDTO {
   @ApiProperty({
@@ -31,10 +32,10 @@ export class PagarLancamentoDTO {
 
   @ApiProperty({
     description: 'Forma de pagamento',
-    enum: ['PIX', 'TED', 'DOC', 'BOLETO', 'DINHEIRO', 'CARTAO'],
+    enum: FORMAS_PAGAMENTO,
     required: false,
   })
-  @IsString()
+  @IsEnum(FORMAS_PAGAMENTO)
   @IsOptional()
   formaPagamento?: string;
 

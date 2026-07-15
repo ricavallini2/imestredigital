@@ -15,12 +15,13 @@ import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/commo
 import { Request, Response, NextFunction } from 'express';
 import { JwtService } from '@nestjs/jwt';
 
-// Estende a interface Request para incluir tenantId
+// Estende a interface Request para incluir os dados extraídos do JWT
 declare global {
   namespace Express {
     interface Request {
       tenantId?: string;
       usuarioId?: string;
+      cargo?: string;
     }
   }
 }
@@ -46,14 +47,25 @@ export class TenantMiddleware implements NestMiddleware {
 
     try {
       const token = authHeader.split(' ')[1];
+      // Verifica a ASSINATURA e a expiração do token (nunca decode puro).
       const payload = this.jwtService.verify(token);
 
-      // Injeta tenantId e usuarioId na requisição
+      // Token válido mas sem tenant → não autoriza (evita queries sem isolamento).
+      if (!payload?.tenantId) {
+        throw new UnauthorizedException('Token inválido: tenantId ausente');
+      }
+
+      // Injeta contexto de tenant/usuário na requisição.
       req.tenantId = payload.tenantId;
-      req.usuarioId = payload.sub;
+      req.usuarioId = payload.sub ?? payload.usuarioId;
+      req.cargo = payload.cargo;
 
       next();
     } catch (erro) {
+      // Preserva a mensagem específica de tenantId ausente; demais viram 401 genérico.
+      if (erro instanceof UnauthorizedException) {
+        throw erro;
+      }
       throw new UnauthorizedException('Token inválido ou expirado');
     }
   }

@@ -14,6 +14,28 @@ import { PagamentoRepository } from './pagamento.repository';
 import { CacheService } from '../cache/cache.service';
 import { KafkaProducerService } from '../kafka/kafka-producer.service';
 import { RegistrarPagamentoDto } from '../../dtos/pagamento.dto';
+import { StatusPagamentoDetalhado } from '../../../generated/client';
+
+/**
+ * Normaliza o status livre recebido (REST/webhook/evento) para o enum canônico
+ * `StatusPagamentoDetalhado` do Prisma (fonte da verdade). Sinônimos legados
+ * ("AUTORIZADO", "PAGO") mapeiam para APROVADO; desconhecidos caem em PENDENTE
+ * (nunca gravamos string arbitrária no enum → evita erro de enum drift).
+ */
+const MAPA_STATUS_PAGAMENTO: Record<string, StatusPagamentoDetalhado> = {
+  PENDENTE: StatusPagamentoDetalhado.PENDENTE,
+  PROCESSANDO: StatusPagamentoDetalhado.PROCESSANDO,
+  APROVADO: StatusPagamentoDetalhado.APROVADO,
+  AUTORIZADO: StatusPagamentoDetalhado.APROVADO,
+  PAGO: StatusPagamentoDetalhado.APROVADO,
+  RECUSADO: StatusPagamentoDetalhado.RECUSADO,
+  ESTORNADO: StatusPagamentoDetalhado.ESTORNADO,
+};
+
+function normalizarStatusPagamento(status: string | undefined): StatusPagamentoDetalhado {
+  if (!status) return StatusPagamentoDetalhado.PENDENTE;
+  return MAPA_STATUS_PAGAMENTO[status.trim().toUpperCase()] ?? StatusPagamentoDetalhado.PENDENTE;
+}
 
 @Injectable()
 export class PagamentoService {
@@ -25,16 +47,21 @@ export class PagamentoService {
 
   /**
    * Registrar novo pagamento.
+   *
+   * Persiste o status já normalizado ao enum canônico e, quando o pagamento é
+   * APROVADO, publica `pedido.pago` (contrato da saga → consumido por
+   * inventory-service para baixa definitiva e financial-service para lançamento).
    */
-  async registrarPagamento(
-    tenantId: string,
-    pedidoId: string,
-    dto: RegistrarPagamentoDto,
-  ) {
-    const pagamento = await this.pagamentoRepository.criar(tenantId, pedidoId, dto);
+  async registrarPagamento(tenantId: string, pedidoId: string, dto: RegistrarPagamentoDto) {
+    const statusNormalizado = normalizarStatusPagamento(dto.status);
 
-    // Publicar evento se autorizado ou pago
-    if (dto.status === 'AUTORIZADO') {
+    const pagamento = await this.pagamentoRepository.criar(tenantId, pedidoId, {
+      ...dto,
+      status: statusNormalizado,
+    });
+
+    // Publica pedido.pago apenas quando o pagamento foi efetivamente aprovado.
+    if (statusNormalizado === StatusPagamentoDetalhado.APROVADO) {
       await this.kafkaProducer.publicarPedidoPago(tenantId, pedidoId);
     }
 
@@ -48,19 +75,20 @@ export class PagamentoService {
   /**
    * Processar webhook de gateway de pagamento.
    * Chamado por POST /pagamentos/webhook
+   *
+   * TODO(Fase 1): STUB. Implementar:
+   * - Validação da assinatura HMAC do gateway (segurança do endpoint público).
+   * - Resolução do tenantId a partir da credencial/payload do webhook.
+   * - Atualização do status do pagamento e publicação de PAGAMENTO_CAPTURADO
+   *   (APROVADO) / PAGAMENTO_RECUSADO (RECUSADO) via KafkaProducerService.
    */
   async processarWebhook(tenantId: string, dadosWebhook: any) {
     const { pedidoId, status, transacaoExternaId, motivo } = dadosWebhook;
 
-    // Buscar pagamento para validar
-    // Em produção, validar assinatura do webhook
-
     if (status === 'APROVADO') {
-      // Atualizar status para PAGO
-      // Publicar evento PAGAMENTO_CAPTURADO
+      // Atualizar status para PAGO + publicar evento PAGAMENTO_CAPTURADO
     } else if (status === 'RECUSADO') {
-      // Atualizar status
-      // Publicar evento PAGAMENTO_RECUSADO
+      // Atualizar status + publicar evento PAGAMENTO_RECUSADO
     }
 
     return { sucesso: true };
@@ -69,15 +97,8 @@ export class PagamentoService {
   /**
    * Estornar pagamento.
    */
-  async estornarPagamento(
-    tenantId: string,
-    pagamentoId: string,
-    motivo: string,
-  ) {
-    const pagamento = await this.pagamentoRepository.buscarPorId(
-      tenantId,
-      pagamentoId,
-    );
+  async estornarPagamento(tenantId: string, pagamentoId: string, motivo: string) {
+    const pagamento = await this.pagamentoRepository.buscarPorId(tenantId, pagamentoId);
 
     if (!pagamento) {
       throw new NotFoundException(`Pagamento ${pagamentoId} não encontrado`);

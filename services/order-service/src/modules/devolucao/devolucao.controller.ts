@@ -15,10 +15,12 @@ import {
   HttpCode,
   HttpStatus,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 import { DevolucaoService } from './devolucao.service';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import {
   SolicitarDevolucaoDto,
   AprovarDevolucaoDto,
@@ -28,6 +30,7 @@ import {
 
 @ApiTags('devolucoes')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('devolucoes')
 export class DevolucaoController {
   constructor(private devolucaoService: DevolucaoService) {}

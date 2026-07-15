@@ -9,11 +9,19 @@ import { IsOptional, IsString, IsNumber, IsEnum, Min, Max } from 'class-validato
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
+/**
+ * Valores de status aceitos no filtro de listagem.
+ *
+ * Espelham EXATAMENTE o enum `StatusProduto` do schema Prisma (UPPERCASE_SNAKE),
+ * para que o valor recebido na query possa ir direto ao `where.status` sem
+ * conversão de caixa.
+ */
 export enum StatusProdutoFiltro {
-  RASCUNHO = 'rascunho',
-  ATIVO = 'ativo',
-  INATIVO = 'inativo',
-  DESCONTINUADO = 'descontinuado',
+  RASCUNHO = 'RASCUNHO',
+  ATIVO = 'ATIVO',
+  INATIVO = 'INATIVO',
+  ESGOTADO = 'ESGOTADO',
+  DESCONTINUADO = 'DESCONTINUADO',
 }
 
 export class ListarProdutosDto {
@@ -44,6 +52,6 @@ export class ListarProdutosDto {
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  @Max(100, { message: 'Máximo de 100 itens por página' })
+  @Max(500, { message: 'Máximo de 500 itens por página' })
   itensPorPagina?: number = 20;
 }

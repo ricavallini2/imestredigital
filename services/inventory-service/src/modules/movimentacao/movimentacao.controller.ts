@@ -21,8 +21,16 @@ export class MovimentacaoController {
     @Query('depositoId') depositoId?: string,
     @Query('tipo') tipo?: string,
     @Query('pagina') pagina: number = 1,
-    @Query('itensPorPagina') itensPorPagina: number = 50,
+    @Query('limite') limite?: number,
+    @Query('itensPorPagina') itensPorPagina?: number,
   ) {
-    return this.movService.listar(req.tenantId, { produtoId, depositoId, tipo, pagina, itensPorPagina });
+    return this.movService.listar(req.tenantId, {
+      produtoId,
+      depositoId,
+      tipo,
+      pagina,
+      limite,
+      itensPorPagina,
+    });
   }
 }

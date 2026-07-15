@@ -7,6 +7,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Decimal } from '@prisma/client/runtime/library';
+import { StatusDevolucao } from '../../../generated/client';
 
 @Injectable()
 export class DevolucaoRepository {
@@ -74,30 +75,35 @@ export class DevolucaoRepository {
 
   /**
    * Atualizar status da devolução.
+   *
+   * Write multi-tenant seguro: filtra por { id, tenantId } via updateMany
+   * e retorna a devolução atualizada (buscada com o mesmo filtro de tenant).
    */
   async atualizarStatus(tenantId: string, devolucaoId: string, novoStatus: string) {
-    return this.prisma.devolucao.update({
-      where: { id: devolucaoId },
+    await this.prisma.devolucao.updateMany({
+      where: { id: devolucaoId, tenantId },
       data: {
-        status: novoStatus,
+        status: novoStatus as StatusDevolucao,
         atualizadoEm: new Date(),
       },
-      include: {
-        itens: true,
-      },
+    });
+
+    return this.prisma.devolucao.findFirst({
+      where: { id: devolucaoId, tenantId },
+      include: { itens: true },
     });
   }
 
   /**
-   * Atualizar rastreio de retorno.
+   * Atualizar rastreio de retorno (write multi-tenant seguro).
    */
   async atualizarRastreioRetorno(
     tenantId: string,
     devolucaoId: string,
     codigoRastreioRetorno: string,
   ) {
-    return this.prisma.devolucao.update({
-      where: { id: devolucaoId },
+    return this.prisma.devolucao.updateMany({
+      where: { id: devolucaoId, tenantId },
       data: {
         codigoRastreioRetorno,
         atualizadoEm: new Date(),
@@ -123,7 +129,7 @@ export class DevolucaoRepository {
       if (dataFim) where.criadoEm.lte = new Date(dataFim);
     }
 
-    const [devolucoes, total] = await Promise.all([
+    const [dados, total] = await Promise.all([
       this.prisma.devolucao.findMany({
         where,
         skip,
@@ -134,14 +140,13 @@ export class DevolucaoRepository {
       this.prisma.devolucao.count({ where }),
     ]);
 
+    // Envelope paginado canônico (Fase 0): { dados, total, pagina, limite, totalPaginas }
     return {
-      devolucoes,
-      paginacao: {
-        total,
-        pagina,
-        limite,
-        totalPaginas: Math.ceil(total / limite),
-      },
+      dados,
+      total,
+      pagina,
+      limite,
+      totalPaginas: Math.ceil(total / limite),
     };
   }
 }

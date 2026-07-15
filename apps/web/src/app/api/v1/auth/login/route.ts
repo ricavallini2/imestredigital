@@ -68,10 +68,13 @@ export async function POST(req: NextRequest) {
       expiresIn: '7d',
     });
 
+    // Mesmo shape do backend real (auth-service AuthService.login):
+    // { accessToken, refreshToken, expiresIn, usuario: { ..., tenant } }.
+    // cargo sempre em lowercase (contrato do JWT e do frontend).
     return NextResponse.json({
       accessToken,
       refreshToken,
-      expiresIn: 3600,
+      expiresIn: '1h',
       usuario: {
         id: usuario.id,
         nome: usuario.nome,
@@ -80,13 +83,13 @@ export async function POST(req: NextRequest) {
         tenantId: DEMO_TENANT_ID,
         status: 'ativo',
         emailVerificado: true,
-      },
-      tenant: {
-        id: DEMO_TENANT_ID,
-        nome: 'Empresa Teste LTDA',
-        cnpj: '12345678000190',
-        plano: 'starter',
-        status: 'ativo',
+        tenant: {
+          id: DEMO_TENANT_ID,
+          nome: 'Empresa Teste LTDA',
+          cnpj: '12345678000190',
+          plano: 'starter',
+          status: 'ativo',
+        },
       },
     });
   } catch {

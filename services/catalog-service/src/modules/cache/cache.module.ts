@@ -1,36 +1,23 @@
 /**
- * Módulo de Cache Redis.
+ * Módulo de Cache.
  *
- * Configura o cache distribuído usando Redis.
- * Usado para:
+ * Fornece o `CacheService` (Redis via ioredis, com fallback em memória)
+ * para toda a aplicação. Usado para:
  * - Cache de produtos frequentemente acessados
- * - Cache de categorias (mudam raramente)
- * - Rate limiting de APIs
+ * - Cache de listagens (invalidado em create/update/delete)
+ *
+ * A conexão é resolvida a partir do ambiente (REDIS_HOST/REDIS_PORT/
+ * REDIS_PASSWORD ou REDIS_URL) pelo próprio CacheService. O ConfigModule
+ * é global (registrado no AppModule), portanto não precisa ser reimportado.
  */
 
-import { Module } from '@nestjs/common';
-import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Global, Module } from '@nestjs/common'
 
-import { CacheService } from './cache.service';
+import { CacheService } from './cache.service'
 
+@Global()
 @Module({
-  imports: [
-    NestCacheModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        store: 'memory', // Em produção: trocar por 'redis'
-        // TODO: Configurar redis quando cache-manager-redis-yet estiver disponível
-        // store: redisStore,
-        // host: config.get('REDIS_HOST', 'localhost'),
-        // port: config.get('REDIS_PORT', 6379),
-        ttl: 300, // 5 minutos de cache padrão (em segundos)
-        max: 1000, // Máximo de itens no cache
-      }),
-    }),
-  ],
   providers: [CacheService],
-  exports: [CacheService, NestCacheModule],
+  exports: [CacheService],
 })
 export class CacheConfigModule {}

@@ -15,6 +15,7 @@ import {
   Body,
   Query,
   Request,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,9 +24,11 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { PrevisaoService } from './previsao.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Previsão')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('previsao')
 export class PrevisaoController {
   constructor(private service: PrevisaoService) {}
@@ -138,8 +141,8 @@ export class PrevisaoController {
   ) {
     return this.service.listarPrevisoes(req.tenantId, {
       produtoId,
+      pagina,
       limite,
-      offset: pagina * limite,
     });
   }
 }

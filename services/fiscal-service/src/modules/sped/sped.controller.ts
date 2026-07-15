@@ -3,14 +3,16 @@
  * Endpoints para geração de arquivos SPED Fiscal e Contribuições.
  */
 
-import { Controller, Post, Body, Req, Res, Logger, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Req, Res, Logger, HttpStatus, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Response } from 'express';
 import { SpedService } from './sped.service';
 import { GerarSpedDto } from '../../dtos/gerar-sped.dto';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 
 @ApiTags('SPED')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('sped')
 export class SpedController {
   private readonly logger = new Logger('SpedController');
@@ -25,14 +27,12 @@ export class SpedController {
   @ApiOperation({ summary: 'Gerar SPED Fiscal (ICMS/IPI)' })
   @ApiResponse({ status: 200, description: 'Arquivo SPED Fiscal gerado com sucesso' })
   @ApiResponse({ status: 400, description: 'Dados inválidos ou configuração fiscal ausente' })
-  async gerarSpedFiscal(
-    @Req() req: any,
-    @Body() dados: GerarSpedDto,
-    @Res() res: Response,
-  ) {
+  async gerarSpedFiscal(@Req() req: any, @Body() dados: GerarSpedDto, @Res() res: Response) {
     try {
       const tenantId = req.tenantId;
-      this.logger.log(`Gerando SPED Fiscal - Tenant: ${tenantId}, Período: ${dados.mes}/${dados.ano}`);
+      this.logger.log(
+        `Gerando SPED Fiscal - Tenant: ${tenantId}, Período: ${dados.mes}/${dados.ano}`,
+      );
 
       const resultado = await this.spedService.gerarSpedFiscal(tenantId, {
         mes: dados.mes,
@@ -62,14 +62,12 @@ export class SpedController {
   @ApiOperation({ summary: 'Gerar SPED Contribuições (PIS/COFINS)' })
   @ApiResponse({ status: 200, description: 'Arquivo SPED Contribuições gerado com sucesso' })
   @ApiResponse({ status: 400, description: 'Dados inválidos ou configuração fiscal ausente' })
-  async gerarSpedContribuicoes(
-    @Req() req: any,
-    @Body() dados: GerarSpedDto,
-    @Res() res: Response,
-  ) {
+  async gerarSpedContribuicoes(@Req() req: any, @Body() dados: GerarSpedDto, @Res() res: Response) {
     try {
       const tenantId = req.tenantId;
-      this.logger.log(`Gerando SPED Contribuições - Tenant: ${tenantId}, Período: ${dados.mes}/${dados.ano}`);
+      this.logger.log(
+        `Gerando SPED Contribuições - Tenant: ${tenantId}, Período: ${dados.mes}/${dados.ano}`,
+      );
 
       const resultado = await this.spedService.gerarSpedContribuicoes(tenantId, {
         mes: dados.mes,

@@ -2,7 +2,7 @@
  * Repositório de Regra Fiscal
  */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CriarRegraFiscalDto } from '../../dtos/regra-fiscal.dto';
 
@@ -52,8 +52,9 @@ export class RegraFiscalRepository {
       }),
     ]);
 
+    // Envelope paginado canônico: { dados, total, pagina, limite, totalPaginas }
     return {
-      regras,
+      dados: regras,
       total,
       pagina,
       limite,
@@ -63,22 +64,41 @@ export class RegraFiscalRepository {
 
   /**
    * Atualiza uma regra fiscal.
+   *
+   * Usa updateMany com filtro por tenantId (defesa em profundidade: garante
+   * que uma regra de outro tenant nunca seja alterada, mesmo que o id vaze).
+   * count === 0 significa que a regra não existe para este tenant → NotFound.
    */
   async atualizar(tenantId: string, regraId: string, dados: Partial<CriarRegraFiscalDto>) {
-    return this.prisma.regraFiscal.update({
-      where: { id: regraId },
+    const { count } = await this.prisma.regraFiscal.updateMany({
+      where: { id: regraId, tenantId },
       data: dados as any,
     });
+
+    if (count === 0) {
+      throw new NotFoundException('Regra fiscal não encontrada');
+    }
+
+    return this.obterPorId(tenantId, regraId);
   }
 
   /**
    * Remove uma regra fiscal (marca como inativa).
+   *
+   * Usa updateMany com filtro por tenantId (defesa em profundidade).
+   * count === 0 significa que a regra não existe para este tenant → NotFound.
    */
   async remover(tenantId: string, regraId: string) {
-    return this.prisma.regraFiscal.update({
-      where: { id: regraId },
+    const { count } = await this.prisma.regraFiscal.updateMany({
+      where: { id: regraId, tenantId },
       data: { ativa: false },
     });
+
+    if (count === 0) {
+      throw new NotFoundException('Regra fiscal não encontrada');
+    }
+
+    return this.obterPorId(tenantId, regraId);
   }
 
   /**

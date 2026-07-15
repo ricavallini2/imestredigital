@@ -16,28 +16,50 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Enums ────────────────────────────────────────────────
+
+enum StatusProduto {
+  ATIVO
+  INATIVO
+  RASCUNHO
+  ESGOTADO
+  DESCONTINUADO
+}
+
+enum TipoVariacao {
+  COR
+  TAMANHO
+  MATERIAL
+  VOLTAGEM
+  OUTRO
+}
+
 // ─── Produto ──────────────────────────────────────────────
 
 /// Produto principal do catálogo
 model Produto {
-  id             String  @id @default(uuid()) @db.Uuid
-  tenantId       String  @map("tenant_id") @db.Uuid
+  id             String        @id @default(uuid()) @db.Uuid
+  tenantId       String        @map("tenant_id") @db.Uuid
   sku            String
   gtin           String?
   nome           String
-  descricao      String  @db.Text
-  descricaoCurta String? @map("descricao_curta")
-  status         String  @default("rascunho") // rascunho, ativo, inativo, descontinuado
+  descricao      String        @db.Text
+  descricaoCurta String?       @map("descricao_curta")
+  status         StatusProduto @default(RASCUNHO)
 
   // Dados fiscais
   ncm    String
   cest   String?
   origem Int     @default(0)
 
-  // Precificação (em centavos para evitar problemas com decimais)
-  precoCusto       Int  @map("preco_custo")
-  precoVenda       Int  @map("preco_venda")
-  precoPromocional Int? @map("preco_promocional")
+  // Precificação
+  precoCusto       Decimal  @map("preco_custo") @db.Decimal(19, 2)
+  precoVenda       Decimal  @map("preco_venda") @db.Decimal(19, 2)
+  precoPromocional Decimal? @map("preco_promocional") @db.Decimal(19, 2)
+
+  // Estoque
+  estoqueMinimo Int    @default(0) @map("estoque_minimo")
+  unidadeMedida String @default("UN") @map("unidade_medida")
 
   // Dimensões e peso
   peso        Int // gramas
@@ -95,13 +117,13 @@ model ImagemProduto {
 
 /// Variação de um produto (cor, tamanho, etc.)
 model VariacaoProduto {
-  id         String  @id @default(uuid()) @db.Uuid
-  produtoId  String  @map("produto_id") @db.Uuid
-  produto    Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid()) @db.Uuid
+  produtoId  String   @map("produto_id") @db.Uuid
+  produto    Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
   sku        String
   gtin       String?
   nome       String
-  precoVenda Int?    @map("preco_venda")
+  precoVenda Decimal? @map("preco_venda") @db.Decimal(19, 2)
   peso       Int?
 
   criadoEm     DateTime @default(now()) @map("criado_em")
@@ -110,6 +132,7 @@ model VariacaoProduto {
   atributos AtributoVariacao[]
   imagens   ImagemVariacao[]
 
+  @@unique([produtoId, sku])
   @@index([produtoId])
   @@map("variacoes_produto")
 }

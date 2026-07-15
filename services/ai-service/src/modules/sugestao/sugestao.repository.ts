@@ -1,16 +1,23 @@
 /**
  * Repository de Sugestões - Camada de dados
+ *
+ * Todas as leituras/escritas são escopadas por tenantId.
  */
 
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  Prisma,
+  TipoSugestao,
+  StatusSugestao,
+} from '../../../generated/client';
 
 @Injectable()
 export class SugestaoRepository {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * Cria uma sugestão
+   * Cria uma sugestão (sempre com tenantId).
    */
   async criarSugestao(dados: {
     tenantId: string;
@@ -22,7 +29,7 @@ export class SugestaoRepository {
     return this.prisma.sugestaoIA.create({
       data: {
         tenantId: dados.tenantId,
-        tipo: dados.tipo as any,
+        tipo: dados.tipo as TipoSugestao,
         contexto: dados.contexto,
         sugestao: dados.sugestao,
         confianca: dados.confianca,
@@ -31,7 +38,7 @@ export class SugestaoRepository {
   }
 
   /**
-   * Lista sugestões
+   * Lista sugestões do tenant com filtros. Retorna total para o envelope.
    */
   async listarSugestoes(
     tenantId: string,
@@ -42,22 +49,24 @@ export class SugestaoRepository {
       offset?: number;
     },
   ) {
-    const where: any = { tenantId };
+    const where: Prisma.SugestaoIAWhereInput = { tenantId };
 
     if (filtros?.tipo) {
-      where.tipo = filtros.tipo;
+      where.tipo = filtros.tipo as TipoSugestao;
     }
 
     if (filtros?.aceita !== undefined) {
-      where.status = filtros.aceita ? 'ACEITA' : 'PENDENTE';
+      where.status = filtros.aceita
+        ? StatusSugestao.ACEITA
+        : StatusSugestao.PENDENTE;
     }
 
     const [sugestoes, total] = await Promise.all([
       this.prisma.sugestaoIA.findMany({
         where,
         orderBy: { criadoEm: 'desc' },
-        take: filtros?.limite || 20,
-        skip: filtros?.offset || 0,
+        take: filtros?.limite ?? 20,
+        skip: filtros?.offset ?? 0,
       }),
       this.prisma.sugestaoIA.count({ where }),
     ]);
@@ -66,15 +75,24 @@ export class SugestaoRepository {
   }
 
   /**
-   * Marca sugestão como aceita
+   * Marca sugestão como aceita, restringindo por tenantId.
+   * Retorna o registro atualizado ou null se não pertencer ao tenant.
    */
-  async aceitarSugestao(sugestaoId: string) {
-    return this.prisma.sugestaoIA.update({
-      where: { id: sugestaoId },
+  async aceitarSugestao(tenantId: string, sugestaoId: string) {
+    const resultado = await this.prisma.sugestaoIA.updateMany({
+      where: { id: sugestaoId, tenantId },
       data: {
-        status: 'ACEITA' as any,
+        status: StatusSugestao.ACEITA,
         respondidoEm: new Date(),
       },
+    });
+
+    if (resultado.count === 0) {
+      return null;
+    }
+
+    return this.prisma.sugestaoIA.findFirst({
+      where: { id: sugestaoId, tenantId },
     });
   }
 }

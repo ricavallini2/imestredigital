@@ -65,6 +65,13 @@ const nextConfig: NextConfig = {
    *   já incluem o caminho completo 'api/v1/lancamentos' etc.
    */
   async rewrites() {
+    // Em desenvolvimento local (sem Docker) NÃO defina USE_MICROSERVICES: todos os
+    // /api/v1/* caem nos route handlers mock de app/api/v1/, e o frontend funciona
+    // 100% offline (sem precisar dos microserviços, Postgres, Redis ou Kafka).
+    // Em produção (Docker) defina USE_MICROSERVICES=true para ativar o proxy real.
+    if (process.env.USE_MICROSERVICES !== 'true') {
+      return { beforeFiles: [], afterFiles: [], fallback: [] }
+    }
     return {
       beforeFiles: [
         // ── Auth Service (3001) ─────────────────────────────────────
@@ -73,7 +80,11 @@ const nextConfig: NextConfig = {
         { source: '/api/v1/usuarios/:path*', destination: `${AUTH_SERVICE}/api/v1/usuarios/:path*` },
 
         // ── Catalog Service / Produtos (3010) ───────────────────────
-        { source: '/api/v1/produtos/:path*', destination: `${CATALOG_SERVICE}/api/v1/produtos/:path*` },
+        // Nota: /produtos/:id/variacoes(/prever,/lote) já caem no proxy de produtos abaixo.
+        { source: '/api/v1/produtos/:path*',   destination: `${CATALOG_SERVICE}/api/v1/produtos/:path*` },
+        { source: '/api/v1/categorias/:path*', destination: `${CATALOG_SERVICE}/api/v1/categorias/:path*` },
+        { source: '/api/v1/marcas/:path*',     destination: `${CATALOG_SERVICE}/api/v1/marcas/:path*` },
+        { source: '/api/v1/grades/:path*',     destination: `${CATALOG_SERVICE}/api/v1/grades/:path*` },
 
         // ── Inventory Service / Estoque (3011) ──────────────────────
         { source: '/api/v1/estoque/:path*',       destination: `${INVENTORY_SERVICE}/api/v1/estoque/:path*` },
@@ -87,8 +98,11 @@ const nextConfig: NextConfig = {
         // Controllers já usam path completo 'api/v1/lancamentos' etc.
         { source: '/api/v1/lancamentos/:path*',    destination: `${FINANCIAL_SERVICE}/api/v1/lancamentos/:path*` },
         { source: '/api/v1/contas-bancarias/:path*', destination: `${FINANCIAL_SERVICE}/api/v1/contas/:path*` },
-        { source: '/api/v1/financeiro/fluxo-caixa/:path*', destination: `${FINANCIAL_SERVICE}/api/v1/fluxo-caixa/:path*` },
-        { source: '/api/v1/financeiro/dre/:path*', destination: `${FINANCIAL_SERVICE}/api/v1/dre/:path*` },
+        // Relatórios financeiros: o financial-service agora expõe estes endpoints
+        // no shape exato esperado pelo frontend (RelatoriosController → api/v1/financeiro/*).
+        { source: '/api/v1/financeiro/fluxo-caixa', destination: `${FINANCIAL_SERVICE}/api/v1/financeiro/fluxo-caixa` },
+        { source: '/api/v1/financeiro/dre',         destination: `${FINANCIAL_SERVICE}/api/v1/financeiro/dre` },
+        { source: '/api/v1/financeiro/resumo',      destination: `${FINANCIAL_SERVICE}/api/v1/financeiro/resumo` },
 
         // ── Fiscal Service (3004) ───────────────────────────────────
         // Controllers usam 'v1/notas-fiscais' com globalPrefix 'api'
@@ -102,9 +116,16 @@ const nextConfig: NextConfig = {
         { source: '/api/v1/segmentos/:path*',  destination: `${CUSTOMER_SERVICE}/api/v1/segmentos/:path*` },
 
         // ── Marketplace Service (3007) ──────────────────────────────
-        { source: '/api/v1/anuncios/:path*',            destination: `${MARKETPLACE_SERVICE}/api/v1/anuncios/:path*` },
-        { source: '/api/v1/marketplaces/:path*',        destination: `${MARKETPLACE_SERVICE}/api/v1/contas/:path*` },
-        { source: '/api/v1/pedidos-marketplace/:path*', destination: `${MARKETPLACE_SERVICE}/api/v1/pedidos-marketplace/:path*` },
+        // Controllers padronizados com caminho completo 'api/v1/...' (sem setGlobalPrefix).
+        // A VITRINE (api/v1/marketplaces) serve a UI no shape das telas
+        // (Marketplace/Anuncio/Stats). O recurso técnico 'contas' segue exposto
+        // para operações de conexão (OAuth, desconectar) via /api/v1/contas.
+        { source: '/api/v1/anuncios/:path*',              destination: `${MARKETPLACE_SERVICE}/api/v1/anuncios/:path*` },
+        { source: '/api/v1/marketplaces/:path*',          destination: `${MARKETPLACE_SERVICE}/api/v1/marketplaces/:path*` },
+        { source: '/api/v1/contas/:path*',                destination: `${MARKETPLACE_SERVICE}/api/v1/contas/:path*` },
+        { source: '/api/v1/pedidos-marketplace/:path*',   destination: `${MARKETPLACE_SERVICE}/api/v1/pedidos-marketplace/:path*` },
+        { source: '/api/v1/perguntas-marketplace/:path*', destination: `${MARKETPLACE_SERVICE}/api/v1/perguntas-marketplace/:path*` },
+        { source: '/api/v1/sincronizacao/:path*',         destination: `${MARKETPLACE_SERVICE}/api/v1/sincronizacao/:path*` },
 
         // ── AI Service (3008) ───────────────────────────────────────
         { source: '/api/v1/insights/:path*',   destination: `${AI_SERVICE}/api/v1/insights/:path*` },

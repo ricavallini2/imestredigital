@@ -8,8 +8,8 @@ export async function GET() {
   const d30 = now - 30 * 86400000;
   const d7  = now - 7  * 86400000;
 
-  const emitidas30d = nfs.filter(n => n.status === 'EMITIDA' && new Date(n.dataEmissao).getTime() >= d30);
-  const emitidas7d  = nfs.filter(n => n.status === 'EMITIDA' && new Date(n.dataEmissao).getTime() >= d7);
+  const emitidas30d = nfs.filter(n => n.status === 'AUTORIZADA' && new Date(n.dataEmissao).getTime() >= d30);
+  const emitidas7d  = nfs.filter(n => n.status === 'AUTORIZADA' && new Date(n.dataEmissao).getTime() >= d7);
 
   const faturado30d = emitidas30d.reduce((s, n) => s + n.valorTotal, 0);
   const faturado7d  = emitidas7d.reduce((s, n) => s + n.valorTotal, 0);
@@ -26,7 +26,7 @@ export async function GET() {
   }, {});
 
   const rejeitadas = nfs.filter(n => n.status === 'REJEITADA').length;
-  const emitidas   = nfs.filter(n => n.status === 'EMITIDA').length;
+  const emitidas   = nfs.filter(n => n.status === 'AUTORIZADA').length;
   const total      = nfs.filter(n => n.status !== 'RASCUNHO').length;
 
   return NextResponse.json({
@@ -40,6 +40,6 @@ export async function GET() {
     taxaEmissao:  total > 0 ? +((emitidas / total) * 100).toFixed(1) : 0,
     porStatus,
     porTipo,
-    processando: nfs.filter(n => n.status === 'PROCESSANDO').length,
+    processando: nfs.filter(n => n.status === 'TRANSMITIDA').length,
   });
 }

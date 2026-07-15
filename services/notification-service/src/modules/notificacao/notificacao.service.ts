@@ -5,7 +5,7 @@
  * respeitando as preferências do usuário e gerenciando o status.
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from '../cache/cache.service';
 import { EmailService } from '../email/email.service';
@@ -131,11 +131,6 @@ export class NotificacaoService {
     notificacao: any,
   ): Promise<void> {
     try {
-      await this.prisma.notificacao.update({
-        where: { id: notificacao.id },
-        data: { status: 'ENVIADA' as any },
-      });
-
       switch (notificacao.tipo) {
         case TipoNotificacao.EMAIL:
           await this.email.enviarEmail(tenantId, {
@@ -178,20 +173,23 @@ export class NotificacaoService {
           this.logger.warn(`Tipo de notificação desconhecido: ${notificacao.tipo}`);
       }
 
-      // Marca como enviada
-      await this.prisma.notificacao.update({
-        where: { id: notificacao.id },
+      // Marca como enviada (ou entregue, no caso de notificação interna).
+      // Write sempre escopado por tenantId (updateMany com { id, tenantId }).
+      const statusFinal =
+        notificacao.tipo === TipoNotificacao.INTERNA ? 'ENTREGUE' : 'ENVIADA';
+      await this.prisma.notificacao.updateMany({
+        where: { id: notificacao.id, tenantId },
         data: {
-          status: 'ENVIADA',
+          status: statusFinal as any,
           enviadaEm: new Date(),
         },
       });
     } catch (erro) {
       this.logger.error(`Erro ao disparar notificação ${notificacao.id}:`, erro);
 
-      // Registra falha
-      await this.prisma.notificacao.update({
-        where: { id: notificacao.id },
+      // Registra falha (write escopado por tenantId)
+      await this.prisma.notificacao.updateMany({
+        where: { id: notificacao.id, tenantId },
         data: {
           status: 'FALHA',
           erroMensagem: (erro as any)?.message || 'Erro desconhecido',
@@ -214,7 +212,13 @@ export class NotificacaoService {
       pagina?: number;
       limite?: number;
     },
-  ): Promise<{ dados: any[]; total: number }> {
+  ): Promise<{
+    dados: any[];
+    total: number;
+    pagina: number;
+    limite: number;
+    totalPaginas: number;
+  }> {
     try {
       const where: DesdeWhere = {
         tenantId,
@@ -237,7 +241,14 @@ export class NotificacaoService {
         orderBy: { criadoEm: 'desc' },
       });
 
-      return { dados, total };
+      // Envelope paginado canônico da Fase 0.
+      return {
+        dados,
+        total,
+        pagina,
+        limite,
+        totalPaginas: Math.ceil(total / limite),
+      };
     } catch (erro) {
       this.logger.error('Erro ao listar notificações:', erro);
       throw erro;
@@ -246,25 +257,31 @@ export class NotificacaoService {
 
   /**
    * Marca uma notificação como lida.
+   * Write escopado por tenantId + destinatarioId (nunca where:{id} sozinho).
    */
   async marcarComoLida(
     tenantId: string,
     notificacaoId: string,
     usuarioId: string,
-  ): Promise<any> {
+  ): Promise<{ id: string; status: string; lidaEm: Date }> {
     try {
-      const notificacao = await this.prisma.notificacao.update({
-        where: { id: notificacaoId },
+      const lidaEm = new Date();
+      const resultado = await this.prisma.notificacao.updateMany({
+        where: { id: notificacaoId, tenantId, destinatarioId: usuarioId },
         data: {
           status: 'LIDA',
-          lidaEm: new Date(),
+          lidaEm,
         },
       });
+
+      if (resultado.count === 0) {
+        throw new NotFoundException('Notificação não encontrada');
+      }
 
       // Limpa cache de não lidas
       await this.cache.remover(`nao_lidas:${tenantId}:${usuarioId}`);
 
-      return notificacao;
+      return { id: notificacaoId, status: 'LIDA', lidaEm };
     } catch (erro) {
       this.logger.error('Erro ao marcar notificação como lida:', erro);
       throw erro;

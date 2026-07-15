@@ -1,5 +1,12 @@
+import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { estoqueService, type MovimentacaoEntradaDTO, type TransferenciaDTO, type AjusteDTO, type DepositoDTO } from '@/services/estoque.service';
+import {
+  estoqueService,
+  type MovimentacaoEntradaDTO,
+  type TransferenciaDTO,
+  type AjusteDTO,
+  type DepositoDTO,
+} from '@/services/estoque.service';
 
 // ─── Query Keys ──────────────────────────────────────────────────────────────
 const estoqueKeys = {
@@ -28,6 +35,26 @@ export function useAlertasEstoque() {
   });
 }
 
+/**
+ * Mapa `produtoId -> total disponível` (somado sobre todos os depósitos).
+ *
+ * O saldo de estoque vive no inventory-service (não no catalog): reaproveita a
+ * MESMA query de `/v1/estoque/resumo` (cache do React Query) e agrega por
+ * produto — assim a lista de produtos cruza estoque com um único fetch e o
+ * detalhe consulta o mapa por `produtoId` sem chamada extra por linha.
+ */
+export function useSaldoPorProduto() {
+  const { data, isLoading, isError } = useResumoEstoque();
+  const mapa = useMemo(() => {
+    const acc = new Map<string, number>();
+    for (const item of data?.itens ?? []) {
+      acc.set(item.produtoId, (acc.get(item.produtoId) ?? 0) + (item.disponivel ?? 0));
+    }
+    return acc;
+  }, [data]);
+  return { mapa, isLoading, isError };
+}
+
 export function useAnaliseIAEstoque() {
   return useQuery({
     queryKey: estoqueKeys.analiseIA(),
@@ -39,7 +66,12 @@ export function useAnaliseIAEstoque() {
 // ─── Movimentações ────────────────────────────────────────────────────────────
 
 export function useMovimentacoes(params?: {
-  busca?: string; tipo?: string; produtoId?: string; periodo?: string; pagina?: number; limite?: number;
+  busca?: string;
+  tipo?: string;
+  produtoId?: string;
+  periodo?: string;
+  pagina?: number;
+  limite?: number;
 }) {
   return useQuery({
     queryKey: estoqueKeys.movimentacoes(params),

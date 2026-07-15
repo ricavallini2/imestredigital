@@ -10,6 +10,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Decimal } from '@prisma/client/runtime/library';
+import { StatusPagamento } from '../../../generated/client';
 
 @Injectable()
 export class PedidoRepository {
@@ -138,7 +139,7 @@ export class PedidoRepository {
     const orderBy: any = {};
     orderBy[campo] = direcao === 'asc' ? 'asc' : 'desc';
 
-    const [pedidos, total] = await Promise.all([
+    const [dados, total] = await Promise.all([
       this.prisma.pedido.findMany({
         where,
         skip,
@@ -152,19 +153,22 @@ export class PedidoRepository {
       this.prisma.pedido.count({ where }),
     ]);
 
+    // Envelope paginado canônico (Fase 0): { dados, total, pagina, limite, totalPaginas }
     return {
-      pedidos,
-      paginacao: {
-        total,
-        pagina,
-        limite,
-        totalPaginas: Math.ceil(total / limite),
-      },
+      dados,
+      total,
+      pagina,
+      limite,
+      totalPaginas: Math.ceil(total / limite),
     };
   }
 
   /**
    * Atualizar status do pedido.
+   *
+   * Write multi-tenant seguro: filtra por { id, tenantId } via updateMany
+   * (a chave { id, tenantId } não é única, então update simples não serve).
+   * Retorna o pedido atualizado, buscado com o mesmo filtro de tenant.
    */
   async atualizarStatus(
     tenantId: string,
@@ -182,28 +186,27 @@ export class PedidoRepository {
     if (novoStatus === 'ENTREGUE') updateData.dataEntrega = new Date();
     if (novoStatus === 'CANCELADO') updateData.dataCancelamento = new Date();
 
-    return this.prisma.pedido.update({
-      where: {
-        id: pedidoId,
-      },
+    await this.prisma.pedido.updateMany({
+      where: { id: pedidoId, tenantId },
       data: updateData,
-      include: {
-        itens: true,
-      },
+    });
+
+    return this.prisma.pedido.findFirst({
+      where: { id: pedidoId, tenantId },
+      include: { itens: true },
     });
   }
 
   /**
    * Atualizar status de pagamento.
    */
-  async atualizarStatusPagamento(
-    tenantId: string,
-    pedidoId: string,
-    novoStatus: string,
-  ) {
-    return this.prisma.pedido.update({
-      where: { id: pedidoId },
-      data: { statusPagamento: novoStatus, atualizadoEm: new Date() },
+  async atualizarStatusPagamento(tenantId: string, pedidoId: string, novoStatus: string) {
+    return this.prisma.pedido.updateMany({
+      where: { id: pedidoId, tenantId },
+      data: {
+        statusPagamento: novoStatus as StatusPagamento,
+        atualizadoEm: new Date(),
+      },
     });
   }
 
@@ -217,8 +220,8 @@ export class PedidoRepository {
     transportadora: string,
     prazoEntrega?: number,
   ) {
-    return this.prisma.pedido.update({
-      where: { id: pedidoId },
+    return this.prisma.pedido.updateMany({
+      where: { id: pedidoId, tenantId },
       data: {
         codigoRastreio,
         transportadora,
@@ -241,19 +244,19 @@ export class PedidoRepository {
   }
 
   /**
-   * Atualizar totais do pedido.
+   * Atualizar totais do pedido (write multi-tenant seguro).
    */
   async atualizarTotais(
+    tenantId: string,
     pedidoId: string,
     valorProdutos: number,
     valorDesconto: number,
     valorFrete: number,
   ) {
-    const valorTotal =
-      valorProdutos - valorDesconto + valorFrete;
+    const valorTotal = valorProdutos - valorDesconto + valorFrete;
 
-    return this.prisma.pedido.update({
-      where: { id: pedidoId },
+    return this.prisma.pedido.updateMany({
+      where: { id: pedidoId, tenantId },
       data: {
         valorProdutos: new Decimal(valorProdutos),
         valorDesconto: new Decimal(valorDesconto),
@@ -291,10 +294,32 @@ export class PedidoRepository {
 
   /**
    * Deletar pedido (apenas status RASCUNHO).
+   *
+   * Write multi-tenant seguro: filtra por { id, tenantId } via deleteMany.
    */
   async deletar(tenantId: string, pedidoId: string) {
-    return this.prisma.pedido.delete({
-      where: { id: pedidoId },
+    return this.prisma.pedido.deleteMany({
+      where: { id: pedidoId, tenantId },
+    });
+  }
+
+  /**
+   * Definir a nota fiscal vinculada ao pedido (write multi-tenant seguro).
+   */
+  async definirNotaFiscal(tenantId: string, pedidoId: string, notaFiscalId: string) {
+    return this.prisma.pedido.updateMany({
+      where: { id: pedidoId, tenantId },
+      data: { notaFiscalId, atualizadoEm: new Date() },
+    });
+  }
+
+  /**
+   * Registrar o motivo de cancelamento (write multi-tenant seguro).
+   */
+  async definirMotivoCancelamento(tenantId: string, pedidoId: string, motivoCancelamento: string) {
+    return this.prisma.pedido.updateMany({
+      where: { id: pedidoId, tenantId },
+      data: { motivoCancelamento, atualizadoEm: new Date() },
     });
   }
 
@@ -320,10 +345,7 @@ export class PedidoRepository {
 
     // Calcular estatísticas
     const totalPedidos = pedidos.length;
-    const totalVendas = pedidos.reduce(
-      (sum, p) => sum + parseFloat(p.valorTotal.toString()),
-      0,
-    );
+    const totalVendas = pedidos.reduce((sum, p) => sum + parseFloat(p.valorTotal.toString()), 0);
 
     const porStatus: any = {};
     const porStatusPagamento: any = {};
@@ -353,9 +375,7 @@ export class PedidoRepository {
           };
         }
         topProdutos[item.sku].quantidade += item.quantidade;
-        topProdutos[item.sku].valorTotal += parseFloat(
-          item.valorTotal.toString(),
-        );
+        topProdutos[item.sku].valorTotal += parseFloat(item.valorTotal.toString());
       }
     }
 
@@ -370,5 +390,37 @@ export class PedidoRepository {
         .sort((a: any, b: any) => b.quantidade - a.quantidade)
         .slice(0, 10),
     };
+  }
+
+  /**
+   * Marca um evento como processado (idempotência do consumo Kafka).
+   *
+   * Usa o índice único (evento, referenciaId): se o evento já foi processado,
+   * a criação falha com P2002 e devolvemos `false` (deve ignorar o
+   * reprocessamento). Se registrou agora, devolve `true` (deve aplicar o
+   * efeito colateral). Mesmo contrato do inventory-service.
+   */
+  async registrarEventoProcessado(
+    tenantId: string,
+    evento: string,
+    referenciaId: string,
+  ): Promise<boolean> {
+    try {
+      await this.prisma.eventoProcessado.create({
+        data: { tenantId, evento, referenciaId },
+      });
+      return true;
+    } catch (erro: unknown) {
+      // P2002 = violação de unique → evento já processado.
+      if (
+        typeof erro === 'object' &&
+        erro !== null &&
+        'code' in erro &&
+        (erro as { code?: string }).code === 'P2002'
+      ) {
+        return false;
+      }
+      throw erro;
+    }
   }
 }

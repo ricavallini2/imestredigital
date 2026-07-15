@@ -1,26 +1,28 @@
 /**
- * Módulo de Cache - Redis
+ * Módulo de Cache
  *
  * Configura cache global para toda a aplicação.
+ *
+ * Observação: usamos o store em memória padrão que acompanha o
+ * `cache-manager` v5 para evitar a incompatibilidade do antigo
+ * `cache-manager-redis-store` (que tinha como alvo o cache-manager v4
+ * e gerava erros do tipo `store.del is not a function`).
+ *
+ * Quando o serviço escalar horizontalmente, basta trocar o store
+ * por um adapter Keyv compatível (ex.: `@keyv/redis`).
  */
 
 import { Global, Module } from '@nestjs/common';
 import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
 import { CacheService } from './cache.service';
-import * as redisStore from 'cache-manager-redis-store';
 
 @Global()
 @Module({
   imports: [
     NestCacheModule.register({
       isGlobal: true,
-      store: redisStore as any,
-      // Configuração Redis
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379', 10),
-      password: process.env.REDIS_PASSWORD || undefined,
-      db: parseInt(process.env.REDIS_DB || '0', 10),
-      ttl: 300, // TTL padrão em segundos
+      ttl: 300_000, // TTL padrão em milissegundos (5 min)
+      max: 5_000, // limite de chaves em memória
     }),
   ],
   providers: [CacheService],

@@ -92,4 +92,9 @@ async function bootstrap() {
   console.log(`📚 Docs: http://localhost:${port}/api/docs`);
 }
 
-bootstrap();
+// Fail-fast: qualquer erro no bootstrap (ex.: JWT_SECRET ausente em
+// produção) derruba o processo com código de saída não-zero.
+bootstrap().catch((err) => {
+  console.error('❌ Falha ao iniciar o Auth Service:', err?.message ?? err);
+  process.exit(1);
+});

@@ -92,7 +92,7 @@ function getDados() {
   const valorEstoque = saldos.reduce((s, e) => s + e.fisico * e.custo, 0);
 
   // ── Fiscal ────────────────────────────────────────────────────────────────
-  const nfs30d      = nfs.filter(n => n.status === 'EMITIDA' && now - new Date(n.dataEmissao).getTime() < ms30d);
+  const nfs30d      = nfs.filter(n => n.status === 'AUTORIZADA' && now - new Date(n.dataEmissao).getTime() < ms30d);
   const impostos30d = nfs30d.reduce((s, n) => s + n.valorICMS + n.valorPIS + n.valorCOFINS, 0);
 
   // ── Financeiro ────────────────────────────────────────────────────────────
@@ -148,7 +148,7 @@ function getDados() {
   const marketplaces       = MARKETPLACES_MOCK;
   const anuncios           = ANUNCIOS_MOCK;
   const perguntas          = PERGUNTAS_MOCK;
-  const mkpConectados      = marketplaces.filter(m => m.status === 'CONECTADO');
+  const mkpConectados      = marketplaces.filter(m => m.status === 'ATIVA');
   const mkpReceitaMes      = marketplaces.reduce((s, m) => s + m.receitaMes, 0);
   const mkpReceitaLiquida  = marketplaces.reduce((s, m) => s + m.receitaLiquidaMes, 0);
   const mkpPedidosMes      = marketplaces.reduce((s, m) => s + m.pedidosMes, 0);
@@ -156,7 +156,7 @@ function getDados() {
   const perguntasPendentes = perguntas.filter(p => p.status === 'PENDENTE');
   const perguntasUrgentes  = perguntasPendentes.filter(p => p.prioridade === 'URGENTE');
   const anunciosAtivos     = anuncios.filter(a => a.status === 'ATIVO');
-  const anunciosSemEstoque = anuncios.filter(a => a.status === 'SEM_ESTOQUE');
+  const anunciosSemEstoque = anuncios.filter(a => a.estoque === 0);
   const topAnuncios        = [...anuncios].sort((a, b) => b.receita30d - a.receita30d).slice(0, 5);
   const mkpDominante       = [...marketplaces].sort((a, b) => b.receitaMes - a.receitaMes)[0];
 
@@ -800,7 +800,7 @@ function gerarResposta(msg: string, _hist: ChatMessage[]): ChatResponse {
     const taxaMedia  = d.mkpReceitaMes > 0 ? ((d.mkpReceitaMes - d.mkpReceitaLiquida) / d.mkpReceitaMes * 100) : 0;
     const linhasMkp  = d.marketplaces.map(m => {
       const pct = d.mkpReceitaMes > 0 ? (m.receitaMes / d.mkpReceitaMes * 100).toFixed(0) : '0';
-      return `| ${m.nome} | ${m.status === 'CONECTADO' ? '🟢' : '🔴'} ${m.status} | ${fmt(m.receitaMes)} | ${pct}% | ${m.avaliacaoVendedor}⭐ |`;
+      return `| ${m.nome} | ${m.status === 'ATIVA' ? '🟢' : '🔴'} ${m.status} | ${fmt(m.receitaMes)} | ${pct}% | ${m.avaliacaoVendedor}⭐ |`;
     }).join('\n');
     return {
       resposta: `## 🛒 Visão Geral dos Marketplaces\n\n**Canais conectados:** ${d.mkpConectados.length}/${d.marketplaces.length}\n**Receita bruta mês:** ${fmt(d.mkpReceitaMes)}\n**Receita líquida mês:** ${fmt(d.mkpReceitaLiquida)} (taxa média ${fmtPct(taxaMedia)})\n**Pedidos hoje:** ${fmtN(d.mkpPedidosHoje)} · **Pedidos mês:** ${fmtN(d.mkpPedidosMes)}\n**Anúncios ativos:** ${d.anunciosAtivos.length} · **Sem estoque:** ${d.anunciosSemEstoque.length}\n**Perguntas pendentes:** ${d.perguntasPendentes.length} (${d.perguntasUrgentes.length} urgentes)\n\n### Canais de Venda\n| Canal | Status | Receita Mês | Participação | Avaliação |\n|---|---|---|---|---|\n${linhasMkp}\n\n> 💡 ${d.mkpDominante ? `${d.mkpDominante.nome} é seu canal dominante com ${fmt(d.mkpDominante.receitaMes)} (${(d.mkpDominante.receitaMes / d.mkpReceitaMes * 100).toFixed(0)}% da receita).` : 'Configure seus marketplaces para começar a vender.'}`,

@@ -72,8 +72,11 @@ export const pedidosService = {
     return data;
   },
 
+  // Cancelamento trafega pelo endpoint unificado de transição de status
+  // (o backend expõe PATCH /:id/status como rota de compatibilidade que
+  // aciona a máquina de estados; a rota semântica de cancelar é DELETE).
   cancelar: async (id: string, motivo?: string): Promise<Pedido> => {
-    const { data } = await api.patch(`/v1/pedidos/${id}/cancelar`, { motivo });
+    const { data } = await api.patch(`/v1/pedidos/${id}/status`, { status: 'CANCELADO', motivo });
     return data;
   },
 

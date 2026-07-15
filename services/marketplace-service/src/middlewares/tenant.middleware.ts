@@ -1,47 +1,75 @@
-import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NestMiddleware, UnauthorizedException, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
+import { JwtService } from '@nestjs/jwt';
 
 /**
- * Middleware para extrair e validar tenant do header da requisição
- * Todo request deve conter o header x-tenant-id
+ * Request enriquecido com dados extraídos do JWT.
  */
-@Injectable()
-export class TenantMiddleware implements NestMiddleware {
-  use(req: Request, res: Response, next: NextFunction) {
-    const tenantId = req.headers['x-tenant-id'] as string;
-
-    // Validar se tenantId foi fornecido
-    if (!tenantId) {
-      throw new UnauthorizedException(
-        'Header x-tenant-id é obrigatório',
-      );
-    }
-
-    // Validar formato básico do tenantId (não pode estar vazio)
-    if (typeof tenantId !== 'string' || tenantId.trim().length === 0) {
-      throw new UnauthorizedException(
-        'x-tenant-id deve ser uma string válida',
-      );
-    }
-
-    // Adicionar tenantId ao objeto Request para uso nos controllers/services
-    (req as any).tenantId = tenantId.trim();
-
-    // Adicionar tenantId aos locals do Express para fácil acesso em templates
-    res.locals.tenantId = tenantId.trim();
-
-    next();
-  }
+export interface RequestComTenant extends Request {
+  tenantId?: string;
+  usuarioId?: string;
+  cargo?: string;
+  usuario?: Record<string, any>;
 }
 
 /**
- * Declare a propriedade tenantId no objeto Request
- * Usar em request.ts ou types/express.d.ts
+ * Middleware de Tenant.
+ *
+ * Verifica a ASSINATURA do JWT (jwt.verify com JWT_SECRET) e popula
+ * req.tenantId / req.usuarioId / req.cargo. Nunca usa jwt.decode puro.
+ * Token ausente ou inválido em rota protegida resulta em 401.
  */
-declare global {
-  namespace Express {
-    interface Request {
-      tenantId?: string;
+@Injectable()
+export class TenantMiddleware implements NestMiddleware {
+  private readonly logger = new Logger(TenantMiddleware.name);
+
+  constructor(private readonly jwtService: JwtService) {}
+
+  use(req: RequestComTenant, res: Response, next: NextFunction) {
+    const token = this.extrairToken(req);
+
+    if (!token) {
+      throw new UnauthorizedException('Token não fornecido');
     }
+
+    let payload: Record<string, any>;
+    try {
+      // verify (não decode) — valida a assinatura com o JWT_SECRET.
+      payload = this.jwtService.verify(token);
+    } catch (erro) {
+      this.logger.warn(`Falha ao verificar token: ${(erro as Error).message}`);
+      throw new UnauthorizedException('Token inválido ou expirado');
+    }
+
+    if (!payload.tenantId) {
+      throw new UnauthorizedException('Token inválido: tenantId não encontrado');
+    }
+
+    req.tenantId = payload.tenantId;
+    req.usuarioId = payload.sub || payload.usuarioId;
+    req.cargo = payload.cargo;
+    req.usuario = payload;
+
+    this.logger.debug(`Tenant ${req.tenantId} autenticado`);
+    next();
+  }
+
+  /**
+   * Extrai o token JWT do header Authorization (Bearer).
+   */
+  private extrairToken(req: RequestComTenant): string | null {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return null;
+    }
+
+    const partes = authHeader.split(' ');
+
+    if (partes.length !== 2 || partes[0] !== 'Bearer') {
+      return null;
+    }
+
+    return partes[1];
   }
 }

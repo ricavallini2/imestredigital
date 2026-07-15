@@ -19,6 +19,7 @@ import {
   Param,
   Query,
   Request,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -27,9 +28,11 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { SugestaoService } from './sugestao.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Sugestões')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('sugestoes')
 export class SugestaoController {
   constructor(private service: SugestaoService) {}
@@ -184,8 +187,8 @@ export class SugestaoController {
     return this.service.listarSugestoes(req.tenantId, {
       tipo,
       aceita,
+      pagina,
       limite,
-      offset: pagina * limite,
     });
   }
 
@@ -201,7 +204,7 @@ export class SugestaoController {
     status: 200,
     description: 'Sugestão aceita',
   })
-  async aceitar(@Param('id') sugestaoId: string) {
-    return this.service.aceitarSugestao('tenant-id', sugestaoId);
+  async aceitar(@Request() req, @Param('id') sugestaoId: string) {
+    return this.service.aceitarSugestao(req.tenantId, sugestaoId);
   }
 }

@@ -39,12 +39,13 @@ export async function PATCH(
     atualizadoEm: new Date().toISOString(),
   };
 
-  // Se estoque vai a 0, status passa para SEM_ESTOQUE automaticamente
+  // Se estoque vai a 0, o anúncio é pausado automaticamente (StatusAnuncio Prisma
+  // não tem SEM_ESTOQUE; a falta de estoque é representada por estoque === 0)
   if (atualizado.estoque === 0 && atualizado.status === 'ATIVO') {
-    atualizado.status = 'SEM_ESTOQUE';
+    atualizado.status = 'PAUSADO';
   }
-  // Se estoque volta e estava SEM_ESTOQUE, volta para ATIVO
-  if (atualizado.estoque > 0 && atual.status === 'SEM_ESTOQUE') {
+  // Se o estoque volta e o anúncio estava pausado por falta de estoque, reativa
+  if (atualizado.estoque > 0 && atual.estoque === 0 && atual.status === 'PAUSADO') {
     atualizado.status = 'ATIVO';
   }
 

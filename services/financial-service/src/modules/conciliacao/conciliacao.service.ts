@@ -94,18 +94,16 @@ export class ConciliacaoService {
       },
     });
 
-    // Marcar como conciliados
-    const marcados = [];
-    for (const lance of lancamentos) {
-      const atualizado = await this.prisma.lancamento.update({
-        where: { id: lance.id },
-        data: {
-          // Campo para marcar como conciliado pode ser adicionado ao schema
-          atualizadoEm: new Date(),
-        },
+    // Marcar como conciliados (escopo por tenant; uma única query).
+    // Campo específico de "conciliado" pode ser adicionado ao schema futuramente.
+    const idsProcessados = lancamentos.map((l) => l.id);
+    if (idsProcessados.length > 0) {
+      await this.prisma.lancamento.updateMany({
+        where: { id: { in: idsProcessados }, tenantId },
+        data: { atualizadoEm: new Date() },
       });
-      marcados.push(atualizado);
     }
+    const marcados = idsProcessados;
 
     // Calcular saldos
     const saldoSistema = lancamentos

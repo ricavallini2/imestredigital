@@ -11,7 +11,13 @@
  * Eventos produzidos pelo Marketplace Service para outros serviços
  */
 export const TOPICOS_PRODUZIDOS = {
-  // Pedidos recebidos dos marketplaces
+  // Pedido recebido de marketplace — CANÔNICO (dot notation), payload PLANO.
+  // Consumido pelo order-service (TOPICOS_CONSUMIDOS.MARKETPLACE_PEDIDO_RECEBIDO
+  // = 'marketplace.pedido.recebido'). NÃO alterar sem alinhar o consumidor.
+  MARKETPLACE_PEDIDO_RECEBIDO_CANONICO: 'marketplace.pedido.recebido',
+
+  // Pedidos recebidos dos marketplaces (legado, envelope) — mantido para
+  // compatibilidade com consumidores internos que ainda usem o hífen.
   MARKETPLACE_PEDIDO_RECEBIDO: 'marketplace-pedido-recebido',
 
   // Anúncios criados/atualizados

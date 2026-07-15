@@ -10,7 +10,8 @@ import {
   User, Building2, Star, Trash2, Clock, CheckCircle2,
   PhoneCall, Mail as MailIcon, MessageCircle, FileText,
   ChevronRight, Zap, Target, AlertTriangle, RefreshCw,
-  Filter, Users, ExternalLink,
+  Filter, Users, ExternalLink, Truck, Receipt, CreditCard,
+  Wallet, ShieldCheck, Package,
 } from 'lucide-react';
 import { KPICard } from '@/components/ui/kpi-card';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -37,9 +38,35 @@ const STATUS_LABELS: Record<string, string> = {
   ATIVO: 'Ativo', INATIVO: 'Inativo',
 };
 const ORIGEM_LABELS: Record<string, string> = {
-  SHOPIFY: 'Shopify', MERCADO_LIVRE: 'Mercado Livre', SHOPEE: 'Shopee',
-  WEBSITE: 'Website', TELEFONE: 'Telefone', EMAIL: 'Email', INDICACAO: 'Indicação',
+  MANUAL: 'Manual', MARKETPLACE: 'Marketplace', SITE: 'Site',
+  INDICACAO: 'Indicação', IMPORTACAO: 'Importação', WEBSITE: 'Website',
+  INSTAGRAM: 'Instagram', FACEBOOK: 'Facebook', WHATSAPP: 'WhatsApp',
+  VENDA_DIRETA: 'Venda Direta', FEIRA: 'Feira', TELEFONE: 'Telefone',
+  EMAIL: 'Email', OUTRO: 'Outro',
 };
+
+const REGIME_LABELS: Record<string, string> = {
+  SIMPLES_NACIONAL: 'Simples Nacional', MEI: 'MEI',
+  LUCRO_PRESUMIDO: 'Lucro Presumido', LUCRO_REAL: 'Lucro Real', ISENTO: 'Isento',
+};
+
+const PAPEL_CONFIG: Record<string, { label: string; icone: React.ReactNode; classe: string }> = {
+  CLIENTE: {
+    label: 'Cliente',
+    icone: <User className="h-3.5 w-3.5" />,
+    classe: 'bg-marca-100 text-marca-700 dark:bg-marca-900/30 dark:text-marca-400',
+  },
+  FORNECEDOR: {
+    label: 'Fornecedor',
+    icone: <Package className="h-3.5 w-3.5" />,
+    classe: 'bg-destaque-100 text-destaque-700 dark:bg-destaque-900/30 dark:text-destaque-400',
+  },
+  TRANSPORTADORA: {
+    label: 'Transportadora',
+    icone: <Truck className="h-3.5 w-3.5" />,
+    classe: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
+  },
+}
 
 const ICONE_INTERACAO: Record<string, React.ReactNode> = {
   COMPRA:       <ShoppingCart className="h-4 w-4" />,
@@ -88,7 +115,12 @@ function ModalInteracao({ clienteId, onClose }: { clienteId: string; onClose: ()
   const [form, setForm] = useState<RegistrarInteracaoDto>({ tipo: 'ATENDIMENTO', titulo: '', descricao: '' });
   const registrar = useRegistrarInteracao();
 
-  const TIPOS: TipoInteracao[] = ['ATENDIMENTO', 'LIGACAO', 'EMAIL', 'WHATSAPP', 'ORCAMENTO', 'REUNIAO', 'VISITA', 'ELOGIO', 'RECLAMACAO', 'OUTRO'];
+  // Conjunto COMPLETO idêntico ao enum Prisma `TipoInteracao` (customer-service).
+  const TIPOS: TipoInteracao[] = [
+    'ATENDIMENTO', 'LIGACAO', 'TELEFONE', 'EMAIL', 'WHATSAPP', 'CHAT',
+    'ORCAMENTO', 'REUNIAO', 'VISITA', 'ELOGIO', 'RECLAMACAO',
+    'VENDA', 'COMPRA', 'DEVOLUCAO', 'MARKETPLACE', 'NOTA',
+  ];
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -453,6 +485,10 @@ export default function ClienteDetailPage() {
 
   const scoreColor = !score ? '#94a3b8' : score >= 7 ? '#22c55e' : score >= 4 ? '#f59e0b' : '#ef4444';
 
+  const papeis = (cliente.papeis && cliente.papeis.length > 0 ? cliente.papeis : ['CLIENTE']) as string[]
+  const isFornecedor = papeis.includes('FORNECEDOR')
+  const isPJ = cliente.tipo === 'PJ'
+
   const TABS: { id: TabType; label: string; count?: number }[] = [
     { id: 'resumo', label: 'Resumo' },
     { id: 'ia', label: '✦ IA' },
@@ -478,6 +514,16 @@ export default function ClienteDetailPage() {
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{cliente.nome}</h1>
               <StatusBadge status={cliente.status} label={STATUS_LABELS[cliente.status]} />
+              {papeis.map((papel) => {
+                const cfg = PAPEL_CONFIG[papel]
+                if (!cfg) return null
+                return (
+                  <span key={papel} className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${cfg.classe}`}>
+                    {cfg.icone}
+                    {cfg.label}
+                  </span>
+                )
+              })}
               {score && (
                 <div className="flex items-center gap-1.5 rounded-full border px-2.5 py-1" style={{ borderColor: scoreColor + '40', background: scoreColor + '15' }}>
                   <Star className="h-3.5 w-3.5" style={{ color: scoreColor }} />
@@ -563,16 +609,22 @@ export default function ClienteDetailPage() {
             <div className="rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
               <h2 className="mb-4 text-base font-semibold text-slate-900 dark:text-slate-100">Dados do Cliente</h2>
               <dl className="grid grid-cols-2 gap-4">
-                {[
-                  { label: 'CPF / CNPJ', value: (cliente as any).cpf ?? (cliente as any).cnpj ?? '—' },
+                {([
+                  isPJ
+                    ? { label: 'CNPJ', value: cliente.cnpj ?? '—' }
+                    : { label: 'CPF', value: cliente.cpf ?? '—' },
                   { label: 'Tipo', value: TIPO_LABELS[cliente.tipo] },
+                  isPJ && cliente.razaoSocial ? { label: 'Razão Social', value: cliente.razaoSocial } : null,
+                  isPJ && cliente.nomeFantasia ? { label: 'Nome Fantasia', value: cliente.nomeFantasia } : null,
+                  !isPJ && cliente.rg ? { label: 'RG', value: cliente.rg } : null,
                   { label: 'Email', value: cliente.email ?? '—' },
+                  cliente.emailSecundario ? { label: 'Email Secundário', value: cliente.emailSecundario } : null,
                   { label: 'Celular', value: cliente.celular ?? '—' },
                   { label: 'Telefone', value: cliente.telefone ?? '—' },
                   { label: 'Origem', value: ORIGEM_LABELS[cliente.origem ?? ''] ?? cliente.origem ?? '—' },
                   { label: 'Cadastrado em', value: dataFmt(cliente.criadoEm) },
                   { label: 'Atualizado em', value: dataFmt((cliente as any).atualizadoEm) },
-                ].map(({ label, value }) => (
+                ].filter(Boolean) as { label: string; value: string }[]).map(({ label, value }) => (
                   <div key={label}>
                     <dt className="text-xs text-slate-500 dark:text-slate-400">{label}</dt>
                     <dd className="mt-0.5 text-sm font-medium text-slate-900 dark:text-slate-100">{value}</dd>
@@ -586,6 +638,135 @@ export default function ClienteDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* Dados fiscais (PJ) */}
+            {isPJ && (cliente.inscricaoEstadual || cliente.ieIsento || cliente.inscricaoMunicipal || cliente.regimeTributario) && (
+              <div className="rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
+                <div className="mb-4 flex items-center gap-2">
+                  <Receipt className="h-4 w-4 text-slate-400" />
+                  <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Dados Fiscais</h2>
+                </div>
+                <dl className="grid grid-cols-2 gap-4">
+                  <div>
+                    <dt className="text-xs text-slate-500 dark:text-slate-400">Inscrição Estadual</dt>
+                    <dd className="mt-0.5 flex items-center gap-2 text-sm font-medium text-slate-900 dark:text-slate-100">
+                      {cliente.ieIsento ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                          <ShieldCheck className="h-3 w-3" /> Isento
+                        </span>
+                      ) : (
+                        cliente.inscricaoEstadual || '—'
+                      )}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-slate-500 dark:text-slate-400">Inscrição Municipal</dt>
+                    <dd className="mt-0.5 text-sm font-medium text-slate-900 dark:text-slate-100">{cliente.inscricaoMunicipal || '—'}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-slate-500 dark:text-slate-400">Regime Tributário</dt>
+                    <dd className="mt-0.5 text-sm font-medium text-slate-900 dark:text-slate-100">
+                      {cliente.regimeTributario ? REGIME_LABELS[cliente.regimeTributario] ?? cliente.regimeTributario : '—'}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            )}
+
+            {/* Dados de fornecedor */}
+            {isFornecedor && (
+              <div className="rounded-lg border border-destaque-200 bg-destaque-50/40 p-6 dark:border-destaque-900/40 dark:bg-destaque-950/10">
+                <div className="mb-4 flex items-center gap-2">
+                  <Package className="h-4 w-4 text-destaque-500" />
+                  <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Dados de Fornecedor</h2>
+                </div>
+                <dl className="grid grid-cols-2 gap-4">
+                  <div>
+                    <dt className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                      <Clock className="h-3 w-3" /> Prazo de Pagamento
+                    </dt>
+                    <dd className="mt-0.5 text-sm font-medium text-slate-900 dark:text-slate-100">
+                      {cliente.prazoPagamento != null ? `${cliente.prazoPagamento} dias` : '—'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                      <CreditCard className="h-3 w-3" /> Condições de Pagamento
+                    </dt>
+                    <dd className="mt-0.5 text-sm font-medium text-slate-900 dark:text-slate-100">{cliente.condicoesPagamento || '—'}</dd>
+                  </div>
+                  <div>
+                    <dt className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                      <Wallet className="h-3 w-3" /> Chave PIX
+                    </dt>
+                    <dd className="mt-0.5 break-all text-sm font-medium text-slate-900 dark:text-slate-100">{cliente.pixChave || '—'}</dd>
+                  </div>
+                  <div>
+                    <dt className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                      <Star className="h-3 w-3" /> Avaliação
+                    </dt>
+                    <dd className="mt-0.5 text-sm font-medium text-slate-900 dark:text-slate-100">
+                      {cliente.avaliacaoFornecedor != null ? (
+                        <span className="inline-flex items-center gap-0.5">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${i < cliente.avaliacaoFornecedor! ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-600'}`}
+                            />
+                          ))}
+                          <span className="ml-1 text-xs text-slate-500">{cliente.avaliacaoFornecedor}/5</span>
+                        </span>
+                      ) : (
+                        '—'
+                      )}
+                    </dd>
+                  </div>
+                </dl>
+                {(cliente.categoriasFornecidas ?? []).length > 0 && (
+                  <div className="mt-4">
+                    <p className="mb-2 text-xs font-medium text-slate-500 dark:text-slate-400">Categorias Fornecidas</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(cliente.categoriasFornecidas ?? []).map((cat) => (
+                        <span key={cat} className="rounded-full bg-destaque-100 px-3 py-1 text-xs font-semibold text-destaque-700 dark:bg-destaque-900/30 dark:text-destaque-400">
+                          {cat}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Histórico de compras do fornecedor */}
+                <div className="mt-4 border-t border-destaque-200/60 pt-4 dark:border-destaque-900/40">
+                  <p className="mb-3 text-xs font-medium text-slate-500 dark:text-slate-400">Histórico de Compras</p>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="rounded-lg bg-white/60 p-3 dark:bg-slate-800/40">
+                      <dt className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                        <DollarSign className="h-3 w-3" /> Total Comprado
+                      </dt>
+                      <dd className="mt-1 text-sm font-bold text-slate-900 dark:text-slate-100">
+                        {moeda(cliente.valorTotalComprasFornecedor ?? 0)}
+                      </dd>
+                    </div>
+                    <div className="rounded-lg bg-white/60 p-3 dark:bg-slate-800/40">
+                      <dt className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                        <ShoppingCart className="h-3 w-3" /> Nº de Compras
+                      </dt>
+                      <dd className="mt-1 text-sm font-bold text-slate-900 dark:text-slate-100">
+                        {cliente.totalComprasFornecedor ?? 0}
+                      </dd>
+                    </div>
+                    <div className="rounded-lg bg-white/60 p-3 dark:bg-slate-800/40">
+                      <dt className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                        <Calendar className="h-3 w-3" /> Última Compra
+                      </dt>
+                      <dd className="mt-1 text-sm font-bold text-slate-900 dark:text-slate-100">
+                        {dataFmt(cliente.ultimaCompraFornecedor)}
+                      </dd>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Segmentos */}
             {(resumo?.segmentos ?? []).length > 0 && (

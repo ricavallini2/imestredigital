@@ -32,15 +32,21 @@ export class ProdutorEventosService {
 
   /**
    * Publica evento de nota autorizada pela SEFAZ.
+   *
+   * `pedidoId` (quando a nota está vinculada a um pedido) permite ao
+   * order-service marcar o pedido como FATURADO — payload plano canônico
+   * { tenantId, pedidoId, notaId, protocolo }.
    */
   async publicarNotaAutorizada(
     tenantId: string,
     notaId: string,
     protocolo: string,
+    pedidoId?: string | null,
   ): Promise<void> {
     try {
       this.kafka.emit(TOPICOS_KAFKA.NOTA_AUTORIZADA, {
         tenantId,
+        pedidoId: pedidoId ?? undefined,
         notaId,
         protocolo,
         timestamp: new Date().toISOString(),
@@ -58,10 +64,12 @@ export class ProdutorEventosService {
     tenantId: string,
     notaId: string,
     motivo: string,
+    pedidoId?: string | null,
   ): Promise<void> {
     try {
       this.kafka.emit(TOPICOS_KAFKA.NOTA_REJEITADA, {
         tenantId,
+        pedidoId: pedidoId ?? undefined,
         notaId,
         motivo,
         timestamp: new Date().toISOString(),
@@ -74,15 +82,21 @@ export class ProdutorEventosService {
 
   /**
    * Publica evento de nota cancelada.
+   *
+   * `pedidoId` (quando a nota está vinculada a um pedido) segue no payload
+   * plano canônico { tenantId, pedidoId, notaId, justificativa } para o
+   * order-service reagir ao cancelamento fiscal (ex.: estornar o faturamento).
    */
   async publicarNotaCancelada(
     tenantId: string,
     notaId: string,
     justificativa: string,
+    pedidoId?: string | null,
   ): Promise<void> {
     try {
       this.kafka.emit(TOPICOS_KAFKA.NOTA_CANCELADA, {
         tenantId,
+        pedidoId: pedidoId ?? undefined,
         notaId,
         justificativa,
         timestamp: new Date().toISOString(),

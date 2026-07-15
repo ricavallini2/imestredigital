@@ -7,12 +7,19 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum TipoInteracaoEnum {
   VENDA = 'VENDA',
+  COMPRA = 'COMPRA',
   ATENDIMENTO = 'ATENDIMENTO',
   RECLAMACAO = 'RECLAMACAO',
+  ELOGIO = 'ELOGIO',
   DEVOLUCAO = 'DEVOLUCAO',
+  ORCAMENTO = 'ORCAMENTO',
   EMAIL = 'EMAIL',
   TELEFONE = 'TELEFONE',
+  LIGACAO = 'LIGACAO',
+  WHATSAPP = 'WHATSAPP',
   CHAT = 'CHAT',
+  REUNIAO = 'REUNIAO',
+  VISITA = 'VISITA',
   MARKETPLACE = 'MARKETPLACE',
   NOTA = 'NOTA',
 }

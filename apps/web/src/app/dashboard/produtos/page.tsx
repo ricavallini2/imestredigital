@@ -4,28 +4,46 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Plus, Search, Edit, Trash2, Filter, Package,
-  TrendingUp, DollarSign, AlertTriangle, CheckCircle,
-  Tag, BarChart2, Eye, Printer,
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Filter,
+  Package,
+  TrendingUp,
+  DollarSign,
+  AlertTriangle,
+  CheckCircle,
+  Tag,
+  Tags,
+  FolderTree,
+  BarChart2,
+  Eye,
+  Printer,
+  Grid3x3,
 } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { KPICard } from '@/components/ui/kpi-card';
 import { SkeletonCard } from '@/components/ui/loading';
 import { useProdutos, useRemoverProduto, useEstatisticasProdutos } from '@/hooks/useProdutos';
+import { useSaldoPorProduto } from '@/hooks/useEstoque';
 import type { Produto } from '@/types';
 
-const moeda = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const moeda = (v: number) =>
+  (Number.isFinite(v) ? v : 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 const STATUS_LABELS: Record<string, string> = {
-  ATIVO: 'Ativo', INATIVO: 'Inativo', RASCUNHO: 'Rascunho',
+  ATIVO: 'Ativo',
+  INATIVO: 'Inativo',
+  RASCUNHO: 'Rascunho',
 };
 
 const CATEGORIA_CORES: Record<string, string> = {
-  'Eletrônicos': 'bg-blue-100 text-blue-700',
-  'Informática': 'bg-indigo-100 text-indigo-700',
-  'Calçados': 'bg-orange-100 text-orange-700',
-  'Vestuário': 'bg-pink-100 text-pink-700',
-  'Acessórios': 'bg-purple-100 text-purple-700',
+  Eletrônicos: 'bg-blue-100 text-blue-700',
+  Informática: 'bg-indigo-100 text-indigo-700',
+  Calçados: 'bg-orange-100 text-orange-700',
+  Vestuário: 'bg-pink-100 text-pink-700',
+  Acessórios: 'bg-purple-100 text-purple-700',
 };
 
 export default function ProdutosPage() {
@@ -36,13 +54,18 @@ export default function ProdutosPage() {
 
   const { data, isLoading, isError } = useProdutos({ pagina: 1, limite: 100 });
   const { data: stats, isLoading: loadingStats } = useEstatisticasProdutos();
+  // Saldo real (inventory-service) cruzado por produtoId — um único fetch para a lista.
+  const { mapa: saldoPorProduto, isLoading: loadingSaldo } = useSaldoPorProduto();
   const removerProduto = useRemoverProduto();
 
   const produtos = (data?.dados ?? []) as any[];
 
   const produtosFiltrados = useMemo(() => {
     return produtos.filter((p) => {
-      const matchBusca = !busca || p.nome.toLowerCase().includes(busca.toLowerCase()) || p.sku.toLowerCase().includes(busca.toLowerCase());
+      const matchBusca =
+        !busca ||
+        p.nome.toLowerCase().includes(busca.toLowerCase()) ||
+        p.sku.toLowerCase().includes(busca.toLowerCase());
       const matchCategoria = !categoriaFiltro || p.categoria === categoriaFiltro;
       const matchStatus = !statusFiltro || p.status === statusFiltro;
       return matchBusca && matchCategoria && matchStatus;
@@ -56,16 +79,42 @@ export default function ProdutosPage() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Produtos</h1>
-          <p className="mt-1 text-slate-600 dark:text-slate-400">Gerencie seu catálogo de produtos</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+            Produtos
+          </h1>
+          <p className="mt-1 text-slate-600 dark:text-slate-400">
+            Gerencie seu catálogo de produtos
+          </p>
         </div>
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <Link href="/dashboard/produtos/etiquetas"
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <Link
+            href="/dashboard/produtos/categorias"
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          >
+            <FolderTree className="h-4 w-4" /> Categorias
+          </Link>
+          <Link
+            href="/dashboard/produtos/marcas"
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          >
+            <Tags className="h-4 w-4" /> Marcas
+          </Link>
+          <Link
+            href="/dashboard/produtos/grades"
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          >
+            <Grid3x3 className="h-4 w-4" /> Grades
+          </Link>
+          <Link
+            href="/dashboard/produtos/etiquetas"
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          >
             <Tag className="h-4 w-4" /> Etiquetas
           </Link>
-          <Link href="/dashboard/produtos/novo"
-            className="inline-flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2.5 font-semibold text-white hover:bg-marca-600 transition-colors">
+          <Link
+            href="/dashboard/produtos/novo"
+            className="inline-flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2.5 font-semibold text-white hover:bg-marca-600 transition-colors"
+          >
             <Plus className="h-5 w-5" /> Novo Produto
           </Link>
         </div>
@@ -77,10 +126,27 @@ export default function ProdutosPage() {
           Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
         ) : (
           <>
-            <KPICard label="Total de Produtos" valor={stats?.total ?? 0} icone={<Package className="h-6 w-6" />} />
-            <KPICard label="Ativos" valor={stats?.ativos ?? 0} icone={<CheckCircle className="h-6 w-6" />} />
-            <KPICard label="Valor do Catálogo" valor={moeda(stats?.valorCatalogo ?? 0)} icone={<DollarSign className="h-6 w-6" />} destaque />
-            <KPICard label="Margem Média" valor={`${stats?.margemMedia?.toFixed(1) ?? 0}%`} icone={<TrendingUp className="h-6 w-6" />} />
+            <KPICard
+              label="Total de Produtos"
+              valor={stats?.total ?? 0}
+              icone={<Package className="h-6 w-6" />}
+            />
+            <KPICard
+              label="Ativos"
+              valor={stats?.ativos ?? 0}
+              icone={<CheckCircle className="h-6 w-6" />}
+            />
+            <KPICard
+              label="Valor do Catálogo"
+              valor={moeda(stats?.valorCatalogo ?? 0)}
+              icone={<DollarSign className="h-6 w-6" />}
+              destaque
+            />
+            <KPICard
+              label="Margem Média"
+              valor={`${stats?.margemMedia?.toFixed(1) ?? 0}%`}
+              icone={<TrendingUp className="h-6 w-6" />}
+            />
           </>
         )}
       </div>
@@ -109,8 +175,14 @@ export default function ProdutosPage() {
           <Filter className="h-4 w-4 text-slate-500" />
           <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Filtros</span>
           {(busca || categoriaFiltro || statusFiltro) && (
-            <button onClick={() => { setBusca(''); setCategoriaFiltro(''); setStatusFiltro(''); }}
-              className="ml-auto text-xs text-marca-600 hover:underline dark:text-marca-400">
+            <button
+              onClick={() => {
+                setBusca('');
+                setCategoriaFiltro('');
+                setStatusFiltro('');
+              }}
+              className="ml-auto text-xs text-marca-600 hover:underline dark:text-marca-400"
+            >
               Limpar filtros
             </button>
           )}
@@ -118,17 +190,31 @@ export default function ProdutosPage() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-            <input type="text" placeholder="Buscar por nome ou SKU..."
-              value={busca} onChange={(e) => setBusca(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 pl-9 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
+            <input
+              type="text"
+              placeholder="Buscar por nome ou SKU..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 pl-9 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+            />
           </div>
-          <select value={categoriaFiltro} onChange={(e) => setCategoriaFiltro(e.target.value)}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+          <select
+            value={categoriaFiltro}
+            onChange={(e) => setCategoriaFiltro(e.target.value)}
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+          >
             <option value="">Todas as categorias</option>
-            {categorias.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+            {categorias.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
           </select>
-          <select value={statusFiltro} onChange={(e) => setStatusFiltro(e.target.value)}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+          <select
+            value={statusFiltro}
+            onChange={(e) => setStatusFiltro(e.target.value)}
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100"
+          >
             <option value="">Todos os status</option>
             <option value="ATIVO">Ativo</option>
             <option value="INATIVO">Inativo</option>
@@ -151,13 +237,19 @@ export default function ProdutosPage() {
       ) : produtosFiltrados.length === 0 ? (
         <div className="rounded-lg border border-dashed border-slate-300 p-12 text-center dark:border-slate-600">
           <Package className="mx-auto mb-3 h-12 w-12 text-slate-300" />
-          <p className="font-semibold text-slate-600 dark:text-slate-400">Nenhum produto encontrado</p>
+          <p className="font-semibold text-slate-600 dark:text-slate-400">
+            Nenhum produto encontrado
+          </p>
           <p className="mt-1 text-sm text-slate-500">
-            {busca || categoriaFiltro || statusFiltro ? 'Tente ajustar os filtros' : 'Crie seu primeiro produto'}
+            {busca || categoriaFiltro || statusFiltro
+              ? 'Tente ajustar os filtros'
+              : 'Crie seu primeiro produto'}
           </p>
           {!busca && !categoriaFiltro && !statusFiltro && (
-            <Link href="/dashboard/produtos/novo"
-              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2 text-sm font-semibold text-white hover:bg-marca-600">
+            <Link
+              href="/dashboard/produtos/novo"
+              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2 text-sm font-semibold text-white hover:bg-marca-600"
+            >
               <Plus className="h-4 w-4" /> Novo Produto
             </Link>
           )}
@@ -168,78 +260,135 @@ export default function ProdutosPage() {
             <table className="w-full text-sm">
               <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/50">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-300">Produto</th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-300">SKU</th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-300">Categoria</th>
-                  <th className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-300">Preço</th>
-                  <th className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-300">Margem</th>
-                  <th className="px-4 py-3 text-center font-semibold text-slate-700 dark:text-slate-300">Estoque</th>
-                  <th className="px-4 py-3 text-center font-semibold text-slate-700 dark:text-slate-300">Status</th>
-                  <th className="px-4 py-3 text-center font-semibold text-slate-700 dark:text-slate-300">Ações</th>
+                  <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-300">
+                    Produto
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-300">
+                    SKU
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-300">
+                    Categoria
+                  </th>
+                  <th className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-300">
+                    Preço
+                  </th>
+                  <th className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-300">
+                    Margem
+                  </th>
+                  <th className="px-4 py-3 text-center font-semibold text-slate-700 dark:text-slate-300">
+                    Estoque
+                  </th>
+                  <th className="px-4 py-3 text-center font-semibold text-slate-700 dark:text-slate-300">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-center font-semibold text-slate-700 dark:text-slate-300">
+                    Ações
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
                 {produtosFiltrados.map((produto) => {
-                  const estoqueCritico = produto.estoque <= produto.estoqueMinimo && produto.estoque > 0;
-                  const semEstoque = produto.estoque === 0;
+                  // Saldo disponível real vindo do inventory-service (agregado por produtoId).
+                  // `undefined` = ainda carregando ou produto sem registro de estoque.
+                  const estoque = saldoPorProduto.get(produto.id);
+                  const semSaldo = estoque === undefined;
+                  const estoqueMinimo = produto.estoqueMinimo ?? 0;
+                  const estoqueCritico = !semSaldo && estoque <= estoqueMinimo && estoque > 0;
+                  const semEstoque = !semSaldo && estoque === 0;
+                  const margem = produto.margem ?? produto.margemLucro;
                   return (
-                    <tr key={produto.id}
-                      className="group hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                    <tr
+                      key={produto.id}
+                      className="group hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+                    >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-lg dark:bg-slate-700">
                             📦
                           </div>
                           <div>
-                            <p className="font-medium text-slate-900 dark:text-slate-100 line-clamp-1">{produto.nome}</p>
+                            <p className="font-medium text-slate-900 dark:text-slate-100 line-clamp-1">
+                              {produto.nome}
+                            </p>
                             <p className="text-xs text-slate-500">{produto.marca}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="font-mono text-xs text-slate-600 dark:text-slate-400">{produto.sku}</span>
+                        <span className="font-mono text-xs text-slate-600 dark:text-slate-400">
+                          {produto.sku}
+                        </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${CATEGORIA_CORES[produto.categoria] ?? 'bg-slate-100 text-slate-700'}`}>
+                        <span
+                          className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${CATEGORIA_CORES[produto.categoria] ?? 'bg-slate-100 text-slate-700'}`}
+                        >
                           {produto.categoria}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div>
-                          <p className="font-semibold text-slate-900 dark:text-slate-100">{moeda(produto.preco)}</p>
-                          {produto.precoCusto > 0 && (
-                            <p className="text-xs text-slate-400">custo: {moeda(produto.precoCusto)}</p>
+                          <p className="font-semibold text-slate-900 dark:text-slate-100">
+                            {moeda(produto.preco)}
+                          </p>
+                          {(produto.precoCusto ?? 0) > 0 && (
+                            <p className="text-xs text-slate-400">
+                              custo: {moeda(produto.precoCusto)}
+                            </p>
                           )}
                         </div>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <span className={`text-sm font-bold ${produto.margemLucro >= 50 ? 'text-green-600' : produto.margemLucro >= 30 ? 'text-amber-600' : 'text-red-600'}`}>
-                          {produto.margemLucro?.toFixed(1)}%
-                        </span>
+                        {margem !== undefined ? (
+                          <span
+                            className={`text-sm font-bold ${margem >= 50 ? 'text-green-600' : margem >= 30 ? 'text-amber-600' : 'text-red-600'}`}
+                          >
+                            {margem.toFixed(1)}%
+                          </span>
+                        ) : (
+                          <span className="text-sm text-slate-400">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                          semEstoque ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                          : estoqueCritico ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                          : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                        }`}>
-                          {semEstoque && <AlertTriangle className="h-3 w-3" />}
-                          {produto.estoque} un
-                        </span>
+                        {semSaldo ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-500 dark:bg-slate-700 dark:text-slate-400">
+                            {loadingSaldo ? '…' : '—'}
+                          </span>
+                        ) : (
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                              semEstoque
+                                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                : estoqueCritico
+                                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                  : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                            }`}
+                          >
+                            {semEstoque && <AlertTriangle className="h-3 w-3" />}
+                            {estoque} un
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <StatusBadge status={produto.status} label={STATUS_LABELS[produto.status] ?? produto.status} />
+                        <StatusBadge
+                          status={produto.status}
+                          label={STATUS_LABELS[produto.status] ?? produto.status}
+                        />
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => router.push(`/dashboard/produtos/${produto.id}`)}
+                          <button
+                            onClick={() => router.push(`/dashboard/produtos/${produto.id}`)}
                             className="rounded p-1.5 text-slate-500 hover:bg-marca-50 hover:text-marca-600 dark:hover:bg-marca-900/20"
-                            title="Ver detalhes">
+                            title="Ver detalhes"
+                          >
                             <Eye className="h-4 w-4" />
                           </button>
-                          <button onClick={() => router.push(`/dashboard/produtos/${produto.id}`)}
+                          <button
+                            onClick={() => router.push(`/dashboard/produtos/${produto.id}`)}
                             className="rounded p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700"
-                            title="Editar">
+                            title="Editar"
+                          >
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
@@ -247,28 +396,44 @@ export default function ProdutosPage() {
                               const v = produto.variacoes?.[0];
                               const item = {
                                 id: `${produto.id}-${v?.sku ?? produto.sku}-${Date.now()}`,
-                                produtoId: produto.id, nome: produto.nome,
-                                sku: v?.sku ?? produto.sku, ean: produto.ean,
-                                preco: v?.preco ?? produto.preco, precoPromocional: produto.precoPromocional,
-                                categoria: produto.categoria, marca: produto.marca,
+                                produtoId: produto.id,
+                                nome: produto.nome,
+                                sku: v?.sku ?? produto.sku,
+                                ean: produto.ean,
+                                preco: v?.preco ?? produto.preco,
+                                precoPromocional: produto.precoPromocional,
+                                categoria: produto.categoria,
+                                marca: produto.marca,
                                 variacao: v?.tipo !== 'Única' ? v?.valor : undefined,
                                 variacaoTipo: v?.tipo !== 'Única' ? v?.tipo : undefined,
                                 quantidade: 1,
                               };
                               try {
-                                const existing = JSON.parse(sessionStorage.getItem('etiqueta-items') ?? '[]');
-                                sessionStorage.setItem('etiqueta-items', JSON.stringify([...existing, item]));
-                              } catch { /* ignore */ }
+                                const existing = JSON.parse(
+                                  sessionStorage.getItem('etiqueta-items') ?? '[]',
+                                );
+                                sessionStorage.setItem(
+                                  'etiqueta-items',
+                                  JSON.stringify([...existing, item]),
+                                );
+                              } catch {
+                                /* ignore */
+                              }
                               router.push('/dashboard/produtos/etiquetas');
                             }}
                             className="rounded p-1.5 text-slate-500 hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-900/20"
-                            title="Gerar etiqueta">
+                            title="Gerar etiqueta"
+                          >
                             <Tag className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => { if (confirm(`Desativar "${produto.nome}"?`)) removerProduto.mutate(produto.id); }}
+                            onClick={() => {
+                              if (confirm(`Desativar "${produto.nome}"?`))
+                                removerProduto.mutate(produto.id);
+                            }}
                             className="rounded p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
-                            title="Desativar">
+                            title="Desativar"
+                          >
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>

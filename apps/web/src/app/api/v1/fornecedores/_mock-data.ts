@@ -1,11 +1,55 @@
-// ─── Interface ────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// CONTRATO: parceiro-unificado (papel FORNECEDOR). Ver docs/design/parceiro-unificado.md.
+//
+// CADASTRO (tela) — UNIFICADO: o cadastro de fornecedor é um PARCEIRO com papel
+// FORNECEDOR, gravado/lido pelo cadastro unificado em /api/v1/clientes (modelo
+// `Cliente` + `papeis[]`). A tela de Fornecedores (Compras) e os hooks de
+// useCompras (useFornecedores/useFornecedor/useCriarFornecedor) já operam sobre
+// /v1/clientes?papel=FORNECEDOR, mapeando Parceiro↔Fornecedor
+// (parceiroParaFornecedor/fornecedorParaParceiro em apps/web/src/hooks/useCompras.ts).
+// A rota /api/v1/clientes suporta `?papel=FORNECEDOR` no GET e persiste todos os
+// campos fiscais do contrato no POST.
+//
+// STORE DE APOIO (mantido): FORNECEDORES_MOCK e as rotas /api/v1/fornecedores NÃO
+// são órfãos — continuam sendo o backing store do subsistema mock de Compras.
+// Os pedidos de compra (compras/_mock-data.ts) referenciam fornecedores por
+// `fornecedorId` no formato `f-*`, e este dataset é consumido por:
+//   • compras/estatisticas      → fornecedores ativos e Top Fornecedores
+//   • compras/[id]/receber      → resolve o fornecedor do pedido recebido
+//   • compras/importar-nfe      → localiza/cria fornecedor a partir da NF-e (PJ)
+//   • ia/chat                   → contexto do módulo de Compras (Top Fornecedores)
+// Por isso o fornecedor aqui pode ser PF (MEI/autônomo) ou PJ — não só PJ — e
+// carrega os campos fiscais (tipo, cpf/cnpj, rg, IE/ieIsento, IM, regime).
+//
+// FOLLOW-UP (unificação completa do subsistema de Compras): repointar os pedidos de
+//   compra e as rotas de Compras para referenciarem PARCEIROS (papel FORNECEDOR) em
+//   vez de ids `f-*`, migrando as estatísticas/importação/IA para o mesmo store de
+//   /v1/clientes. É uma tarefa MAIOR (migração de dados + reescrita das rotas de
+//   Compras), NÃO um simples "remover este mock". Enquanto não for feita, este
+//   dataset e estas rotas permanecem necessários.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type TipoPessoa = 'PF' | 'PJ'
 
 export interface FornecedorMock {
   id: string;
+  // Tipo de pessoa: PF (MEI/autônomo) ou PJ. Opcional: ausência = PJ (compatibilidade
+  // com registros legados e fornecedores criados pela importação de NF-e, sempre PJ).
+  tipo?: TipoPessoa;
+  // PJ: identificação social. PF: pode espelhar `nome` para compatibilidade da UI/lista.
   razaoSocial: string;
   nomeFantasia: string;
+  // PF: nome completo (preenchido a partir do form; espelha razaoSocial quando PJ).
+  nome?: string;
+  // Documentos: cnpj para PJ (''/ausente quando PF), cpf/rg para PF.
   cnpj: string;
+  cpf?: string;
+  rg?: string;
+  // Campos fiscais PJ.
   inscricaoEstadual?: string;
+  ieIsento?: boolean;
+  inscricaoMunicipal?: string;
+  regimeTributario?: string;
   email: string;
   telefone: string;
   endereco: {
@@ -38,39 +82,52 @@ const _d = (diasAtras: number) => new Date(Date.now() - diasAtras * 86400000).to
 
 const INITIAL_FORNECEDORES: FornecedorMock[] = [
   {
-    id: 'f-001', razaoSocial: 'Tech Distribuidora Ltda', nomeFantasia: 'TechDist',
-    cnpj: '12.345.678/0001-90', inscricaoEstadual: '123.456.789.000',
+    id: 'f-001', tipo: 'PJ', razaoSocial: 'Tech Distribuidora Ltda', nomeFantasia: 'TechDist',
+    cnpj: '12.345.678/0001-90', inscricaoEstadual: '123.456.789.000', ieIsento: false,
+    regimeTributario: 'LUCRO_PRESUMIDO',
     email: 'compras@techdist.com.br', telefone: '(11) 3456-7890',
     endereco: { logradouro: 'Av. Paulista', numero: '1000', complemento: 'Sala 501', bairro: 'Bela Vista', cidade: 'São Paulo', uf: 'SP', cep: '01310-100' },
     status: 'ATIVO', totalCompras: 145000, qtdCompras: 12, ultimaCompra: _d(5), prazoMedioPagamento: 30, criadoEm: _d(180),
   },
   {
-    id: 'f-002', razaoSocial: 'Eletrônicos Brasil S.A.', nomeFantasia: 'ElecBrasil',
-    cnpj: '98.765.432/0001-10', inscricaoEstadual: '987.654.321.000',
+    id: 'f-002', tipo: 'PJ', razaoSocial: 'Eletrônicos Brasil S.A.', nomeFantasia: 'ElecBrasil',
+    cnpj: '98.765.432/0001-10', inscricaoEstadual: '987.654.321.000', ieIsento: false,
+    regimeTributario: 'LUCRO_REAL',
     email: 'fornecedor@elecbrasil.com.br', telefone: '(21) 2345-6789',
     endereco: { logradouro: 'Rua da Assembleia', numero: '200', bairro: 'Centro', cidade: 'Rio de Janeiro', uf: 'RJ', cep: '20011-000' },
     status: 'ATIVO', totalCompras: 89000, qtdCompras: 8, ultimaCompra: _d(12), prazoMedioPagamento: 45, criadoEm: _d(150),
   },
   {
-    id: 'f-003', razaoSocial: 'Moda Fashion Importações Ltda', nomeFantasia: 'Moda Fashion',
-    cnpj: '45.678.901/0001-23', inscricaoEstadual: '456.789.012.000',
+    id: 'f-003', tipo: 'PJ', razaoSocial: 'Moda Fashion Importações Ltda', nomeFantasia: 'Moda Fashion',
+    cnpj: '45.678.901/0001-23', inscricaoEstadual: '456.789.012.000', ieIsento: false,
+    regimeTributario: 'SIMPLES_NACIONAL',
     email: 'contato@modafashion.com.br', telefone: '(48) 3456-7890',
     endereco: { logradouro: 'Rua das Palmeiras', numero: '500', bairro: 'Centro', cidade: 'Blumenau', uf: 'SC', cep: '89010-200' },
     status: 'ATIVO', totalCompras: 56000, qtdCompras: 15, ultimaCompra: _d(8), prazoMedioPagamento: 28, criadoEm: _d(200),
   },
   {
-    id: 'f-004', razaoSocial: 'Calçados Premium Ltda', nomeFantasia: 'Calçados Premium',
-    cnpj: '23.456.789/0001-45', inscricaoEstadual: '234.567.890.000',
+    id: 'f-004', tipo: 'PJ', razaoSocial: 'Calçados Premium Ltda', nomeFantasia: 'Calçados Premium',
+    cnpj: '23.456.789/0001-45', inscricaoEstadual: '234.567.890.000', ieIsento: false,
+    regimeTributario: 'LUCRO_PRESUMIDO',
     email: 'vendas@calcadospremium.com.br', telefone: '(51) 3456-7890',
     endereco: { logradouro: 'Av. Borges de Medeiros', numero: '800', bairro: 'Moinhos de Vento', cidade: 'Porto Alegre', uf: 'RS', cep: '90020-030' },
     status: 'ATIVO', totalCompras: 34000, qtdCompras: 6, ultimaCompra: _d(20), prazoMedioPagamento: 30, criadoEm: _d(120),
   },
   {
-    id: 'f-005', razaoSocial: 'InfoParts Componentes Eletrônicos Ltda', nomeFantasia: 'InfoParts',
-    cnpj: '67.890.123/0001-67', inscricaoEstadual: '678.901.234.000',
+    id: 'f-005', tipo: 'PJ', razaoSocial: 'InfoParts Componentes Eletrônicos Ltda', nomeFantasia: 'InfoParts',
+    cnpj: '67.890.123/0001-67', inscricaoEstadual: '678.901.234.000', ieIsento: false,
+    regimeTributario: 'LUCRO_REAL',
     email: 'pedidos@infoparts.com.br', telefone: '(31) 3456-7890',
     endereco: { logradouro: 'Rua dos Caetés', numero: '300', bairro: 'Centro', cidade: 'Belo Horizonte', uf: 'MG', cep: '30120-040' },
     status: 'INATIVO', totalCompras: 12000, qtdCompras: 3, ultimaCompra: _d(90), prazoMedioPagamento: 15, criadoEm: _d(300),
+  },
+  {
+    // Fornecedor PF (MEI/autônomo) — demonstra que fornecedor não é só PJ.
+    id: 'f-006', tipo: 'PF', nome: 'José Carlos da Silva', razaoSocial: 'José Carlos da Silva',
+    nomeFantasia: 'JC Marcenaria', cnpj: '', cpf: '321.654.987-00', rg: '32.165.498-7',
+    email: 'jc.marcenaria@gmail.com', telefone: '(47) 99876-5432',
+    endereco: { logradouro: 'Rua dos Artesãos', numero: '85', bairro: 'Industrial', cidade: 'Joinville', uf: 'SC', cep: '89230-000' },
+    status: 'ATIVO', totalCompras: 8200, qtdCompras: 4, ultimaCompra: _d(18), prazoMedioPagamento: 15, criadoEm: _d(95),
   },
 ];
 

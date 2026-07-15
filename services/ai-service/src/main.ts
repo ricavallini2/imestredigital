@@ -16,6 +16,15 @@ import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  // Fail-fast: em produção, JWT_SECRET é obrigatório. Sem ele, aborta o
+  // bootstrap antes de subir o servidor (nunca usar fallback silencioso).
+  if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET?.trim()) {
+    throw new Error(
+      'JWT_SECRET não definido. É obrigatório em produção — ' +
+        'defina a variável de ambiente antes de iniciar o ai-service.',
+    );
+  }
+
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
 

@@ -125,13 +125,18 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 exports.Prisma.ClienteScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
+  papeis: 'papeis',
   tipo: 'tipo',
   nome: 'nome',
   nomeFantasia: 'nomeFantasia',
   razaoSocial: 'razaoSocial',
   cpf: 'cpf',
   cnpj: 'cnpj',
+  rg: 'rg',
   inscricaoEstadual: 'inscricaoEstadual',
+  ieIsento: 'ieIsento',
+  inscricaoMunicipal: 'inscricaoMunicipal',
+  regimeTributario: 'regimeTributario',
   email: 'email',
   emailSecundario: 'emailSecundario',
   telefone: 'telefone',
@@ -146,6 +151,17 @@ exports.Prisma.ClienteScalarFieldEnum = {
   ultimaCompra: 'ultimaCompra',
   totalCompras: 'totalCompras',
   valorTotalCompras: 'valorTotalCompras',
+  limiteCredito: 'limiteCredito',
+  vendedorId: 'vendedorId',
+  prazoPagamento: 'prazoPagamento',
+  condicoesPagamento: 'condicoesPagamento',
+  pixChave: 'pixChave',
+  categoriasFornecidas: 'categoriasFornecidas',
+  avaliacaoFornecedor: 'avaliacaoFornecedor',
+  ultimaCompraFornecedor: 'ultimaCompraFornecedor',
+  totalComprasFornecedor: 'totalComprasFornecedor',
+  valorTotalComprasFornecedor: 'valorTotalComprasFornecedor',
+  deletadoEm: 'deletadoEm',
   criadoEm: 'criadoEm',
   atualizadoEm: 'atualizadoEm'
 };
@@ -264,6 +280,14 @@ exports.TipoCliente = exports.$Enums.TipoCliente = {
   PESSOA_JURIDICA: 'PESSOA_JURIDICA'
 };
 
+exports.RegimeTributario = exports.$Enums.RegimeTributario = {
+  SIMPLES_NACIONAL: 'SIMPLES_NACIONAL',
+  MEI: 'MEI',
+  LUCRO_PRESUMIDO: 'LUCRO_PRESUMIDO',
+  LUCRO_REAL: 'LUCRO_REAL',
+  ISENTO: 'ISENTO'
+};
+
 exports.StatusCliente = exports.$Enums.StatusCliente = {
   PROSPECT: 'PROSPECT',
   ATIVO: 'ATIVO',
@@ -276,7 +300,22 @@ exports.OrigemCliente = exports.$Enums.OrigemCliente = {
   MARKETPLACE: 'MARKETPLACE',
   SITE: 'SITE',
   INDICACAO: 'INDICACAO',
-  IMPORTACAO: 'IMPORTACAO'
+  IMPORTACAO: 'IMPORTACAO',
+  WEBSITE: 'WEBSITE',
+  INSTAGRAM: 'INSTAGRAM',
+  FACEBOOK: 'FACEBOOK',
+  WHATSAPP: 'WHATSAPP',
+  VENDA_DIRETA: 'VENDA_DIRETA',
+  FEIRA: 'FEIRA',
+  TELEFONE: 'TELEFONE',
+  EMAIL: 'EMAIL',
+  OUTRO: 'OUTRO'
+};
+
+exports.Papel = exports.$Enums.Papel = {
+  CLIENTE: 'CLIENTE',
+  FORNECEDOR: 'FORNECEDOR',
+  TRANSPORTADORA: 'TRANSPORTADORA'
 };
 
 exports.TipoEndereco = exports.$Enums.TipoEndereco = {
@@ -287,12 +326,19 @@ exports.TipoEndereco = exports.$Enums.TipoEndereco = {
 
 exports.TipoInteracao = exports.$Enums.TipoInteracao = {
   VENDA: 'VENDA',
+  COMPRA: 'COMPRA',
   ATENDIMENTO: 'ATENDIMENTO',
   RECLAMACAO: 'RECLAMACAO',
+  ELOGIO: 'ELOGIO',
   DEVOLUCAO: 'DEVOLUCAO',
+  ORCAMENTO: 'ORCAMENTO',
   EMAIL: 'EMAIL',
   TELEFONE: 'TELEFONE',
+  LIGACAO: 'LIGACAO',
+  WHATSAPP: 'WHATSAPP',
   CHAT: 'CHAT',
+  REUNIAO: 'REUNIAO',
+  VISITA: 'VISITA',
   MARKETPLACE: 'MARKETPLACE',
   NOTA: 'NOTA'
 };

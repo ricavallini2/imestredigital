@@ -12,23 +12,31 @@ import {
   Param,
   Body,
   Query,
+  UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { RegraFiscalService } from './regra-fiscal.service';
 import { CriarRegraFiscalDto, AtualizarRegraFiscalDto } from '../../dtos/regra-fiscal.dto';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
+import { RolesGuard } from '../../guards/roles.guard';
+import { Roles } from '../../decorators/roles.decorator';
 
 @ApiTags('regras-fiscais')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('v1/regras-fiscais')
 export class RegraFiscalController {
   constructor(private readonly service: RegraFiscalService) {}
 
   /**
    * Cria uma regra fiscal.
+   *
+   * Restrita a admin|gerente.
    */
   @Post()
+  @Roles('admin', 'gerente')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Criar regra fiscal' })
   @ApiResponse({ status: 201, description: 'Regra fiscal criada' })
@@ -64,6 +72,7 @@ export class RegraFiscalController {
    * Atualiza uma regra fiscal.
    */
   @Put(':id')
+  @Roles('admin', 'gerente')
   @ApiOperation({ summary: 'Atualizar regra fiscal' })
   @ApiResponse({ status: 200, description: 'Regra fiscal atualizada' })
   async atualizar(
@@ -78,6 +87,7 @@ export class RegraFiscalController {
    * Remove uma regra fiscal.
    */
   @Delete(':id')
+  @Roles('admin', 'gerente')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remover regra fiscal' })
   async remover(@Req() req: any, @Param('id') regraId: string) {
@@ -93,10 +103,7 @@ export class RegraFiscalController {
     status: 200,
     description: 'Sugestões de classificação',
   })
-  async sugerirClassificacao(
-    @Req() req: any,
-    @Body() body: { descricaoProduto: string },
-  ) {
+  async sugerirClassificacao(@Req() req: any, @Body() body: { descricaoProduto: string }) {
     return this.service.sugerirClassificacao(req.tenantId, body.descricaoProduto);
   }
 }

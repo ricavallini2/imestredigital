@@ -50,7 +50,7 @@ export async function GET() {
 
   // Por status (ativos)
   const ativos = PEDIDOS_MOCK.filter(p => !['CANCELADO', 'DEVOLVIDO'].includes(p.status));
-  const STATUS_LISTA = ['PENDENTE','CONFIRMADO','SEPARANDO','SEPARADO','FATURADO','ENVIADO','ENTREGUE','CANCELADO'];
+  const STATUS_LISTA = ['PENDENTE','CONFIRMADO','EM_SEPARACAO','FATURADO','ENVIADO','ENTREGUE','CANCELADO'];
   const porStatus = Object.fromEntries(
     STATUS_LISTA.map(s => [s, PEDIDOS_MOCK.filter(p => p.status === s).length])
   );
@@ -114,11 +114,11 @@ export async function GET() {
 
   // ─── Fiscal ──────────────────────────────────────────────────────────────────
   const nfs = getNotasFiscais();
-  const nfs30d     = nfs.filter(n => n.status === 'EMITIDA' && now - new Date(n.dataEmissao).getTime() < ms30d);
+  const nfs30d     = nfs.filter(n => n.status === 'AUTORIZADA' && now - new Date(n.dataEmissao).getTime() < ms30d);
   const faturado30d = +nfs30d.reduce((s, n) => s + n.valorTotal, 0).toFixed(2);
   const impostos30d = +nfs30d.reduce((s, n) => s + n.valorICMS + n.valorPIS + n.valorCOFINS, 0).toFixed(2);
   const totalNFsNaoRascunho = nfs.filter(n => n.status !== 'RASCUNHO').length;
-  const totalEmitidas = nfs.filter(n => n.status === 'EMITIDA').length;
+  const totalEmitidas = nfs.filter(n => n.status === 'AUTORIZADA').length;
   const taxaEmissao  = totalNFsNaoRascunho > 0 ? +((totalEmitidas / totalNFsNaoRascunho) * 100).toFixed(1) : 0;
   const nfsPendentes = nfs.filter(n => ['RASCUNHO','VALIDADA'].includes(n.status)).length;
 

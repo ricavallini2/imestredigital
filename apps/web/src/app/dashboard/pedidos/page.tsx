@@ -22,8 +22,8 @@ const CANAL_CONFIG: Record<string, { label: string; emoji: string; cor: string }
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  PENDENTE: 'Pendente', CONFIRMADO: 'Confirmado', SEPARANDO: 'Separando',
-  SEPARADO: 'Separado', FATURADO: 'Faturado', ENVIADO: 'Enviado',
+  RASCUNHO: 'Rascunho', PENDENTE: 'Pendente', CONFIRMADO: 'Confirmado',
+  EM_SEPARACAO: 'Em Separação', FATURADO: 'Faturado', ENVIADO: 'Enviado',
   ENTREGUE: 'Entregue', CANCELADO: 'Cancelado', DEVOLVIDO: 'Devolvido',
 };
 

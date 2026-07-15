@@ -1,6 +1,15 @@
 import api from '@/lib/api';
 import type { Insight } from '@/types';
 
+/** Envelope paginado canônico retornado por todas as listagens. */
+export interface RespostaPaginada<T> {
+  dados: T[];
+  total: number;
+  pagina: number;
+  limite: number;
+  totalPaginas: number;
+}
+
 export interface ChatMessage { role: 'user' | 'assistant'; content: string; }
 export interface ChatResponse {
   resposta: string;
@@ -18,11 +27,13 @@ export interface BuscaGlobalResult {
 
 export const iaService = {
   // ─── Insights ──────────────────────────────────────────────────────────────
+  // O backend responde no envelope canônico { dados, total, ... }.
+  // Desembrulhamos aqui e devolvemos Insight[] para os hooks/UI.
   listarInsights: async (params?: {
-    visualizado?: boolean; tipo?: string; prioridade?: string; limite?: number;
+    visualizado?: boolean; tipo?: string; prioridade?: string; pagina?: number; limite?: number;
   }): Promise<Insight[]> => {
-    const { data } = await api.get('/v1/insights', { params });
-    return data;
+    const { data } = await api.get<RespostaPaginada<Insight>>('/v1/insights', { params });
+    return data.dados;
   },
 
   marcarVisualizado: async (id: string): Promise<void> => {

@@ -15,7 +15,7 @@ export interface ProdutoMock {
   id: string; tenantId: string;
   sku: string; ean?: string; nome: string; descricao: string;
   descricaoCurta?: string; categoria: string; categoriaId: string;
-  marca: string; status: 'ATIVO' | 'INATIVO' | 'RASCUNHO';
+  marca: string; status: 'ATIVO' | 'INATIVO' | 'RASCUNHO' | 'ESGOTADO' | 'DESCONTINUADO';
   preco: number; precoCusto: number; precoPromocional?: number;
   margemLucro: number; // %
   peso: number; altura: number; largura: number; comprimento: number;

@@ -27,7 +27,7 @@ export type ContaFinanceira = $Result.DefaultSelection<Prisma.$ContaFinanceiraPa
 export type Lancamento = $Result.DefaultSelection<Prisma.$LancamentoPayload>
 /**
  * Model CategoriaFinanceira
- * Categorias hierárquicas para organizar receitas e despesas.
+ * 
  */
 export type CategoriaFinanceira = $Result.DefaultSelection<Prisma.$CategoriaFinanceiraPayload>
 /**
@@ -42,10 +42,129 @@ export type Recorrencia = $Result.DefaultSelection<Prisma.$RecorrenciaPayload>
  */
 export type ConciliacaoBancaria = $Result.DefaultSelection<Prisma.$ConciliacaoBancariaPayload>
 /**
+ * Model EventoProcessado
+ * Registra eventos já consumidos para garantir idempotência no processamento
+ * da SAGA (reentregas do broker não reaplicam o efeito colateral).
+ * Dedup por (evento, referenciaId) — ex. ("pedido.faturado", pedidoId).
+ */
+export type EventoProcessado = $Result.DefaultSelection<Prisma.$EventoProcessadoPayload>
+/**
  * Model DRE
  * Relatório financeiro mensal/anual.
  */
 export type DRE = $Result.DefaultSelection<Prisma.$DREPayload>
+
+/**
+ * Enums
+ */
+export namespace $Enums {
+  export const TipoConta: {
+  CORRENTE: 'CORRENTE',
+  POUPANCA: 'POUPANCA',
+  INVESTIMENTO: 'INVESTIMENTO',
+  CAIXA: 'CAIXA',
+  CARTAO: 'CARTAO',
+  DIGITAL: 'DIGITAL'
+};
+
+export type TipoConta = (typeof TipoConta)[keyof typeof TipoConta]
+
+
+export const TipoLancamento: {
+  RECEITA: 'RECEITA',
+  DESPESA: 'DESPESA',
+  TRANSFERENCIA: 'TRANSFERENCIA'
+};
+
+export type TipoLancamento = (typeof TipoLancamento)[keyof typeof TipoLancamento]
+
+
+export const StatusLancamento: {
+  PENDENTE: 'PENDENTE',
+  PAGO: 'PAGO',
+  ATRASADO: 'ATRASADO',
+  CANCELADO: 'CANCELADO',
+  PARCIAL: 'PARCIAL'
+};
+
+export type StatusLancamento = (typeof StatusLancamento)[keyof typeof StatusLancamento]
+
+
+export const FormaPagamento: {
+  DINHEIRO: 'DINHEIRO',
+  PIX: 'PIX',
+  CARTAO_CREDITO: 'CARTAO_CREDITO',
+  CARTAO_DEBITO: 'CARTAO_DEBITO',
+  BOLETO: 'BOLETO',
+  TRANSFERENCIA: 'TRANSFERENCIA',
+  TED: 'TED',
+  DOC: 'DOC',
+  CHEQUE: 'CHEQUE',
+  OUTRO: 'OUTRO'
+};
+
+export type FormaPagamento = (typeof FormaPagamento)[keyof typeof FormaPagamento]
+
+
+export const TipoCategoriaFinanceira: {
+  RECEITA: 'RECEITA',
+  DESPESA: 'DESPESA'
+};
+
+export type TipoCategoriaFinanceira = (typeof TipoCategoriaFinanceira)[keyof typeof TipoCategoriaFinanceira]
+
+
+export const FrequenciaRecorrencia: {
+  DIARIA: 'DIARIA',
+  SEMANAL: 'SEMANAL',
+  QUINZENAL: 'QUINZENAL',
+  MENSAL: 'MENSAL',
+  BIMESTRAL: 'BIMESTRAL',
+  TRIMESTRAL: 'TRIMESTRAL',
+  SEMESTRAL: 'SEMESTRAL',
+  ANUAL: 'ANUAL'
+};
+
+export type FrequenciaRecorrencia = (typeof FrequenciaRecorrencia)[keyof typeof FrequenciaRecorrencia]
+
+
+export const StatusConciliacao: {
+  EM_ANDAMENTO: 'EM_ANDAMENTO',
+  CONCLUIDA: 'CONCLUIDA',
+  DIVERGENTE: 'DIVERGENTE'
+};
+
+export type StatusConciliacao = (typeof StatusConciliacao)[keyof typeof StatusConciliacao]
+
+}
+
+export type TipoConta = $Enums.TipoConta
+
+export const TipoConta: typeof $Enums.TipoConta
+
+export type TipoLancamento = $Enums.TipoLancamento
+
+export const TipoLancamento: typeof $Enums.TipoLancamento
+
+export type StatusLancamento = $Enums.StatusLancamento
+
+export const StatusLancamento: typeof $Enums.StatusLancamento
+
+export type FormaPagamento = $Enums.FormaPagamento
+
+export const FormaPagamento: typeof $Enums.FormaPagamento
+
+export type TipoCategoriaFinanceira = $Enums.TipoCategoriaFinanceira
+
+export const TipoCategoriaFinanceira: typeof $Enums.TipoCategoriaFinanceira
+
+export type FrequenciaRecorrencia = $Enums.FrequenciaRecorrencia
+
+export const FrequenciaRecorrencia: typeof $Enums.FrequenciaRecorrencia
+
+export type StatusConciliacao = $Enums.StatusConciliacao
+
+export const StatusConciliacao: typeof $Enums.StatusConciliacao
 
 /**
  * ##  Prisma Client ʲˢ
@@ -219,6 +338,16 @@ export class PrismaClient<
     * ```
     */
   get conciliacaoBancaria(): Prisma.ConciliacaoBancariaDelegate<ExtArgs>;
+
+  /**
+   * `prisma.eventoProcessado`: Exposes CRUD operations for the **EventoProcessado** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more EventoProcessados
+    * const eventoProcessados = await prisma.eventoProcessado.findMany()
+    * ```
+    */
+  get eventoProcessado(): Prisma.EventoProcessadoDelegate<ExtArgs>;
 
   /**
    * `prisma.dRE`: Exposes CRUD operations for the **DRE** model.
@@ -675,6 +804,7 @@ export namespace Prisma {
     CategoriaFinanceira: 'CategoriaFinanceira',
     Recorrencia: 'Recorrencia',
     ConciliacaoBancaria: 'ConciliacaoBancaria',
+    EventoProcessado: 'EventoProcessado',
     DRE: 'DRE'
   };
 
@@ -691,7 +821,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "contaFinanceira" | "lancamento" | "categoriaFinanceira" | "recorrencia" | "conciliacaoBancaria" | "dRE"
+      modelProps: "contaFinanceira" | "lancamento" | "categoriaFinanceira" | "recorrencia" | "conciliacaoBancaria" | "eventoProcessado" | "dRE"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1042,6 +1172,76 @@ export namespace Prisma {
           count: {
             args: Prisma.ConciliacaoBancariaCountArgs<ExtArgs>
             result: $Utils.Optional<ConciliacaoBancariaCountAggregateOutputType> | number
+          }
+        }
+      }
+      EventoProcessado: {
+        payload: Prisma.$EventoProcessadoPayload<ExtArgs>
+        fields: Prisma.EventoProcessadoFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.EventoProcessadoFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.EventoProcessadoFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>
+          }
+          findFirst: {
+            args: Prisma.EventoProcessadoFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.EventoProcessadoFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>
+          }
+          findMany: {
+            args: Prisma.EventoProcessadoFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>[]
+          }
+          create: {
+            args: Prisma.EventoProcessadoCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>
+          }
+          createMany: {
+            args: Prisma.EventoProcessadoCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.EventoProcessadoCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>[]
+          }
+          delete: {
+            args: Prisma.EventoProcessadoDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>
+          }
+          update: {
+            args: Prisma.EventoProcessadoUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>
+          }
+          deleteMany: {
+            args: Prisma.EventoProcessadoDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.EventoProcessadoUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.EventoProcessadoUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventoProcessadoPayload>
+          }
+          aggregate: {
+            args: Prisma.EventoProcessadoAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateEventoProcessado>
+          }
+          groupBy: {
+            args: Prisma.EventoProcessadoGroupByArgs<ExtArgs>
+            result: $Utils.Optional<EventoProcessadoGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.EventoProcessadoCountArgs<ExtArgs>
+            result: $Utils.Optional<EventoProcessadoCountAggregateOutputType> | number
           }
         }
       }
@@ -1430,7 +1630,7 @@ export namespace Prisma {
     id: string | null
     tenantId: string | null
     nome: string | null
-    tipo: string | null
+    tipo: $Enums.TipoConta | null
     banco: string | null
     agencia: string | null
     conta: string | null
@@ -1447,7 +1647,7 @@ export namespace Prisma {
     id: string | null
     tenantId: string | null
     nome: string | null
-    tipo: string | null
+    tipo: $Enums.TipoConta | null
     banco: string | null
     agencia: string | null
     conta: string | null
@@ -1631,7 +1831,7 @@ export namespace Prisma {
     id: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoConta
     banco: string | null
     agencia: string | null
     conta: string | null
@@ -1743,7 +1943,7 @@ export namespace Prisma {
       id: string
       tenantId: string
       nome: string
-      tipo: string
+      tipo: $Enums.TipoConta
       banco: string | null
       agencia: string | null
       conta: string | null
@@ -2155,7 +2355,7 @@ export namespace Prisma {
     readonly id: FieldRef<"ContaFinanceira", 'String'>
     readonly tenantId: FieldRef<"ContaFinanceira", 'String'>
     readonly nome: FieldRef<"ContaFinanceira", 'String'>
-    readonly tipo: FieldRef<"ContaFinanceira", 'String'>
+    readonly tipo: FieldRef<"ContaFinanceira", 'TipoConta'>
     readonly banco: FieldRef<"ContaFinanceira", 'String'>
     readonly agencia: FieldRef<"ContaFinanceira", 'String'>
     readonly conta: FieldRef<"ContaFinanceira", 'String'>
@@ -2622,7 +2822,8 @@ export namespace Prisma {
     id: string | null
     tenantId: string | null
     contaId: string | null
-    tipo: string | null
+    usuarioId: string | null
+    tipo: $Enums.TipoLancamento | null
     categoria: string | null
     subcategoria: string | null
     descricao: string | null
@@ -2630,8 +2831,8 @@ export namespace Prisma {
     dataVencimento: Date | null
     dataPagamento: Date | null
     dataCompetencia: Date | null
-    status: string | null
-    formaPagamento: string | null
+    status: $Enums.StatusLancamento | null
+    formaPagamento: $Enums.FormaPagamento | null
     numeroParcela: number | null
     totalParcelas: number | null
     parcelaOrigemId: string | null
@@ -2653,7 +2854,8 @@ export namespace Prisma {
     id: string | null
     tenantId: string | null
     contaId: string | null
-    tipo: string | null
+    usuarioId: string | null
+    tipo: $Enums.TipoLancamento | null
     categoria: string | null
     subcategoria: string | null
     descricao: string | null
@@ -2661,8 +2863,8 @@ export namespace Prisma {
     dataVencimento: Date | null
     dataPagamento: Date | null
     dataCompetencia: Date | null
-    status: string | null
-    formaPagamento: string | null
+    status: $Enums.StatusLancamento | null
+    formaPagamento: $Enums.FormaPagamento | null
     numeroParcela: number | null
     totalParcelas: number | null
     parcelaOrigemId: string | null
@@ -2684,6 +2886,7 @@ export namespace Prisma {
     id: number
     tenantId: number
     contaId: number
+    usuarioId: number
     tipo: number
     categoria: number
     subcategoria: number
@@ -2730,6 +2933,7 @@ export namespace Prisma {
     id?: true
     tenantId?: true
     contaId?: true
+    usuarioId?: true
     tipo?: true
     categoria?: true
     subcategoria?: true
@@ -2761,6 +2965,7 @@ export namespace Prisma {
     id?: true
     tenantId?: true
     contaId?: true
+    usuarioId?: true
     tipo?: true
     categoria?: true
     subcategoria?: true
@@ -2792,6 +2997,7 @@ export namespace Prisma {
     id?: true
     tenantId?: true
     contaId?: true
+    usuarioId?: true
     tipo?: true
     categoria?: true
     subcategoria?: true
@@ -2911,7 +3117,8 @@ export namespace Prisma {
     id: string
     tenantId: string
     contaId: string | null
-    tipo: string
+    usuarioId: string | null
+    tipo: $Enums.TipoLancamento
     categoria: string | null
     subcategoria: string | null
     descricao: string
@@ -2919,8 +3126,8 @@ export namespace Prisma {
     dataVencimento: Date
     dataPagamento: Date | null
     dataCompetencia: Date | null
-    status: string
-    formaPagamento: string | null
+    status: $Enums.StatusLancamento
+    formaPagamento: $Enums.FormaPagamento | null
     numeroParcela: number | null
     totalParcelas: number | null
     parcelaOrigemId: string | null
@@ -2962,6 +3169,7 @@ export namespace Prisma {
     id?: boolean
     tenantId?: boolean
     contaId?: boolean
+    usuarioId?: boolean
     tipo?: boolean
     categoria?: boolean
     subcategoria?: boolean
@@ -2998,6 +3206,7 @@ export namespace Prisma {
     id?: boolean
     tenantId?: boolean
     contaId?: boolean
+    usuarioId?: boolean
     tipo?: boolean
     categoria?: boolean
     subcategoria?: boolean
@@ -3034,6 +3243,7 @@ export namespace Prisma {
     id?: boolean
     tenantId?: boolean
     contaId?: boolean
+    usuarioId?: boolean
     tipo?: boolean
     categoria?: boolean
     subcategoria?: boolean
@@ -3087,7 +3297,8 @@ export namespace Prisma {
       id: string
       tenantId: string
       contaId: string | null
-      tipo: string
+      usuarioId: string | null
+      tipo: $Enums.TipoLancamento
       categoria: string | null
       subcategoria: string | null
       descricao: string
@@ -3095,8 +3306,8 @@ export namespace Prisma {
       dataVencimento: Date
       dataPagamento: Date | null
       dataCompetencia: Date | null
-      status: string
-      formaPagamento: string | null
+      status: $Enums.StatusLancamento
+      formaPagamento: $Enums.FormaPagamento | null
       numeroParcela: number | null
       totalParcelas: number | null
       parcelaOrigemId: string | null
@@ -3513,7 +3724,8 @@ export namespace Prisma {
     readonly id: FieldRef<"Lancamento", 'String'>
     readonly tenantId: FieldRef<"Lancamento", 'String'>
     readonly contaId: FieldRef<"Lancamento", 'String'>
-    readonly tipo: FieldRef<"Lancamento", 'String'>
+    readonly usuarioId: FieldRef<"Lancamento", 'String'>
+    readonly tipo: FieldRef<"Lancamento", 'TipoLancamento'>
     readonly categoria: FieldRef<"Lancamento", 'String'>
     readonly subcategoria: FieldRef<"Lancamento", 'String'>
     readonly descricao: FieldRef<"Lancamento", 'String'>
@@ -3521,8 +3733,8 @@ export namespace Prisma {
     readonly dataVencimento: FieldRef<"Lancamento", 'DateTime'>
     readonly dataPagamento: FieldRef<"Lancamento", 'DateTime'>
     readonly dataCompetencia: FieldRef<"Lancamento", 'DateTime'>
-    readonly status: FieldRef<"Lancamento", 'String'>
-    readonly formaPagamento: FieldRef<"Lancamento", 'String'>
+    readonly status: FieldRef<"Lancamento", 'StatusLancamento'>
+    readonly formaPagamento: FieldRef<"Lancamento", 'FormaPagamento'>
     readonly numeroParcela: FieldRef<"Lancamento", 'Int'>
     readonly totalParcelas: FieldRef<"Lancamento", 'Int'>
     readonly parcelaOrigemId: FieldRef<"Lancamento", 'String'>
@@ -3945,7 +4157,7 @@ export namespace Prisma {
     id: string | null
     tenantId: string | null
     nome: string | null
-    tipo: string | null
+    tipo: $Enums.TipoCategoriaFinanceira | null
     icone: string | null
     cor: string | null
     paiId: string | null
@@ -3958,7 +4170,7 @@ export namespace Prisma {
     id: string | null
     tenantId: string | null
     nome: string | null
-    tipo: string | null
+    tipo: $Enums.TipoCategoriaFinanceira | null
     icone: string | null
     cor: string | null
     paiId: string | null
@@ -4098,7 +4310,7 @@ export namespace Prisma {
     id: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoCategoriaFinanceira
     icone: string | null
     cor: string | null
     paiId: string | null
@@ -4186,7 +4398,7 @@ export namespace Prisma {
       id: string
       tenantId: string
       nome: string
-      tipo: string
+      tipo: $Enums.TipoCategoriaFinanceira
       icone: string | null
       cor: string | null
       paiId: string | null
@@ -4591,7 +4803,7 @@ export namespace Prisma {
     readonly id: FieldRef<"CategoriaFinanceira", 'String'>
     readonly tenantId: FieldRef<"CategoriaFinanceira", 'String'>
     readonly nome: FieldRef<"CategoriaFinanceira", 'String'>
-    readonly tipo: FieldRef<"CategoriaFinanceira", 'String'>
+    readonly tipo: FieldRef<"CategoriaFinanceira", 'TipoCategoriaFinanceira'>
     readonly icone: FieldRef<"CategoriaFinanceira", 'String'>
     readonly cor: FieldRef<"CategoriaFinanceira", 'String'>
     readonly paiId: FieldRef<"CategoriaFinanceira", 'String'>
@@ -4992,10 +5204,10 @@ export namespace Prisma {
     tenantId: string | null
     contaId: string | null
     descricao: string | null
-    tipo: string | null
+    tipo: $Enums.TipoLancamento | null
     categoria: string | null
     valor: Decimal | null
-    frequencia: string | null
+    frequencia: $Enums.FrequenciaRecorrencia | null
     diaVencimento: number | null
     proximaGeracao: Date | null
     ativa: boolean | null
@@ -5008,10 +5220,10 @@ export namespace Prisma {
     tenantId: string | null
     contaId: string | null
     descricao: string | null
-    tipo: string | null
+    tipo: $Enums.TipoLancamento | null
     categoria: string | null
     valor: Decimal | null
-    frequencia: string | null
+    frequencia: $Enums.FrequenciaRecorrencia | null
     diaVencimento: number | null
     proximaGeracao: Date | null
     ativa: boolean | null
@@ -5187,10 +5399,10 @@ export namespace Prisma {
     tenantId: string
     contaId: string | null
     descricao: string
-    tipo: string
+    tipo: $Enums.TipoLancamento
     categoria: string | null
     valor: Decimal
-    frequencia: string
+    frequencia: $Enums.FrequenciaRecorrencia
     diaVencimento: number | null
     proximaGeracao: Date
     ativa: boolean
@@ -5289,10 +5501,10 @@ export namespace Prisma {
       tenantId: string
       contaId: string | null
       descricao: string
-      tipo: string
+      tipo: $Enums.TipoLancamento
       categoria: string | null
       valor: Prisma.Decimal
-      frequencia: string
+      frequencia: $Enums.FrequenciaRecorrencia
       diaVencimento: number | null
       proximaGeracao: Date
       ativa: boolean
@@ -5697,10 +5909,10 @@ export namespace Prisma {
     readonly tenantId: FieldRef<"Recorrencia", 'String'>
     readonly contaId: FieldRef<"Recorrencia", 'String'>
     readonly descricao: FieldRef<"Recorrencia", 'String'>
-    readonly tipo: FieldRef<"Recorrencia", 'String'>
+    readonly tipo: FieldRef<"Recorrencia", 'TipoLancamento'>
     readonly categoria: FieldRef<"Recorrencia", 'String'>
     readonly valor: FieldRef<"Recorrencia", 'Decimal'>
-    readonly frequencia: FieldRef<"Recorrencia", 'String'>
+    readonly frequencia: FieldRef<"Recorrencia", 'FrequenciaRecorrencia'>
     readonly diaVencimento: FieldRef<"Recorrencia", 'Int'>
     readonly proximaGeracao: FieldRef<"Recorrencia", 'DateTime'>
     readonly ativa: FieldRef<"Recorrencia", 'Boolean'>
@@ -6103,7 +6315,7 @@ export namespace Prisma {
     dataFim: Date | null
     saldoInicial: Decimal | null
     saldoFinal: Decimal | null
-    status: string | null
+    status: $Enums.StatusConciliacao | null
     criadoEm: Date | null
     atualizadoEm: Date | null
   }
@@ -6116,7 +6328,7 @@ export namespace Prisma {
     dataFim: Date | null
     saldoInicial: Decimal | null
     saldoFinal: Decimal | null
-    status: string | null
+    status: $Enums.StatusConciliacao | null
     criadoEm: Date | null
     atualizadoEm: Date | null
   }
@@ -6282,7 +6494,7 @@ export namespace Prisma {
     dataFim: Date
     saldoInicial: Decimal
     saldoFinal: Decimal
-    status: string
+    status: $Enums.StatusConciliacao
     divergencias: JsonValue | null
     criadoEm: Date
     atualizadoEm: Date
@@ -6371,7 +6583,7 @@ export namespace Prisma {
       dataFim: Date
       saldoInicial: Prisma.Decimal
       saldoFinal: Prisma.Decimal
-      status: string
+      status: $Enums.StatusConciliacao
       divergencias: Prisma.JsonValue | null
       criadoEm: Date
       atualizadoEm: Date
@@ -6776,7 +6988,7 @@ export namespace Prisma {
     readonly dataFim: FieldRef<"ConciliacaoBancaria", 'DateTime'>
     readonly saldoInicial: FieldRef<"ConciliacaoBancaria", 'Decimal'>
     readonly saldoFinal: FieldRef<"ConciliacaoBancaria", 'Decimal'>
-    readonly status: FieldRef<"ConciliacaoBancaria", 'String'>
+    readonly status: FieldRef<"ConciliacaoBancaria", 'StatusConciliacao'>
     readonly divergencias: FieldRef<"ConciliacaoBancaria", 'Json'>
     readonly criadoEm: FieldRef<"ConciliacaoBancaria", 'DateTime'>
     readonly atualizadoEm: FieldRef<"ConciliacaoBancaria", 'DateTime'>
@@ -7109,6 +7321,890 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ConciliacaoBancariaInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model EventoProcessado
+   */
+
+  export type AggregateEventoProcessado = {
+    _count: EventoProcessadoCountAggregateOutputType | null
+    _min: EventoProcessadoMinAggregateOutputType | null
+    _max: EventoProcessadoMaxAggregateOutputType | null
+  }
+
+  export type EventoProcessadoMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    evento: string | null
+    referenciaId: string | null
+    processadoEm: Date | null
+  }
+
+  export type EventoProcessadoMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    evento: string | null
+    referenciaId: string | null
+    processadoEm: Date | null
+  }
+
+  export type EventoProcessadoCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    evento: number
+    referenciaId: number
+    processadoEm: number
+    _all: number
+  }
+
+
+  export type EventoProcessadoMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    evento?: true
+    referenciaId?: true
+    processadoEm?: true
+  }
+
+  export type EventoProcessadoMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    evento?: true
+    referenciaId?: true
+    processadoEm?: true
+  }
+
+  export type EventoProcessadoCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    evento?: true
+    referenciaId?: true
+    processadoEm?: true
+    _all?: true
+  }
+
+  export type EventoProcessadoAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EventoProcessado to aggregate.
+     */
+    where?: EventoProcessadoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventoProcessados to fetch.
+     */
+    orderBy?: EventoProcessadoOrderByWithRelationInput | EventoProcessadoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: EventoProcessadoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventoProcessados from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventoProcessados.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned EventoProcessados
+    **/
+    _count?: true | EventoProcessadoCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: EventoProcessadoMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: EventoProcessadoMaxAggregateInputType
+  }
+
+  export type GetEventoProcessadoAggregateType<T extends EventoProcessadoAggregateArgs> = {
+        [P in keyof T & keyof AggregateEventoProcessado]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateEventoProcessado[P]>
+      : GetScalarType<T[P], AggregateEventoProcessado[P]>
+  }
+
+
+
+
+  export type EventoProcessadoGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EventoProcessadoWhereInput
+    orderBy?: EventoProcessadoOrderByWithAggregationInput | EventoProcessadoOrderByWithAggregationInput[]
+    by: EventoProcessadoScalarFieldEnum[] | EventoProcessadoScalarFieldEnum
+    having?: EventoProcessadoScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: EventoProcessadoCountAggregateInputType | true
+    _min?: EventoProcessadoMinAggregateInputType
+    _max?: EventoProcessadoMaxAggregateInputType
+  }
+
+  export type EventoProcessadoGroupByOutputType = {
+    id: string
+    tenantId: string
+    evento: string
+    referenciaId: string
+    processadoEm: Date
+    _count: EventoProcessadoCountAggregateOutputType | null
+    _min: EventoProcessadoMinAggregateOutputType | null
+    _max: EventoProcessadoMaxAggregateOutputType | null
+  }
+
+  type GetEventoProcessadoGroupByPayload<T extends EventoProcessadoGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<EventoProcessadoGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof EventoProcessadoGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], EventoProcessadoGroupByOutputType[P]>
+            : GetScalarType<T[P], EventoProcessadoGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type EventoProcessadoSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    evento?: boolean
+    referenciaId?: boolean
+    processadoEm?: boolean
+  }, ExtArgs["result"]["eventoProcessado"]>
+
+  export type EventoProcessadoSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    evento?: boolean
+    referenciaId?: boolean
+    processadoEm?: boolean
+  }, ExtArgs["result"]["eventoProcessado"]>
+
+  export type EventoProcessadoSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    evento?: boolean
+    referenciaId?: boolean
+    processadoEm?: boolean
+  }
+
+
+  export type $EventoProcessadoPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "EventoProcessado"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      /**
+       * Nome lógico do evento consumido (ex. "pedido.faturado", "pedido.pago").
+       */
+      evento: string
+      /**
+       * Identificador do agregado de referência (ex. pedidoId).
+       */
+      referenciaId: string
+      processadoEm: Date
+    }, ExtArgs["result"]["eventoProcessado"]>
+    composites: {}
+  }
+
+  type EventoProcessadoGetPayload<S extends boolean | null | undefined | EventoProcessadoDefaultArgs> = $Result.GetResult<Prisma.$EventoProcessadoPayload, S>
+
+  type EventoProcessadoCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<EventoProcessadoFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: EventoProcessadoCountAggregateInputType | true
+    }
+
+  export interface EventoProcessadoDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EventoProcessado'], meta: { name: 'EventoProcessado' } }
+    /**
+     * Find zero or one EventoProcessado that matches the filter.
+     * @param {EventoProcessadoFindUniqueArgs} args - Arguments to find a EventoProcessado
+     * @example
+     * // Get one EventoProcessado
+     * const eventoProcessado = await prisma.eventoProcessado.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends EventoProcessadoFindUniqueArgs>(args: SelectSubset<T, EventoProcessadoFindUniqueArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one EventoProcessado that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {EventoProcessadoFindUniqueOrThrowArgs} args - Arguments to find a EventoProcessado
+     * @example
+     * // Get one EventoProcessado
+     * const eventoProcessado = await prisma.eventoProcessado.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends EventoProcessadoFindUniqueOrThrowArgs>(args: SelectSubset<T, EventoProcessadoFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first EventoProcessado that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventoProcessadoFindFirstArgs} args - Arguments to find a EventoProcessado
+     * @example
+     * // Get one EventoProcessado
+     * const eventoProcessado = await prisma.eventoProcessado.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends EventoProcessadoFindFirstArgs>(args?: SelectSubset<T, EventoProcessadoFindFirstArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first EventoProcessado that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventoProcessadoFindFirstOrThrowArgs} args - Arguments to find a EventoProcessado
+     * @example
+     * // Get one EventoProcessado
+     * const eventoProcessado = await prisma.eventoProcessado.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends EventoProcessadoFindFirstOrThrowArgs>(args?: SelectSubset<T, EventoProcessadoFindFirstOrThrowArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more EventoProcessados that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventoProcessadoFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all EventoProcessados
+     * const eventoProcessados = await prisma.eventoProcessado.findMany()
+     * 
+     * // Get first 10 EventoProcessados
+     * const eventoProcessados = await prisma.eventoProcessado.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const eventoProcessadoWithIdOnly = await prisma.eventoProcessado.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends EventoProcessadoFindManyArgs>(args?: SelectSubset<T, EventoProcessadoFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a EventoProcessado.
+     * @param {EventoProcessadoCreateArgs} args - Arguments to create a EventoProcessado.
+     * @example
+     * // Create one EventoProcessado
+     * const EventoProcessado = await prisma.eventoProcessado.create({
+     *   data: {
+     *     // ... data to create a EventoProcessado
+     *   }
+     * })
+     * 
+     */
+    create<T extends EventoProcessadoCreateArgs>(args: SelectSubset<T, EventoProcessadoCreateArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many EventoProcessados.
+     * @param {EventoProcessadoCreateManyArgs} args - Arguments to create many EventoProcessados.
+     * @example
+     * // Create many EventoProcessados
+     * const eventoProcessado = await prisma.eventoProcessado.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends EventoProcessadoCreateManyArgs>(args?: SelectSubset<T, EventoProcessadoCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many EventoProcessados and returns the data saved in the database.
+     * @param {EventoProcessadoCreateManyAndReturnArgs} args - Arguments to create many EventoProcessados.
+     * @example
+     * // Create many EventoProcessados
+     * const eventoProcessado = await prisma.eventoProcessado.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many EventoProcessados and only return the `id`
+     * const eventoProcessadoWithIdOnly = await prisma.eventoProcessado.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends EventoProcessadoCreateManyAndReturnArgs>(args?: SelectSubset<T, EventoProcessadoCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a EventoProcessado.
+     * @param {EventoProcessadoDeleteArgs} args - Arguments to delete one EventoProcessado.
+     * @example
+     * // Delete one EventoProcessado
+     * const EventoProcessado = await prisma.eventoProcessado.delete({
+     *   where: {
+     *     // ... filter to delete one EventoProcessado
+     *   }
+     * })
+     * 
+     */
+    delete<T extends EventoProcessadoDeleteArgs>(args: SelectSubset<T, EventoProcessadoDeleteArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one EventoProcessado.
+     * @param {EventoProcessadoUpdateArgs} args - Arguments to update one EventoProcessado.
+     * @example
+     * // Update one EventoProcessado
+     * const eventoProcessado = await prisma.eventoProcessado.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends EventoProcessadoUpdateArgs>(args: SelectSubset<T, EventoProcessadoUpdateArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more EventoProcessados.
+     * @param {EventoProcessadoDeleteManyArgs} args - Arguments to filter EventoProcessados to delete.
+     * @example
+     * // Delete a few EventoProcessados
+     * const { count } = await prisma.eventoProcessado.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends EventoProcessadoDeleteManyArgs>(args?: SelectSubset<T, EventoProcessadoDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EventoProcessados.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventoProcessadoUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many EventoProcessados
+     * const eventoProcessado = await prisma.eventoProcessado.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends EventoProcessadoUpdateManyArgs>(args: SelectSubset<T, EventoProcessadoUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one EventoProcessado.
+     * @param {EventoProcessadoUpsertArgs} args - Arguments to update or create a EventoProcessado.
+     * @example
+     * // Update or create a EventoProcessado
+     * const eventoProcessado = await prisma.eventoProcessado.upsert({
+     *   create: {
+     *     // ... data to create a EventoProcessado
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the EventoProcessado we want to update
+     *   }
+     * })
+     */
+    upsert<T extends EventoProcessadoUpsertArgs>(args: SelectSubset<T, EventoProcessadoUpsertArgs<ExtArgs>>): Prisma__EventoProcessadoClient<$Result.GetResult<Prisma.$EventoProcessadoPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of EventoProcessados.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventoProcessadoCountArgs} args - Arguments to filter EventoProcessados to count.
+     * @example
+     * // Count the number of EventoProcessados
+     * const count = await prisma.eventoProcessado.count({
+     *   where: {
+     *     // ... the filter for the EventoProcessados we want to count
+     *   }
+     * })
+    **/
+    count<T extends EventoProcessadoCountArgs>(
+      args?: Subset<T, EventoProcessadoCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], EventoProcessadoCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a EventoProcessado.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventoProcessadoAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends EventoProcessadoAggregateArgs>(args: Subset<T, EventoProcessadoAggregateArgs>): Prisma.PrismaPromise<GetEventoProcessadoAggregateType<T>>
+
+    /**
+     * Group by EventoProcessado.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventoProcessadoGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends EventoProcessadoGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: EventoProcessadoGroupByArgs['orderBy'] }
+        : { orderBy?: EventoProcessadoGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, EventoProcessadoGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEventoProcessadoGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the EventoProcessado model
+   */
+  readonly fields: EventoProcessadoFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for EventoProcessado.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__EventoProcessadoClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the EventoProcessado model
+   */ 
+  interface EventoProcessadoFieldRefs {
+    readonly id: FieldRef<"EventoProcessado", 'String'>
+    readonly tenantId: FieldRef<"EventoProcessado", 'String'>
+    readonly evento: FieldRef<"EventoProcessado", 'String'>
+    readonly referenciaId: FieldRef<"EventoProcessado", 'String'>
+    readonly processadoEm: FieldRef<"EventoProcessado", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * EventoProcessado findUnique
+   */
+  export type EventoProcessadoFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * Filter, which EventoProcessado to fetch.
+     */
+    where: EventoProcessadoWhereUniqueInput
+  }
+
+  /**
+   * EventoProcessado findUniqueOrThrow
+   */
+  export type EventoProcessadoFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * Filter, which EventoProcessado to fetch.
+     */
+    where: EventoProcessadoWhereUniqueInput
+  }
+
+  /**
+   * EventoProcessado findFirst
+   */
+  export type EventoProcessadoFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * Filter, which EventoProcessado to fetch.
+     */
+    where?: EventoProcessadoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventoProcessados to fetch.
+     */
+    orderBy?: EventoProcessadoOrderByWithRelationInput | EventoProcessadoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EventoProcessados.
+     */
+    cursor?: EventoProcessadoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventoProcessados from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventoProcessados.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EventoProcessados.
+     */
+    distinct?: EventoProcessadoScalarFieldEnum | EventoProcessadoScalarFieldEnum[]
+  }
+
+  /**
+   * EventoProcessado findFirstOrThrow
+   */
+  export type EventoProcessadoFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * Filter, which EventoProcessado to fetch.
+     */
+    where?: EventoProcessadoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventoProcessados to fetch.
+     */
+    orderBy?: EventoProcessadoOrderByWithRelationInput | EventoProcessadoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EventoProcessados.
+     */
+    cursor?: EventoProcessadoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventoProcessados from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventoProcessados.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EventoProcessados.
+     */
+    distinct?: EventoProcessadoScalarFieldEnum | EventoProcessadoScalarFieldEnum[]
+  }
+
+  /**
+   * EventoProcessado findMany
+   */
+  export type EventoProcessadoFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * Filter, which EventoProcessados to fetch.
+     */
+    where?: EventoProcessadoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventoProcessados to fetch.
+     */
+    orderBy?: EventoProcessadoOrderByWithRelationInput | EventoProcessadoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing EventoProcessados.
+     */
+    cursor?: EventoProcessadoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventoProcessados from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventoProcessados.
+     */
+    skip?: number
+    distinct?: EventoProcessadoScalarFieldEnum | EventoProcessadoScalarFieldEnum[]
+  }
+
+  /**
+   * EventoProcessado create
+   */
+  export type EventoProcessadoCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * The data needed to create a EventoProcessado.
+     */
+    data: XOR<EventoProcessadoCreateInput, EventoProcessadoUncheckedCreateInput>
+  }
+
+  /**
+   * EventoProcessado createMany
+   */
+  export type EventoProcessadoCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many EventoProcessados.
+     */
+    data: EventoProcessadoCreateManyInput | EventoProcessadoCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * EventoProcessado createManyAndReturn
+   */
+  export type EventoProcessadoCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many EventoProcessados.
+     */
+    data: EventoProcessadoCreateManyInput | EventoProcessadoCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * EventoProcessado update
+   */
+  export type EventoProcessadoUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * The data needed to update a EventoProcessado.
+     */
+    data: XOR<EventoProcessadoUpdateInput, EventoProcessadoUncheckedUpdateInput>
+    /**
+     * Choose, which EventoProcessado to update.
+     */
+    where: EventoProcessadoWhereUniqueInput
+  }
+
+  /**
+   * EventoProcessado updateMany
+   */
+  export type EventoProcessadoUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update EventoProcessados.
+     */
+    data: XOR<EventoProcessadoUpdateManyMutationInput, EventoProcessadoUncheckedUpdateManyInput>
+    /**
+     * Filter which EventoProcessados to update
+     */
+    where?: EventoProcessadoWhereInput
+  }
+
+  /**
+   * EventoProcessado upsert
+   */
+  export type EventoProcessadoUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * The filter to search for the EventoProcessado to update in case it exists.
+     */
+    where: EventoProcessadoWhereUniqueInput
+    /**
+     * In case the EventoProcessado found by the `where` argument doesn't exist, create a new EventoProcessado with this data.
+     */
+    create: XOR<EventoProcessadoCreateInput, EventoProcessadoUncheckedCreateInput>
+    /**
+     * In case the EventoProcessado was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<EventoProcessadoUpdateInput, EventoProcessadoUncheckedUpdateInput>
+  }
+
+  /**
+   * EventoProcessado delete
+   */
+  export type EventoProcessadoDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
+    /**
+     * Filter which EventoProcessado to delete.
+     */
+    where: EventoProcessadoWhereUniqueInput
+  }
+
+  /**
+   * EventoProcessado deleteMany
+   */
+  export type EventoProcessadoDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EventoProcessados to delete
+     */
+    where?: EventoProcessadoWhereInput
+  }
+
+  /**
+   * EventoProcessado without action
+   */
+  export type EventoProcessadoDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventoProcessado
+     */
+    select?: EventoProcessadoSelect<ExtArgs> | null
   }
 
 
@@ -8270,6 +9366,7 @@ export namespace Prisma {
     id: 'id',
     tenantId: 'tenantId',
     contaId: 'contaId',
+    usuarioId: 'usuarioId',
     tipo: 'tipo',
     categoria: 'categoria',
     subcategoria: 'subcategoria',
@@ -8351,6 +9448,17 @@ export namespace Prisma {
   };
 
   export type ConciliacaoBancariaScalarFieldEnum = (typeof ConciliacaoBancariaScalarFieldEnum)[keyof typeof ConciliacaoBancariaScalarFieldEnum]
+
+
+  export const EventoProcessadoScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    evento: 'evento',
+    referenciaId: 'referenciaId',
+    processadoEm: 'processadoEm'
+  };
+
+  export type EventoProcessadoScalarFieldEnum = (typeof EventoProcessadoScalarFieldEnum)[keyof typeof EventoProcessadoScalarFieldEnum]
 
 
   export const DREScalarFieldEnum: {
@@ -8438,6 +9546,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'TipoConta'
+   */
+  export type EnumTipoContaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoConta'>
+    
+
+
+  /**
+   * Reference to a field of type 'TipoConta[]'
+   */
+  export type ListEnumTipoContaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoConta[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Decimal'
    */
   export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
@@ -8473,6 +9595,48 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'TipoLancamento'
+   */
+  export type EnumTipoLancamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoLancamento'>
+    
+
+
+  /**
+   * Reference to a field of type 'TipoLancamento[]'
+   */
+  export type ListEnumTipoLancamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoLancamento[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusLancamento'
+   */
+  export type EnumStatusLancamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusLancamento'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusLancamento[]'
+   */
+  export type ListEnumStatusLancamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusLancamento[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'FormaPagamento'
+   */
+  export type EnumFormaPagamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FormaPagamento'>
+    
+
+
+  /**
+   * Reference to a field of type 'FormaPagamento[]'
+   */
+  export type ListEnumFormaPagamentoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FormaPagamento[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -8483,6 +9647,48 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'TipoCategoriaFinanceira'
+   */
+  export type EnumTipoCategoriaFinanceiraFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoCategoriaFinanceira'>
+    
+
+
+  /**
+   * Reference to a field of type 'TipoCategoriaFinanceira[]'
+   */
+  export type ListEnumTipoCategoriaFinanceiraFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoCategoriaFinanceira[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'FrequenciaRecorrencia'
+   */
+  export type EnumFrequenciaRecorrenciaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FrequenciaRecorrencia'>
+    
+
+
+  /**
+   * Reference to a field of type 'FrequenciaRecorrencia[]'
+   */
+  export type ListEnumFrequenciaRecorrenciaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FrequenciaRecorrencia[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusConciliacao'
+   */
+  export type EnumStatusConciliacaoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusConciliacao'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusConciliacao[]'
+   */
+  export type ListEnumStatusConciliacaoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusConciliacao[]'>
     
 
 
@@ -8517,7 +9723,7 @@ export namespace Prisma {
     id?: UuidFilter<"ContaFinanceira"> | string
     tenantId?: UuidFilter<"ContaFinanceira"> | string
     nome?: StringFilter<"ContaFinanceira"> | string
-    tipo?: StringFilter<"ContaFinanceira"> | string
+    tipo?: EnumTipoContaFilter<"ContaFinanceira"> | $Enums.TipoConta
     banco?: StringNullableFilter<"ContaFinanceira"> | string | null
     agencia?: StringNullableFilter<"ContaFinanceira"> | string | null
     conta?: StringNullableFilter<"ContaFinanceira"> | string | null
@@ -8564,7 +9770,7 @@ export namespace Prisma {
     NOT?: ContaFinanceiraWhereInput | ContaFinanceiraWhereInput[]
     tenantId?: UuidFilter<"ContaFinanceira"> | string
     nome?: StringFilter<"ContaFinanceira"> | string
-    tipo?: StringFilter<"ContaFinanceira"> | string
+    tipo?: EnumTipoContaFilter<"ContaFinanceira"> | $Enums.TipoConta
     banco?: StringNullableFilter<"ContaFinanceira"> | string | null
     agencia?: StringNullableFilter<"ContaFinanceira"> | string | null
     conta?: StringNullableFilter<"ContaFinanceira"> | string | null
@@ -8611,7 +9817,7 @@ export namespace Prisma {
     id?: UuidWithAggregatesFilter<"ContaFinanceira"> | string
     tenantId?: UuidWithAggregatesFilter<"ContaFinanceira"> | string
     nome?: StringWithAggregatesFilter<"ContaFinanceira"> | string
-    tipo?: StringWithAggregatesFilter<"ContaFinanceira"> | string
+    tipo?: EnumTipoContaWithAggregatesFilter<"ContaFinanceira"> | $Enums.TipoConta
     banco?: StringNullableWithAggregatesFilter<"ContaFinanceira"> | string | null
     agencia?: StringNullableWithAggregatesFilter<"ContaFinanceira"> | string | null
     conta?: StringNullableWithAggregatesFilter<"ContaFinanceira"> | string | null
@@ -8631,7 +9837,8 @@ export namespace Prisma {
     id?: UuidFilter<"Lancamento"> | string
     tenantId?: UuidFilter<"Lancamento"> | string
     contaId?: UuidNullableFilter<"Lancamento"> | string | null
-    tipo?: StringFilter<"Lancamento"> | string
+    usuarioId?: UuidNullableFilter<"Lancamento"> | string | null
+    tipo?: EnumTipoLancamentoFilter<"Lancamento"> | $Enums.TipoLancamento
     categoria?: StringNullableFilter<"Lancamento"> | string | null
     subcategoria?: StringNullableFilter<"Lancamento"> | string | null
     descricao?: StringFilter<"Lancamento"> | string
@@ -8639,8 +9846,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFilter<"Lancamento"> | Date | string
     dataPagamento?: DateTimeNullableFilter<"Lancamento"> | Date | string | null
     dataCompetencia?: DateTimeNullableFilter<"Lancamento"> | Date | string | null
-    status?: StringFilter<"Lancamento"> | string
-    formaPagamento?: StringNullableFilter<"Lancamento"> | string | null
+    status?: EnumStatusLancamentoFilter<"Lancamento"> | $Enums.StatusLancamento
+    formaPagamento?: EnumFormaPagamentoNullableFilter<"Lancamento"> | $Enums.FormaPagamento | null
     numeroParcela?: IntNullableFilter<"Lancamento"> | number | null
     totalParcelas?: IntNullableFilter<"Lancamento"> | number | null
     parcelaOrigemId?: UuidNullableFilter<"Lancamento"> | string | null
@@ -8667,6 +9874,7 @@ export namespace Prisma {
     id?: SortOrder
     tenantId?: SortOrder
     contaId?: SortOrderInput | SortOrder
+    usuarioId?: SortOrderInput | SortOrder
     tipo?: SortOrder
     categoria?: SortOrderInput | SortOrder
     subcategoria?: SortOrderInput | SortOrder
@@ -8706,7 +9914,8 @@ export namespace Prisma {
     NOT?: LancamentoWhereInput | LancamentoWhereInput[]
     tenantId?: UuidFilter<"Lancamento"> | string
     contaId?: UuidNullableFilter<"Lancamento"> | string | null
-    tipo?: StringFilter<"Lancamento"> | string
+    usuarioId?: UuidNullableFilter<"Lancamento"> | string | null
+    tipo?: EnumTipoLancamentoFilter<"Lancamento"> | $Enums.TipoLancamento
     categoria?: StringNullableFilter<"Lancamento"> | string | null
     subcategoria?: StringNullableFilter<"Lancamento"> | string | null
     descricao?: StringFilter<"Lancamento"> | string
@@ -8714,8 +9923,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFilter<"Lancamento"> | Date | string
     dataPagamento?: DateTimeNullableFilter<"Lancamento"> | Date | string | null
     dataCompetencia?: DateTimeNullableFilter<"Lancamento"> | Date | string | null
-    status?: StringFilter<"Lancamento"> | string
-    formaPagamento?: StringNullableFilter<"Lancamento"> | string | null
+    status?: EnumStatusLancamentoFilter<"Lancamento"> | $Enums.StatusLancamento
+    formaPagamento?: EnumFormaPagamentoNullableFilter<"Lancamento"> | $Enums.FormaPagamento | null
     numeroParcela?: IntNullableFilter<"Lancamento"> | number | null
     totalParcelas?: IntNullableFilter<"Lancamento"> | number | null
     parcelaOrigemId?: UuidNullableFilter<"Lancamento"> | string | null
@@ -8742,6 +9951,7 @@ export namespace Prisma {
     id?: SortOrder
     tenantId?: SortOrder
     contaId?: SortOrderInput | SortOrder
+    usuarioId?: SortOrderInput | SortOrder
     tipo?: SortOrder
     categoria?: SortOrderInput | SortOrder
     subcategoria?: SortOrderInput | SortOrder
@@ -8782,7 +9992,8 @@ export namespace Prisma {
     id?: UuidWithAggregatesFilter<"Lancamento"> | string
     tenantId?: UuidWithAggregatesFilter<"Lancamento"> | string
     contaId?: UuidNullableWithAggregatesFilter<"Lancamento"> | string | null
-    tipo?: StringWithAggregatesFilter<"Lancamento"> | string
+    usuarioId?: UuidNullableWithAggregatesFilter<"Lancamento"> | string | null
+    tipo?: EnumTipoLancamentoWithAggregatesFilter<"Lancamento"> | $Enums.TipoLancamento
     categoria?: StringNullableWithAggregatesFilter<"Lancamento"> | string | null
     subcategoria?: StringNullableWithAggregatesFilter<"Lancamento"> | string | null
     descricao?: StringWithAggregatesFilter<"Lancamento"> | string
@@ -8790,8 +10001,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeWithAggregatesFilter<"Lancamento"> | Date | string
     dataPagamento?: DateTimeNullableWithAggregatesFilter<"Lancamento"> | Date | string | null
     dataCompetencia?: DateTimeNullableWithAggregatesFilter<"Lancamento"> | Date | string | null
-    status?: StringWithAggregatesFilter<"Lancamento"> | string
-    formaPagamento?: StringNullableWithAggregatesFilter<"Lancamento"> | string | null
+    status?: EnumStatusLancamentoWithAggregatesFilter<"Lancamento"> | $Enums.StatusLancamento
+    formaPagamento?: EnumFormaPagamentoNullableWithAggregatesFilter<"Lancamento"> | $Enums.FormaPagamento | null
     numeroParcela?: IntNullableWithAggregatesFilter<"Lancamento"> | number | null
     totalParcelas?: IntNullableWithAggregatesFilter<"Lancamento"> | number | null
     parcelaOrigemId?: UuidNullableWithAggregatesFilter<"Lancamento"> | string | null
@@ -8817,7 +10028,7 @@ export namespace Prisma {
     id?: UuidFilter<"CategoriaFinanceira"> | string
     tenantId?: UuidFilter<"CategoriaFinanceira"> | string
     nome?: StringFilter<"CategoriaFinanceira"> | string
-    tipo?: StringFilter<"CategoriaFinanceira"> | string
+    tipo?: EnumTipoCategoriaFinanceiraFilter<"CategoriaFinanceira"> | $Enums.TipoCategoriaFinanceira
     icone?: StringNullableFilter<"CategoriaFinanceira"> | string | null
     cor?: StringNullableFilter<"CategoriaFinanceira"> | string | null
     paiId?: UuidNullableFilter<"CategoriaFinanceira"> | string | null
@@ -8850,7 +10061,7 @@ export namespace Prisma {
     NOT?: CategoriaFinanceiraWhereInput | CategoriaFinanceiraWhereInput[]
     tenantId?: UuidFilter<"CategoriaFinanceira"> | string
     nome?: StringFilter<"CategoriaFinanceira"> | string
-    tipo?: StringFilter<"CategoriaFinanceira"> | string
+    tipo?: EnumTipoCategoriaFinanceiraFilter<"CategoriaFinanceira"> | $Enums.TipoCategoriaFinanceira
     icone?: StringNullableFilter<"CategoriaFinanceira"> | string | null
     cor?: StringNullableFilter<"CategoriaFinanceira"> | string | null
     paiId?: UuidNullableFilter<"CategoriaFinanceira"> | string | null
@@ -8884,7 +10095,7 @@ export namespace Prisma {
     id?: UuidWithAggregatesFilter<"CategoriaFinanceira"> | string
     tenantId?: UuidWithAggregatesFilter<"CategoriaFinanceira"> | string
     nome?: StringWithAggregatesFilter<"CategoriaFinanceira"> | string
-    tipo?: StringWithAggregatesFilter<"CategoriaFinanceira"> | string
+    tipo?: EnumTipoCategoriaFinanceiraWithAggregatesFilter<"CategoriaFinanceira"> | $Enums.TipoCategoriaFinanceira
     icone?: StringNullableWithAggregatesFilter<"CategoriaFinanceira"> | string | null
     cor?: StringNullableWithAggregatesFilter<"CategoriaFinanceira"> | string | null
     paiId?: UuidNullableWithAggregatesFilter<"CategoriaFinanceira"> | string | null
@@ -8901,10 +10112,10 @@ export namespace Prisma {
     tenantId?: UuidFilter<"Recorrencia"> | string
     contaId?: UuidNullableFilter<"Recorrencia"> | string | null
     descricao?: StringFilter<"Recorrencia"> | string
-    tipo?: StringFilter<"Recorrencia"> | string
+    tipo?: EnumTipoLancamentoFilter<"Recorrencia"> | $Enums.TipoLancamento
     categoria?: StringNullableFilter<"Recorrencia"> | string | null
     valor?: DecimalFilter<"Recorrencia"> | Decimal | DecimalJsLike | number | string
-    frequencia?: StringFilter<"Recorrencia"> | string
+    frequencia?: EnumFrequenciaRecorrenciaFilter<"Recorrencia"> | $Enums.FrequenciaRecorrencia
     diaVencimento?: IntNullableFilter<"Recorrencia"> | number | null
     proximaGeracao?: DateTimeFilter<"Recorrencia"> | Date | string
     ativa?: BoolFilter<"Recorrencia"> | boolean
@@ -8940,10 +10151,10 @@ export namespace Prisma {
     tenantId?: UuidFilter<"Recorrencia"> | string
     contaId?: UuidNullableFilter<"Recorrencia"> | string | null
     descricao?: StringFilter<"Recorrencia"> | string
-    tipo?: StringFilter<"Recorrencia"> | string
+    tipo?: EnumTipoLancamentoFilter<"Recorrencia"> | $Enums.TipoLancamento
     categoria?: StringNullableFilter<"Recorrencia"> | string | null
     valor?: DecimalFilter<"Recorrencia"> | Decimal | DecimalJsLike | number | string
-    frequencia?: StringFilter<"Recorrencia"> | string
+    frequencia?: EnumFrequenciaRecorrenciaFilter<"Recorrencia"> | $Enums.FrequenciaRecorrencia
     diaVencimento?: IntNullableFilter<"Recorrencia"> | number | null
     proximaGeracao?: DateTimeFilter<"Recorrencia"> | Date | string
     ativa?: BoolFilter<"Recorrencia"> | boolean
@@ -8982,10 +10193,10 @@ export namespace Prisma {
     tenantId?: UuidWithAggregatesFilter<"Recorrencia"> | string
     contaId?: UuidNullableWithAggregatesFilter<"Recorrencia"> | string | null
     descricao?: StringWithAggregatesFilter<"Recorrencia"> | string
-    tipo?: StringWithAggregatesFilter<"Recorrencia"> | string
+    tipo?: EnumTipoLancamentoWithAggregatesFilter<"Recorrencia"> | $Enums.TipoLancamento
     categoria?: StringNullableWithAggregatesFilter<"Recorrencia"> | string | null
     valor?: DecimalWithAggregatesFilter<"Recorrencia"> | Decimal | DecimalJsLike | number | string
-    frequencia?: StringWithAggregatesFilter<"Recorrencia"> | string
+    frequencia?: EnumFrequenciaRecorrenciaWithAggregatesFilter<"Recorrencia"> | $Enums.FrequenciaRecorrencia
     diaVencimento?: IntNullableWithAggregatesFilter<"Recorrencia"> | number | null
     proximaGeracao?: DateTimeWithAggregatesFilter<"Recorrencia"> | Date | string
     ativa?: BoolWithAggregatesFilter<"Recorrencia"> | boolean
@@ -9004,7 +10215,7 @@ export namespace Prisma {
     dataFim?: DateTimeFilter<"ConciliacaoBancaria"> | Date | string
     saldoInicial?: DecimalFilter<"ConciliacaoBancaria"> | Decimal | DecimalJsLike | number | string
     saldoFinal?: DecimalFilter<"ConciliacaoBancaria"> | Decimal | DecimalJsLike | number | string
-    status?: StringFilter<"ConciliacaoBancaria"> | string
+    status?: EnumStatusConciliacaoFilter<"ConciliacaoBancaria"> | $Enums.StatusConciliacao
     divergencias?: JsonNullableFilter<"ConciliacaoBancaria">
     criadoEm?: DateTimeFilter<"ConciliacaoBancaria"> | Date | string
     atualizadoEm?: DateTimeFilter<"ConciliacaoBancaria"> | Date | string
@@ -9037,7 +10248,7 @@ export namespace Prisma {
     dataFim?: DateTimeFilter<"ConciliacaoBancaria"> | Date | string
     saldoInicial?: DecimalFilter<"ConciliacaoBancaria"> | Decimal | DecimalJsLike | number | string
     saldoFinal?: DecimalFilter<"ConciliacaoBancaria"> | Decimal | DecimalJsLike | number | string
-    status?: StringFilter<"ConciliacaoBancaria"> | string
+    status?: EnumStatusConciliacaoFilter<"ConciliacaoBancaria"> | $Enums.StatusConciliacao
     divergencias?: JsonNullableFilter<"ConciliacaoBancaria">
     criadoEm?: DateTimeFilter<"ConciliacaoBancaria"> | Date | string
     atualizadoEm?: DateTimeFilter<"ConciliacaoBancaria"> | Date | string
@@ -9074,10 +10285,63 @@ export namespace Prisma {
     dataFim?: DateTimeWithAggregatesFilter<"ConciliacaoBancaria"> | Date | string
     saldoInicial?: DecimalWithAggregatesFilter<"ConciliacaoBancaria"> | Decimal | DecimalJsLike | number | string
     saldoFinal?: DecimalWithAggregatesFilter<"ConciliacaoBancaria"> | Decimal | DecimalJsLike | number | string
-    status?: StringWithAggregatesFilter<"ConciliacaoBancaria"> | string
+    status?: EnumStatusConciliacaoWithAggregatesFilter<"ConciliacaoBancaria"> | $Enums.StatusConciliacao
     divergencias?: JsonNullableWithAggregatesFilter<"ConciliacaoBancaria">
     criadoEm?: DateTimeWithAggregatesFilter<"ConciliacaoBancaria"> | Date | string
     atualizadoEm?: DateTimeWithAggregatesFilter<"ConciliacaoBancaria"> | Date | string
+  }
+
+  export type EventoProcessadoWhereInput = {
+    AND?: EventoProcessadoWhereInput | EventoProcessadoWhereInput[]
+    OR?: EventoProcessadoWhereInput[]
+    NOT?: EventoProcessadoWhereInput | EventoProcessadoWhereInput[]
+    id?: UuidFilter<"EventoProcessado"> | string
+    tenantId?: UuidFilter<"EventoProcessado"> | string
+    evento?: StringFilter<"EventoProcessado"> | string
+    referenciaId?: StringFilter<"EventoProcessado"> | string
+    processadoEm?: DateTimeFilter<"EventoProcessado"> | Date | string
+  }
+
+  export type EventoProcessadoOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    evento?: SortOrder
+    referenciaId?: SortOrder
+    processadoEm?: SortOrder
+  }
+
+  export type EventoProcessadoWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    evento_referenciaId?: EventoProcessadoEvento_referenciaIdCompoundUniqueInput
+    AND?: EventoProcessadoWhereInput | EventoProcessadoWhereInput[]
+    OR?: EventoProcessadoWhereInput[]
+    NOT?: EventoProcessadoWhereInput | EventoProcessadoWhereInput[]
+    tenantId?: UuidFilter<"EventoProcessado"> | string
+    evento?: StringFilter<"EventoProcessado"> | string
+    referenciaId?: StringFilter<"EventoProcessado"> | string
+    processadoEm?: DateTimeFilter<"EventoProcessado"> | Date | string
+  }, "id" | "evento_referenciaId">
+
+  export type EventoProcessadoOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    evento?: SortOrder
+    referenciaId?: SortOrder
+    processadoEm?: SortOrder
+    _count?: EventoProcessadoCountOrderByAggregateInput
+    _max?: EventoProcessadoMaxOrderByAggregateInput
+    _min?: EventoProcessadoMinOrderByAggregateInput
+  }
+
+  export type EventoProcessadoScalarWhereWithAggregatesInput = {
+    AND?: EventoProcessadoScalarWhereWithAggregatesInput | EventoProcessadoScalarWhereWithAggregatesInput[]
+    OR?: EventoProcessadoScalarWhereWithAggregatesInput[]
+    NOT?: EventoProcessadoScalarWhereWithAggregatesInput | EventoProcessadoScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"EventoProcessado"> | string
+    tenantId?: UuidWithAggregatesFilter<"EventoProcessado"> | string
+    evento?: StringWithAggregatesFilter<"EventoProcessado"> | string
+    referenciaId?: StringWithAggregatesFilter<"EventoProcessado"> | string
+    processadoEm?: DateTimeWithAggregatesFilter<"EventoProcessado"> | Date | string
   }
 
   export type DREWhereInput = {
@@ -9127,6 +10391,7 @@ export namespace Prisma {
 
   export type DREWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    tenantId_ano_mes?: DRETenantId_ano_mesCompoundUniqueInput
     AND?: DREWhereInput | DREWhereInput[]
     OR?: DREWhereInput[]
     NOT?: DREWhereInput | DREWhereInput[]
@@ -9147,7 +10412,7 @@ export namespace Prisma {
     receitasFinanceiras?: DecimalFilter<"DRE"> | Decimal | DecimalJsLike | number | string
     lucroLiquido?: DecimalFilter<"DRE"> | Decimal | DecimalJsLike | number | string
     criadoEm?: DateTimeFilter<"DRE"> | Date | string
-  }, "id">
+  }, "id" | "tenantId_ano_mes">
 
   export type DREOrderByWithAggregationInput = {
     id?: SortOrder
@@ -9203,7 +10468,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoConta
     banco?: string | null
     agencia?: string | null
     conta?: string | null
@@ -9225,7 +10490,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoConta
     banco?: string | null
     agencia?: string | null
     conta?: string | null
@@ -9247,7 +10512,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoContaFieldUpdateOperationsInput | $Enums.TipoConta
     banco?: NullableStringFieldUpdateOperationsInput | string | null
     agencia?: NullableStringFieldUpdateOperationsInput | string | null
     conta?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9269,7 +10534,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoContaFieldUpdateOperationsInput | $Enums.TipoConta
     banco?: NullableStringFieldUpdateOperationsInput | string | null
     agencia?: NullableStringFieldUpdateOperationsInput | string | null
     conta?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9291,7 +10556,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoConta
     banco?: string | null
     agencia?: string | null
     conta?: string | null
@@ -9308,7 +10573,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoContaFieldUpdateOperationsInput | $Enums.TipoConta
     banco?: NullableStringFieldUpdateOperationsInput | string | null
     agencia?: NullableStringFieldUpdateOperationsInput | string | null
     conta?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9325,7 +10590,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoContaFieldUpdateOperationsInput | $Enums.TipoConta
     banco?: NullableStringFieldUpdateOperationsInput | string | null
     agencia?: NullableStringFieldUpdateOperationsInput | string | null
     conta?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9341,7 +10606,8 @@ export namespace Prisma {
   export type LancamentoCreateInput = {
     id?: string
     tenantId: string
-    tipo: string
+    usuarioId?: string | null
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     subcategoria?: string | null
     descricao: string
@@ -9349,8 +10615,8 @@ export namespace Prisma {
     dataVencimento: Date | string
     dataPagamento?: Date | string | null
     dataCompetencia?: Date | string | null
-    status?: string
-    formaPagamento?: string | null
+    status?: $Enums.StatusLancamento
+    formaPagamento?: $Enums.FormaPagamento | null
     numeroParcela?: number | null
     totalParcelas?: number | null
     parcelaOrigemId?: string | null
@@ -9374,7 +10640,8 @@ export namespace Prisma {
     id?: string
     tenantId: string
     contaId?: string | null
-    tipo: string
+    usuarioId?: string | null
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     subcategoria?: string | null
     descricao: string
@@ -9382,8 +10649,8 @@ export namespace Prisma {
     dataVencimento: Date | string
     dataPagamento?: Date | string | null
     dataCompetencia?: Date | string | null
-    status?: string
-    formaPagamento?: string | null
+    status?: $Enums.StatusLancamento
+    formaPagamento?: $Enums.FormaPagamento | null
     numeroParcela?: number | null
     totalParcelas?: number | null
     parcelaOrigemId?: string | null
@@ -9405,7 +10672,8 @@ export namespace Prisma {
   export type LancamentoUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -9413,8 +10681,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9438,7 +10706,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     contaId?: NullableStringFieldUpdateOperationsInput | string | null
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -9446,8 +10715,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9470,7 +10739,8 @@ export namespace Prisma {
     id?: string
     tenantId: string
     contaId?: string | null
-    tipo: string
+    usuarioId?: string | null
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     subcategoria?: string | null
     descricao: string
@@ -9478,8 +10748,8 @@ export namespace Prisma {
     dataVencimento: Date | string
     dataPagamento?: Date | string | null
     dataCompetencia?: Date | string | null
-    status?: string
-    formaPagamento?: string | null
+    status?: $Enums.StatusLancamento
+    formaPagamento?: $Enums.FormaPagamento | null
     numeroParcela?: number | null
     totalParcelas?: number | null
     parcelaOrigemId?: string | null
@@ -9501,7 +10771,8 @@ export namespace Prisma {
   export type LancamentoUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -9509,8 +10780,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9530,7 +10801,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     contaId?: NullableStringFieldUpdateOperationsInput | string | null
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -9538,8 +10810,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9562,7 +10834,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoCategoriaFinanceira
     icone?: string | null
     cor?: string | null
     ativa?: boolean
@@ -9576,7 +10848,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoCategoriaFinanceira
     icone?: string | null
     cor?: string | null
     paiId?: string | null
@@ -9590,7 +10862,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoCategoriaFinanceiraFieldUpdateOperationsInput | $Enums.TipoCategoriaFinanceira
     icone?: NullableStringFieldUpdateOperationsInput | string | null
     cor?: NullableStringFieldUpdateOperationsInput | string | null
     ativa?: BoolFieldUpdateOperationsInput | boolean
@@ -9604,7 +10876,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoCategoriaFinanceiraFieldUpdateOperationsInput | $Enums.TipoCategoriaFinanceira
     icone?: NullableStringFieldUpdateOperationsInput | string | null
     cor?: NullableStringFieldUpdateOperationsInput | string | null
     paiId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9618,7 +10890,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoCategoriaFinanceira
     icone?: string | null
     cor?: string | null
     paiId?: string | null
@@ -9631,7 +10903,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoCategoriaFinanceiraFieldUpdateOperationsInput | $Enums.TipoCategoriaFinanceira
     icone?: NullableStringFieldUpdateOperationsInput | string | null
     cor?: NullableStringFieldUpdateOperationsInput | string | null
     ativa?: BoolFieldUpdateOperationsInput | boolean
@@ -9643,7 +10915,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoCategoriaFinanceiraFieldUpdateOperationsInput | $Enums.TipoCategoriaFinanceira
     icone?: NullableStringFieldUpdateOperationsInput | string | null
     cor?: NullableStringFieldUpdateOperationsInput | string | null
     paiId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9656,10 +10928,10 @@ export namespace Prisma {
     id?: string
     tenantId: string
     descricao: string
-    tipo: string
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     valor: Decimal | DecimalJsLike | number | string
-    frequencia: string
+    frequencia: $Enums.FrequenciaRecorrencia
     diaVencimento?: number | null
     proximaGeracao: Date | string
     ativa?: boolean
@@ -9674,10 +10946,10 @@ export namespace Prisma {
     tenantId: string
     contaId?: string | null
     descricao: string
-    tipo: string
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     valor: Decimal | DecimalJsLike | number | string
-    frequencia: string
+    frequencia: $Enums.FrequenciaRecorrencia
     diaVencimento?: number | null
     proximaGeracao: Date | string
     ativa?: boolean
@@ -9690,10 +10962,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    frequencia?: StringFieldUpdateOperationsInput | string
+    frequencia?: EnumFrequenciaRecorrenciaFieldUpdateOperationsInput | $Enums.FrequenciaRecorrencia
     diaVencimento?: NullableIntFieldUpdateOperationsInput | number | null
     proximaGeracao?: DateTimeFieldUpdateOperationsInput | Date | string
     ativa?: BoolFieldUpdateOperationsInput | boolean
@@ -9708,10 +10980,10 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     contaId?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    frequencia?: StringFieldUpdateOperationsInput | string
+    frequencia?: EnumFrequenciaRecorrenciaFieldUpdateOperationsInput | $Enums.FrequenciaRecorrencia
     diaVencimento?: NullableIntFieldUpdateOperationsInput | number | null
     proximaGeracao?: DateTimeFieldUpdateOperationsInput | Date | string
     ativa?: BoolFieldUpdateOperationsInput | boolean
@@ -9725,10 +10997,10 @@ export namespace Prisma {
     tenantId: string
     contaId?: string | null
     descricao: string
-    tipo: string
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     valor: Decimal | DecimalJsLike | number | string
-    frequencia: string
+    frequencia: $Enums.FrequenciaRecorrencia
     diaVencimento?: number | null
     proximaGeracao: Date | string
     ativa?: boolean
@@ -9740,10 +11012,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    frequencia?: StringFieldUpdateOperationsInput | string
+    frequencia?: EnumFrequenciaRecorrenciaFieldUpdateOperationsInput | $Enums.FrequenciaRecorrencia
     diaVencimento?: NullableIntFieldUpdateOperationsInput | number | null
     proximaGeracao?: DateTimeFieldUpdateOperationsInput | Date | string
     ativa?: BoolFieldUpdateOperationsInput | boolean
@@ -9756,10 +11028,10 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     contaId?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    frequencia?: StringFieldUpdateOperationsInput | string
+    frequencia?: EnumFrequenciaRecorrenciaFieldUpdateOperationsInput | $Enums.FrequenciaRecorrencia
     diaVencimento?: NullableIntFieldUpdateOperationsInput | number | null
     proximaGeracao?: DateTimeFieldUpdateOperationsInput | Date | string
     ativa?: BoolFieldUpdateOperationsInput | boolean
@@ -9774,7 +11046,7 @@ export namespace Prisma {
     dataFim: Date | string
     saldoInicial: Decimal | DecimalJsLike | number | string
     saldoFinal: Decimal | DecimalJsLike | number | string
-    status?: string
+    status?: $Enums.StatusConciliacao
     divergencias?: NullableJsonNullValueInput | InputJsonValue
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -9789,7 +11061,7 @@ export namespace Prisma {
     dataFim: Date | string
     saldoInicial: Decimal | DecimalJsLike | number | string
     saldoFinal: Decimal | DecimalJsLike | number | string
-    status?: string
+    status?: $Enums.StatusConciliacao
     divergencias?: NullableJsonNullValueInput | InputJsonValue
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -9802,7 +11074,7 @@ export namespace Prisma {
     dataFim?: DateTimeFieldUpdateOperationsInput | Date | string
     saldoInicial?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     saldoFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusConciliacaoFieldUpdateOperationsInput | $Enums.StatusConciliacao
     divergencias?: NullableJsonNullValueInput | InputJsonValue
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9817,7 +11089,7 @@ export namespace Prisma {
     dataFim?: DateTimeFieldUpdateOperationsInput | Date | string
     saldoInicial?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     saldoFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusConciliacaoFieldUpdateOperationsInput | $Enums.StatusConciliacao
     divergencias?: NullableJsonNullValueInput | InputJsonValue
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9831,7 +11103,7 @@ export namespace Prisma {
     dataFim: Date | string
     saldoInicial: Decimal | DecimalJsLike | number | string
     saldoFinal: Decimal | DecimalJsLike | number | string
-    status?: string
+    status?: $Enums.StatusConciliacao
     divergencias?: NullableJsonNullValueInput | InputJsonValue
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -9844,7 +11116,7 @@ export namespace Prisma {
     dataFim?: DateTimeFieldUpdateOperationsInput | Date | string
     saldoInicial?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     saldoFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusConciliacaoFieldUpdateOperationsInput | $Enums.StatusConciliacao
     divergencias?: NullableJsonNullValueInput | InputJsonValue
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9858,10 +11130,66 @@ export namespace Prisma {
     dataFim?: DateTimeFieldUpdateOperationsInput | Date | string
     saldoInicial?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     saldoFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusConciliacaoFieldUpdateOperationsInput | $Enums.StatusConciliacao
     divergencias?: NullableJsonNullValueInput | InputJsonValue
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventoProcessadoCreateInput = {
+    id?: string
+    tenantId: string
+    evento: string
+    referenciaId: string
+    processadoEm?: Date | string
+  }
+
+  export type EventoProcessadoUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    evento: string
+    referenciaId: string
+    processadoEm?: Date | string
+  }
+
+  export type EventoProcessadoUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    evento?: StringFieldUpdateOperationsInput | string
+    referenciaId?: StringFieldUpdateOperationsInput | string
+    processadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventoProcessadoUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    evento?: StringFieldUpdateOperationsInput | string
+    referenciaId?: StringFieldUpdateOperationsInput | string
+    processadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventoProcessadoCreateManyInput = {
+    id?: string
+    tenantId: string
+    evento: string
+    referenciaId: string
+    processadoEm?: Date | string
+  }
+
+  export type EventoProcessadoUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    evento?: StringFieldUpdateOperationsInput | string
+    referenciaId?: StringFieldUpdateOperationsInput | string
+    processadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventoProcessadoUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    evento?: StringFieldUpdateOperationsInput | string
+    referenciaId?: StringFieldUpdateOperationsInput | string
+    processadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type DRECreateInput = {
@@ -10038,6 +11366,13 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
+  export type EnumTipoContaFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoConta | EnumTipoContaFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoConta[] | ListEnumTipoContaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoConta[] | ListEnumTipoContaFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoContaFilter<$PrismaModel> | $Enums.TipoConta
+  }
+
   export type StringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -10209,6 +11544,16 @@ export namespace Prisma {
     _max?: NestedStringFilter<$PrismaModel>
   }
 
+  export type EnumTipoContaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoConta | EnumTipoContaFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoConta[] | ListEnumTipoContaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoConta[] | ListEnumTipoContaFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoContaWithAggregatesFilter<$PrismaModel> | $Enums.TipoConta
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTipoContaFilter<$PrismaModel>
+    _max?: NestedEnumTipoContaFilter<$PrismaModel>
+  }
+
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -10277,6 +11622,13 @@ export namespace Prisma {
     not?: NestedUuidNullableFilter<$PrismaModel> | string | null
   }
 
+  export type EnumTipoLancamentoFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoLancamento | EnumTipoLancamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoLancamento[] | ListEnumTipoLancamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoLancamento[] | ListEnumTipoLancamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoLancamentoFilter<$PrismaModel> | $Enums.TipoLancamento
+  }
+
   export type DateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -10286,6 +11638,20 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type EnumStatusLancamentoFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusLancamento | EnumStatusLancamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusLancamento[] | ListEnumStatusLancamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusLancamento[] | ListEnumStatusLancamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusLancamentoFilter<$PrismaModel> | $Enums.StatusLancamento
+  }
+
+  export type EnumFormaPagamentoNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.FormaPagamento | EnumFormaPagamentoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.FormaPagamento[] | ListEnumFormaPagamentoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.FormaPagamento[] | ListEnumFormaPagamentoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumFormaPagamentoNullableFilter<$PrismaModel> | $Enums.FormaPagamento | null
   }
 
   export type IntNullableFilter<$PrismaModel = never> = {
@@ -10321,6 +11687,7 @@ export namespace Prisma {
     id?: SortOrder
     tenantId?: SortOrder
     contaId?: SortOrder
+    usuarioId?: SortOrder
     tipo?: SortOrder
     categoria?: SortOrder
     subcategoria?: SortOrder
@@ -10359,6 +11726,7 @@ export namespace Prisma {
     id?: SortOrder
     tenantId?: SortOrder
     contaId?: SortOrder
+    usuarioId?: SortOrder
     tipo?: SortOrder
     categoria?: SortOrder
     subcategoria?: SortOrder
@@ -10390,6 +11758,7 @@ export namespace Prisma {
     id?: SortOrder
     tenantId?: SortOrder
     contaId?: SortOrder
+    usuarioId?: SortOrder
     tipo?: SortOrder
     categoria?: SortOrder
     subcategoria?: SortOrder
@@ -10438,6 +11807,16 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
+  export type EnumTipoLancamentoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoLancamento | EnumTipoLancamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoLancamento[] | ListEnumTipoLancamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoLancamento[] | ListEnumTipoLancamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoLancamentoWithAggregatesFilter<$PrismaModel> | $Enums.TipoLancamento
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTipoLancamentoFilter<$PrismaModel>
+    _max?: NestedEnumTipoLancamentoFilter<$PrismaModel>
+  }
+
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -10450,6 +11829,26 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type EnumStatusLancamentoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusLancamento | EnumStatusLancamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusLancamento[] | ListEnumStatusLancamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusLancamento[] | ListEnumStatusLancamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusLancamentoWithAggregatesFilter<$PrismaModel> | $Enums.StatusLancamento
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusLancamentoFilter<$PrismaModel>
+    _max?: NestedEnumStatusLancamentoFilter<$PrismaModel>
+  }
+
+  export type EnumFormaPagamentoNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.FormaPagamento | EnumFormaPagamentoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.FormaPagamento[] | ListEnumFormaPagamentoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.FormaPagamento[] | ListEnumFormaPagamentoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumFormaPagamentoNullableWithAggregatesFilter<$PrismaModel> | $Enums.FormaPagamento | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumFormaPagamentoNullableFilter<$PrismaModel>
+    _max?: NestedEnumFormaPagamentoNullableFilter<$PrismaModel>
   }
 
   export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -10466,6 +11865,13 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type EnumTipoCategoriaFinanceiraFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoCategoriaFinanceira | EnumTipoCategoriaFinanceiraFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoCategoriaFinanceira[] | ListEnumTipoCategoriaFinanceiraFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoCategoriaFinanceira[] | ListEnumTipoCategoriaFinanceiraFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoCategoriaFinanceiraFilter<$PrismaModel> | $Enums.TipoCategoriaFinanceira
   }
 
   export type CategoriaFinanceiraNullableRelationFilter = {
@@ -10520,6 +11926,23 @@ export namespace Prisma {
     ativa?: SortOrder
     criadoEm?: SortOrder
     atualizadoEm?: SortOrder
+  }
+
+  export type EnumTipoCategoriaFinanceiraWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoCategoriaFinanceira | EnumTipoCategoriaFinanceiraFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoCategoriaFinanceira[] | ListEnumTipoCategoriaFinanceiraFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoCategoriaFinanceira[] | ListEnumTipoCategoriaFinanceiraFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoCategoriaFinanceiraWithAggregatesFilter<$PrismaModel> | $Enums.TipoCategoriaFinanceira
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTipoCategoriaFinanceiraFilter<$PrismaModel>
+    _max?: NestedEnumTipoCategoriaFinanceiraFilter<$PrismaModel>
+  }
+
+  export type EnumFrequenciaRecorrenciaFilter<$PrismaModel = never> = {
+    equals?: $Enums.FrequenciaRecorrencia | EnumFrequenciaRecorrenciaFieldRefInput<$PrismaModel>
+    in?: $Enums.FrequenciaRecorrencia[] | ListEnumFrequenciaRecorrenciaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FrequenciaRecorrencia[] | ListEnumFrequenciaRecorrenciaFieldRefInput<$PrismaModel>
+    not?: NestedEnumFrequenciaRecorrenciaFilter<$PrismaModel> | $Enums.FrequenciaRecorrencia
   }
 
   export type RecorrenciaCountOrderByAggregateInput = {
@@ -10578,6 +12001,23 @@ export namespace Prisma {
   export type RecorrenciaSumOrderByAggregateInput = {
     valor?: SortOrder
     diaVencimento?: SortOrder
+  }
+
+  export type EnumFrequenciaRecorrenciaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.FrequenciaRecorrencia | EnumFrequenciaRecorrenciaFieldRefInput<$PrismaModel>
+    in?: $Enums.FrequenciaRecorrencia[] | ListEnumFrequenciaRecorrenciaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FrequenciaRecorrencia[] | ListEnumFrequenciaRecorrenciaFieldRefInput<$PrismaModel>
+    not?: NestedEnumFrequenciaRecorrenciaWithAggregatesFilter<$PrismaModel> | $Enums.FrequenciaRecorrencia
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumFrequenciaRecorrenciaFilter<$PrismaModel>
+    _max?: NestedEnumFrequenciaRecorrenciaFilter<$PrismaModel>
+  }
+
+  export type EnumStatusConciliacaoFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusConciliacao | EnumStatusConciliacaoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusConciliacao[] | ListEnumStatusConciliacaoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusConciliacao[] | ListEnumStatusConciliacaoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusConciliacaoFilter<$PrismaModel> | $Enums.StatusConciliacao
   }
   export type JsonNullableFilter<$PrismaModel = never> = 
     | PatchUndefined<
@@ -10656,6 +12096,16 @@ export namespace Prisma {
     saldoInicial?: SortOrder
     saldoFinal?: SortOrder
   }
+
+  export type EnumStatusConciliacaoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusConciliacao | EnumStatusConciliacaoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusConciliacao[] | ListEnumStatusConciliacaoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusConciliacao[] | ListEnumStatusConciliacaoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusConciliacaoWithAggregatesFilter<$PrismaModel> | $Enums.StatusConciliacao
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusConciliacaoFilter<$PrismaModel>
+    _max?: NestedEnumStatusConciliacaoFilter<$PrismaModel>
+  }
   export type JsonNullableWithAggregatesFilter<$PrismaModel = never> = 
     | PatchUndefined<
         Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
@@ -10682,6 +12132,35 @@ export namespace Prisma {
     _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
+  export type EventoProcessadoEvento_referenciaIdCompoundUniqueInput = {
+    evento: string
+    referenciaId: string
+  }
+
+  export type EventoProcessadoCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    evento?: SortOrder
+    referenciaId?: SortOrder
+    processadoEm?: SortOrder
+  }
+
+  export type EventoProcessadoMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    evento?: SortOrder
+    referenciaId?: SortOrder
+    processadoEm?: SortOrder
+  }
+
+  export type EventoProcessadoMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    evento?: SortOrder
+    referenciaId?: SortOrder
+    processadoEm?: SortOrder
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -10691,6 +12170,12 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type DRETenantId_ano_mesCompoundUniqueInput = {
+    tenantId: string
+    ano: number
+    mes: number
   }
 
   export type DRECountOrderByAggregateInput = {
@@ -10878,6 +12363,10 @@ export namespace Prisma {
 
   export type StringFieldUpdateOperationsInput = {
     set?: string
+  }
+
+  export type EnumTipoContaFieldUpdateOperationsInput = {
+    set?: $Enums.TipoConta
   }
 
   export type NullableStringFieldUpdateOperationsInput = {
@@ -11068,8 +12557,20 @@ export namespace Prisma {
     connect?: ContaFinanceiraWhereUniqueInput
   }
 
+  export type EnumTipoLancamentoFieldUpdateOperationsInput = {
+    set?: $Enums.TipoLancamento
+  }
+
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
+  }
+
+  export type EnumStatusLancamentoFieldUpdateOperationsInput = {
+    set?: $Enums.StatusLancamento
+  }
+
+  export type NullableEnumFormaPagamentoFieldUpdateOperationsInput = {
+    set?: $Enums.FormaPagamento | null
   }
 
   export type NullableIntFieldUpdateOperationsInput = {
@@ -11145,6 +12646,10 @@ export namespace Prisma {
     connect?: CategoriaFinanceiraWhereUniqueInput | CategoriaFinanceiraWhereUniqueInput[]
   }
 
+  export type EnumTipoCategoriaFinanceiraFieldUpdateOperationsInput = {
+    set?: $Enums.TipoCategoriaFinanceira
+  }
+
   export type CategoriaFinanceiraUpdateOneWithoutFilhosNestedInput = {
     create?: XOR<CategoriaFinanceiraCreateWithoutFilhosInput, CategoriaFinanceiraUncheckedCreateWithoutFilhosInput>
     connectOrCreate?: CategoriaFinanceiraCreateOrConnectWithoutFilhosInput
@@ -11203,6 +12708,10 @@ export namespace Prisma {
     connect?: LancamentoWhereUniqueInput | LancamentoWhereUniqueInput[]
   }
 
+  export type EnumFrequenciaRecorrenciaFieldUpdateOperationsInput = {
+    set?: $Enums.FrequenciaRecorrencia
+  }
+
   export type ContaFinanceiraUpdateOneWithoutRecorrenciasNestedInput = {
     create?: XOR<ContaFinanceiraCreateWithoutRecorrenciasInput, ContaFinanceiraUncheckedCreateWithoutRecorrenciasInput>
     connectOrCreate?: ContaFinanceiraCreateOrConnectWithoutRecorrenciasInput
@@ -11247,6 +12756,10 @@ export namespace Prisma {
     connect?: ContaFinanceiraWhereUniqueInput
   }
 
+  export type EnumStatusConciliacaoFieldUpdateOperationsInput = {
+    set?: $Enums.StatusConciliacao
+  }
+
   export type ContaFinanceiraUpdateOneRequiredWithoutConciliacoesNestedInput = {
     create?: XOR<ContaFinanceiraCreateWithoutConciliacoesInput, ContaFinanceiraUncheckedCreateWithoutConciliacoesInput>
     connectOrCreate?: ContaFinanceiraCreateOrConnectWithoutConciliacoesInput
@@ -11286,6 +12799,13 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringFilter<$PrismaModel> | string
+  }
+
+  export type NestedEnumTipoContaFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoConta | EnumTipoContaFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoConta[] | ListEnumTipoContaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoConta[] | ListEnumTipoContaFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoContaFilter<$PrismaModel> | $Enums.TipoConta
   }
 
   export type NestedStringNullableFilter<$PrismaModel = never> = {
@@ -11371,6 +12891,16 @@ export namespace Prisma {
     _max?: NestedStringFilter<$PrismaModel>
   }
 
+  export type NestedEnumTipoContaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoConta | EnumTipoContaFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoConta[] | ListEnumTipoContaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoConta[] | ListEnumTipoContaFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoContaWithAggregatesFilter<$PrismaModel> | $Enums.TipoConta
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTipoContaFilter<$PrismaModel>
+    _max?: NestedEnumTipoContaFilter<$PrismaModel>
+  }
+
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -11448,6 +12978,13 @@ export namespace Prisma {
     not?: NestedUuidNullableFilter<$PrismaModel> | string | null
   }
 
+  export type NestedEnumTipoLancamentoFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoLancamento | EnumTipoLancamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoLancamento[] | ListEnumTipoLancamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoLancamento[] | ListEnumTipoLancamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoLancamentoFilter<$PrismaModel> | $Enums.TipoLancamento
+  }
+
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -11457,6 +12994,20 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedEnumStatusLancamentoFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusLancamento | EnumStatusLancamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusLancamento[] | ListEnumStatusLancamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusLancamento[] | ListEnumStatusLancamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusLancamentoFilter<$PrismaModel> | $Enums.StatusLancamento
+  }
+
+  export type NestedEnumFormaPagamentoNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.FormaPagamento | EnumFormaPagamentoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.FormaPagamento[] | ListEnumFormaPagamentoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.FormaPagamento[] | ListEnumFormaPagamentoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumFormaPagamentoNullableFilter<$PrismaModel> | $Enums.FormaPagamento | null
   }
 
   export type NestedUuidNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -11473,6 +13024,16 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
+  export type NestedEnumTipoLancamentoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoLancamento | EnumTipoLancamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoLancamento[] | ListEnumTipoLancamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoLancamento[] | ListEnumTipoLancamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoLancamentoWithAggregatesFilter<$PrismaModel> | $Enums.TipoLancamento
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTipoLancamentoFilter<$PrismaModel>
+    _max?: NestedEnumTipoLancamentoFilter<$PrismaModel>
+  }
+
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -11485,6 +13046,26 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStatusLancamentoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusLancamento | EnumStatusLancamentoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusLancamento[] | ListEnumStatusLancamentoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusLancamento[] | ListEnumStatusLancamentoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusLancamentoWithAggregatesFilter<$PrismaModel> | $Enums.StatusLancamento
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusLancamentoFilter<$PrismaModel>
+    _max?: NestedEnumStatusLancamentoFilter<$PrismaModel>
+  }
+
+  export type NestedEnumFormaPagamentoNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.FormaPagamento | EnumFormaPagamentoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.FormaPagamento[] | ListEnumFormaPagamentoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.FormaPagamento[] | ListEnumFormaPagamentoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumFormaPagamentoNullableWithAggregatesFilter<$PrismaModel> | $Enums.FormaPagamento | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumFormaPagamentoNullableFilter<$PrismaModel>
+    _max?: NestedEnumFormaPagamentoNullableFilter<$PrismaModel>
   }
 
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -11512,6 +13093,57 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedEnumTipoCategoriaFinanceiraFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoCategoriaFinanceira | EnumTipoCategoriaFinanceiraFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoCategoriaFinanceira[] | ListEnumTipoCategoriaFinanceiraFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoCategoriaFinanceira[] | ListEnumTipoCategoriaFinanceiraFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoCategoriaFinanceiraFilter<$PrismaModel> | $Enums.TipoCategoriaFinanceira
+  }
+
+  export type NestedEnumTipoCategoriaFinanceiraWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoCategoriaFinanceira | EnumTipoCategoriaFinanceiraFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoCategoriaFinanceira[] | ListEnumTipoCategoriaFinanceiraFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoCategoriaFinanceira[] | ListEnumTipoCategoriaFinanceiraFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoCategoriaFinanceiraWithAggregatesFilter<$PrismaModel> | $Enums.TipoCategoriaFinanceira
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTipoCategoriaFinanceiraFilter<$PrismaModel>
+    _max?: NestedEnumTipoCategoriaFinanceiraFilter<$PrismaModel>
+  }
+
+  export type NestedEnumFrequenciaRecorrenciaFilter<$PrismaModel = never> = {
+    equals?: $Enums.FrequenciaRecorrencia | EnumFrequenciaRecorrenciaFieldRefInput<$PrismaModel>
+    in?: $Enums.FrequenciaRecorrencia[] | ListEnumFrequenciaRecorrenciaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FrequenciaRecorrencia[] | ListEnumFrequenciaRecorrenciaFieldRefInput<$PrismaModel>
+    not?: NestedEnumFrequenciaRecorrenciaFilter<$PrismaModel> | $Enums.FrequenciaRecorrencia
+  }
+
+  export type NestedEnumFrequenciaRecorrenciaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.FrequenciaRecorrencia | EnumFrequenciaRecorrenciaFieldRefInput<$PrismaModel>
+    in?: $Enums.FrequenciaRecorrencia[] | ListEnumFrequenciaRecorrenciaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FrequenciaRecorrencia[] | ListEnumFrequenciaRecorrenciaFieldRefInput<$PrismaModel>
+    not?: NestedEnumFrequenciaRecorrenciaWithAggregatesFilter<$PrismaModel> | $Enums.FrequenciaRecorrencia
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumFrequenciaRecorrenciaFilter<$PrismaModel>
+    _max?: NestedEnumFrequenciaRecorrenciaFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStatusConciliacaoFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusConciliacao | EnumStatusConciliacaoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusConciliacao[] | ListEnumStatusConciliacaoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusConciliacao[] | ListEnumStatusConciliacaoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusConciliacaoFilter<$PrismaModel> | $Enums.StatusConciliacao
+  }
+
+  export type NestedEnumStatusConciliacaoWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusConciliacao | EnumStatusConciliacaoFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusConciliacao[] | ListEnumStatusConciliacaoFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusConciliacao[] | ListEnumStatusConciliacaoFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusConciliacaoWithAggregatesFilter<$PrismaModel> | $Enums.StatusConciliacao
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusConciliacaoFilter<$PrismaModel>
+    _max?: NestedEnumStatusConciliacaoFilter<$PrismaModel>
   }
   export type NestedJsonNullableFilter<$PrismaModel = never> = 
     | PatchUndefined<
@@ -11566,7 +13198,8 @@ export namespace Prisma {
   export type LancamentoCreateWithoutContaInput = {
     id?: string
     tenantId: string
-    tipo: string
+    usuarioId?: string | null
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     subcategoria?: string | null
     descricao: string
@@ -11574,8 +13207,8 @@ export namespace Prisma {
     dataVencimento: Date | string
     dataPagamento?: Date | string | null
     dataCompetencia?: Date | string | null
-    status?: string
-    formaPagamento?: string | null
+    status?: $Enums.StatusLancamento
+    formaPagamento?: $Enums.FormaPagamento | null
     numeroParcela?: number | null
     totalParcelas?: number | null
     parcelaOrigemId?: string | null
@@ -11597,7 +13230,8 @@ export namespace Prisma {
   export type LancamentoUncheckedCreateWithoutContaInput = {
     id?: string
     tenantId: string
-    tipo: string
+    usuarioId?: string | null
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     subcategoria?: string | null
     descricao: string
@@ -11605,8 +13239,8 @@ export namespace Prisma {
     dataVencimento: Date | string
     dataPagamento?: Date | string | null
     dataCompetencia?: Date | string | null
-    status?: string
-    formaPagamento?: string | null
+    status?: $Enums.StatusLancamento
+    formaPagamento?: $Enums.FormaPagamento | null
     numeroParcela?: number | null
     totalParcelas?: number | null
     parcelaOrigemId?: string | null
@@ -11638,7 +13272,8 @@ export namespace Prisma {
   export type LancamentoCreateWithoutContaOrigemInput = {
     id?: string
     tenantId: string
-    tipo: string
+    usuarioId?: string | null
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     subcategoria?: string | null
     descricao: string
@@ -11646,8 +13281,8 @@ export namespace Prisma {
     dataVencimento: Date | string
     dataPagamento?: Date | string | null
     dataCompetencia?: Date | string | null
-    status?: string
-    formaPagamento?: string | null
+    status?: $Enums.StatusLancamento
+    formaPagamento?: $Enums.FormaPagamento | null
     numeroParcela?: number | null
     totalParcelas?: number | null
     parcelaOrigemId?: string | null
@@ -11670,7 +13305,8 @@ export namespace Prisma {
     id?: string
     tenantId: string
     contaId?: string | null
-    tipo: string
+    usuarioId?: string | null
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     subcategoria?: string | null
     descricao: string
@@ -11678,8 +13314,8 @@ export namespace Prisma {
     dataVencimento: Date | string
     dataPagamento?: Date | string | null
     dataCompetencia?: Date | string | null
-    status?: string
-    formaPagamento?: string | null
+    status?: $Enums.StatusLancamento
+    formaPagamento?: $Enums.FormaPagamento | null
     numeroParcela?: number | null
     totalParcelas?: number | null
     parcelaOrigemId?: string | null
@@ -11710,7 +13346,8 @@ export namespace Prisma {
   export type LancamentoCreateWithoutContaDestinoInput = {
     id?: string
     tenantId: string
-    tipo: string
+    usuarioId?: string | null
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     subcategoria?: string | null
     descricao: string
@@ -11718,8 +13355,8 @@ export namespace Prisma {
     dataVencimento: Date | string
     dataPagamento?: Date | string | null
     dataCompetencia?: Date | string | null
-    status?: string
-    formaPagamento?: string | null
+    status?: $Enums.StatusLancamento
+    formaPagamento?: $Enums.FormaPagamento | null
     numeroParcela?: number | null
     totalParcelas?: number | null
     parcelaOrigemId?: string | null
@@ -11742,7 +13379,8 @@ export namespace Prisma {
     id?: string
     tenantId: string
     contaId?: string | null
-    tipo: string
+    usuarioId?: string | null
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     subcategoria?: string | null
     descricao: string
@@ -11750,8 +13388,8 @@ export namespace Prisma {
     dataVencimento: Date | string
     dataPagamento?: Date | string | null
     dataCompetencia?: Date | string | null
-    status?: string
-    formaPagamento?: string | null
+    status?: $Enums.StatusLancamento
+    formaPagamento?: $Enums.FormaPagamento | null
     numeroParcela?: number | null
     totalParcelas?: number | null
     parcelaOrigemId?: string | null
@@ -11783,10 +13421,10 @@ export namespace Prisma {
     id?: string
     tenantId: string
     descricao: string
-    tipo: string
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     valor: Decimal | DecimalJsLike | number | string
-    frequencia: string
+    frequencia: $Enums.FrequenciaRecorrencia
     diaVencimento?: number | null
     proximaGeracao: Date | string
     ativa?: boolean
@@ -11799,10 +13437,10 @@ export namespace Prisma {
     id?: string
     tenantId: string
     descricao: string
-    tipo: string
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     valor: Decimal | DecimalJsLike | number | string
-    frequencia: string
+    frequencia: $Enums.FrequenciaRecorrencia
     diaVencimento?: number | null
     proximaGeracao: Date | string
     ativa?: boolean
@@ -11828,7 +13466,7 @@ export namespace Prisma {
     dataFim: Date | string
     saldoInicial: Decimal | DecimalJsLike | number | string
     saldoFinal: Decimal | DecimalJsLike | number | string
-    status?: string
+    status?: $Enums.StatusConciliacao
     divergencias?: NullableJsonNullValueInput | InputJsonValue
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -11841,7 +13479,7 @@ export namespace Prisma {
     dataFim: Date | string
     saldoInicial: Decimal | DecimalJsLike | number | string
     saldoFinal: Decimal | DecimalJsLike | number | string
-    status?: string
+    status?: $Enums.StatusConciliacao
     divergencias?: NullableJsonNullValueInput | InputJsonValue
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -11880,7 +13518,8 @@ export namespace Prisma {
     id?: UuidFilter<"Lancamento"> | string
     tenantId?: UuidFilter<"Lancamento"> | string
     contaId?: UuidNullableFilter<"Lancamento"> | string | null
-    tipo?: StringFilter<"Lancamento"> | string
+    usuarioId?: UuidNullableFilter<"Lancamento"> | string | null
+    tipo?: EnumTipoLancamentoFilter<"Lancamento"> | $Enums.TipoLancamento
     categoria?: StringNullableFilter<"Lancamento"> | string | null
     subcategoria?: StringNullableFilter<"Lancamento"> | string | null
     descricao?: StringFilter<"Lancamento"> | string
@@ -11888,8 +13527,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFilter<"Lancamento"> | Date | string
     dataPagamento?: DateTimeNullableFilter<"Lancamento"> | Date | string | null
     dataCompetencia?: DateTimeNullableFilter<"Lancamento"> | Date | string | null
-    status?: StringFilter<"Lancamento"> | string
-    formaPagamento?: StringNullableFilter<"Lancamento"> | string | null
+    status?: EnumStatusLancamentoFilter<"Lancamento"> | $Enums.StatusLancamento
+    formaPagamento?: EnumFormaPagamentoNullableFilter<"Lancamento"> | $Enums.FormaPagamento | null
     numeroParcela?: IntNullableFilter<"Lancamento"> | number | null
     totalParcelas?: IntNullableFilter<"Lancamento"> | number | null
     parcelaOrigemId?: UuidNullableFilter<"Lancamento"> | string | null
@@ -11964,10 +13603,10 @@ export namespace Prisma {
     tenantId?: UuidFilter<"Recorrencia"> | string
     contaId?: UuidNullableFilter<"Recorrencia"> | string | null
     descricao?: StringFilter<"Recorrencia"> | string
-    tipo?: StringFilter<"Recorrencia"> | string
+    tipo?: EnumTipoLancamentoFilter<"Recorrencia"> | $Enums.TipoLancamento
     categoria?: StringNullableFilter<"Recorrencia"> | string | null
     valor?: DecimalFilter<"Recorrencia"> | Decimal | DecimalJsLike | number | string
-    frequencia?: StringFilter<"Recorrencia"> | string
+    frequencia?: EnumFrequenciaRecorrenciaFilter<"Recorrencia"> | $Enums.FrequenciaRecorrencia
     diaVencimento?: IntNullableFilter<"Recorrencia"> | number | null
     proximaGeracao?: DateTimeFilter<"Recorrencia"> | Date | string
     ativa?: BoolFilter<"Recorrencia"> | boolean
@@ -12002,7 +13641,7 @@ export namespace Prisma {
     dataFim?: DateTimeFilter<"ConciliacaoBancaria"> | Date | string
     saldoInicial?: DecimalFilter<"ConciliacaoBancaria"> | Decimal | DecimalJsLike | number | string
     saldoFinal?: DecimalFilter<"ConciliacaoBancaria"> | Decimal | DecimalJsLike | number | string
-    status?: StringFilter<"ConciliacaoBancaria"> | string
+    status?: EnumStatusConciliacaoFilter<"ConciliacaoBancaria"> | $Enums.StatusConciliacao
     divergencias?: JsonNullableFilter<"ConciliacaoBancaria">
     criadoEm?: DateTimeFilter<"ConciliacaoBancaria"> | Date | string
     atualizadoEm?: DateTimeFilter<"ConciliacaoBancaria"> | Date | string
@@ -12012,7 +13651,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoConta
     banco?: string | null
     agencia?: string | null
     conta?: string | null
@@ -12033,7 +13672,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoConta
     banco?: string | null
     agencia?: string | null
     conta?: string | null
@@ -12059,10 +13698,10 @@ export namespace Prisma {
     id?: string
     tenantId: string
     descricao: string
-    tipo: string
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     valor: Decimal | DecimalJsLike | number | string
-    frequencia: string
+    frequencia: $Enums.FrequenciaRecorrencia
     diaVencimento?: number | null
     proximaGeracao: Date | string
     ativa?: boolean
@@ -12076,10 +13715,10 @@ export namespace Prisma {
     tenantId: string
     contaId?: string | null
     descricao: string
-    tipo: string
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     valor: Decimal | DecimalJsLike | number | string
-    frequencia: string
+    frequencia: $Enums.FrequenciaRecorrencia
     diaVencimento?: number | null
     proximaGeracao: Date | string
     ativa?: boolean
@@ -12096,7 +13735,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoConta
     banco?: string | null
     agencia?: string | null
     conta?: string | null
@@ -12117,7 +13756,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoConta
     banco?: string | null
     agencia?: string | null
     conta?: string | null
@@ -12143,7 +13782,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoConta
     banco?: string | null
     agencia?: string | null
     conta?: string | null
@@ -12164,7 +13803,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoConta
     banco?: string | null
     agencia?: string | null
     conta?: string | null
@@ -12201,7 +13840,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoContaFieldUpdateOperationsInput | $Enums.TipoConta
     banco?: NullableStringFieldUpdateOperationsInput | string | null
     agencia?: NullableStringFieldUpdateOperationsInput | string | null
     conta?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12222,7 +13861,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoContaFieldUpdateOperationsInput | $Enums.TipoConta
     banco?: NullableStringFieldUpdateOperationsInput | string | null
     agencia?: NullableStringFieldUpdateOperationsInput | string | null
     conta?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12254,10 +13893,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    frequencia?: StringFieldUpdateOperationsInput | string
+    frequencia?: EnumFrequenciaRecorrenciaFieldUpdateOperationsInput | $Enums.FrequenciaRecorrencia
     diaVencimento?: NullableIntFieldUpdateOperationsInput | number | null
     proximaGeracao?: DateTimeFieldUpdateOperationsInput | Date | string
     ativa?: BoolFieldUpdateOperationsInput | boolean
@@ -12271,10 +13910,10 @@ export namespace Prisma {
     tenantId?: StringFieldUpdateOperationsInput | string
     contaId?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    frequencia?: StringFieldUpdateOperationsInput | string
+    frequencia?: EnumFrequenciaRecorrenciaFieldUpdateOperationsInput | $Enums.FrequenciaRecorrencia
     diaVencimento?: NullableIntFieldUpdateOperationsInput | number | null
     proximaGeracao?: DateTimeFieldUpdateOperationsInput | Date | string
     ativa?: BoolFieldUpdateOperationsInput | boolean
@@ -12297,7 +13936,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoContaFieldUpdateOperationsInput | $Enums.TipoConta
     banco?: NullableStringFieldUpdateOperationsInput | string | null
     agencia?: NullableStringFieldUpdateOperationsInput | string | null
     conta?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12318,7 +13957,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoContaFieldUpdateOperationsInput | $Enums.TipoConta
     banco?: NullableStringFieldUpdateOperationsInput | string | null
     agencia?: NullableStringFieldUpdateOperationsInput | string | null
     conta?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12350,7 +13989,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoContaFieldUpdateOperationsInput | $Enums.TipoConta
     banco?: NullableStringFieldUpdateOperationsInput | string | null
     agencia?: NullableStringFieldUpdateOperationsInput | string | null
     conta?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12371,7 +14010,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoContaFieldUpdateOperationsInput | $Enums.TipoConta
     banco?: NullableStringFieldUpdateOperationsInput | string | null
     agencia?: NullableStringFieldUpdateOperationsInput | string | null
     conta?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12392,7 +14031,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoCategoriaFinanceira
     icone?: string | null
     cor?: string | null
     ativa?: boolean
@@ -12405,7 +14044,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoCategoriaFinanceira
     icone?: string | null
     cor?: string | null
     paiId?: string | null
@@ -12423,7 +14062,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoCategoriaFinanceira
     icone?: string | null
     cor?: string | null
     ativa?: boolean
@@ -12436,7 +14075,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoCategoriaFinanceira
     icone?: string | null
     cor?: string | null
     ativa?: boolean
@@ -12470,7 +14109,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoCategoriaFinanceiraFieldUpdateOperationsInput | $Enums.TipoCategoriaFinanceira
     icone?: NullableStringFieldUpdateOperationsInput | string | null
     cor?: NullableStringFieldUpdateOperationsInput | string | null
     ativa?: BoolFieldUpdateOperationsInput | boolean
@@ -12483,7 +14122,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoCategoriaFinanceiraFieldUpdateOperationsInput | $Enums.TipoCategoriaFinanceira
     icone?: NullableStringFieldUpdateOperationsInput | string | null
     cor?: NullableStringFieldUpdateOperationsInput | string | null
     paiId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12515,7 +14154,7 @@ export namespace Prisma {
     id?: UuidFilter<"CategoriaFinanceira"> | string
     tenantId?: UuidFilter<"CategoriaFinanceira"> | string
     nome?: StringFilter<"CategoriaFinanceira"> | string
-    tipo?: StringFilter<"CategoriaFinanceira"> | string
+    tipo?: EnumTipoCategoriaFinanceiraFilter<"CategoriaFinanceira"> | $Enums.TipoCategoriaFinanceira
     icone?: StringNullableFilter<"CategoriaFinanceira"> | string | null
     cor?: StringNullableFilter<"CategoriaFinanceira"> | string | null
     paiId?: UuidNullableFilter<"CategoriaFinanceira"> | string | null
@@ -12528,7 +14167,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoConta
     banco?: string | null
     agencia?: string | null
     conta?: string | null
@@ -12549,7 +14188,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoConta
     banco?: string | null
     agencia?: string | null
     conta?: string | null
@@ -12574,7 +14213,8 @@ export namespace Prisma {
   export type LancamentoCreateWithoutRecorrenciaInput = {
     id?: string
     tenantId: string
-    tipo: string
+    usuarioId?: string | null
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     subcategoria?: string | null
     descricao: string
@@ -12582,8 +14222,8 @@ export namespace Prisma {
     dataVencimento: Date | string
     dataPagamento?: Date | string | null
     dataCompetencia?: Date | string | null
-    status?: string
-    formaPagamento?: string | null
+    status?: $Enums.StatusLancamento
+    formaPagamento?: $Enums.FormaPagamento | null
     numeroParcela?: number | null
     totalParcelas?: number | null
     parcelaOrigemId?: string | null
@@ -12606,7 +14246,8 @@ export namespace Prisma {
     id?: string
     tenantId: string
     contaId?: string | null
-    tipo: string
+    usuarioId?: string | null
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     subcategoria?: string | null
     descricao: string
@@ -12614,8 +14255,8 @@ export namespace Prisma {
     dataVencimento: Date | string
     dataPagamento?: Date | string | null
     dataCompetencia?: Date | string | null
-    status?: string
-    formaPagamento?: string | null
+    status?: $Enums.StatusLancamento
+    formaPagamento?: $Enums.FormaPagamento | null
     numeroParcela?: number | null
     totalParcelas?: number | null
     parcelaOrigemId?: string | null
@@ -12658,7 +14299,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoContaFieldUpdateOperationsInput | $Enums.TipoConta
     banco?: NullableStringFieldUpdateOperationsInput | string | null
     agencia?: NullableStringFieldUpdateOperationsInput | string | null
     conta?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12679,7 +14320,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoContaFieldUpdateOperationsInput | $Enums.TipoConta
     banco?: NullableStringFieldUpdateOperationsInput | string | null
     agencia?: NullableStringFieldUpdateOperationsInput | string | null
     conta?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12716,7 +14357,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoConta
     banco?: string | null
     agencia?: string | null
     conta?: string | null
@@ -12737,7 +14378,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoConta
     banco?: string | null
     agencia?: string | null
     conta?: string | null
@@ -12774,7 +14415,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoContaFieldUpdateOperationsInput | $Enums.TipoConta
     banco?: NullableStringFieldUpdateOperationsInput | string | null
     agencia?: NullableStringFieldUpdateOperationsInput | string | null
     conta?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12795,7 +14436,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoContaFieldUpdateOperationsInput | $Enums.TipoConta
     banco?: NullableStringFieldUpdateOperationsInput | string | null
     agencia?: NullableStringFieldUpdateOperationsInput | string | null
     conta?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12815,7 +14456,8 @@ export namespace Prisma {
   export type LancamentoCreateManyContaInput = {
     id?: string
     tenantId: string
-    tipo: string
+    usuarioId?: string | null
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     subcategoria?: string | null
     descricao: string
@@ -12823,8 +14465,8 @@ export namespace Prisma {
     dataVencimento: Date | string
     dataPagamento?: Date | string | null
     dataCompetencia?: Date | string | null
-    status?: string
-    formaPagamento?: string | null
+    status?: $Enums.StatusLancamento
+    formaPagamento?: $Enums.FormaPagamento | null
     numeroParcela?: number | null
     totalParcelas?: number | null
     parcelaOrigemId?: string | null
@@ -12847,7 +14489,8 @@ export namespace Prisma {
     id?: string
     tenantId: string
     contaId?: string | null
-    tipo: string
+    usuarioId?: string | null
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     subcategoria?: string | null
     descricao: string
@@ -12855,8 +14498,8 @@ export namespace Prisma {
     dataVencimento: Date | string
     dataPagamento?: Date | string | null
     dataCompetencia?: Date | string | null
-    status?: string
-    formaPagamento?: string | null
+    status?: $Enums.StatusLancamento
+    formaPagamento?: $Enums.FormaPagamento | null
     numeroParcela?: number | null
     totalParcelas?: number | null
     parcelaOrigemId?: string | null
@@ -12878,7 +14521,8 @@ export namespace Prisma {
     id?: string
     tenantId: string
     contaId?: string | null
-    tipo: string
+    usuarioId?: string | null
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     subcategoria?: string | null
     descricao: string
@@ -12886,8 +14530,8 @@ export namespace Prisma {
     dataVencimento: Date | string
     dataPagamento?: Date | string | null
     dataCompetencia?: Date | string | null
-    status?: string
-    formaPagamento?: string | null
+    status?: $Enums.StatusLancamento
+    formaPagamento?: $Enums.FormaPagamento | null
     numeroParcela?: number | null
     totalParcelas?: number | null
     parcelaOrigemId?: string | null
@@ -12909,10 +14553,10 @@ export namespace Prisma {
     id?: string
     tenantId: string
     descricao: string
-    tipo: string
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     valor: Decimal | DecimalJsLike | number | string
-    frequencia: string
+    frequencia: $Enums.FrequenciaRecorrencia
     diaVencimento?: number | null
     proximaGeracao: Date | string
     ativa?: boolean
@@ -12927,7 +14571,7 @@ export namespace Prisma {
     dataFim: Date | string
     saldoInicial: Decimal | DecimalJsLike | number | string
     saldoFinal: Decimal | DecimalJsLike | number | string
-    status?: string
+    status?: $Enums.StatusConciliacao
     divergencias?: NullableJsonNullValueInput | InputJsonValue
     criadoEm?: Date | string
     atualizadoEm?: Date | string
@@ -12936,7 +14580,8 @@ export namespace Prisma {
   export type LancamentoUpdateWithoutContaInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -12944,8 +14589,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12967,7 +14612,8 @@ export namespace Prisma {
   export type LancamentoUncheckedUpdateWithoutContaInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -12975,8 +14621,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12998,7 +14644,8 @@ export namespace Prisma {
   export type LancamentoUncheckedUpdateManyWithoutContaInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -13006,8 +14653,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13029,7 +14676,8 @@ export namespace Prisma {
   export type LancamentoUpdateWithoutContaOrigemInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -13037,8 +14685,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13061,7 +14709,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     contaId?: NullableStringFieldUpdateOperationsInput | string | null
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -13069,8 +14718,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13092,7 +14741,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     contaId?: NullableStringFieldUpdateOperationsInput | string | null
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -13100,8 +14750,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13122,7 +14772,8 @@ export namespace Prisma {
   export type LancamentoUpdateWithoutContaDestinoInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -13130,8 +14781,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13154,7 +14805,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     contaId?: NullableStringFieldUpdateOperationsInput | string | null
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -13162,8 +14814,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13185,7 +14837,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     contaId?: NullableStringFieldUpdateOperationsInput | string | null
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -13193,8 +14846,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13216,10 +14869,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    frequencia?: StringFieldUpdateOperationsInput | string
+    frequencia?: EnumFrequenciaRecorrenciaFieldUpdateOperationsInput | $Enums.FrequenciaRecorrencia
     diaVencimento?: NullableIntFieldUpdateOperationsInput | number | null
     proximaGeracao?: DateTimeFieldUpdateOperationsInput | Date | string
     ativa?: BoolFieldUpdateOperationsInput | boolean
@@ -13232,10 +14885,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    frequencia?: StringFieldUpdateOperationsInput | string
+    frequencia?: EnumFrequenciaRecorrenciaFieldUpdateOperationsInput | $Enums.FrequenciaRecorrencia
     diaVencimento?: NullableIntFieldUpdateOperationsInput | number | null
     proximaGeracao?: DateTimeFieldUpdateOperationsInput | Date | string
     ativa?: BoolFieldUpdateOperationsInput | boolean
@@ -13248,10 +14901,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     descricao?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    frequencia?: StringFieldUpdateOperationsInput | string
+    frequencia?: EnumFrequenciaRecorrenciaFieldUpdateOperationsInput | $Enums.FrequenciaRecorrencia
     diaVencimento?: NullableIntFieldUpdateOperationsInput | number | null
     proximaGeracao?: DateTimeFieldUpdateOperationsInput | Date | string
     ativa?: BoolFieldUpdateOperationsInput | boolean
@@ -13266,7 +14919,7 @@ export namespace Prisma {
     dataFim?: DateTimeFieldUpdateOperationsInput | Date | string
     saldoInicial?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     saldoFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusConciliacaoFieldUpdateOperationsInput | $Enums.StatusConciliacao
     divergencias?: NullableJsonNullValueInput | InputJsonValue
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13279,7 +14932,7 @@ export namespace Prisma {
     dataFim?: DateTimeFieldUpdateOperationsInput | Date | string
     saldoInicial?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     saldoFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusConciliacaoFieldUpdateOperationsInput | $Enums.StatusConciliacao
     divergencias?: NullableJsonNullValueInput | InputJsonValue
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13292,7 +14945,7 @@ export namespace Prisma {
     dataFim?: DateTimeFieldUpdateOperationsInput | Date | string
     saldoInicial?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     saldoFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusConciliacaoFieldUpdateOperationsInput | $Enums.StatusConciliacao
     divergencias?: NullableJsonNullValueInput | InputJsonValue
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13302,7 +14955,7 @@ export namespace Prisma {
     id?: string
     tenantId: string
     nome: string
-    tipo: string
+    tipo: $Enums.TipoCategoriaFinanceira
     icone?: string | null
     cor?: string | null
     ativa?: boolean
@@ -13314,7 +14967,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoCategoriaFinanceiraFieldUpdateOperationsInput | $Enums.TipoCategoriaFinanceira
     icone?: NullableStringFieldUpdateOperationsInput | string | null
     cor?: NullableStringFieldUpdateOperationsInput | string | null
     ativa?: BoolFieldUpdateOperationsInput | boolean
@@ -13327,7 +14980,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoCategoriaFinanceiraFieldUpdateOperationsInput | $Enums.TipoCategoriaFinanceira
     icone?: NullableStringFieldUpdateOperationsInput | string | null
     cor?: NullableStringFieldUpdateOperationsInput | string | null
     ativa?: BoolFieldUpdateOperationsInput | boolean
@@ -13340,7 +14993,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     nome?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoCategoriaFinanceiraFieldUpdateOperationsInput | $Enums.TipoCategoriaFinanceira
     icone?: NullableStringFieldUpdateOperationsInput | string | null
     cor?: NullableStringFieldUpdateOperationsInput | string | null
     ativa?: BoolFieldUpdateOperationsInput | boolean
@@ -13352,7 +15005,8 @@ export namespace Prisma {
     id?: string
     tenantId: string
     contaId?: string | null
-    tipo: string
+    usuarioId?: string | null
+    tipo: $Enums.TipoLancamento
     categoria?: string | null
     subcategoria?: string | null
     descricao: string
@@ -13360,8 +15014,8 @@ export namespace Prisma {
     dataVencimento: Date | string
     dataPagamento?: Date | string | null
     dataCompetencia?: Date | string | null
-    status?: string
-    formaPagamento?: string | null
+    status?: $Enums.StatusLancamento
+    formaPagamento?: $Enums.FormaPagamento | null
     numeroParcela?: number | null
     totalParcelas?: number | null
     parcelaOrigemId?: string | null
@@ -13382,7 +15036,8 @@ export namespace Prisma {
   export type LancamentoUpdateWithoutRecorrenciaInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -13390,8 +15045,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13414,7 +15069,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     contaId?: NullableStringFieldUpdateOperationsInput | string | null
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -13422,8 +15078,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13445,7 +15101,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     contaId?: NullableStringFieldUpdateOperationsInput | string | null
-    tipo?: StringFieldUpdateOperationsInput | string
+    usuarioId?: NullableStringFieldUpdateOperationsInput | string | null
+    tipo?: EnumTipoLancamentoFieldUpdateOperationsInput | $Enums.TipoLancamento
     categoria?: NullableStringFieldUpdateOperationsInput | string | null
     subcategoria?: NullableStringFieldUpdateOperationsInput | string | null
     descricao?: StringFieldUpdateOperationsInput | string
@@ -13453,8 +15110,8 @@ export namespace Prisma {
     dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
     dataPagamento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dataCompetencia?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    formaPagamento?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusLancamentoFieldUpdateOperationsInput | $Enums.StatusLancamento
+    formaPagamento?: NullableEnumFormaPagamentoFieldUpdateOperationsInput | $Enums.FormaPagamento | null
     numeroParcela?: NullableIntFieldUpdateOperationsInput | number | null
     totalParcelas?: NullableIntFieldUpdateOperationsInput | number | null
     parcelaOrigemId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13509,6 +15166,10 @@ export namespace Prisma {
      * @deprecated Use ConciliacaoBancariaDefaultArgs instead
      */
     export type ConciliacaoBancariaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ConciliacaoBancariaDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use EventoProcessadoDefaultArgs instead
+     */
+    export type EventoProcessadoArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = EventoProcessadoDefaultArgs<ExtArgs>
     /**
      * @deprecated Use DREDefaultArgs instead
      */

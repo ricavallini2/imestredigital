@@ -25,7 +25,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     const protocolo = `1352600${Date.now().toString().slice(-8)}`;
     const chaveAcesso = gerarChaveAcesso(nf.numero, '35');
     const updated = updateNotaFiscal(id, {
-      status: 'EMITIDA',
+      status: 'AUTORIZADA',
       chaveAcesso,
       protocolo,
       dataAutorizacao: agora,

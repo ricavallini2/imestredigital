@@ -2,7 +2,7 @@
  * DTO para criação de pedido.
  */
 
-import { IsString, IsOptional, IsNumber, IsArray, ValidateNested, IsDecimal } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ItemPedidoCreateDto {
@@ -22,11 +22,11 @@ export class ItemPedidoCreateDto {
   @IsNumber()
   quantidade: number;
 
-  @IsDecimal()
+  @IsNumber({ maxDecimalPlaces: 2 })
   valorUnitario: number;
 
   @IsOptional()
-  @IsDecimal()
+  @IsNumber({ maxDecimalPlaces: 2 })
   valorDesconto?: number;
 
   @IsOptional()
@@ -73,7 +73,9 @@ export class EnderecoEntregaDto {
 export class CriarPedidoDto {
   @IsOptional()
   @IsString()
-  origem?: string; // LOJA, MARKETPLACE, ECOMMERCE, MANUAL
+  // Enum OrigemPedido: LOJA_FISICA | ECOMMERCE | MARKETPLACE | TELEFONE | WHATSAPP | MANUAL | OUTRO.
+  // Ausente → default OUTRO no service. MANUAL = pedido digitado no ERP.
+  origem?: string;
 
   @IsOptional()
   @IsString()
@@ -112,11 +114,11 @@ export class CriarPedidoDto {
   parcelas?: number;
 
   @IsOptional()
-  @IsDecimal()
+  @IsNumber({ maxDecimalPlaces: 2 })
   valorDesconto?: number;
 
   @IsOptional()
-  @IsDecimal()
+  @IsNumber({ maxDecimalPlaces: 2 })
   valorFrete?: number;
 
   @IsOptional()

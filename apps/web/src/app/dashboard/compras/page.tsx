@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   ShoppingBag, Plus, Search, RefreshCw, Brain, TrendingDown,
-  ChevronRight, Loader2, FileCheck, Truck, Building2, DollarSign,
-  FileX, Clock, CheckCircle2, XCircle, AlertTriangle, FileText,
-  Upload, PackageCheck, TrendingUp,
+  ChevronRight, FileCheck, Truck, Building2, DollarSign,
+  Clock, CheckCircle2, XCircle, AlertTriangle, FileText,
+  Upload, PackageCheck, TrendingUp, X,
 } from 'lucide-react';
 import {
   useCompras,
@@ -58,19 +59,46 @@ function Skeleton({ className }: { className?: string }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function ComprasPage() {
+function ComprasContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Filtro por fornecedor vindo da tela de Fornecedores (parceiro unificado).
+  // Lido no client via window.location.search para evitar o limite de Suspense
+  // que useSearchParams exige no App Router. `fornecedorId` filtra os pedidos ·
+  // `fornecedor` é só o rótulo exibido.
+  const [fornecedorId, setFornecedorId] = useState('');
+  const [fornecedorNome, setFornecedorNome] = useState('');
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    setFornecedorId(p.get('fornecedorId') ?? '');
+    setFornecedorNome(p.get('fornecedor') ?? '');
+  }, []);
+
   const [busca, setBusca] = useState('');
   const [status, setStatus] = useState<StatusCompra | ''>('');
   const [showIA, setShowIA] = useState(true);
 
   const { data: comprasData, isLoading: loadingCompras, refetch } = useCompras({
     status: status || undefined,
+    fornecedorId: fornecedorId || undefined,
     busca: busca || undefined,
   });
   const { data: est, isLoading: loadingEst } = useEstatisticasCompras();
 
   const compras: PedidoCompra[] = comprasData?.dados ?? [];
   const temNfes = (est?.nfesImportadas ?? 0) > 0;
+
+  // Remove o filtro de fornecedor da URL, preservando os demais parâmetros.
+  const limparFiltroFornecedor = () => {
+    const params = new URLSearchParams(window.location.search);
+    params.delete('fornecedorId');
+    params.delete('fornecedor');
+    setFornecedorId('');
+    setFornecedorNome('');
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  };
 
   return (
     <div className="space-y-6">
@@ -112,6 +140,26 @@ export default function ComprasPage() {
           </Link>
         </div>
       </div>
+
+      {/* Indicador de filtro por fornecedor */}
+      {fornecedorId && (
+        <div className="flex items-center gap-2 rounded-xl border border-marca-200 dark:border-marca-800/50 bg-marca-50 dark:bg-marca-900/10 px-4 py-2.5">
+          <Building2 className="h-4 w-4 text-marca-600 shrink-0" />
+          <span className="text-sm text-slate-600 dark:text-slate-300">
+            Filtrando compras de{' '}
+            <span className="font-semibold text-marca-700 dark:text-marca-400">
+              {fornecedorNome || 'fornecedor selecionado'}
+            </span>
+          </span>
+          <button
+            onClick={limparFiltroFornecedor}
+            className="ml-auto flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 hover:bg-white dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+            Limpar filtro
+          </button>
+        </div>
+      )}
 
       {/* KPIs */}
       {loadingEst ? (
@@ -351,9 +399,21 @@ export default function ComprasPage() {
           <div className="py-16 text-center">
             <ShoppingBag className="mx-auto mb-3 h-12 w-12 text-slate-200 dark:text-slate-600" />
             <p className="text-slate-500 text-sm font-medium">
-              {busca || status ? 'Nenhum pedido encontrado com esses filtros' : 'Nenhum pedido de compra'}
+              {fornecedorId
+                ? 'Nenhuma compra encontrada para este fornecedor'
+                : busca || status
+                  ? 'Nenhum pedido encontrado com esses filtros'
+                  : 'Nenhum pedido de compra'}
             </p>
-            {!busca && !status && (
+            {fornecedorId ? (
+              <button
+                onClick={limparFiltroFornecedor}
+                className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              >
+                <X className="h-4 w-4" />
+                Limpar filtro de fornecedor
+              </button>
+            ) : !busca && !status && (
               <Link
                 href="/dashboard/compras/importar-nfe"
                 className="mt-4 inline-flex items-center gap-2 rounded-xl bg-marca-600 px-4 py-2 text-sm font-semibold text-white hover:bg-marca-700 transition-colors"
@@ -453,4 +513,8 @@ export default function ComprasPage() {
       )}
     </div>
   );
+}
+
+export default function ComprasPage() {
+  return <ComprasContent />;
 }

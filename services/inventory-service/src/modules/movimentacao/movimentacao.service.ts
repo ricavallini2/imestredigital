@@ -12,11 +12,16 @@ export class MovimentacaoService {
 
   /**
    * Lista movimentações com filtros e paginação.
+   *
+   * Retorna o ENVELOPE PAGINADO canônico da Fase 0:
+   * { dados, total, pagina, limite, totalPaginas }.
    */
   async listar(tenantId: string, filtros: any) {
     const { produtoId, depositoId, tipo } = filtros;
     const pagina = Number(filtros.pagina) > 0 ? Number(filtros.pagina) : 1;
-    const itensPorPagina = Number(filtros.itensPorPagina) > 0 ? Number(filtros.itensPorPagina) : 50;
+    // Aceita `limite` (canônico) ou o legado `itensPorPagina`.
+    const limiteBruto = Number(filtros.limite ?? filtros.itensPorPagina);
+    const limite = limiteBruto > 0 ? limiteBruto : 50;
     const where: any = { tenantId };
 
     if (produtoId) where.produtoId = produtoId;
@@ -26,8 +31,8 @@ export class MovimentacaoService {
     const [dados, total] = await Promise.all([
       this.prisma.movimentacao.findMany({
         where,
-        skip: (pagina - 1) * itensPorPagina,
-        take: itensPorPagina,
+        skip: (pagina - 1) * limite,
+        take: limite,
         orderBy: { criadoEm: 'desc' },
         include: { deposito: { select: { nome: true } } },
       }),
@@ -36,12 +41,10 @@ export class MovimentacaoService {
 
     return {
       dados,
-      meta: {
-        total,
-        pagina,
-        itensPorPagina,
-        totalPaginas: Math.ceil(total / itensPorPagina),
-      },
+      total,
+      pagina,
+      limite,
+      totalPaginas: Math.ceil(total / limite),
     };
   }
 }

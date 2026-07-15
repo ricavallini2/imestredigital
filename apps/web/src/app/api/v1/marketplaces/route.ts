@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     id: `mkp-${Date.now()}`,
     canal: body.canal ?? 'MERCADO_LIVRE',
     nome: body.nome ?? 'Novo Marketplace',
-    status: 'DESCONECTADO',
+    status: 'PENDENTE',
     taxaPlataforma: body.taxaPlataforma ?? 13,
     sellerId: body.sellerId ?? '',
     pedidosHoje: 0,

@@ -8,12 +8,13 @@
  * - Título de anúncio (por marketplace)
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { LLMService } from '../assistente/llm.service';
 import { SugestaoRepository } from './sugestao.repository';
+import { ProdutorEventosService } from '../eventos/produtor-eventos.service';
 import {
   promptRespostaMarketplace,
   promptDescricaoProduto,
@@ -45,8 +46,32 @@ export class SugestaoService {
   constructor(
     private llmService: LLMService,
     private repository: SugestaoRepository,
+    private produtorEventos: ProdutorEventosService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
+
+  /**
+   * Persiste a sugestão e publica o evento sugestao_criada no Kafka.
+   * Ponto único de criação para garantir a publicação do evento.
+   */
+  private async persistirSugestao(dados: {
+    tenantId: string;
+    tipo: string;
+    contexto: Record<string, any>;
+    sugestao: string;
+    confianca: number;
+  }) {
+    const registro = await this.repository.criarSugestao(dados);
+
+    await this.produtorEventos.publicarSugestaooCriada({
+      tenantId: registro.tenantId,
+      sugestaoId: registro.id,
+      tipo: registro.tipo,
+      confianca: Number(registro.confianca),
+    });
+
+    return registro;
+  }
 
   /**
    * Sugere preço para um produto
@@ -86,7 +111,7 @@ export class SugestaoService {
     };
 
     // Armazenar
-    await this.repository.criarSugestao({
+    await this.persistirSugestao({
       tenantId,
       tipo: 'PRECO',
       contexto: { produtoId, custoUnitario, margemDesejada },
@@ -156,7 +181,7 @@ Gere uma descrição otimizada.`;
       );
 
       // Armazenar no BD
-      await this.repository.criarSugestao({
+      await this.persistirSugestao({
         tenantId,
         tipo: 'DESCRICAO_PRODUTO',
         contexto: { produtoId, ...dados },
@@ -213,7 +238,7 @@ Redija uma resposta profissional.`;
       };
 
       // Armazenar
-      await this.repository.criarSugestao({
+      await this.persistirSugestao({
         tenantId,
         tipo: 'RESPOSTA_MARKETPLACE',
         contexto: { perguntaId, pergunta, ...contexto },
@@ -277,24 +302,47 @@ Responda apenas com o título, sem aspas.`;
   }
 
   /**
-   * Lista sugestões geradas
+   * Lista sugestões geradas, no envelope paginado canônico:
+   * { dados, total, pagina, limite, totalPaginas }.
    */
   async listarSugestoes(
     tenantId: string,
     filtros?: {
       tipo?: string;
       aceita?: boolean;
+      pagina?: number;
       limite?: number;
-      offset?: number;
     },
   ) {
-    return this.repository.listarSugestoes(tenantId, filtros);
+    const pagina = filtros?.pagina ?? 0;
+    const limite = filtros?.limite ?? 20;
+
+    const { sugestoes, total } = await this.repository.listarSugestoes(tenantId, {
+      tipo: filtros?.tipo,
+      aceita: filtros?.aceita,
+      limite,
+      offset: pagina * limite,
+    });
+
+    return {
+      dados: sugestoes,
+      total,
+      pagina,
+      limite,
+      totalPaginas: limite > 0 ? Math.ceil(total / limite) : 0,
+    };
   }
 
   /**
-   * Marca sugestão como aceita (registra comportamento do usuário)
+   * Marca sugestão como aceita (escopada por tenant).
    */
   async aceitarSugestao(tenantId: string, sugestaoId: string) {
-    return this.repository.aceitarSugestao(sugestaoId);
+    const atualizada = await this.repository.aceitarSugestao(tenantId, sugestaoId);
+
+    if (!atualizada) {
+      throw new NotFoundException('Sugestão não encontrada');
+    }
+
+    return atualizada;
   }
 }

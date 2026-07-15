@@ -7,6 +7,7 @@ import { Injectable, NotFoundException, BadRequestException, Logger } from '@nes
 import Decimal from 'decimal.js';
 import { ContaRepository } from './conta.repository';
 import { CacheService } from '../cache/cache.service';
+import { TIPOS_CONTA } from '../../dtos/enums';
 
 interface CriarContaInput {
   tenantId: string;
@@ -34,7 +35,7 @@ export class ContaService {
    */
   async criar(input: CriarContaInput) {
     // Validações
-    if (!['CORRENTE', 'POUPANCA', 'CAIXA', 'CARTAO', 'DIGITAL'].includes(input.tipo)) {
+    if (!TIPOS_CONTA.includes(input.tipo as (typeof TIPOS_CONTA)[number])) {
       throw new BadRequestException('Tipo de conta inválido');
     }
 

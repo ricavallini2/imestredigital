@@ -143,6 +143,7 @@ exports.Prisma.LancamentoScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
   contaId: 'contaId',
+  usuarioId: 'usuarioId',
   tipo: 'tipo',
   categoria: 'categoria',
   subcategoria: 'subcategoria',
@@ -214,6 +215,14 @@ exports.Prisma.ConciliacaoBancariaScalarFieldEnum = {
   atualizadoEm: 'atualizadoEm'
 };
 
+exports.Prisma.EventoProcessadoScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  evento: 'evento',
+  referenciaId: 'referenciaId',
+  processadoEm: 'processadoEm'
+};
+
 exports.Prisma.DREScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -260,7 +269,63 @@ exports.Prisma.JsonNullValueFilter = {
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
 };
+exports.TipoConta = exports.$Enums.TipoConta = {
+  CORRENTE: 'CORRENTE',
+  POUPANCA: 'POUPANCA',
+  INVESTIMENTO: 'INVESTIMENTO',
+  CAIXA: 'CAIXA',
+  CARTAO: 'CARTAO',
+  DIGITAL: 'DIGITAL'
+};
 
+exports.TipoLancamento = exports.$Enums.TipoLancamento = {
+  RECEITA: 'RECEITA',
+  DESPESA: 'DESPESA',
+  TRANSFERENCIA: 'TRANSFERENCIA'
+};
+
+exports.StatusLancamento = exports.$Enums.StatusLancamento = {
+  PENDENTE: 'PENDENTE',
+  PAGO: 'PAGO',
+  ATRASADO: 'ATRASADO',
+  CANCELADO: 'CANCELADO',
+  PARCIAL: 'PARCIAL'
+};
+
+exports.FormaPagamento = exports.$Enums.FormaPagamento = {
+  DINHEIRO: 'DINHEIRO',
+  PIX: 'PIX',
+  CARTAO_CREDITO: 'CARTAO_CREDITO',
+  CARTAO_DEBITO: 'CARTAO_DEBITO',
+  BOLETO: 'BOLETO',
+  TRANSFERENCIA: 'TRANSFERENCIA',
+  TED: 'TED',
+  DOC: 'DOC',
+  CHEQUE: 'CHEQUE',
+  OUTRO: 'OUTRO'
+};
+
+exports.TipoCategoriaFinanceira = exports.$Enums.TipoCategoriaFinanceira = {
+  RECEITA: 'RECEITA',
+  DESPESA: 'DESPESA'
+};
+
+exports.FrequenciaRecorrencia = exports.$Enums.FrequenciaRecorrencia = {
+  DIARIA: 'DIARIA',
+  SEMANAL: 'SEMANAL',
+  QUINZENAL: 'QUINZENAL',
+  MENSAL: 'MENSAL',
+  BIMESTRAL: 'BIMESTRAL',
+  TRIMESTRAL: 'TRIMESTRAL',
+  SEMESTRAL: 'SEMESTRAL',
+  ANUAL: 'ANUAL'
+};
+
+exports.StatusConciliacao = exports.$Enums.StatusConciliacao = {
+  EM_ANDAMENTO: 'EM_ANDAMENTO',
+  CONCLUIDA: 'CONCLUIDA',
+  DIVERGENTE: 'DIVERGENTE'
+};
 
 exports.Prisma.ModelName = {
   ContaFinanceira: 'ContaFinanceira',
@@ -268,6 +333,7 @@ exports.Prisma.ModelName = {
   CategoriaFinanceira: 'CategoriaFinanceira',
   Recorrencia: 'Recorrencia',
   ConciliacaoBancaria: 'ConciliacaoBancaria',
+  EventoProcessado: 'EventoProcessado',
   DRE: 'DRE'
 };
 

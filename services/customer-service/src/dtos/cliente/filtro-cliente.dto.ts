@@ -16,12 +16,35 @@ export enum StatusClienteFiltro {
   BLOQUEADO = 'BLOQUEADO',
 }
 
+export enum PapelFiltro {
+  CLIENTE = 'CLIENTE',
+  FORNECEDOR = 'FORNECEDOR',
+  TRANSPORTADORA = 'TRANSPORTADORA',
+}
+
+export enum TipoClienteFiltro {
+  PESSOA_FISICA = 'PESSOA_FISICA',
+  PESSOA_JURIDICA = 'PESSOA_JURIDICA',
+  PF = 'PF',
+  PJ = 'PJ',
+}
+
+// Conjunto COMPLETO idêntico ao enum Prisma `OrigemCliente` (customer-service).
 export enum OrigemClienteFiltro {
   MANUAL = 'MANUAL',
   MARKETPLACE = 'MARKETPLACE',
   SITE = 'SITE',
   INDICACAO = 'INDICACAO',
   IMPORTACAO = 'IMPORTACAO',
+  WEBSITE = 'WEBSITE',
+  INSTAGRAM = 'INSTAGRAM',
+  FACEBOOK = 'FACEBOOK',
+  WHATSAPP = 'WHATSAPP',
+  VENDA_DIRETA = 'VENDA_DIRETA',
+  FEIRA = 'FEIRA',
+  TELEFONE = 'TELEFONE',
+  EMAIL = 'EMAIL',
+  OUTRO = 'OUTRO',
 }
 
 export class FiltroClienteDto {
@@ -52,6 +75,24 @@ export class FiltroClienteDto {
   @IsOptional()
   @IsString()
   busca?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filtro por papel (CLIENTE / FORNECEDOR / TRANSPORTADORA)',
+    enum: PapelFiltro,
+    example: 'CLIENTE',
+  })
+  @IsOptional()
+  @IsEnum(PapelFiltro, { message: 'Papel inválido' })
+  papel?: PapelFiltro;
+
+  @ApiPropertyOptional({
+    description: 'Filtro por tipo de pessoa (PF/PJ ou PESSOA_FISICA/PESSOA_JURIDICA)',
+    enum: TipoClienteFiltro,
+    example: 'PF',
+  })
+  @IsOptional()
+  @IsEnum(TipoClienteFiltro, { message: 'Tipo inválido' })
+  tipo?: TipoClienteFiltro;
 
   @ApiPropertyOptional({
     description: 'Filtro por email',

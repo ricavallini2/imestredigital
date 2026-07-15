@@ -220,3 +220,8 @@ cd apps/web && npm run dev   # port 3000
 ## What's Mock vs Real
 
 The **frontend is fully functional with mock data** — all `app/api/v1/` routes return hardcoded/generated data. The NestJS microservices are scaffolded and partially implemented but not required to run the frontend. `next.config.ts` rewrites `/api/v1/*` to microservices in production.
+
+
+Don't make mistakes. The code will be reviewed by the Codex.
+
+Conversar em português BR

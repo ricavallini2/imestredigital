@@ -22,6 +22,9 @@ model Cliente {
   id                    String                @id @default(uuid()) @db.Uuid
   tenantId              String                @db.Uuid // ID da empresa/tenant
 
+  // Papéis do parceiro de negócio (cadastro unificado cliente/fornecedor)
+  papeis                Papel[]               @default([CLIENTE])
+
   // Tipo de cliente
   tipo                  TipoCliente           // PESSOA_FISICA ou PESSOA_JURIDICA
 
@@ -33,7 +36,11 @@ model Cliente {
   // Documentos
   cpf                   String?               // CPF (apenas PF), sem formatação
   cnpj                  String?               // CNPJ (apenas PJ), sem formatação
+  rg                    String?               // RG (apenas PF)
   inscricaoEstadual     String?               // Inscrição estadual (PJ)
+  ieIsento              Boolean               @default(false) // IE = ISENTO (PJ)
+  inscricaoMunicipal    String?               // Inscrição municipal (PJ)
+  regimeTributario      RegimeTributario?     // Regime tributário (PJ)
 
   // Contato
   email                 String                // Email principal (único por tenant+email)
@@ -54,10 +61,24 @@ model Cliente {
   status                StatusCliente         @default(PROSPECT) // Ativo, inativo, bloqueado, prospect
   origem                OrigemCliente         @default(MANUAL) // Como foi criado
 
-  // Histórico de vendas
+  // Histórico de vendas (papel CLIENTE)
   ultimaCompra          DateTime?             // Data da última compra
   totalCompras          Int                   @default(0) // Total de pedidos
   valorTotalCompras     Decimal               @default(0) @db.Decimal(19, 2) // Valor total
+
+  // Grupo CLIENTE
+  limiteCredito         Decimal?              @db.Decimal(19, 2) // Limite de crédito
+  vendedorId            String?               @db.Uuid // Vendedor/representante responsável
+
+  // Grupo FORNECEDOR
+  prazoPagamento        Int?                  // Prazo médio de pagamento (dias)
+  condicoesPagamento    String?               // Ex.: "30/60/90"
+  pixChave              String?               // Chave PIX para pagamento ao fornecedor
+  categoriasFornecidas  String[]              // Categorias de produtos fornecidos
+  avaliacaoFornecedor   Int?                  // Avaliação do fornecedor (1–5)
+  ultimaCompraFornecedor    DateTime?         // Última compra feita DESTE fornecedor
+  totalComprasFornecedor    Int               @default(0) // Qtde de compras (contas a pagar)
+  valorTotalComprasFornecedor Decimal         @default(0) @db.Decimal(19, 2)
 
   // Soft delete
   deletadoEm            DateTime?             // Data de exclusão lógica
@@ -84,6 +105,7 @@ model Cliente {
   @@index([tenantId, cnpj])
   @@index([tenantId, origem])
   @@index([tenantId, criadoEm])
+  @@index([papeis], type: Gin) // filtro por papel (cliente/fornecedor)
 }
 
 // EnderecoCliente - Endereço de entrega ou cobrança do cliente
@@ -159,7 +181,7 @@ model InteracaoCliente {
   cliente               Cliente               @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
   // Tipo e canal
-  tipo                  TipoInteracao         // VENDA, ATENDIMENTO, RECLAMACAO, DEVOLUCAO, EMAIL, TELEFONE, CHAT, MARKETPLACE, NOTA
+  tipo                  TipoInteracao         // VENDA, COMPRA, ATENDIMENTO, RECLAMACAO, ELOGIO, DEVOLUCAO, ORCAMENTO, EMAIL, TELEFONE, LIGACAO, WHATSAPP, CHAT, REUNIAO, VISITA, MARKETPLACE, NOTA
   canal                 CanalInteracao        // TELEFONE, EMAIL, WHATSAPP, CHAT, PRESENCIAL, MARKETPLACE
 
   // Conteúdo
@@ -268,10 +290,26 @@ model ImportacaoCliente {
 // ENUMS - Tipos de Cliente, Status, Origem, etc
 // ═══════════════════════════════════════════════════════════════
 
+/// Papel do parceiro de negócio (cadastro unificado cliente/fornecedor)
+enum Papel {
+  CLIENTE
+  FORNECEDOR
+  TRANSPORTADORA
+}
+
 /// Tipo de cliente: Pessoa Física ou Jurídica
 enum TipoCliente {
   PESSOA_FISICA
   PESSOA_JURIDICA
+}
+
+/// Regime tributário (apenas PJ)
+enum RegimeTributario {
+  SIMPLES_NACIONAL
+  MEI
+  LUCRO_PRESUMIDO
+  LUCRO_REAL
+  ISENTO
 }
 
 /// Status do cliente
@@ -282,13 +320,22 @@ enum StatusCliente {
   BLOQUEADO     // Cliente com inadimplência ou problemas
 }
 
-/// Origem do cliente (como foi adicionado)
+/// Origem do cliente (como foi adicionado) — alinhado ao enum do banco
 enum OrigemCliente {
   MANUAL        // Criado manualmente
   MARKETPLACE   // Vindo de marketplace
   SITE          // Cadastro via site
   INDICACAO     // Indicação de outro cliente
   IMPORTACAO    // Importado em lote
+  WEBSITE       // Cadastro via website
+  INSTAGRAM
+  FACEBOOK
+  WHATSAPP
+  VENDA_DIRETA
+  FEIRA
+  TELEFONE
+  EMAIL
+  OUTRO
 }
 
 /// Tipo de endereço
@@ -301,12 +348,19 @@ enum TipoEndereco {
 /// Tipo de interação com cliente
 enum TipoInteracao {
   VENDA
+  COMPRA
   ATENDIMENTO
   RECLAMACAO
+  ELOGIO
   DEVOLUCAO
+  ORCAMENTO
   EMAIL
   TELEFONE
+  LIGACAO
+  WHATSAPP
   CHAT
+  REUNIAO
+  VISITA
   MARKETPLACE
   NOTA
 }

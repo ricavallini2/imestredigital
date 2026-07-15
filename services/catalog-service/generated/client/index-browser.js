@@ -137,6 +137,8 @@ exports.Prisma.ProdutoScalarFieldEnum = {
   precoCusto: 'precoCusto',
   precoVenda: 'precoVenda',
   precoPromocional: 'precoPromocional',
+  estoqueMinimo: 'estoqueMinimo',
+  unidadeMedida: 'unidadeMedida',
   peso: 'peso',
   altura: 'altura',
   largura: 'largura',
@@ -187,6 +189,23 @@ exports.Prisma.ImagemVariacaoScalarFieldEnum = {
   ordem: 'ordem'
 };
 
+exports.Prisma.GradeScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  nome: 'nome',
+  descricao: 'descricao',
+  ativa: 'ativa',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+};
+
+exports.Prisma.GradeTamanhoScalarFieldEnum = {
+  id: 'id',
+  gradeId: 'gradeId',
+  valor: 'valor',
+  ordem: 'ordem'
+};
+
 exports.Prisma.CategoriaScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -224,7 +243,13 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
-
+exports.StatusProduto = exports.$Enums.StatusProduto = {
+  ATIVO: 'ATIVO',
+  INATIVO: 'INATIVO',
+  RASCUNHO: 'RASCUNHO',
+  ESGOTADO: 'ESGOTADO',
+  DESCONTINUADO: 'DESCONTINUADO'
+};
 
 exports.Prisma.ModelName = {
   Produto: 'Produto',
@@ -232,6 +257,8 @@ exports.Prisma.ModelName = {
   VariacaoProduto: 'VariacaoProduto',
   AtributoVariacao: 'AtributoVariacao',
   ImagemVariacao: 'ImagemVariacao',
+  Grade: 'Grade',
+  GradeTamanho: 'GradeTamanho',
   Categoria: 'Categoria',
   Marca: 'Marca'
 };

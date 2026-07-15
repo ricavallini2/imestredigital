@@ -13,7 +13,7 @@ import {
   LayoutDashboard, Package, Warehouse, ShoppingCart,
   Landmark, Store, FileText, DollarSign, Users, Bot,
   Settings, X, ShoppingBag, Megaphone, MessageCircle, BarChart2,
-  BadgeDollarSign, Settings2, FileCheck2, History, Tag, MessagesSquare,
+  BadgeDollarSign, Settings2, FileCheck2, History, Tag, Tags, FolderTree, MessagesSquare,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { LogoSidebar } from '@/components/ui/logo';
@@ -143,6 +143,8 @@ export function Sidebar({ aberta = false, onFechar }: SidebarProps) {
               {ehProdutos && ativo && (
                 <div className="ml-4 mt-0.5 space-y-0.5 border-l-2 border-marca-200 dark:border-marca-800 pl-3">
                   {[
+                    { href: '/dashboard/produtos/categorias', label: 'Categorias', icone: FolderTree },
+                    { href: '/dashboard/produtos/marcas', label: 'Marcas', icone: Tags },
                     { href: '/dashboard/produtos/etiquetas', label: 'Etiquetas', icone: Tag },
                   ].map((sub) => {
                     const subAtivo = pathname.startsWith(sub.href);

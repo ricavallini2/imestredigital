@@ -17,6 +17,8 @@ export const TOPICOS_CATALOGO = {
   PRODUTO_REMOVIDO: 'catalogo.produto.removido',
   /** Categoria foi criada ou atualizada */
   CATEGORIA_ATUALIZADA: 'catalogo.categoria.atualizada',
+  /** Marca foi criada ou atualizada */
+  MARCA_ATUALIZADA: 'catalogo.marca.atualizada',
 } as const;
 
 /** Configuração padrão do Kafka */

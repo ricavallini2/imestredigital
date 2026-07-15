@@ -12,12 +12,56 @@ import {
   IsEnum,
   IsNumber,
   IsArray,
+  IsBoolean,
+  IsInt,
+  IsIn,
   MinLength,
   MaxLength,
   Min,
   IsUUID,
+  Matches,
+  ValidateNested,
+  ArrayMaxSize,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+/**
+ * Imagem do produto (padrão e-commerce).
+ *
+ * `url` aceita tanto URL http(s) hospedada (recomendado p/ marketplaces) quanto
+ * data URL (upload local). A capa é a imagem com `principal: true` (ou `ordem 0`).
+ */
+export class ImagemProdutoDto {
+  @ApiProperty({ description: 'URL da imagem (http(s) ou data URL)' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(200000, { message: 'URL de imagem muito longa' })
+  url: string;
+
+  @ApiPropertyOptional({ description: 'URL da miniatura' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200000)
+  urlMiniatura?: string;
+
+  @ApiPropertyOptional({ description: 'Se é a imagem principal (capa)' })
+  @IsOptional()
+  @IsBoolean()
+  principal?: boolean;
+
+  @ApiPropertyOptional({ description: 'Ordem de exibição (0 = capa)' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  ordem?: number;
+
+  @ApiPropertyOptional({ description: 'Texto alternativo (acessibilidade/SEO)' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  textoAlternativo?: string;
+}
 
 export class CriarProdutoDto {
   @ApiProperty({ description: 'Código SKU único do produto', example: 'CAM-AZL-M' })
@@ -52,12 +96,12 @@ export class CriarProdutoDto {
   descricaoCurta?: string;
 
   @ApiProperty({ description: 'ID da categoria', example: 'uuid-da-categoria' })
-  @IsUUID('4', { message: 'ID da categoria deve ser um UUID válido' })
+  @Matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/, { message: 'ID da categoria deve ser um UUID válido' })
   categoriaId: string;
 
   @ApiPropertyOptional({ description: 'ID da marca' })
   @IsOptional()
-  @IsUUID('4', { message: 'ID da marca deve ser um UUID válido' })
+  @Matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/, { message: 'ID da marca deve ser um UUID válido' })
   marcaId?: string;
 
   @ApiProperty({ description: 'NCM do produto (8 dígitos)', example: '61091000' })
@@ -112,9 +156,54 @@ export class CriarProdutoDto {
   @Min(0.1)
   comprimento: number;
 
+  @ApiPropertyOptional({
+    description: 'Status do produto',
+    enum: ['ATIVO', 'INATIVO', 'RASCUNHO', 'ESGOTADO', 'DESCONTINUADO'],
+  })
+  @IsOptional()
+  @IsIn(['ATIVO', 'INATIVO', 'RASCUNHO', 'ESGOTADO', 'DESCONTINUADO'], {
+    message: 'Status inválido',
+  })
+  status?: string;
+
+  @ApiPropertyOptional({ description: 'Estoque mínimo (para alertas)', example: 5 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  estoqueMinimo?: number;
+
+  @ApiPropertyOptional({ description: 'Unidade de medida', example: 'UN' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(10)
+  unidadeMedida?: string;
+
+  @ApiPropertyOptional({ description: 'Título para SEO/anúncio' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  metaTitulo?: string;
+
+  @ApiPropertyOptional({ description: 'Descrição para SEO/anúncio' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  metaDescricao?: string;
+
   @ApiPropertyOptional({ description: 'Tags para busca', example: ['algodão', 'premium'] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   tags?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Galeria de imagens (capa = principal/ordem 0). Usada na vitrine e nos anúncios.',
+    type: [ImagemProdutoDto],
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(20, { message: 'No máximo 20 imagens por produto' })
+  @ValidateNested({ each: true })
+  @Type(() => ImagemProdutoDto)
+  imagens?: ImagemProdutoDto[];
 }

@@ -12,7 +12,7 @@ import { FiltroPedidoMarketplaceDto } from '../../dtos/filtro-pedido-marketplace
 
 @ApiTags('Pedidos Marketplace')
 @ApiBearerAuth()
-@Controller('pedidos-marketplace')
+@Controller('api/v1/pedidos-marketplace')
 export class PedidoMarketplaceController {
   private readonly logger = new Logger('PedidoMarketplaceController');
 

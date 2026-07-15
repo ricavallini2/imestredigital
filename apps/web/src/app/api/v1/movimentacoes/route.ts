@@ -28,8 +28,12 @@ export async function GET(req: NextRequest) {
   const inicio = (pagina - 1) * limite;
   const dados = lista.slice(inicio, inicio + limite);
 
+  // Envelope paginado canônico da Fase 0: { dados, total, pagina, limite, totalPaginas }
   return NextResponse.json({
     dados,
-    paginacao: { pagina, itensPorPagina: limite, total, totalPaginas: Math.ceil(total / limite) },
+    total,
+    pagina,
+    limite,
+    totalPaginas: Math.ceil(total / limite),
   });
 }

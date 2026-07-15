@@ -2,7 +2,7 @@
  * DTOs para pagamentos.
  */
 
-import { IsString, IsOptional, IsNumber, Min, IsDecimal } from 'class-validator';
+import { IsString, IsOptional, IsNumber, Min } from 'class-validator';
 
 export class RegistrarPagamentoDto {
   @IsString()
@@ -11,7 +11,7 @@ export class RegistrarPagamentoDto {
   @IsString()
   status: string; // PENDENTE, AUTORIZADO, PAGO, ESTORNADO
 
-  @IsDecimal()
+  @IsNumber({ maxDecimalPlaces: 2 })
   valor: number;
 
   @IsOptional()
@@ -54,6 +54,6 @@ export class EstornarPagamentoDto {
   motivo: string;
 
   @IsOptional()
-  @IsDecimal()
+  @IsNumber({ maxDecimalPlaces: 2 })
   valor?: number;
 }

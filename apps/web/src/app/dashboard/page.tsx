@@ -32,8 +32,7 @@ const fmtPct = (v: number) => `${v > 0 ? '+' : ''}${v.toFixed(1)}%`;
 const STATUS_COR: Record<string, string> = {
   PENDENTE: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
   CONFIRMADO: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-  SEPARANDO: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-  SEPARADO: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
+  EM_SEPARACAO: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
   FATURADO: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
   ENVIADO: 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400',
   ENTREGUE: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
@@ -440,8 +439,8 @@ export default function DashboardPage() {
             </Link>
           </div>
           {isLoading ? <Skeleton className="h-28" /> : (
-            <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-              {(['PENDENTE','CONFIRMADO','SEPARANDO','SEPARADO','FATURADO','ENVIADO','ENTREGUE','CANCELADO'] as const).map(status => {
+            <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+              {(['PENDENTE','CONFIRMADO','EM_SEPARACAO','FATURADO','ENVIADO','ENTREGUE','CANCELADO'] as const).map(status => {
                 const qtd = resumo?.porStatus?.[status] ?? 0;
                 const max = Math.max(...Object.values(resumo?.porStatus ?? {}).map(Number));
                 const pct = max > 0 ? (qtd / max) * 100 : 0;

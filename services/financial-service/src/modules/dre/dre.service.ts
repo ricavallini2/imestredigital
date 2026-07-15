@@ -8,6 +8,13 @@ import Decimal from 'decimal.js';
 import { PrismaService } from '../prisma/prisma.service';
 import { CacheService } from '../cache/cache.service';
 
+/** Formato mínimo de lançamento necessário para as agregações da DRE. */
+interface LancamentoAgregavel {
+  tipo: string;
+  categoria: string | null;
+  valor: Decimal | string | number;
+}
+
 @Injectable()
 export class DreService {
   private readonly logger = new Logger('DreService');
@@ -33,7 +40,7 @@ export class DreService {
     const dataInicio = new Date(ano, mes - 1, 1);
     const dataFim = new Date(ano, mes, 0, 23, 59, 59);
 
-    // Buscar lançamentos pagos no período
+    // Buscar lançamentos pagos no período (competência = dataPagamento).
     const lancamentos = await this.prisma.lancamento.findMany({
       where: {
         tenantId,
@@ -45,61 +52,95 @@ export class DreService {
       },
     });
 
-    // Agrupar por tipo
-    const receitas = lancamentos
+    // Soma os valores (Decimal) das RECEITAS cujas categorias constam em
+    // `categorias` (case-insensitive).
+    const somaReceitaCat = (categorias: string[]): Decimal =>
+      this.somarPorCategoria(lancamentos, 'RECEITA', categorias);
+    // Soma os valores (Decimal) das DESPESAS cujas categorias constam em `categorias`.
+    const somaDespesaCat = (categorias: string[]): Decimal =>
+      this.somarPorCategoria(lancamentos, 'DESPESA', categorias);
+
+    // ── RECEITAS ──────────────────────────────────────────────────────────
+    const receitasFinanceiras = somaReceitaCat(['Financeiro']);
+    const receitaBruta = lancamentos
       .filter((l) => l.tipo === 'RECEITA')
-      .map((l) => new Decimal(l.valor))
-      .reduce((acc, val) => acc.plus(val), new Decimal(0));
+      .reduce((acc, l) => acc.plus(new Decimal(l.valor)), new Decimal(0));
 
-    const despesas = lancamentos
-      .filter((l) => l.tipo === 'DESPESA')
-      .map((l) => new Decimal(l.valor))
-      .reduce((acc, val) => acc.plus(val), new Decimal(0));
-
-    // Calcular métricas
-    const receitaBruta = receitas;
-    const deducoes = new Decimal(0); // Pode ser configurado
+    // ── DEDUÇÕES ──────────────────────────────────────────────────────────
+    // Impostos incidentes sobre a receita (categoria DESPESA "Impostos").
+    const deducoes = somaDespesaCat(['Impostos']);
     const receitaLiquida = receitaBruta.minus(deducoes);
 
-    const custosMercadorias = new Decimal(0); // Buscar de lançamentos com tag "CMV"
+    // ── CMV (custo da mercadoria vendida = compras de estoque) ─────────────
+    const custosMercadorias = somaDespesaCat(['Compras', 'CMV']);
     const lucroBruto = receitaLiquida.minus(custosMercadorias);
 
-    const despesasOperacionais = new Decimal(0);
-    const despesasAdministrativas = new Decimal(0);
-    const despesasComerciais = new Decimal(0);
+    // ── DESPESAS OPERACIONAIS (por classe) ────────────────────────────────
+    // Operacionais: pessoal, ocupação e operacional (infra/utilidades).
+    const despesasOperacionais = somaDespesaCat([
+      'Pessoal',
+      'Ocupação',
+      'Ocupacao',
+      'Operacional',
+    ]);
+    // Comerciais: marketing e vendas.
+    const despesasComerciais = somaDespesaCat(['Marketing', 'Comercial', 'Vendas']);
+    // Administrativas: demais despesas não classificadas acima e não financeiras.
+    const classificadas = [
+      'Impostos',
+      'Compras',
+      'CMV',
+      'Pessoal',
+      'Ocupação',
+      'Ocupacao',
+      'Operacional',
+      'Marketing',
+      'Comercial',
+      'Vendas',
+      'Financeiro',
+    ].map((c) => c.toLowerCase());
+    const despesasAdministrativas = lancamentos
+      .filter(
+        (l) =>
+          l.tipo === 'DESPESA' &&
+          !classificadas.includes((l.categoria ?? '').toLowerCase()),
+      )
+      .reduce((acc, l) => acc.plus(new Decimal(l.valor)), new Decimal(0));
 
     const resultadoOperacional = lucroBruto
       .minus(despesasOperacionais)
       .minus(despesasAdministrativas)
       .minus(despesasComerciais);
 
-    const despesasFinanceiras = new Decimal(0);
-    const receitasFinanceiras = new Decimal(0);
+    // ── RESULTADO FINANCEIRO ──────────────────────────────────────────────
+    const despesasFinanceiras = somaDespesaCat(['Financeiro']);
 
     const lucroLiquido = resultadoOperacional
       .plus(receitasFinanceiras)
       .minus(despesasFinanceiras);
 
-    // Salvar DRE
-    const dre = await this.prisma.dRE.create({
-      data: {
-        tenantId,
-        periodo: 'MENSAL',
-        ano,
-        mes,
-        receitaBruta,
-        deducoes,
-        receitaLiquida,
-        custosMercadorias,
-        lucroBruto,
-        despesasOperacionais,
-        despesasAdministrativas,
-        despesasComerciais,
-        resultadoOperacional,
-        despesasFinanceiras,
-        receitasFinanceiras,
-        lucroLiquido,
-      },
+    // Persistir DRE (upsert: idempotente na regeneração do mesmo período,
+    // respeitando o unique composto (tenantId, ano, mes)).
+    const dadosDre = {
+      periodo: 'MENSAL',
+      receitaBruta,
+      deducoes,
+      receitaLiquida,
+      custosMercadorias,
+      lucroBruto,
+      despesasOperacionais,
+      despesasAdministrativas,
+      despesasComerciais,
+      resultadoOperacional,
+      despesasFinanceiras,
+      receitasFinanceiras,
+      lucroLiquido,
+    };
+
+    const dre = await this.prisma.dRE.upsert({
+      where: { tenantId_ano_mes: { tenantId, ano, mes } },
+      update: dadosDre,
+      create: { tenantId, ano, mes, ...dadosDre },
     });
 
     // Cachear por 30 dias
@@ -108,6 +149,25 @@ export class DreService {
     this.logger.log(`DRE gerada: ${tenantId}/${ano}/${mes}`);
 
     return dre;
+  }
+
+  /**
+   * Soma (Decimal) os valores dos lançamentos de um `tipo` cujas categorias
+   * constam em `categorias` (comparação case-insensitive, tolerante a acentos
+   * já normalizados na lista). Base única para todas as linhas da DRE.
+   */
+  private somarPorCategoria(
+    lancamentos: LancamentoAgregavel[],
+    tipo: 'RECEITA' | 'DESPESA',
+    categorias: string[],
+  ): Decimal {
+    const alvo = categorias.map((c) => c.toLowerCase());
+    return lancamentos
+      .filter(
+        (l) =>
+          l.tipo === tipo && alvo.includes((l.categoria ?? '').toLowerCase()),
+      )
+      .reduce((acc, l) => acc.plus(new Decimal(l.valor as Decimal)), new Decimal(0));
   }
 
   /**

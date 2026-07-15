@@ -11,6 +11,7 @@ import {
   Body,
   UseInterceptors,
   UploadedFile,
+  UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -18,9 +19,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiConsumes } from '@nestjs/swagger';
 import { ConfiguracaoFiscalService } from './configuracao-fiscal.service';
 import { AtualizarConfiguracaoFiscalDto } from '../../dtos/configuracao-fiscal.dto';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
+import { RolesGuard } from '../../guards/roles.guard';
+import { Roles } from '../../decorators/roles.decorator';
 
 @ApiTags('configuracao-fiscal')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('v1/configuracao-fiscal')
 export class ConfiguracaoFiscalController {
   constructor(private readonly service: ConfiguracaoFiscalService) {}
@@ -36,8 +41,11 @@ export class ConfiguracaoFiscalController {
 
   /**
    * Atualiza configuração fiscal.
+   *
+   * Restrita a admin|gerente (dados fiscais sensíveis do emitente).
    */
   @Put()
+  @Roles('admin', 'gerente')
   @ApiOperation({ summary: 'Atualizar configuração fiscal' })
   async atualizar(@Req() req: any, @Body() dto: AtualizarConfiguracaoFiscalDto) {
     return this.service.atualizarConfiguracao(req.tenantId, dto);
@@ -45,8 +53,11 @@ export class ConfiguracaoFiscalController {
 
   /**
    * Faz upload de certificado digital.
+   *
+   * Restrita a admin|gerente (certificado A1 e senha).
    */
   @Post('certificado')
+  @Roles('admin', 'gerente')
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('certificado'))
   @ApiConsumes('multipart/form-data')
@@ -65,11 +76,7 @@ export class ConfiguracaoFiscalController {
       throw new Error('Senha do certificado é obrigatória');
     }
 
-    return this.service.uploadCertificado(
-      req.tenantId,
-      arquivo.buffer,
-      senha,
-    );
+    return this.service.uploadCertificado(req.tenantId, arquivo.buffer, senha);
   }
 
   /**

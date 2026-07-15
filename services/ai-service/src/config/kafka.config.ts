@@ -38,7 +38,7 @@ export const TOPICOS_CONSUMIDOS = {
   LANCAMENTO_CRIADO: 'financeiro.lancamento_criado',
 
   // De fiscal
-  NOTA_AUTORIZADA: 'fiscal.nota_autorizada',
+  NOTA_AUTORIZADA: 'nota.autorizada',
 } as const;
 
 export const kafkaConfig = {

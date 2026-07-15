@@ -19,8 +19,11 @@ datasource db {
 // Pode ser do tipo PESSOA_FISICA (cpf, dataNascimento, genero) ou
 // PESSOA_JURIDICA (cnpj, razaoSocial, inscrição estadual).
 model Cliente {
-  id       String @id @default(cuid())
-  tenantId String // ID da empresa/tenant
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid // ID da empresa/tenant
+
+  // Papéis do parceiro de negócio (cadastro unificado cliente/fornecedor)
+  papeis Papel[] @default([CLIENTE])
 
   // Tipo de cliente
   tipo TipoCliente // PESSOA_FISICA ou PESSOA_JURIDICA
@@ -31,9 +34,13 @@ model Cliente {
   razaoSocial  String? // Razão social (apenas PJ)
 
   // Documentos
-  cpf               String? // CPF (apenas PF), sem formatação
-  cnpj              String? // CNPJ (apenas PJ), sem formatação
-  inscricaoEstadual String? // Inscrição estadual (PJ)
+  cpf                String? // CPF (apenas PF), sem formatação
+  cnpj               String? // CNPJ (apenas PJ), sem formatação
+  rg                 String? // RG (apenas PF)
+  inscricaoEstadual  String? // Inscrição estadual (PJ)
+  ieIsento           Boolean           @default(false) // IE = ISENTO (PJ)
+  inscricaoMunicipal String? // Inscrição municipal (PJ)
+  regimeTributario   RegimeTributario? // Regime tributário (PJ)
 
   // Contato
   email           String // Email principal (único por tenant+email)
@@ -54,10 +61,27 @@ model Cliente {
   status StatusCliente @default(PROSPECT) // Ativo, inativo, bloqueado, prospect
   origem OrigemCliente @default(MANUAL) // Como foi criado
 
-  // Histórico de vendas
+  // Histórico de vendas (papel CLIENTE)
   ultimaCompra      DateTime? // Data da última compra
   totalCompras      Int       @default(0) // Total de pedidos
-  valorTotalCompras Int       @default(0) // Valor total em centavos
+  valorTotalCompras Decimal   @default(0) @db.Decimal(19, 2) // Valor total
+
+  // Grupo CLIENTE
+  limiteCredito Decimal? @db.Decimal(19, 2) // Limite de crédito
+  vendedorId    String?  @db.Uuid // Vendedor/representante responsável
+
+  // Grupo FORNECEDOR
+  prazoPagamento              Int? // Prazo médio de pagamento (dias)
+  condicoesPagamento          String? // Ex.: "30/60/90"
+  pixChave                    String? // Chave PIX para pagamento ao fornecedor
+  categoriasFornecidas        String[] // Categorias de produtos fornecidos
+  avaliacaoFornecedor         Int? // Avaliação do fornecedor (1–5)
+  ultimaCompraFornecedor      DateTime? // Última compra feita DESTE fornecedor
+  totalComprasFornecedor      Int       @default(0) // Qtde de compras (contas a pagar)
+  valorTotalComprasFornecedor Decimal   @default(0) @db.Decimal(19, 2)
+
+  // Soft delete
+  deletadoEm DateTime? // Data de exclusão lógica
 
   // Relacionamentos
   enderecos  EnderecoCliente[]
@@ -75,19 +99,24 @@ model Cliente {
   @@unique([tenantId, email], map: "uk_cliente_tenant_email") // Email único por tenant
   @@index([tenantId])
   @@index([tenantId, status])
+  @@index([tenantId, tipo])
+  @@index([tenantId, email])
+  @@index([tenantId, cpf])
+  @@index([tenantId, cnpj])
   @@index([tenantId, origem])
   @@index([tenantId, criadoEm])
+  @@index([papeis], type: Gin) // filtro por papel (cliente/fornecedor)
 }
 
 // EnderecoCliente - Endereço de entrega ou cobrança do cliente
 // Um cliente pode ter múltiplos endereços marcados como
 // padrão, entrega ou cobrança.
 model EnderecoCliente {
-  id       String @id @default(cuid())
-  tenantId String
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
 
   // Relacionamento com cliente
-  clienteId String
+  clienteId String  @db.Uuid
   cliente   Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
   // Tipo de endereço
@@ -116,11 +145,11 @@ model EnderecoCliente {
 // Permite armazenar múltiplos pontos de contato (pessoas específicas)
 // dentro da empresa do cliente.
 model ContatoCliente {
-  id       String @id @default(cuid())
-  tenantId String
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
 
   // Relacionamento com cliente
-  clienteId String
+  clienteId String  @db.Uuid
   cliente   Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
   // Dados do contato
@@ -144,15 +173,15 @@ model ContatoCliente {
 // Registra todas as interações: vendas, atendimentos, reclamações,
 // devoluções, emails, mensagens, etc.
 model InteracaoCliente {
-  id       String @id @default(cuid())
-  tenantId String
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
 
   // Relacionamento com cliente
-  clienteId String
+  clienteId String  @db.Uuid
   cliente   Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
   // Tipo e canal
-  tipo  TipoInteracao // VENDA, ATENDIMENTO, RECLAMACAO, DEVOLUCAO, EMAIL, TELEFONE, CHAT, MARKETPLACE, NOTA
+  tipo  TipoInteracao // VENDA, COMPRA, ATENDIMENTO, RECLAMACAO, ELOGIO, DEVOLUCAO, ORCAMENTO, EMAIL, TELEFONE, LIGACAO, WHATSAPP, CHAT, REUNIAO, VISITA, MARKETPLACE, NOTA
   canal CanalInteracao // TELEFONE, EMAIL, WHATSAPP, CHAT, PRESENCIAL, MARKETPLACE
 
   // Conteúdo
@@ -161,8 +190,8 @@ model InteracaoCliente {
 
   // Contexto
   data      DateTime @default(now()) // Data da interação
-  usuarioId String // ID do usuário que registrou
-  pedidoId  String? // ID do pedido relacionado (se houver)
+  usuarioId String   @db.Uuid // ID do usuário que registrou
+  pedidoId  String?  @db.Uuid // ID do pedido relacionado (se houver)
 
   // Metadados adicionais
   metadata Json? // Dados adicionais em JSON
@@ -179,8 +208,8 @@ model InteracaoCliente {
 // Permite criar segmentos dinâmicos baseados em regras
 // (ex: "Clientes que gastaram mais de R$10k nos últimos 30 dias").
 model SegmentoCliente {
-  id       String @id @default(cuid())
-  tenantId String
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
 
   // Identificação
   nome      String // Nome do segmento
@@ -208,13 +237,13 @@ model SegmentoCliente {
 // ClienteSegmento - Tabela associativa entre Cliente e SegmentoCliente
 // Associa clientes aos segmentos dos quais fazem parte.
 model ClienteSegmento {
-  id String @id @default(cuid())
+  id String @id @default(uuid()) @db.Uuid
 
   // Relacionamentos
-  clienteId String
+  clienteId String  @db.Uuid
   cliente   Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
-  segmentoId String
+  segmentoId String          @db.Uuid
   segmento   SegmentoCliente @relation(fields: [segmentoId], references: [id], onDelete: Cascade)
 
   // Data de adição ao segmento
@@ -228,8 +257,8 @@ model ClienteSegmento {
 // Controla o processo de importação de clientes a partir de
 // arquivos CSV ou XLSX.
 model ImportacaoCliente {
-  id       String @id @default(cuid())
-  tenantId String
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
 
   // Arquivo
   arquivo String // Caminho ou nome do arquivo
@@ -247,7 +276,7 @@ model ImportacaoCliente {
   logErros Json? // Array de erros: [{ linha: 2, campo: "email", erro: "email inválido" }]
 
   // Contexto
-  usuarioId String // Usuário que iniciou a importação
+  usuarioId String @db.Uuid // Usuário que iniciou a importação
 
   // Auditoria
   criadoEm    DateTime  @default(now())
@@ -261,10 +290,26 @@ model ImportacaoCliente {
 // ENUMS - Tipos de Cliente, Status, Origem, etc
 // ═══════════════════════════════════════════════════════════════
 
+/// Papel do parceiro de negócio (cadastro unificado cliente/fornecedor)
+enum Papel {
+  CLIENTE
+  FORNECEDOR
+  TRANSPORTADORA
+}
+
 /// Tipo de cliente: Pessoa Física ou Jurídica
 enum TipoCliente {
   PESSOA_FISICA
   PESSOA_JURIDICA
+}
+
+/// Regime tributário (apenas PJ)
+enum RegimeTributario {
+  SIMPLES_NACIONAL
+  MEI
+  LUCRO_PRESUMIDO
+  LUCRO_REAL
+  ISENTO
 }
 
 /// Status do cliente
@@ -275,13 +320,22 @@ enum StatusCliente {
   BLOQUEADO // Cliente com inadimplência ou problemas
 }
 
-/// Origem do cliente (como foi adicionado)
+/// Origem do cliente (como foi adicionado) — alinhado ao enum do banco
 enum OrigemCliente {
   MANUAL // Criado manualmente
   MARKETPLACE // Vindo de marketplace
   SITE // Cadastro via site
   INDICACAO // Indicação de outro cliente
   IMPORTACAO // Importado em lote
+  WEBSITE // Cadastro via website
+  INSTAGRAM
+  FACEBOOK
+  WHATSAPP
+  VENDA_DIRETA
+  FEIRA
+  TELEFONE
+  EMAIL
+  OUTRO
 }
 
 /// Tipo de endereço
@@ -294,12 +348,19 @@ enum TipoEndereco {
 /// Tipo de interação com cliente
 enum TipoInteracao {
   VENDA
+  COMPRA
   ATENDIMENTO
   RECLAMACAO
+  ELOGIO
   DEVOLUCAO
+  ORCAMENTO
   EMAIL
   TELEFONE
+  LIGACAO
+  WHATSAPP
   CHAT
+  REUNIAO
+  VISITA
   MARKETPLACE
   NOTA
 }

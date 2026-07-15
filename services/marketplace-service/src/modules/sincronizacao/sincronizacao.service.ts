@@ -6,7 +6,7 @@ import { PerguntaService } from '../pergunta/pergunta.service';
 import { ContaMarketplaceRepository } from '../conta-marketplace/conta-marketplace.repository';
 import { CacheService } from '../cache/cache.service';
 import { IntegracaoFactory } from '../integracao/integracao.factory';
-import { StatusSincronizacao, TipoSincronizacao } from '../../../generated/client';
+import { StatusSincronizacao, TipoSincronizacao, DirecaoSincronizacao } from '../../../generated/client';
 
 /**
  * Serviço de orquestração de sincronizações
@@ -70,15 +70,15 @@ export class SincronizacaoService {
         tenantId,
         contaMarketplaceId: contaId,
         tipo: TipoSincronizacao.PRODUTO,
-        direcao: 'ENVIO',
-        status: 'SUCESSO',
+        direcao: DirecaoSincronizacao.ENVIO,
+        status: StatusSincronizacao.SUCESSO,
         inicioEm: new Date(),
       })).id;
 
       // Lógica de sincronização
       this.logger.log('Produtos sincronizados');
 
-      await this.repository.atualizar(logId, {
+      await this.repository.atualizar(logId, tenantId, {
         registrosProcessados: 0,
         fimEm: new Date(),
       });
@@ -99,13 +99,13 @@ export class SincronizacaoService {
         tenantId,
         contaMarketplaceId: contaId,
         tipo: TipoSincronizacao.PEDIDO,
-        direcao: 'RECEBIMENTO',
+        direcao: DirecaoSincronizacao.RECEBIMENTO,
         status: StatusSincronizacao.SUCESSO,
         registrosProcessados: resultado.importados,
         inicioEm: new Date(),
       })).id;
 
-      await this.repository.atualizar(logId, {
+      await this.repository.atualizar(logId, tenantId, {
         fimEm: new Date(),
       });
 
@@ -190,13 +190,13 @@ export class SincronizacaoService {
         tenantId,
         contaMarketplaceId: contaId,
         tipo: TipoSincronizacao.PERGUNTA,
-        direcao: 'RECEBIMENTO',
+        direcao: DirecaoSincronizacao.RECEBIMENTO,
         status: StatusSincronizacao.SUCESSO,
         registrosProcessados: resultado.importadas,
         inicioEm: new Date(),
       })).id;
 
-      await this.repository.atualizar(logId, {
+      await this.repository.atualizar(logId, tenantId, {
         fimEm: new Date(),
       });
 

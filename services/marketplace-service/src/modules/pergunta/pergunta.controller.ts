@@ -12,7 +12,7 @@ import { ResponderPerguntaDto } from '../../dtos/responder-pergunta.dto';
 
 @ApiTags('Perguntas Marketplace')
 @ApiBearerAuth()
-@Controller('perguntas-marketplace')
+@Controller('api/v1/perguntas-marketplace')
 export class PerguntaController {
   private readonly logger = new Logger('PerguntaController');
 

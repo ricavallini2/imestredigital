@@ -1,0 +1,43 @@
+# ═══════════════════════════════════════════════════════════════
+# Override para VPS COMPARTILHADA com reverse-proxy Caddy (edge-caddy)
+# ═══════════════════════════════════════════════════════════════
+# Esta VPS já roda outros projetos atrás de um Caddy compartilhado
+# (edge-caddy) que é dono das portas 80/443 e faz TLS automático.
+#
+# Portanto, NÃO subimos nginx nem certbot (ficam de fora do `up`).
+# O container `web` entra na rede externa `edge_default` do Caddy,
+# que então roteia sistema.imestredigital.cloud → imestredigital-web:3000.
+# Nenhum serviço publica porta no host → zero colisão com os outros projetos.
+#
+# Deploy (repare: nginx/certbot NÃO entram na lista):
+#   docker compose -f docker-compose.prod.yml -f docker-compose.vps.yml \
+#     --env-file .env.production up -d --build \
+#     postgres redis redpanda \
+#     auth-service catalog-service inventory-service order-service \
+#     financial-service fiscal-service customer-service marketplace-service \
+#     ai-service notification-service web
+#
+# Depois, no /opt/edge/Caddyfile, acrescentar (append, sem tocar no resto):
+#   sistema.imestredigital.cloud {
+#       encode gzip
+#       header Strict-Transport-Security "max-age=63072000; includeSubDomains"
+#       reverse_proxy imestredigital-web:3000
+#   }
+#   e recarregar: docker exec edge-caddy caddy reload --config /etc/caddy/Caddyfile
+# ═══════════════════════════════════════════════════════════════
+
+services:
+  web:
+    # Entra na rede do Caddy (além da backend interna) para ser alcançável
+    # por nome (imestredigital-web) a partir do edge-caddy.
+    networks:
+      - backend
+      - edge
+    environment:
+      NEXT_PUBLIC_APP_URL: https://sistema.imestredigital.cloud
+
+networks:
+  # Rede default do stack "edge" (edge-caddy). Já existe na VPS — external.
+  edge:
+    external: true
+    name: edge_default

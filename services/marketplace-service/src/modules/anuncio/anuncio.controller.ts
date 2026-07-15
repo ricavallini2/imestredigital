@@ -13,7 +13,7 @@ import { FiltroAnuncioDto } from '../../dtos/filtro-anuncio.dto';
 
 @ApiTags('Anúncios Marketplace')
 @ApiBearerAuth()
-@Controller('anuncios')
+@Controller('api/v1/anuncios')
 export class AnuncioController {
   private readonly logger = new Logger('AnuncioController');
 

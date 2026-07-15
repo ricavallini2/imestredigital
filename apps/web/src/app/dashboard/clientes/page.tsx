@@ -40,7 +40,7 @@ export default function ClientesPage() {
   const [tipoFiltro, setTipoFiltro] = useState('');
   const [origemFiltro, setOrigemFiltro] = useState('');
 
-  const { data, isLoading, isError, refetch } = useClientes({ pagina: 1, limite: 200 });
+  const { data, isLoading, isError, refetch } = useClientes({ pagina: 1, limite: 200, papel: 'CLIENTE' });
   const { data: estatisticas, isLoading: loadingStats } = useEstatisticasClientes();
   const inativar = useInativarCliente();
 

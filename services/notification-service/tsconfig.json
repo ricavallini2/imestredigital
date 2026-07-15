@@ -5,7 +5,9 @@
     "rootDir": "./src",
     "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     },
     "strict": false,
     "noImplicitAny": false,
@@ -16,8 +18,15 @@
     "skipLibCheck": true,
     "composite": false,
     "declaration": false,
-    "declarationMap": false
+    "declarationMap": false,
+    "incremental": false
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "test"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test"
+  ]
 }

@@ -1,13 +1,16 @@
-import { Controller, Get, Post, Delete, Param, Body, Headers, HttpCode, BadRequestException, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, Req, HttpCode, BadRequestException, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ContaMarketplaceService } from './conta-marketplace.service';
 import { ConectarMarketplaceDto } from '../../dtos/conectar-marketplace.dto';
 import { PlataformaMarketplace } from '../../../generated/client';
+import { RequestComTenant } from '../../middlewares/tenant.middleware';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Controller para gerenciar contas marketplace
- * Endpoints para conectar, desconectar e gerenciar autenticação
+ * Endpoints para conectar, desconectar e gerenciar autenticação.
+ *
+ * tenantId vem do JWT (TenantMiddleware → req.tenantId), nunca de header cru.
  */
 @ApiTags('Contas Marketplace')
 @ApiBearerAuth()
@@ -26,10 +29,7 @@ export class ContaMarketplaceController {
     status: 200,
     description: 'URL de autenticação gerada com sucesso',
   })
-  obterUrlAutenticacao(
-    @Param('marketplace') marketplace: string,
-    @Headers('x-tenant-id') tenantId: string,
-  ) {
+  obterUrlAutenticacao(@Param('marketplace') marketplace: string) {
     if (!Object.values(PlataformaMarketplace).includes(marketplace as PlataformaMarketplace)) {
       throw new BadRequestException(`Marketplace inválido: ${marketplace}`);
     }
@@ -57,11 +57,8 @@ export class ContaMarketplaceController {
     status: 201,
     description: 'Conta conectada com sucesso',
   })
-  async conectar(
-    @Body() dto: ConectarMarketplaceDto,
-    @Headers('x-tenant-id') tenantId: string,
-  ) {
-    return this.service.conectar(tenantId, dto.marketplace, dto);
+  async conectar(@Req() req: RequestComTenant, @Body() dto: ConectarMarketplaceDto) {
+    return this.service.conectar(req.tenantId, dto.marketplace, dto);
   }
 
   /**
@@ -73,8 +70,8 @@ export class ContaMarketplaceController {
     status: 200,
     description: 'Contas listadas com sucesso',
   })
-  async listar(@Headers('x-tenant-id') tenantId: string) {
-    return this.service.listar(tenantId);
+  async listar(@Req() req: RequestComTenant) {
+    return this.service.listar(req.tenantId);
   }
 
   /**
@@ -86,11 +83,8 @@ export class ContaMarketplaceController {
     status: 200,
     description: 'Detalhes da conta',
   })
-  async obterPorId(
-    @Param('id') contaId: string,
-    @Headers('x-tenant-id') tenantId: string,
-  ) {
-    return this.service.obterPorId(contaId, tenantId);
+  async obterPorId(@Req() req: RequestComTenant, @Param('id') contaId: string) {
+    return this.service.obterPorId(contaId, req.tenantId);
   }
 
   /**
@@ -102,11 +96,8 @@ export class ContaMarketplaceController {
     status: 200,
     description: 'Status da conta',
   })
-  async verificarStatus(
-    @Param('id') contaId: string,
-    @Headers('x-tenant-id') tenantId: string,
-  ) {
-    return this.service.verificarStatus(contaId, tenantId);
+  async verificarStatus(@Req() req: RequestComTenant, @Param('id') contaId: string) {
+    return this.service.verificarStatus(contaId, req.tenantId);
   }
 
   /**
@@ -118,11 +109,8 @@ export class ContaMarketplaceController {
     status: 200,
     description: 'Token renovado com sucesso',
   })
-  async renovarToken(
-    @Param('id') contaId: string,
-    @Headers('x-tenant-id') tenantId: string,
-  ) {
-    await this.service.renovarToken(contaId, tenantId);
+  async renovarToken(@Req() req: RequestComTenant, @Param('id') contaId: string) {
+    await this.service.renovarToken(contaId, req.tenantId);
     return { mensagem: 'Token renovado com sucesso' };
   }
 
@@ -136,16 +124,14 @@ export class ContaMarketplaceController {
     status: 204,
     description: 'Conta desconectada com sucesso',
   })
-  async desconectar(
-    @Param('id') contaId: string,
-    @Headers('x-tenant-id') tenantId: string,
-  ) {
-    await this.service.desconectar(contaId, tenantId);
+  async desconectar(@Req() req: RequestComTenant, @Param('id') contaId: string) {
+    await this.service.desconectar(contaId, req.tenantId);
   }
 
   /**
    * Callback OAuth2 para Mercado Livre
-   * Recebe o código de autorização e completa o fluxo
+   * Recebe o código de autorização e completa o fluxo.
+   * (Implementação real do fluxo OAuth fica para a Fase 3.)
    */
   @Get('callback/mercado-livre')
   @ApiOperation({ summary: 'Callback OAuth2 Mercado Livre' })
@@ -153,11 +139,7 @@ export class ContaMarketplaceController {
     status: 200,
     description: 'Autenticação completada',
   })
-  async callbackMercadoLivre(
-    @Headers('x-tenant-id') tenantId: string,
-  ) {
-    // Implementação do callback
-    // Em produção, receber code como query parameter e processar
+  async callbackMercadoLivre() {
     return { mensagem: 'Callback OAuth2 Mercado Livre' };
   }
 }

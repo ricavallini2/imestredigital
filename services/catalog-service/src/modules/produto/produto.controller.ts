@@ -55,6 +55,18 @@ export class ProdutoController {
     return this.produtoService.listar(req.tenantId, filtros);
   }
 
+  /**
+   * Estatísticas agregadas do catálogo do tenant.
+   *
+   * Declarada ANTES de `:id` para não ser capturada como parâmetro de rota.
+   */
+  @Get('estatisticas')
+  @ApiOperation({ summary: 'Estatísticas do catálogo (totais, status, margem, categorias)' })
+  @ApiResponse({ status: 200, description: 'Resumo estatístico do catálogo' })
+  async obterEstatisticas(@Request() req: any) {
+    return this.produtoService.obterEstatisticas(req.tenantId);
+  }
+
   /** Busca um produto pelo ID */
   @Get(':id')
   @ApiOperation({ summary: 'Buscar produto por ID' })

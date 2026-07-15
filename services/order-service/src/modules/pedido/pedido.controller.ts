@@ -19,19 +19,23 @@ import {
   HttpCode,
   HttpStatus,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 import { PedidoService } from './pedido.service';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { CriarPedidoDto } from '../../dtos/criar-pedido.dto';
 import { FiltroPedidoDto } from '../../dtos/filtro-pedido.dto';
 import { CancelarPedidoDto } from '../../dtos/cancelar-pedido.dto';
+import { AtualizarStatusPedidoDto } from '../../dtos/atualizar-status-pedido.dto';
 import { EnviarPedidoDto } from '../../dtos/enviar-pedido.dto';
 import { CalcularFreteDto } from '../../dtos/calcular-frete.dto';
 import { PeriodoEstatisticasDto } from '../../dtos/estatisticas-pedido.dto';
 
 @ApiTags('pedidos')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('pedidos')
 export class PedidoController {
   constructor(private pedidoService: PedidoService) {}
@@ -89,6 +93,29 @@ export class PedidoController {
   }
 
   /**
+   * PATCH /pedidos/:id/status
+   * Endpoint de COMPATIBILIDADE: recebe o status ALVO e mapeia para a
+   * máquina de estados semântica (confirmar, separar, faturar, enviar,
+   * entregar, cancelar). Usado pelo frontend, que expõe uma única ação
+   * genérica de "avançar status". As rotas semânticas continuam válidas.
+   */
+  @Patch(':id/status')
+  @ApiOperation({
+    summary: 'Atualizar status (compatibilidade)',
+    description:
+      'Recebe o status alvo (valores do enum Prisma) e aciona a transição ' +
+      'correspondente na máquina de estados do pedido',
+  })
+  async atualizarStatus(
+    @Req() req: any,
+    @Param('id') pedidoId: string,
+    @Body() dto: AtualizarStatusPedidoDto,
+  ) {
+    const tenantId = req.tenantId;
+    return this.pedidoService.transicionarStatus(tenantId, pedidoId, dto);
+  }
+
+  /**
    * PATCH /pedidos/:id/confirmar
    * Confirmar pedido (status PENDENTE -> CONFIRMADO).
    */
@@ -107,12 +134,12 @@ export class PedidoController {
 
   /**
    * PATCH /pedidos/:id/separando
-   * Iniciar separação (SEPARANDO).
+   * Iniciar separação (status EM_SEPARACAO).
    */
   @Patch(':id/separando')
   @ApiOperation({
     summary: 'Iniciar separação',
-    description: 'Move pedido para SEPARANDO quando estoque é reservado',
+    description: 'Move o pedido para EM_SEPARACAO quando o estoque é reservado',
   })
   async iniciarSeparacao(
     @Req() req: any,
@@ -124,12 +151,15 @@ export class PedidoController {
 
   /**
    * PATCH /pedidos/:id/separado
-   * Finalizar separação (SEPARADO).
+   * Finalizar separação: apenas emite o evento PEDIDO_SEPARADO no Kafka; o
+   * status permanece EM_SEPARACAO (estado único de separação) até o faturamento.
    */
   @Patch(':id/separado')
   @ApiOperation({
     summary: 'Finalizar separação',
-    description: 'Move pedido para SEPARADO quando itens foram separados',
+    description:
+      'Sinaliza o fim da separação (evento PEDIDO_SEPARADO). O status ' +
+      'permanece EM_SEPARACAO até o faturamento.',
   })
   async finalizarSeparacao(
     @Req() req: any,

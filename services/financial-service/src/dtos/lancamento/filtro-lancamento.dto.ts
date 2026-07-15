@@ -4,23 +4,24 @@
 
 import { IsString, IsDateString, IsOptional, IsNumber, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { TIPOS_LANCAMENTO, STATUS_LANCAMENTO } from '../enums';
 
 export class FiltroLancamentoDTO {
   @ApiProperty({
     description: 'Tipo do lançamento',
-    enum: ['RECEITA', 'DESPESA', 'TRANSFERENCIA'],
+    enum: TIPOS_LANCAMENTO,
     required: false,
   })
-  @IsEnum(['RECEITA', 'DESPESA', 'TRANSFERENCIA'])
+  @IsEnum(TIPOS_LANCAMENTO)
   @IsOptional()
   tipo?: string;
 
   @ApiProperty({
     description: 'Status do lançamento',
-    enum: ['PENDENTE', 'PAGO', 'ATRASADO', 'CANCELADO'],
+    enum: STATUS_LANCAMENTO,
     required: false,
   })
-  @IsEnum(['PENDENTE', 'PAGO', 'ATRASADO', 'CANCELADO'])
+  @IsEnum(STATUS_LANCAMENTO)
   @IsOptional()
   status?: string;
 

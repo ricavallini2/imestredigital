@@ -306,7 +306,7 @@ export default function MovimentacoesPage() {
               </table>
             </div>
             <div className="border-t border-slate-100 dark:border-slate-700 px-4 py-3 text-xs text-slate-500">
-              {movimentacoes.length} movimentações · Total: {data?.paginacao?.total ?? 0}
+              {movimentacoes.length} movimentações · Total: {data?.total ?? 0}
             </div>
           </>
         )}

@@ -4,19 +4,19 @@
  */
 
 // ═══════════════════════════════════════════════════════════
-// PAGINAÇÃO (padrão de todos os endpoints de listagem)
+// PAGINAÇÃO (envelope canônico de todos os endpoints de listagem)
 // ═══════════════════════════════════════════════════════════
-
-export interface Paginacao {
-  total: number;
-  pagina: number;
-  limite: number;
-  totalPaginas: number;
-}
+//
+// Formato PLANO canônico da Fase 0 (fonte da verdade do backend, mocks e front):
+//   { dados, total, pagina, limite, totalPaginas }
+// Todos os serviços/handlers de listagem devem responder exatamente isto.
 
 export interface RespostaPaginada<T> {
-  dados: T[];
-  paginacao: Paginacao;
+  dados: T[]
+  total: number
+  pagina: number
+  limite: number
+  totalPaginas: number
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -55,11 +55,25 @@ export interface Produto {
   ncm?: string;
   preco: number;
   precoCusto?: number;
+  precoPromocional?: number;
+  /** Margem sobre o preço de venda (%), derivada no service. 1 casa decimal. */
+  margem?: number;
+  /** Alias de `margem` mantido para compatibilidade com a UI existente. */
+  margemLucro?: number;
   categoria?: string;
   categoriaId?: string;
   marca?: string;
-  status: 'ATIVO' | 'INATIVO' | 'RASCUNHO';
+  descricaoCurta?: string;
+  // Alinhado ao enum Prisma `StatusProduto` (catalog-service).
+  status: 'ATIVO' | 'INATIVO' | 'RASCUNHO' | 'ESGOTADO' | 'DESCONTINUADO';
   imagens?: string[];
+  tags?: string[];
+  // Fiscais (catalog-service)
+  cest?: string;
+  origem?: number;
+  unidadeMedida?: string;
+  cfop?: string;
+  estoqueMinimo?: number;
   peso?: number;
   altura?: number;
   largura?: number;
@@ -77,6 +91,174 @@ export interface FiltrosProduto {
   itensPorPagina?: number; // alias usado pelo catalog-service
   ordenarPor?: string;
   ordem?: 'ASC' | 'DESC';
+}
+
+// ═══════════════════════════════════════════════════════════
+// GRADES DE TAMANHO (catalog-service)
+// ═══════════════════════════════════════════════════════════
+//
+// Grade = conjunto reutilizável de tamanhos padrão do varejo BR (ex.:
+// "Numérica Calçados" → 34..44, "Vestuário" → PP..GG). Cada grade é POR TENANT.
+// Usada no wizard de variação para gerar a matriz de variações do produto.
+
+/** Um tamanho dentro de uma grade (valor + posição de exibição). */
+export interface GradeTamanho {
+  id: string;
+  valor: string; // ex.: '38', 'PP', 'G'
+  ordem: number;
+}
+
+/** Grade de tamanhos reutilizável (contrato canônico do backend). */
+export interface Grade {
+  id: string;
+  nome: string;
+  descricao?: string;
+  ativa: boolean;
+  tamanhos: GradeTamanho[];
+  criadoEm?: string;
+  atualizadoEm?: string;
+}
+
+/** DTO de criação/edição de grade (campos aceitos pelo catalog-service). */
+export interface GradeDto {
+  nome: string;
+  descricao?: string;
+  ativa?: boolean;
+  /** Tamanhos na ordem desejada; a `ordem` é derivada do índice no array. */
+  tamanhos: Array<{ valor: string; ordem: number }>;
+}
+
+export interface FiltrosGrade {
+  busca?: string;
+  ativa?: boolean;
+  pagina?: number;
+  itensPorPagina?: number;
+}
+
+// ═══════════════════════════════════════════════════════════
+// VARIAÇÕES DE PRODUTO (catalog-service)
+// ═══════════════════════════════════════════════════════════
+//
+// Uma variação é um SKU vendável derivado do produto-pai, descrito por um
+// conjunto de atributos (ex.: [{nome:'Cor',valor:'Preto'},{nome:'Tamanho',valor:'38'}]).
+
+/** Atributo descritivo de uma variação (par nome/valor). */
+export interface AtributoVariacao {
+  nome: string; // ex.: 'Cor', 'Tamanho'
+  valor: string; // ex.: 'Preto', '38'
+}
+
+/** Variação de produto persistida (espelha `VariacaoProduto` do catalog-service). */
+export interface VariacaoProduto {
+  id: string;
+  produtoId?: string;
+  sku: string;
+  gtin?: string;
+  nome: string;
+  precoVenda?: number;
+  peso?: number;
+  atributos: AtributoVariacao[];
+  criadoEm?: string;
+  atualizadoEm?: string;
+}
+
+/** Payload do wizard: gera a matriz de variações a partir de uma grade. */
+export interface PreverVariacoesDto {
+  atributo: string; // default 'Cor'
+  valorAtributo: string; // ex.: 'Preto'
+  gradeId: string;
+}
+
+/**
+ * Linha da matriz retornada por `.../variacoes/prever`.
+ * O backend devolve o SKU/nome/preço já calculados e os atributos montados;
+ * o usuário edita antes de salvar em lote.
+ */
+export interface VariacaoPrevista {
+  sku: string;
+  nome: string;
+  precoVenda?: number;
+  gtin?: string;
+  atributos: AtributoVariacao[];
+}
+
+/** Uma variação a persistir no lote (subset editável de VariacaoProduto). */
+export interface VariacaoLoteItem {
+  id?: string;
+  sku: string;
+  nome: string;
+  precoVenda?: number;
+  gtin?: string;
+  peso?: number;
+  atributos: AtributoVariacao[];
+}
+
+/** Payload de `.../variacoes/lote` — grava/atualiza as variações em bloco. */
+export interface SalvarVariacoesLoteDto {
+  variacoes: VariacaoLoteItem[];
+}
+
+// ═══════════════════════════════════════════════════════════
+// CATEGORIAS & MARCAS (catalog-service)
+// ═══════════════════════════════════════════════════════════
+
+/** Categoria de produto (com hierarquia). Espelha o retorno do catalog-service. */
+export interface Categoria {
+  id: string;
+  nome: string;
+  slug: string;
+  nivel: number;
+  ativa: boolean;
+  categoriaPaiId?: string | null;
+  categoriaPai?: { id: string; nome: string; slug: string } | null;
+  subcategorias?: Array<{ id: string; nome: string; slug: string; ativa: boolean }>;
+  /** Contagens agregadas retornadas pelo backend (`_count`). */
+  _count?: { produtos: number; subcategorias: number };
+  criadoEm?: string;
+  atualizadoEm?: string;
+}
+
+/** Marca de produto. Espelha o retorno do catalog-service. */
+export interface Marca {
+  id: string;
+  nome: string;
+  slug: string;
+  logoUrl?: string | null;
+  ativa: boolean;
+  /** Contagens agregadas retornadas pelo backend (`_count`). */
+  _count?: { produtos: number };
+  criadoEm?: string;
+  atualizadoEm?: string;
+}
+
+/** DTO de criação/edição de categoria (campos aceitos pelo catalog-service). */
+export interface CategoriaDto {
+  nome: string;
+  categoriaPaiId?: string | null;
+  ativa?: boolean;
+}
+
+/** DTO de criação/edição de marca (campos aceitos pelo catalog-service). */
+export interface MarcaDto {
+  nome: string;
+  logoUrl?: string;
+  ativa?: boolean;
+}
+
+export interface FiltrosCategoria {
+  busca?: string;
+  ativa?: boolean;
+  categoriaPaiId?: string;
+  apenasRaiz?: boolean;
+  pagina?: number;
+  itensPorPagina?: number;
+}
+
+export interface FiltrosMarca {
+  busca?: string;
+  ativa?: boolean;
+  pagina?: number;
+  itensPorPagina?: number;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -122,9 +304,18 @@ export interface Deposito {
   endereco?: string;
 }
 
+/** Tipo de movimentação — enum Prisma `TipoMovimentacao` (inventory-service). */
+export type TipoMovimentacao =
+  | 'ENTRADA'
+  | 'SAIDA'
+  | 'AJUSTE'
+  | 'TRANSFERENCIA'
+  | 'DEVOLUCAO'
+  | 'RESERVA';
+
 export interface Movimentacao {
   id: string;
-  tipo: 'ENTRADA' | 'SAIDA' | 'TRANSFERENCIA' | 'AJUSTE';
+  tipo: TipoMovimentacao;
   produtoId: string;
   produto: string;
   sku: string;
@@ -140,11 +331,13 @@ export interface Movimentacao {
 // PEDIDOS (order-service)
 // ═══════════════════════════════════════════════════════════
 
+// Alinhado ao enum Prisma `StatusPedido` (order-service). UPPERCASE_SNAKE.
+// A fase de separação é um único estado: EM_SEPARACAO (não há SEPARANDO/SEPARADO).
 export type StatusPedido =
+  | 'RASCUNHO'
   | 'PENDENTE'
   | 'CONFIRMADO'
-  | 'SEPARANDO'
-  | 'SEPARADO'
+  | 'EM_SEPARACAO'
   | 'FATURADO'
   | 'ENVIADO'
   | 'ENTREGUE'
@@ -199,24 +392,79 @@ export interface FiltrosPedido {
 }
 
 // ═══════════════════════════════════════════════════════════
-// CLIENTES (customer-service / CRM)
+// CLIENTES / PARCEIROS (customer-service / CRM)
 // ═══════════════════════════════════════════════════════════
+//
+// Contrato canônico: docs/design/parceiro-unificado.md
+// Cadastro unificado de parceiros, diferenciado por `papeis`.
+// O frontend usa tipo 'PF' | 'PJ'; o backend aceita ambos e normaliza.
+
+/** Papel do parceiro no negócio (um parceiro pode ter vários). */
+export type Papel = 'CLIENTE' | 'FORNECEDOR' | 'TRANSPORTADORA';
+
+/** Regime tributário (aplica-se a PJ). */
+export type RegimeTributario =
+  | 'SIMPLES_NACIONAL'
+  | 'MEI'
+  | 'LUCRO_PRESUMIDO'
+  | 'LUCRO_REAL'
+  | 'ISENTO';
+
+/** Origem do cadastro do parceiro (alinhado ao banco). */
+export type OrigemCliente =
+  | 'MANUAL'
+  | 'MARKETPLACE'
+  | 'SITE'
+  | 'INDICACAO'
+  | 'IMPORTACAO'
+  | 'WEBSITE'
+  | 'INSTAGRAM'
+  | 'FACEBOOK'
+  | 'WHATSAPP'
+  | 'VENDA_DIRETA'
+  | 'FEIRA'
+  | 'TELEFONE'
+  | 'EMAIL'
+  | 'OUTRO';
 
 export interface Cliente {
   id: string;
+  /** Papéis do parceiro (default ['CLIENTE']). */
+  papeis?: Papel[];
   nome: string;
+  nomeFantasia?: string;
+  razaoSocial?: string;
   email?: string;
+  emailSecundario?: string;
   telefone?: string;
   celular?: string;
   cpf?: string;
   cnpj?: string;
+  rg?: string;
+  inscricaoEstadual?: string;
+  /** IE isenta (PJ) — quando true, o campo inscricaoEstadual fica vazio. */
+  ieIsento?: boolean;
+  inscricaoMunicipal?: string;
+  regimeTributario?: RegimeTributario;
+  dataNascimento?: string;
+  genero?: 'M' | 'F' | 'O';
   tipo: 'PF' | 'PJ';
   status: 'ATIVO' | 'INATIVO';
+  score?: number;
   totalCompras: number;
   quantidadePedidos: number;
   ultimaCompra?: string;
-  origem?: string;
+  origem?: OrigemCliente | string;
   tags?: string[];
+  // Grupo CLIENTE
+  limiteCredito?: number;
+  vendedorId?: string;
+  // Grupo FORNECEDOR
+  prazoPagamento?: number;
+  condicoesPagamento?: string;
+  pixChave?: string;
+  categoriasFornecidas?: string[];
+  avaliacaoFornecedor?: number;
   criadoEm: string;
 }
 
@@ -233,6 +481,7 @@ export interface FiltrosCliente {
   status?: string;
   tipo?: string;
   origem?: string;
+  papel?: string;
   pagina?: number;
   limite?: number;
 }
@@ -260,17 +509,24 @@ export interface Contato {
   principal: boolean;
 }
 
+// Alinhado ao enum Prisma `TipoInteracao` (customer-service). Conjunto COMPLETO.
 export type TipoInteracao =
+  | 'VENDA'
   | 'COMPRA'
   | 'ATENDIMENTO'
   | 'RECLAMACAO'
   | 'ELOGIO'
+  | 'DEVOLUCAO'
   | 'ORCAMENTO'
-  | 'VISITA'
   | 'EMAIL'
+  | 'TELEFONE'
   | 'LIGACAO'
   | 'WHATSAPP'
-  | 'OUTRO';
+  | 'CHAT'
+  | 'REUNIAO'
+  | 'VISITA'
+  | 'MARKETPLACE'
+  | 'NOTA';
 
 export interface Interacao {
   id: string;
@@ -304,6 +560,10 @@ export interface ClienteDetalhe extends Cliente {
   totalPedidos?: number;
   ticketMedio?: number;
   segmentos?: string[];
+  // Histórico de compra (papel FORNECEDOR / contas a pagar)
+  ultimaCompraFornecedor?: string;
+  totalComprasFornecedor?: number;
+  valorTotalComprasFornecedor?: number;
   atualizadoEm?: string;
 }
 
@@ -318,16 +578,39 @@ export interface AnaliseIA {
 }
 
 export interface CriarClienteDto {
+  /** Papéis do parceiro (default ['CLIENTE'] — ao menos um). */
+  papeis?: Papel[];
   tipo: 'PF' | 'PJ';
   nome: string;
+  nomeFantasia?: string;
+  razaoSocial?: string;
   email?: string;
+  emailSecundario?: string;
   telefone?: string;
   celular?: string;
   cpf?: string;
   cnpj?: string;
-  origem?: string;
+  rg?: string;
+  inscricaoEstadual?: string;
+  ieIsento?: boolean;
+  inscricaoMunicipal?: string;
+  regimeTributario?: RegimeTributario;
+  dataNascimento?: string;
+  genero?: 'M' | 'F' | 'O';
+  origem?: OrigemCliente | string;
+  status?: 'ATIVO' | 'INATIVO';
+  score?: number;
   tags?: string[];
   observacoes?: string;
+  // Grupo CLIENTE
+  limiteCredito?: number;
+  vendedorId?: string;
+  // Grupo FORNECEDOR
+  prazoPagamento?: number;
+  condicoesPagamento?: string;
+  pixChave?: string;
+  categoriasFornecidas?: string[];
+  avaliacaoFornecedor?: number;
   endereco?: {
     logradouro: string;
     numero: string;
@@ -336,6 +619,7 @@ export interface CriarClienteDto {
     cidade: string;
     estado: string;
     cep: string;
+    tipo?: string;
   };
 }
 
@@ -351,8 +635,9 @@ export interface RegistrarInteracaoDto {
 // FINANCEIRO (financial-service)
 // ═══════════════════════════════════════════════════════════
 
-export type TipoLancamento = 'RECEITA' | 'DESPESA';
-export type StatusLancamento = 'PENDENTE' | 'PAGO' | 'CANCELADO' | 'ATRASADO';
+// Alinhados aos enums Prisma `TipoLancamento` e `StatusLancamento` (financial-service).
+export type TipoLancamento = 'RECEITA' | 'DESPESA' | 'TRANSFERENCIA';
+export type StatusLancamento = 'PENDENTE' | 'PAGO' | 'ATRASADO' | 'CANCELADO' | 'PARCIAL';
 
 export interface Lancamento {
   id: string;
@@ -410,7 +695,17 @@ export interface FiltrosLancamento {
 // FISCAL (fiscal-service)
 // ═══════════════════════════════════════════════════════════
 
-export type StatusNota = 'RASCUNHO' | 'VALIDADA' | 'EMITIDA' | 'CANCELADA' | 'DENEGADA';
+// Alinhado ao enum Prisma `StatusNotaFiscal` (fiscal-service). UPPERCASE.
+// AUTORIZADA (antes EMITIDA no front) e TRANSMITIDA (antes PROCESSANDO).
+export type StatusNota =
+  | 'RASCUNHO'
+  | 'VALIDADA'
+  | 'TRANSMITIDA'
+  | 'AUTORIZADA'
+  | 'REJEITADA'
+  | 'CANCELADA'
+  | 'INUTILIZADA'
+  | 'DENEGADA';
 
 export interface NotaFiscal {
   id: string;
@@ -439,7 +734,20 @@ export interface FiltrosNotaFiscal {
 // AI / INSIGHTS (ai-service)
 // ═══════════════════════════════════════════════════════════
 
-export type TipoInsight = 'ALERTA' | 'OPORTUNIDADE' | 'PREVISAO' | 'ANOMALIA';
+// Alinhado ao enum Prisma `TipoInsight` (ai-service). Inclui as categorias de
+// domínio usadas pelo motor de insights, além dos tipos analíticos.
+export type TipoInsight =
+  | 'ALERTA'
+  | 'OPORTUNIDADE'
+  | 'TENDENCIA'
+  | 'ANOMALIA'
+  | 'PREVISAO'
+  | 'VENDA'
+  | 'ESTOQUE'
+  | 'FINANCEIRO'
+  | 'FISCAL'
+  | 'MARKETPLACE';
+// Alinhado ao enum Prisma `PrioridadeInsight` (ai-service).
 export type PrioridadeInsight = 'BAIXA' | 'MEDIA' | 'ALTA' | 'CRITICA';
 
 export interface Insight {
@@ -458,11 +766,32 @@ export interface Insight {
 // MARKETPLACES (marketplace-service)
 // ═══════════════════════════════════════════════════════════
 
+/** Plataforma de marketplace — enum Prisma `PlataformaMarketplace`. */
+export type PlataformaMarketplace =
+  | 'SHOPEE'
+  | 'MERCADO_LIVRE'
+  | 'AMAZON'
+  | 'MAGALU'
+  | 'AMERICANAS'
+  | 'SHOPIFY'
+  | 'SHEIN'
+  | 'NUVEMSHOP'
+  | 'WOOCOMMERCE';
+
+/** Status da conexão da conta — enum Prisma `StatusConexao` (feminino). */
+export type StatusConexaoMarketplace =
+  | 'ATIVA'
+  | 'INATIVA'
+  | 'PENDENTE'
+  | 'ERRO'
+  | 'RECONECTANDO'
+  | 'EXPIRANDO';
+
 export interface ContaMarketplace {
   id: string;
-  marketplace: 'MERCADO_LIVRE' | 'SHOPEE' | 'AMAZON' | 'MAGALU' | 'SHOPIFY';
+  marketplace: PlataformaMarketplace;
   nome: string;
-  status: 'ATIVO' | 'INATIVO' | 'ERRO' | 'PENDENTE';
+  status: StatusConexaoMarketplace;
   pedidosHoje: number;
   anunciosAtivos: number;
   perguntasPendentes: number;

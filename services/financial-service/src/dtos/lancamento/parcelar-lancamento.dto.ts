@@ -4,6 +4,7 @@
 
 import { IsNumber, IsDateString, IsString, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { INTERVALOS_PARCELAMENTO } from '../enums';
 
 export class ParcelarLancamentoDTO {
   @ApiProperty({
@@ -22,9 +23,9 @@ export class ParcelarLancamentoDTO {
 
   @ApiProperty({
     description: 'Intervalo entre parcelas',
-    enum: ['SEMANAL', 'QUINZENAL', 'MENSAL'],
+    enum: INTERVALOS_PARCELAMENTO,
     example: 'MENSAL',
   })
-  @IsEnum(['SEMANAL', 'QUINZENAL', 'MENSAL'])
+  @IsEnum(INTERVALOS_PARCELAMENTO)
   intervalo: string;
 }

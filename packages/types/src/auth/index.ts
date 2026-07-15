@@ -6,35 +6,52 @@
  * autenticação, tokens JWT e contexto de tenant.
  */
 
-/** Cargos disponíveis no sistema */
+/**
+ * Cargos disponíveis no sistema.
+ * Valores UPPERCASE espelham o enum `CargoUsuario` do schema Prisma
+ * (auth-service) — fonte da verdade. O payload JWT transporta o cargo
+ * em lowercase (ver `JwtPayload.cargo`); a comparação de RBAC é
+ * case-insensitive.
+ */
 export enum Cargo {
-  ADMIN = 'admin',
-  GERENTE = 'gerente',
-  OPERADOR = 'operador',
-  VISUALIZADOR = 'visualizador',
+  ADMIN = 'ADMIN',
+  GERENTE = 'GERENTE',
+  OPERADOR = 'OPERADOR',
+  VISUALIZADOR = 'VISUALIZADOR',
 }
 
-/** Status possíveis de um usuário */
+/**
+ * Status possíveis de um usuário.
+ * Espelha o enum `StatusUsuario` do schema Prisma (auth-service).
+ */
 export enum StatusUsuario {
-  ATIVO = 'ativo',
-  PENDENTE = 'pendente',
-  INATIVO = 'inativo',
-  REMOVIDO = 'removido',
+  ATIVO = 'ATIVO',
+  INATIVO = 'INATIVO',
+  BLOQUEADO = 'BLOQUEADO',
+  PENDENTE = 'PENDENTE',
+  REMOVIDO = 'REMOVIDO',
 }
 
-/** Status possíveis de um tenant */
+/**
+ * Status possíveis de um tenant.
+ * Espelha o enum `StatusTenant` do schema Prisma (auth-service).
+ */
 export enum StatusTenant {
-  ATIVO = 'ativo',
-  SUSPENSO = 'suspenso',
-  CANCELADO = 'cancelado',
+  ATIVO = 'ATIVO',
+  INATIVO = 'INATIVO',
+  SUSPENSO = 'SUSPENSO',
+  TRIAL = 'TRIAL',
+  CANCELADO = 'CANCELADO',
 }
 
-/** Planos disponíveis */
+/**
+ * Planos disponíveis.
+ * Espelha o enum `PlanoTenant` do schema Prisma (auth-service).
+ */
 export enum Plano {
-  STARTER = 'starter',
-  GROWTH = 'growth',
-  PRO = 'pro',
-  ENTERPRISE = 'enterprise',
+  STARTER = 'STARTER',
+  PROFISSIONAL = 'PROFISSIONAL',
+  ENTERPRISE = 'ENTERPRISE',
 }
 
 /** Payload decodificado do JWT (presente em req.user) */
@@ -45,8 +62,8 @@ export interface UsuarioAutenticado {
   tenantId: string;
   /** Email do usuário */
   email: string;
-  /** Cargo/role do usuário */
-  cargo: Cargo;
+  /** Cargo/role do usuário — transportado em lowercase no JWT (ex.: 'admin') */
+  cargo: string;
 }
 
 /** Payload codificado no JWT */

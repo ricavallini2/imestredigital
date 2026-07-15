@@ -15,13 +15,15 @@ const pct   = (v: number) => `${v.toFixed(1)}%`;
 const dtfmt = (iso: string) => new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
 
 // ─── Status config ─────────────────────────────────────────────────────────────
+// Rótulos do enum Prisma `StatusNotaFiscal` (fiscal-service).
 const STATUS_CFG: Record<string, { label: string; bg: string; text: string; icon: React.ReactNode }> = {
-  EMITIDA:     { label: 'Emitida',     bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400', icon: <CheckCircle2 className="h-3 w-3" /> },
-  PROCESSANDO: { label: 'Processando', bg: 'bg-blue-100 dark:bg-blue-900/30',       text: 'text-blue-700 dark:text-blue-400',       icon: <Clock className="h-3 w-3 animate-pulse" /> },
+  AUTORIZADA:  { label: 'Autorizada',  bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400', icon: <CheckCircle2 className="h-3 w-3" /> },
+  TRANSMITIDA: { label: 'Transmitida', bg: 'bg-blue-100 dark:bg-blue-900/30',       text: 'text-blue-700 dark:text-blue-400',       icon: <Clock className="h-3 w-3 animate-pulse" /> },
   VALIDADA:    { label: 'Validada',    bg: 'bg-indigo-100 dark:bg-indigo-900/30',   text: 'text-indigo-700 dark:text-indigo-400',   icon: <ShieldCheck className="h-3 w-3" /> },
   RASCUNHO:    { label: 'Rascunho',    bg: 'bg-slate-100 dark:bg-slate-700',        text: 'text-slate-600 dark:text-slate-400',     icon: <FileText className="h-3 w-3" /> },
   REJEITADA:   { label: 'Rejeitada',   bg: 'bg-red-100 dark:bg-red-900/30',         text: 'text-red-700 dark:text-red-400',         icon: <XCircle className="h-3 w-3" /> },
   CANCELADA:   { label: 'Cancelada',   bg: 'bg-orange-100 dark:bg-orange-900/30',   text: 'text-orange-700 dark:text-orange-400',   icon: <XCircle className="h-3 w-3" /> },
+  INUTILIZADA: { label: 'Inutilizada', bg: 'bg-slate-100 dark:bg-slate-700',        text: 'text-slate-600 dark:text-slate-400',     icon: <XCircle className="h-3 w-3" /> },
   DENEGADA:    { label: 'Denegada',    bg: 'bg-rose-100 dark:bg-rose-900/30',       text: 'text-rose-700 dark:text-rose-400',       icon: <XCircle className="h-3 w-3" /> },
 };
 
@@ -61,8 +63,8 @@ function ScoreRing({ score, saude }: { score: number; saude: string }) {
 
 const STATUS_OPCOES: { value: StatusNF | ''; label: string }[] = [
   { value: '', label: 'Todos' },
-  { value: 'EMITIDA', label: 'Emitida' },
-  { value: 'PROCESSANDO', label: 'Processando' },
+  { value: 'AUTORIZADA', label: 'Autorizada' },
+  { value: 'TRANSMITIDA', label: 'Transmitida' },
   { value: 'VALIDADA', label: 'Validada' },
   { value: 'RASCUNHO', label: 'Rascunho' },
   { value: 'REJEITADA', label: 'Rejeitada' },
@@ -101,7 +103,7 @@ export default function FiscalPage() {
           <button onClick={() => refetch()} className="rounded-xl border border-slate-200 dark:border-slate-700 p-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
             <RefreshCw className="h-4 w-4 text-slate-500" />
           </button>
-          <Link href="/dashboard/fiscal/configuracao"
+          <Link href="/dashboard/fiscal/configuracoes"
             className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
             Configurações
           </Link>
@@ -282,7 +284,7 @@ export default function FiscalPage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          {['EMITIDA', 'CANCELADA'].includes(nf.status) && nf.tipo === 'NFE' && (
+                          {['AUTORIZADA', 'CANCELADA'].includes(nf.status) && nf.tipo === 'NFE' && (
                             <button
                               onClick={() => window.open(`/dashboard/fiscal/${nf.id}/danfe`, '_blank')}
                               title="Imprimir DANFE"
@@ -291,7 +293,7 @@ export default function FiscalPage() {
                               <Printer className="h-4 w-4" />
                             </button>
                           )}
-                          {['EMITIDA', 'CANCELADA'].includes(nf.status) && nf.tipo === 'NFCE' && (
+                          {['AUTORIZADA', 'CANCELADA'].includes(nf.status) && nf.tipo === 'NFCE' && (
                             <button
                               onClick={() => window.open(`/dashboard/fiscal/${nf.id}/nfce`, '_blank')}
                               title="Imprimir Cupom NFC-e"

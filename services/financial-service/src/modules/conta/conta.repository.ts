@@ -5,6 +5,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import Decimal from 'decimal.js';
+import { Prisma, TipoConta } from '../../../generated/client';
 
 interface CriarContaInput {
   tenantId: string;
@@ -32,7 +33,7 @@ export class ContaRepository {
       data: {
         tenantId: dados.tenantId,
         nome: dados.nome,
-        tipo: dados.tipo,
+        tipo: dados.tipo as TipoConta,
         banco: dados.banco,
         agencia: dados.agencia,
         conta: dados.conta,
@@ -69,15 +70,32 @@ export class ContaRepository {
 
   /**
    * Atualiza conta.
+   *
+   * Usa updateMany com { id, tenantId } para impedir escrita
+   * cross-tenant e retorna o registro já filtrado por tenant.
    */
   async atualizar(id: string, tenantId: string, dados: Partial<CriarContaInput>) {
-    return this.prisma.contaFinanceira.update({
-      where: { id },
-      data: {
-        ...dados,
-        atualizadoEm: new Date(),
-      },
+    const data: Prisma.ContaFinanceiraUpdateManyMutationInput = {
+      atualizadoEm: new Date(),
+    }
+
+    if (dados.nome !== undefined) data.nome = dados.nome
+    if (dados.tipo !== undefined) data.tipo = dados.tipo as TipoConta
+    if (dados.banco !== undefined) data.banco = dados.banco
+    if (dados.agencia !== undefined) data.agencia = dados.agencia
+    if (dados.conta !== undefined) data.conta = dados.conta
+    if (dados.saldoInicial !== undefined) data.saldoInicial = dados.saldoInicial
+    if (dados.saldoAtual !== undefined) data.saldoAtual = dados.saldoAtual
+    if (dados.ativa !== undefined) data.ativa = dados.ativa
+    if (dados.cor !== undefined) data.cor = dados.cor
+    if (dados.icone !== undefined) data.icone = dados.icone
+
+    await this.prisma.contaFinanceira.updateMany({
+      where: { id, tenantId },
+      data,
     });
+
+    return this.buscarPorId(id, tenantId);
   }
 
   /**
@@ -131,6 +149,10 @@ export class ContaRepository {
 
   /**
    * Transfere valor entre contas.
+   *
+   * Toda a operação (leitura de saldos + duas escritas) roda dentro de
+   * uma única transação para garantir atomicidade: ou ambos os saldos
+   * são atualizados, ou nenhum. As escritas são escopadas por tenantId.
    */
   async transferir(
     idOrigem: string,
@@ -138,23 +160,35 @@ export class ContaRepository {
     tenantId: string,
     valor: Decimal,
   ) {
-    const contaOrigem = await this.buscarPorId(idOrigem, tenantId);
-    const contaDestino = await this.buscarPorId(idDestino, tenantId);
+    return this.prisma.$transaction(async (tx) => {
+      const contaOrigem = await tx.contaFinanceira.findFirst({
+        where: { id: idOrigem, tenantId },
+      });
+      const contaDestino = await tx.contaFinanceira.findFirst({
+        where: { id: idDestino, tenantId },
+      });
 
-    if (!contaOrigem || !contaDestino) {
-      throw new Error('Uma ou ambas as contas não foram encontradas');
-    }
+      if (!contaOrigem || !contaDestino) {
+        throw new Error('Uma ou ambas as contas não foram encontradas');
+      }
 
-    const novoSaldoOrigem = new Decimal(contaOrigem.saldoAtual).minus(valor);
-    const novoSaldoDestino = new Decimal(contaDestino.saldoAtual).plus(valor);
+      const novoSaldoOrigem = new Decimal(contaOrigem.saldoAtual).minus(valor);
+      const novoSaldoDestino = new Decimal(contaDestino.saldoAtual).plus(valor);
 
-    await this.atualizarSaldo(idOrigem, tenantId, novoSaldoOrigem);
-    await this.atualizarSaldo(idDestino, tenantId, novoSaldoDestino);
+      await tx.contaFinanceira.updateMany({
+        where: { id: idOrigem, tenantId },
+        data: { saldoAtual: novoSaldoOrigem, atualizadoEm: new Date() },
+      });
+      await tx.contaFinanceira.updateMany({
+        where: { id: idDestino, tenantId },
+        data: { saldoAtual: novoSaldoDestino, atualizadoEm: new Date() },
+      });
 
-    return {
-      contaOrigem: { id: idOrigem, novoSaldo: novoSaldoOrigem },
-      contaDestino: { id: idDestino, novoSaldo: novoSaldoDestino },
-    };
+      return {
+        contaOrigem: { id: idOrigem, novoSaldo: novoSaldoOrigem },
+        contaDestino: { id: idDestino, novoSaldo: novoSaldoDestino },
+      };
+    });
   }
 
   /**

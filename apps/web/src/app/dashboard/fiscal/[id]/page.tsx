@@ -15,13 +15,16 @@ const dtfmt = (iso: string) => new Date(iso).toLocaleString('pt-BR', { dateStyle
 const dtcur = (iso: string) => new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
 
 // ─── Status/tipo helpers ───────────────────────────────────────────────────────
+// Rótulos do enum Prisma `StatusNotaFiscal` (fiscal-service).
 const STATUS_CFG: Record<string, { label: string; bg: string; text: string; icon: React.ReactNode }> = {
-  EMITIDA:     { label: 'Autorizada',  bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400', icon: <CheckCircle2 className="h-4 w-4" /> },
-  PROCESSANDO: { label: 'Processando', bg: 'bg-blue-100 dark:bg-blue-900/30',       text: 'text-blue-700 dark:text-blue-400',       icon: <Clock className="h-4 w-4 animate-spin" /> },
+  AUTORIZADA:  { label: 'Autorizada',  bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400', icon: <CheckCircle2 className="h-4 w-4" /> },
+  TRANSMITIDA: { label: 'Transmitida', bg: 'bg-blue-100 dark:bg-blue-900/30',       text: 'text-blue-700 dark:text-blue-400',       icon: <Clock className="h-4 w-4 animate-spin" /> },
   VALIDADA:    { label: 'Validada',    bg: 'bg-indigo-100 dark:bg-indigo-900/30',   text: 'text-indigo-700 dark:text-indigo-400',   icon: <ShieldCheck className="h-4 w-4" /> },
   RASCUNHO:    { label: 'Rascunho',    bg: 'bg-slate-100 dark:bg-slate-700',        text: 'text-slate-600 dark:text-slate-400',     icon: <FileText className="h-4 w-4" /> },
   REJEITADA:   { label: 'Rejeitada',   bg: 'bg-red-100 dark:bg-red-900/30',         text: 'text-red-700 dark:text-red-400',         icon: <XCircle className="h-4 w-4" /> },
   CANCELADA:   { label: 'Cancelada',   bg: 'bg-orange-100 dark:bg-orange-900/30',   text: 'text-orange-700 dark:text-orange-400',   icon: <XCircle className="h-4 w-4" /> },
+  INUTILIZADA: { label: 'Inutilizada', bg: 'bg-slate-100 dark:bg-slate-700',        text: 'text-slate-600 dark:text-slate-400',     icon: <XCircle className="h-4 w-4" /> },
+  DENEGADA:    { label: 'Denegada',    bg: 'bg-rose-100 dark:bg-rose-900/30',       text: 'text-rose-700 dark:text-rose-400',       icon: <XCircle className="h-4 w-4" /> },
 };
 
 const TIPO_LABEL: Record<string, string> = { NFE: 'NF-e', NFCE: 'NFC-e', NFSE: 'NFS-e' };
@@ -161,7 +164,7 @@ export default function NotaFiscalDetalhe() {
             <RefreshCw className="h-4 w-4 text-slate-500" />
           </button>
           {/* Print buttons */}
-          {['EMITIDA', 'CANCELADA'].includes(n.status) && n.tipo === 'NFE' && (
+          {['AUTORIZADA', 'CANCELADA'].includes(n.status) && n.tipo === 'NFE' && (
             <button
               onClick={() => window.open(`/dashboard/fiscal/${n.id}/danfe`, '_blank')}
               className="flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
@@ -169,7 +172,7 @@ export default function NotaFiscalDetalhe() {
               <Printer className="h-4 w-4" /> DANFE
             </button>
           )}
-          {['EMITIDA', 'CANCELADA'].includes(n.status) && n.tipo === 'NFCE' && (
+          {['AUTORIZADA', 'CANCELADA'].includes(n.status) && n.tipo === 'NFCE' && (
             <button
               onClick={() => window.open(`/dashboard/fiscal/${n.id}/nfce`, '_blank')}
               className="flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
@@ -191,7 +194,7 @@ export default function NotaFiscalDetalhe() {
               Emitir
             </button>
           )}
-          {['EMITIDA', 'VALIDADA'].includes(n.status) && (
+          {['AUTORIZADA', 'VALIDADA'].includes(n.status) && (
             <button onClick={() => setShowCancel(true)}
               className="flex items-center gap-1.5 rounded-xl border border-red-200 dark:border-red-800 px-3 py-2 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
               <Ban className="h-4 w-4" />Cancelar

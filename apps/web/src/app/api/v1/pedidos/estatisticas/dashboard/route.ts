@@ -16,14 +16,13 @@ export async function GET() {
   const ticketMedio = pedidos30d.length ? receita30d / pedidos30d.filter((p) => p.statusPagamento === 'PAGO').length : 0;
 
   const porStatus = {
-    PENDENTE:   ativos.filter((p) => p.status === 'PENDENTE').length,
-    CONFIRMADO: ativos.filter((p) => p.status === 'CONFIRMADO').length,
-    SEPARANDO:  ativos.filter((p) => p.status === 'SEPARANDO').length,
-    SEPARADO:   ativos.filter((p) => p.status === 'SEPARADO').length,
-    FATURADO:   ativos.filter((p) => p.status === 'FATURADO').length,
-    ENVIADO:    ativos.filter((p) => p.status === 'ENVIADO').length,
-    ENTREGUE:   PEDIDOS_MOCK.filter((p) => p.status === 'ENTREGUE').length,
-    CANCELADO:  PEDIDOS_MOCK.filter((p) => p.status === 'CANCELADO').length,
+    PENDENTE:     ativos.filter((p) => p.status === 'PENDENTE').length,
+    CONFIRMADO:   ativos.filter((p) => p.status === 'CONFIRMADO').length,
+    EM_SEPARACAO: ativos.filter((p) => p.status === 'EM_SEPARACAO').length,
+    FATURADO:     ativos.filter((p) => p.status === 'FATURADO').length,
+    ENVIADO:      ativos.filter((p) => p.status === 'ENVIADO').length,
+    ENTREGUE:     PEDIDOS_MOCK.filter((p) => p.status === 'ENTREGUE').length,
+    CANCELADO:    PEDIDOS_MOCK.filter((p) => p.status === 'CANCELADO').length,
   };
 
   const porCanal = ['BALCAO', 'INTERNA', 'SHOPIFY', 'MERCADO_LIVRE', 'SHOPEE', 'AMAZON', 'OUTROS'].map((canal) => ({

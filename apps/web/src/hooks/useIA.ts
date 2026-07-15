@@ -4,7 +4,7 @@ import { iaService, type ChatMessage, type ChatResponse } from '@/services/ia.se
 
 // ─── Insights ─────────────────────────────────────────────────────────────────
 export function useInsights(params?: {
-  visualizado?: boolean; tipo?: string; prioridade?: string; limite?: number;
+  visualizado?: boolean; tipo?: string; prioridade?: string; pagina?: number; limite?: number;
 }) {
   return useQuery({
     queryKey: ['insights', params],

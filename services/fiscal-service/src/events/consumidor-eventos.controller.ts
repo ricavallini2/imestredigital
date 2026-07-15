@@ -24,15 +24,19 @@ export class ConsumidorEventosController {
     @Ctx() contexto: KafkaContext,
   ): Promise<void> {
     try {
-      const { tenantId, pedidoId } = dados;
+      const { tenantId, pedidoId } = dados ?? {};
+      if (!tenantId || !pedidoId) {
+        this.logger.warn('pedido.faturar ignorado: payload incompleto');
+        return;
+      }
       this.logger.log(
-        `Recebido evento PEDIDO_FATURAR para pedido ${pedidoId} do tenant ${tenantId}`,
+        `Recebido evento pedido.faturar para pedido ${pedidoId} do tenant ${tenantId}`,
       );
 
-      // Integração futura: gerar NF-e automaticamente
-      // await this.notaFiscalService.gerarNotaAutomaticamente(tenantId, pedidoId);
+      // Gera, valida e transmite a NF-e automaticamente (idempotente por pedidoId).
+      await this.notaFiscalService.gerarNotaAutomaticamente(tenantId, dados);
     } catch (erro) {
-      this.logger.error('Erro ao processar PEDIDO_FATURAR:', erro);
+      this.logger.error('Erro ao processar pedido.faturar:', erro);
     }
   }
 

@@ -26,7 +26,8 @@ export async function GET(req: NextRequest) {
     data: p.criadoEm.split('T')[0], criadoEm: p.criadoEm,
   }));
 
-  return NextResponse.json({ dados, paginacao: { pagina, itensPorPagina: limite, total, totalPaginas: Math.ceil(total / limite) } });
+  // Envelope paginado canônico (Fase 0): { dados, total, pagina, limite, totalPaginas }
+  return NextResponse.json({ dados, total, pagina, limite, totalPaginas: Math.ceil(total / limite) });
 }
 
 export async function POST(req: NextRequest) {

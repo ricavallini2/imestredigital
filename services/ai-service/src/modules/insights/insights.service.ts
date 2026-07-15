@@ -9,10 +9,11 @@
  * - Marketplace (avaliações, perguntas)
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InsightsRepository } from './insights.repository';
 import { LLMService } from '../assistente/llm.service';
 import { promptAnaliseVendas } from '../assistente/prompts/system-prompt';
+import { ProdutorEventosService } from '../eventos/produtor-eventos.service';
 
 interface FiltrosInsights {
   tipo?: string;
@@ -22,6 +23,16 @@ interface FiltrosInsights {
   limite?: number;
 }
 
+interface DadosCriacaoInsight {
+  tenantId: string;
+  tipo: string;
+  titulo: string;
+  descricao: string;
+  prioridade: string;
+  dados?: Record<string, any>;
+  acaoSugerida?: string;
+}
+
 @Injectable()
 export class InsightsService {
   private logger = new Logger('InsightsService');
@@ -29,6 +40,7 @@ export class InsightsService {
   constructor(
     private repository: InsightsRepository,
     private llmService: LLMService,
+    private produtorEventos: ProdutorEventosService,
   ) {}
 
   /**
@@ -85,7 +97,7 @@ Analise e forneça insights.`;
       maxTokens: 1000,
     });
 
-    return this.repository.criarInsight({
+    return this.persistirInsight({
       tenantId,
       tipo: 'VENDA',
       titulo: 'Análise de Vendas',
@@ -120,7 +132,7 @@ Produtos encalhados (risco de obsolescência):
 ${produtosEncalhados.map((p) => `- ${p.nome}: ${p.estoque} un (venda média: ${p.vendiaMedia}/dia)`).join('\n')}
     `;
 
-    return this.repository.criarInsight({
+    return this.persistirInsight({
       tenantId,
       tipo: 'ESTOQUE',
       titulo: 'Alerta de Estoque',
@@ -153,7 +165,7 @@ Análise de fluxo de caixa:
 - Saldo projetado: R$ ${fluxoCaixa.saldoProjetado}
     `;
 
-    return this.repository.criarInsight({
+    return this.persistirInsight({
       tenantId,
       tipo: 'FINANCEIRO',
       titulo: 'Análise de Fluxo de Caixa',
@@ -164,45 +176,81 @@ Análise de fluxo de caixa:
   }
 
   /**
-   * Lista insights com filtros
+   * Lista insights com filtros, no envelope paginado canônico:
+   * { dados, total, pagina, limite, totalPaginas }.
    */
   async listarInsights(tenantId: string, filtros: FiltrosInsights) {
-    return this.repository.listarInsights(tenantId, {
+    const pagina = filtros.pagina ?? 0;
+    const limite = filtros.limite ?? 20;
+
+    const { insights, total } = await this.repository.listarInsights(tenantId, {
       tipo: filtros.tipo,
       prioridade: filtros.prioridade,
       apenasNaoLidos: filtros.apenasNaoLidos,
-      limite: filtros.limite || 20,
-      offset: (filtros.pagina || 0) * (filtros.limite || 20),
+      limite,
+      offset: pagina * limite,
     });
+
+    return {
+      dados: insights,
+      total,
+      pagina,
+      limite,
+      totalPaginas: limite > 0 ? Math.ceil(total / limite) : 0,
+    };
   }
 
   /**
-   * Marca insight como visualizado
+   * Obtém um insight específico do tenant.
    */
-  async marcarComoVisualizado(tenantId: string, insightId: string) {
-    const insight = await this.repository.obterInsight(insightId);
+  async obterInsight(tenantId: string, insightId: string) {
+    const insight = await this.repository.obterInsight(tenantId, insightId);
 
-    if (!insight || insight.tenantId !== tenantId) {
-      throw new Error('Insight não encontrado');
+    if (!insight) {
+      throw new NotFoundException('Insight não encontrado');
     }
 
-    return this.repository.marcarVisualizado(insightId);
+    return insight;
+  }
+
+  /**
+   * Marca insight como visualizado (escopado por tenant).
+   */
+  async marcarComoVisualizado(tenantId: string, insightId: string) {
+    const atualizado = await this.repository.marcarVisualizado(tenantId, insightId);
+
+    if (!atualizado) {
+      throw new NotFoundException('Insight não encontrado');
+    }
+
+    return atualizado;
   }
 
   /**
    * Cria um insight diretamente a partir de dados externos.
    * Usado por outros módulos (ex: ConsumidorEventosService).
+   * Publica o evento insight_gerado no Kafka.
    */
-  async criarInsight(dados: {
-    tenantId: string;
-    tipo: string;
-    titulo: string;
-    descricao: string;
-    prioridade: string;
-    dados?: any;
-    acaoSugerida?: string;
-  }) {
-    return this.repository.criarInsight(dados as any);
+  async criarInsight(dados: DadosCriacaoInsight) {
+    return this.persistirInsight(dados);
+  }
+
+  /**
+   * Persiste o insight e publica o evento insight_gerado no Kafka.
+   * Ponto único de criação para garantir a publicação do evento.
+   */
+  private async persistirInsight(dados: DadosCriacaoInsight) {
+    const insight = await this.repository.criarInsight(dados);
+
+    await this.produtorEventos.publicarInsightGerado({
+      tenantId: insight.tenantId,
+      insightId: insight.id,
+      tipo: insight.tipo,
+      titulo: insight.titulo,
+      prioridade: insight.prioridade,
+    });
+
+    return insight;
   }
 
   /**

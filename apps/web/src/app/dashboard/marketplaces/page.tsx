@@ -10,6 +10,7 @@ import {
   RefreshCw,
   TrendingUp,
   AlertTriangle,
+  AlertCircle,
   CheckCircle2,
   XCircle,
   PauseCircle,
@@ -22,21 +23,40 @@ import {
   ChevronUp,
   Sparkles,
   Zap,
+  Plug,
+  X,
 } from 'lucide-react';
 import { KPICard } from '@/components/ui/kpi-card';
 import {
   useMarketplaces,
   useStatsMarketplace,
   useSincronizar,
+  useConectarMercadoLivre,
   Marketplace,
 } from '@/hooks/useMarketplaces';
 
+// ─── Extrai mensagem amigável de erro do Axios/back ───────────────────────────
+function mensagemErro(err: unknown): string {
+  const e = err as {
+    response?: { data?: { message?: string | string[]; erro?: string } };
+    message?: string;
+  };
+  const data = e?.response?.data;
+  const msg = data?.message ?? data?.erro ?? e?.message;
+  if (Array.isArray(msg)) return msg.join(', ');
+  return msg ?? 'Não foi possível conectar ao Mercado Livre. Tente novamente.';
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const brl = (v: number) =>
-  v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+// Defensivo: em modo microserviços o shape do backend real pode divergir do
+// mock enquanto a reconciliação da Fase 3 não fecha — nunca quebrar por
+// valor ausente (undefined/null/string Decimal → 0).
+const brl = (v?: number | string | null) =>
+  Number(v ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-function tempoRelativo(iso: string): string {
+function tempoRelativo(iso?: string | null): string {
+  if (!iso) return '—';
   const diff = Date.now() - new Date(iso).getTime();
   const min  = Math.floor(diff / 60000);
   if (min < 1)  return 'agora';
@@ -55,20 +75,24 @@ const CANAL_CONFIG: Record<string, { emoji: string; cor: string; corText: string
 };
 
 function StatusIcon({ status }: { status: Marketplace['status'] }) {
-  if (status === 'CONECTADO')   return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-  if (status === 'ERRO')        return <XCircle      className="h-4 w-4 text-red-500"   />;
-  if (status === 'PAUSADO')     return <PauseCircle  className="h-4 w-4 text-yellow-500" />;
+  if (status === 'ATIVA')        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+  if (status === 'ERRO')         return <XCircle      className="h-4 w-4 text-red-500"   />;
+  if (status === 'PENDENTE')     return <PauseCircle  className="h-4 w-4 text-yellow-500" />;
+  if (status === 'RECONECTANDO') return <RefreshCw    className="h-4 w-4 text-blue-500"   />;
   return <AlertTriangle className="h-4 w-4 text-slate-400" />;
 }
 
 function StatusLabel({ status }: { status: Marketplace['status'] }) {
+  // Rótulos do enum Prisma `StatusConexao` (marketplace-service).
   const map: Record<string, { label: string; cls: string }> = {
-    CONECTADO:    { label: 'Conectado',    cls: 'bg-green-100  text-green-700  dark:bg-green-900/30  dark:text-green-400'  },
-    DESCONECTADO: { label: 'Desconectado', cls: 'bg-slate-100  text-slate-600  dark:bg-slate-700     dark:text-slate-400'  },
+    ATIVA:        { label: 'Ativa',        cls: 'bg-green-100  text-green-700  dark:bg-green-900/30  dark:text-green-400'  },
+    INATIVA:      { label: 'Inativa',      cls: 'bg-slate-100  text-slate-600  dark:bg-slate-700     dark:text-slate-400'  },
+    PENDENTE:     { label: 'Pendente',     cls: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
     ERRO:         { label: 'Erro',         cls: 'bg-red-100    text-red-700    dark:bg-red-900/30    dark:text-red-400'    },
-    PAUSADO:      { label: 'Pausado',      cls: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
+    RECONECTANDO: { label: 'Reconectando', cls: 'bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400'   },
+    EXPIRANDO:    { label: 'Expirando',    cls: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
   };
-  const cfg = map[status] ?? map.DESCONECTADO;
+  const cfg = map[status] ?? map.INATIVA;
   return (
     <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${cfg.cls}`}>
       <StatusIcon status={status} />
@@ -131,7 +155,10 @@ function SkeletonCard() {
 // ─── Revenue Bar Chart (CSS only) ─────────────────────────────────────────────
 
 function RevenueBarChart({ marketplaces }: { marketplaces: Marketplace[] }) {
-  const total = marketplaces.reduce((s, m) => s + m.receitaMes, 0);
+  // Defensivo: receita pode vir ausente/string do backend real (Fase 3 em reconciliação).
+  const receitaDe = (m: Marketplace) => Number(m.receitaMes ?? 0);
+  const receitaLiquidaDe = (m: Marketplace) => Number(m.receitaLiquidaMes ?? 0);
+  const total = marketplaces.reduce((s, m) => s + receitaDe(m), 0);
   if (total === 0) return null;
 
   const cores: Record<string, string> = {
@@ -145,8 +172,9 @@ function RevenueBarChart({ marketplaces }: { marketplaces: Marketplace[] }) {
   return (
     <div className="space-y-3">
       {marketplaces.map((m) => {
-        const pct    = total > 0 ? (m.receitaMes / total) * 100 : 0;
-        const pctLiq = m.receitaMes > 0 ? (m.receitaLiquidaMes / m.receitaMes) * 100 : 0;
+        const bruto  = receitaDe(m);
+        const pct    = total > 0 ? (bruto / total) * 100 : 0;
+        const pctLiq = bruto > 0 ? (receitaLiquidaDe(m) / bruto) * 100 : 0;
         const cfg    = CANAL_CONFIG[m.canal] ?? CANAL_CONFIG.SHOPIFY;
         const cor    = cores[m.canal] ?? 'bg-slate-400';
         return (
@@ -320,7 +348,7 @@ function MarketplaceCard({
               val: (
                 <span className="flex items-center gap-1">
                   <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                  {marketplace.avaliacaoVendedor.toFixed(1)}
+                  {Number(marketplace.avaliacaoVendedor ?? 0).toFixed(1)}
                 </span>
               ),
             },
@@ -417,7 +445,19 @@ export default function MarketplacesPage() {
   const { data: marketplaces = [], isLoading: loadingMkp } = useMarketplaces();
   const { data: stats,              isLoading: loadingStats } = useStatsMarketplace();
   const sincronizar = useSincronizar();
+  const conectarML  = useConectarMercadoLivre();
   const [syncingIds, setSyncingIds] = useState<Set<string>>(new Set());
+  const [erroConexao, setErroConexao] = useState<string | null>(null);
+
+  const handleConectarML = async () => {
+    setErroConexao(null);
+    try {
+      // Em caso de sucesso o navegador é redirecionado para o ML (não retorna).
+      await conectarML.mutateAsync();
+    } catch (err) {
+      setErroConexao(mensagemErro(err));
+    }
+  };
 
   const handleSync = async (id: string) => {
     setSyncingIds((prev) => new Set([...prev, id]));
@@ -461,6 +501,18 @@ export default function MarketplacesPage() {
             Vendas por Canal
           </Link>
           <button
+            onClick={handleConectarML}
+            disabled={conectarML.isPending}
+            className="flex items-center gap-2 rounded-lg border border-yellow-400 bg-yellow-50 px-4 py-2.5 text-sm font-semibold text-yellow-800 transition-colors hover:bg-yellow-100 disabled:opacity-70 dark:border-yellow-500/40 dark:bg-yellow-900/20 dark:text-yellow-300 dark:hover:bg-yellow-900/30"
+          >
+            {conectarML.isPending ? (
+              <RefreshCw className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plug className="h-4 w-4" />
+            )}
+            <span>🟠 Conectar Mercado Livre</span>
+          </button>
+          <button
             onClick={handleSyncAll}
             disabled={syncingIds.size > 0}
             className="flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-marca-600 disabled:opacity-70 dark:bg-marca-600"
@@ -470,6 +522,33 @@ export default function MarketplacesPage() {
           </button>
         </div>
       </div>
+
+      {/* Banner de erro de conexão ML */}
+      {erroConexao && (
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 dark:border-red-800/50 dark:bg-red-900/15">
+          <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" />
+          <div className="flex-1 text-sm">
+            <p className="font-semibold text-red-800 dark:text-red-300">
+              Não foi possível iniciar a conexão com o Mercado Livre
+            </p>
+            <p className="mt-0.5 text-red-700 dark:text-red-400">{erroConexao}</p>
+            {/(configurad|ML_CLIENT)/i.test(erroConexao) && (
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400/80">
+                Defina <code className="rounded bg-red-100 px-1 font-mono dark:bg-red-900/40">ML_CLIENT_ID</code> e{' '}
+                <code className="rounded bg-red-100 px-1 font-mono dark:bg-red-900/40">ML_CLIENT_SECRET</code>{' '}
+                no <code className="font-mono">.env</code> do marketplace-service e reinicie o serviço.
+              </p>
+            )}
+          </div>
+          <button
+            onClick={() => setErroConexao(null)}
+            className="rounded-lg p-1 text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/30"
+            aria-label="Fechar"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       {/* KPI Row */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -588,12 +667,12 @@ export default function MarketplacesPage() {
                       <td className="px-4 py-3 text-right">
                         <span
                           className={`font-semibold ${
-                            a.conversao >= 3
+                            Number(a.conversao ?? 0) >= 3
                               ? 'text-green-600 dark:text-green-400'
                               : 'text-slate-600 dark:text-slate-400'
                           }`}
                         >
-                          {a.conversao.toFixed(1)}%
+                          {Number(a.conversao ?? 0).toFixed(1)}%
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right font-bold text-slate-800 dark:text-slate-100">

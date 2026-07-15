@@ -69,11 +69,13 @@ if (!globalThis.__insightsSeq) globalThis.__insightsSeq = INITIAL_INSIGHTS.lengt
 function getInsights() { return globalThis.__insightsMock!; }
 
 // GET /api/v1/insights
+// Retorna o envelope paginado canônico: { dados, total, pagina, limite, totalPaginas }
 export async function GET(req: NextRequest) {
   const params = req.nextUrl.searchParams;
   const visualizado = params.get('visualizado');
   const tipo        = params.get('tipo');
   const prioridade  = params.get('prioridade');
+  const pagina      = Number(params.get('pagina') ?? '0');
   const limite      = Number(params.get('limite') ?? '50');
 
   let lista = [...getInsights()].sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
@@ -84,5 +86,15 @@ export async function GET(req: NextRequest) {
   if (tipo) lista = lista.filter(i => i.tipo === tipo.toUpperCase());
   if (prioridade) lista = lista.filter(i => i.prioridade === prioridade.toUpperCase());
 
-  return NextResponse.json(lista.slice(0, limite));
+  const total = lista.length;
+  const inicio = pagina * limite;
+  const dados = lista.slice(inicio, inicio + limite);
+
+  return NextResponse.json({
+    dados,
+    total,
+    pagina,
+    limite,
+    totalPaginas: limite > 0 ? Math.ceil(total / limite) : 0,
+  });
 }

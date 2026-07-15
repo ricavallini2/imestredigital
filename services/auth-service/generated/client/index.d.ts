@@ -32,6 +32,68 @@ export type Usuario = $Result.DefaultSelection<Prisma.$UsuarioPayload>
 export type RefreshToken = $Result.DefaultSelection<Prisma.$RefreshTokenPayload>
 
 /**
+ * Enums
+ */
+export namespace $Enums {
+  export const PlanoTenant: {
+  STARTER: 'STARTER',
+  PROFISSIONAL: 'PROFISSIONAL',
+  ENTERPRISE: 'ENTERPRISE'
+};
+
+export type PlanoTenant = (typeof PlanoTenant)[keyof typeof PlanoTenant]
+
+
+export const StatusTenant: {
+  ATIVO: 'ATIVO',
+  INATIVO: 'INATIVO',
+  SUSPENSO: 'SUSPENSO',
+  TRIAL: 'TRIAL',
+  CANCELADO: 'CANCELADO'
+};
+
+export type StatusTenant = (typeof StatusTenant)[keyof typeof StatusTenant]
+
+
+export const CargoUsuario: {
+  ADMIN: 'ADMIN',
+  GERENTE: 'GERENTE',
+  OPERADOR: 'OPERADOR',
+  VISUALIZADOR: 'VISUALIZADOR'
+};
+
+export type CargoUsuario = (typeof CargoUsuario)[keyof typeof CargoUsuario]
+
+
+export const StatusUsuario: {
+  ATIVO: 'ATIVO',
+  INATIVO: 'INATIVO',
+  BLOQUEADO: 'BLOQUEADO',
+  PENDENTE: 'PENDENTE',
+  REMOVIDO: 'REMOVIDO'
+};
+
+export type StatusUsuario = (typeof StatusUsuario)[keyof typeof StatusUsuario]
+
+}
+
+export type PlanoTenant = $Enums.PlanoTenant
+
+export const PlanoTenant: typeof $Enums.PlanoTenant
+
+export type StatusTenant = $Enums.StatusTenant
+
+export const StatusTenant: typeof $Enums.StatusTenant
+
+export type CargoUsuario = $Enums.CargoUsuario
+
+export const CargoUsuario: typeof $Enums.CargoUsuario
+
+export type StatusUsuario = $Enums.StatusUsuario
+
+export const StatusUsuario: typeof $Enums.StatusUsuario
+
+/**
  * ##  Prisma Client ʲˢ
  * 
  * Type-safe database client for TypeScript & Node.js
@@ -1108,8 +1170,8 @@ export namespace Prisma {
     telefone: string | null
     endereco: string | null
     inscricaoEstadual: string | null
-    plano: string | null
-    status: string | null
+    plano: $Enums.PlanoTenant | null
+    status: $Enums.StatusTenant | null
     limiteUsuarios: number | null
     limitePedidosMes: number | null
     criadoEm: Date | null
@@ -1124,8 +1186,8 @@ export namespace Prisma {
     telefone: string | null
     endereco: string | null
     inscricaoEstadual: string | null
-    plano: string | null
-    status: string | null
+    plano: $Enums.PlanoTenant | null
+    status: $Enums.StatusTenant | null
     limiteUsuarios: number | null
     limitePedidosMes: number | null
     criadoEm: Date | null
@@ -1305,8 +1367,8 @@ export namespace Prisma {
     telefone: string | null
     endereco: string | null
     inscricaoEstadual: string | null
-    plano: string
-    status: string
+    plano: $Enums.PlanoTenant
+    status: $Enums.StatusTenant
     limiteUsuarios: number
     limitePedidosMes: number
     configuracoes: JsonValue | null
@@ -1405,8 +1467,8 @@ export namespace Prisma {
       telefone: string | null
       endereco: string | null
       inscricaoEstadual: string | null
-      plano: string
-      status: string
+      plano: $Enums.PlanoTenant
+      status: $Enums.StatusTenant
       limiteUsuarios: number
       limitePedidosMes: number
       configuracoes: Prisma.JsonValue | null
@@ -1813,8 +1875,8 @@ export namespace Prisma {
     readonly telefone: FieldRef<"Tenant", 'String'>
     readonly endereco: FieldRef<"Tenant", 'String'>
     readonly inscricaoEstadual: FieldRef<"Tenant", 'String'>
-    readonly plano: FieldRef<"Tenant", 'String'>
-    readonly status: FieldRef<"Tenant", 'String'>
+    readonly plano: FieldRef<"Tenant", 'PlanoTenant'>
+    readonly status: FieldRef<"Tenant", 'StatusTenant'>
     readonly limiteUsuarios: FieldRef<"Tenant", 'Int'>
     readonly limitePedidosMes: FieldRef<"Tenant", 'Int'>
     readonly configuracoes: FieldRef<"Tenant", 'Json'>
@@ -2194,8 +2256,8 @@ export namespace Prisma {
     nome: string | null
     email: string | null
     senhaHash: string | null
-    cargo: string | null
-    status: string | null
+    cargo: $Enums.CargoUsuario | null
+    status: $Enums.StatusUsuario | null
     emailVerificado: boolean | null
     ultimoLogin: Date | null
     tentativasLogin: number | null
@@ -2211,8 +2273,8 @@ export namespace Prisma {
     nome: string | null
     email: string | null
     senhaHash: string | null
-    cargo: string | null
-    status: string | null
+    cargo: $Enums.CargoUsuario | null
+    status: $Enums.StatusUsuario | null
     emailVerificado: boolean | null
     ultimoLogin: Date | null
     tentativasLogin: number | null
@@ -2395,8 +2457,8 @@ export namespace Prisma {
     nome: string
     email: string
     senhaHash: string
-    cargo: string
-    status: string
+    cargo: $Enums.CargoUsuario
+    status: $Enums.StatusUsuario
     emailVerificado: boolean
     ultimoLogin: Date | null
     tentativasLogin: number
@@ -2505,8 +2567,8 @@ export namespace Prisma {
       nome: string
       email: string
       senhaHash: string
-      cargo: string
-      status: string
+      cargo: $Enums.CargoUsuario
+      status: $Enums.StatusUsuario
       emailVerificado: boolean
       ultimoLogin: Date | null
       tentativasLogin: number
@@ -2915,8 +2977,8 @@ export namespace Prisma {
     readonly nome: FieldRef<"Usuario", 'String'>
     readonly email: FieldRef<"Usuario", 'String'>
     readonly senhaHash: FieldRef<"Usuario", 'String'>
-    readonly cargo: FieldRef<"Usuario", 'String'>
-    readonly status: FieldRef<"Usuario", 'String'>
+    readonly cargo: FieldRef<"Usuario", 'CargoUsuario'>
+    readonly status: FieldRef<"Usuario", 'StatusUsuario'>
     readonly emailVerificado: FieldRef<"Usuario", 'Boolean'>
     readonly ultimoLogin: FieldRef<"Usuario", 'DateTime'>
     readonly tentativasLogin: FieldRef<"Usuario", 'Int'>
@@ -4363,6 +4425,34 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'PlanoTenant'
+   */
+  export type EnumPlanoTenantFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlanoTenant'>
+    
+
+
+  /**
+   * Reference to a field of type 'PlanoTenant[]'
+   */
+  export type ListEnumPlanoTenantFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlanoTenant[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusTenant'
+   */
+  export type EnumStatusTenantFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusTenant'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusTenant[]'
+   */
+  export type ListEnumStatusTenantFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusTenant[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -4394,6 +4484,34 @@ export namespace Prisma {
    * Reference to a field of type 'DateTime[]'
    */
   export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'CargoUsuario'
+   */
+  export type EnumCargoUsuarioFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CargoUsuario'>
+    
+
+
+  /**
+   * Reference to a field of type 'CargoUsuario[]'
+   */
+  export type ListEnumCargoUsuarioFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CargoUsuario[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusUsuario'
+   */
+  export type EnumStatusUsuarioFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusUsuario'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusUsuario[]'
+   */
+  export type ListEnumStatusUsuarioFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusUsuario[]'>
     
 
 
@@ -4432,8 +4550,8 @@ export namespace Prisma {
     telefone?: StringNullableFilter<"Tenant"> | string | null
     endereco?: StringNullableFilter<"Tenant"> | string | null
     inscricaoEstadual?: StringNullableFilter<"Tenant"> | string | null
-    plano?: StringFilter<"Tenant"> | string
-    status?: StringFilter<"Tenant"> | string
+    plano?: EnumPlanoTenantFilter<"Tenant"> | $Enums.PlanoTenant
+    status?: EnumStatusTenantFilter<"Tenant"> | $Enums.StatusTenant
     limiteUsuarios?: IntFilter<"Tenant"> | number
     limitePedidosMes?: IntFilter<"Tenant"> | number
     configuracoes?: JsonNullableFilter<"Tenant">
@@ -4471,8 +4589,8 @@ export namespace Prisma {
     telefone?: StringNullableFilter<"Tenant"> | string | null
     endereco?: StringNullableFilter<"Tenant"> | string | null
     inscricaoEstadual?: StringNullableFilter<"Tenant"> | string | null
-    plano?: StringFilter<"Tenant"> | string
-    status?: StringFilter<"Tenant"> | string
+    plano?: EnumPlanoTenantFilter<"Tenant"> | $Enums.PlanoTenant
+    status?: EnumStatusTenantFilter<"Tenant"> | $Enums.StatusTenant
     limiteUsuarios?: IntFilter<"Tenant"> | number
     limitePedidosMes?: IntFilter<"Tenant"> | number
     configuracoes?: JsonNullableFilter<"Tenant">
@@ -4514,8 +4632,8 @@ export namespace Prisma {
     telefone?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     endereco?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     inscricaoEstadual?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
-    plano?: StringWithAggregatesFilter<"Tenant"> | string
-    status?: StringWithAggregatesFilter<"Tenant"> | string
+    plano?: EnumPlanoTenantWithAggregatesFilter<"Tenant"> | $Enums.PlanoTenant
+    status?: EnumStatusTenantWithAggregatesFilter<"Tenant"> | $Enums.StatusTenant
     limiteUsuarios?: IntWithAggregatesFilter<"Tenant"> | number
     limitePedidosMes?: IntWithAggregatesFilter<"Tenant"> | number
     configuracoes?: JsonNullableWithAggregatesFilter<"Tenant">
@@ -4532,8 +4650,8 @@ export namespace Prisma {
     nome?: StringFilter<"Usuario"> | string
     email?: StringFilter<"Usuario"> | string
     senhaHash?: StringFilter<"Usuario"> | string
-    cargo?: StringFilter<"Usuario"> | string
-    status?: StringFilter<"Usuario"> | string
+    cargo?: EnumCargoUsuarioFilter<"Usuario"> | $Enums.CargoUsuario
+    status?: EnumStatusUsuarioFilter<"Usuario"> | $Enums.StatusUsuario
     emailVerificado?: BoolFilter<"Usuario"> | boolean
     ultimoLogin?: DateTimeNullableFilter<"Usuario"> | Date | string | null
     tentativasLogin?: IntFilter<"Usuario"> | number
@@ -4568,15 +4686,16 @@ export namespace Prisma {
 
   export type UsuarioWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    email?: string
+    tenantId_email?: UsuarioTenantIdEmailCompoundUniqueInput
     AND?: UsuarioWhereInput | UsuarioWhereInput[]
     OR?: UsuarioWhereInput[]
     NOT?: UsuarioWhereInput | UsuarioWhereInput[]
     tenantId?: UuidFilter<"Usuario"> | string
     nome?: StringFilter<"Usuario"> | string
+    email?: StringFilter<"Usuario"> | string
     senhaHash?: StringFilter<"Usuario"> | string
-    cargo?: StringFilter<"Usuario"> | string
-    status?: StringFilter<"Usuario"> | string
+    cargo?: EnumCargoUsuarioFilter<"Usuario"> | $Enums.CargoUsuario
+    status?: EnumStatusUsuarioFilter<"Usuario"> | $Enums.StatusUsuario
     emailVerificado?: BoolFilter<"Usuario"> | boolean
     ultimoLogin?: DateTimeNullableFilter<"Usuario"> | Date | string | null
     tentativasLogin?: IntFilter<"Usuario"> | number
@@ -4587,7 +4706,7 @@ export namespace Prisma {
     atualizadoEm?: DateTimeFilter<"Usuario"> | Date | string
     tenant?: XOR<TenantRelationFilter, TenantWhereInput>
     refreshTokens?: RefreshTokenListRelationFilter
-  }, "id" | "email">
+  }, "id" | "tenantId_email">
 
   export type UsuarioOrderByWithAggregationInput = {
     id?: SortOrder
@@ -4621,8 +4740,8 @@ export namespace Prisma {
     nome?: StringWithAggregatesFilter<"Usuario"> | string
     email?: StringWithAggregatesFilter<"Usuario"> | string
     senhaHash?: StringWithAggregatesFilter<"Usuario"> | string
-    cargo?: StringWithAggregatesFilter<"Usuario"> | string
-    status?: StringWithAggregatesFilter<"Usuario"> | string
+    cargo?: EnumCargoUsuarioWithAggregatesFilter<"Usuario"> | $Enums.CargoUsuario
+    status?: EnumStatusUsuarioWithAggregatesFilter<"Usuario"> | $Enums.StatusUsuario
     emailVerificado?: BoolWithAggregatesFilter<"Usuario"> | boolean
     ultimoLogin?: DateTimeNullableWithAggregatesFilter<"Usuario"> | Date | string | null
     tentativasLogin?: IntWithAggregatesFilter<"Usuario"> | number
@@ -4706,8 +4825,8 @@ export namespace Prisma {
     telefone?: string | null
     endereco?: string | null
     inscricaoEstadual?: string | null
-    plano?: string
-    status?: string
+    plano?: $Enums.PlanoTenant
+    status?: $Enums.StatusTenant
     limiteUsuarios?: number
     limitePedidosMes?: number
     configuracoes?: NullableJsonNullValueInput | InputJsonValue
@@ -4724,8 +4843,8 @@ export namespace Prisma {
     telefone?: string | null
     endereco?: string | null
     inscricaoEstadual?: string | null
-    plano?: string
-    status?: string
+    plano?: $Enums.PlanoTenant
+    status?: $Enums.StatusTenant
     limiteUsuarios?: number
     limitePedidosMes?: number
     configuracoes?: NullableJsonNullValueInput | InputJsonValue
@@ -4742,8 +4861,8 @@ export namespace Prisma {
     telefone?: NullableStringFieldUpdateOperationsInput | string | null
     endereco?: NullableStringFieldUpdateOperationsInput | string | null
     inscricaoEstadual?: NullableStringFieldUpdateOperationsInput | string | null
-    plano?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    plano?: EnumPlanoTenantFieldUpdateOperationsInput | $Enums.PlanoTenant
+    status?: EnumStatusTenantFieldUpdateOperationsInput | $Enums.StatusTenant
     limiteUsuarios?: IntFieldUpdateOperationsInput | number
     limitePedidosMes?: IntFieldUpdateOperationsInput | number
     configuracoes?: NullableJsonNullValueInput | InputJsonValue
@@ -4760,8 +4879,8 @@ export namespace Prisma {
     telefone?: NullableStringFieldUpdateOperationsInput | string | null
     endereco?: NullableStringFieldUpdateOperationsInput | string | null
     inscricaoEstadual?: NullableStringFieldUpdateOperationsInput | string | null
-    plano?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    plano?: EnumPlanoTenantFieldUpdateOperationsInput | $Enums.PlanoTenant
+    status?: EnumStatusTenantFieldUpdateOperationsInput | $Enums.StatusTenant
     limiteUsuarios?: IntFieldUpdateOperationsInput | number
     limitePedidosMes?: IntFieldUpdateOperationsInput | number
     configuracoes?: NullableJsonNullValueInput | InputJsonValue
@@ -4778,8 +4897,8 @@ export namespace Prisma {
     telefone?: string | null
     endereco?: string | null
     inscricaoEstadual?: string | null
-    plano?: string
-    status?: string
+    plano?: $Enums.PlanoTenant
+    status?: $Enums.StatusTenant
     limiteUsuarios?: number
     limitePedidosMes?: number
     configuracoes?: NullableJsonNullValueInput | InputJsonValue
@@ -4795,8 +4914,8 @@ export namespace Prisma {
     telefone?: NullableStringFieldUpdateOperationsInput | string | null
     endereco?: NullableStringFieldUpdateOperationsInput | string | null
     inscricaoEstadual?: NullableStringFieldUpdateOperationsInput | string | null
-    plano?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    plano?: EnumPlanoTenantFieldUpdateOperationsInput | $Enums.PlanoTenant
+    status?: EnumStatusTenantFieldUpdateOperationsInput | $Enums.StatusTenant
     limiteUsuarios?: IntFieldUpdateOperationsInput | number
     limitePedidosMes?: IntFieldUpdateOperationsInput | number
     configuracoes?: NullableJsonNullValueInput | InputJsonValue
@@ -4812,8 +4931,8 @@ export namespace Prisma {
     telefone?: NullableStringFieldUpdateOperationsInput | string | null
     endereco?: NullableStringFieldUpdateOperationsInput | string | null
     inscricaoEstadual?: NullableStringFieldUpdateOperationsInput | string | null
-    plano?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    plano?: EnumPlanoTenantFieldUpdateOperationsInput | $Enums.PlanoTenant
+    status?: EnumStatusTenantFieldUpdateOperationsInput | $Enums.StatusTenant
     limiteUsuarios?: IntFieldUpdateOperationsInput | number
     limitePedidosMes?: IntFieldUpdateOperationsInput | number
     configuracoes?: NullableJsonNullValueInput | InputJsonValue
@@ -4826,8 +4945,8 @@ export namespace Prisma {
     nome: string
     email: string
     senhaHash: string
-    cargo?: string
-    status?: string
+    cargo?: $Enums.CargoUsuario
+    status?: $Enums.StatusUsuario
     emailVerificado?: boolean
     ultimoLogin?: Date | string | null
     tentativasLogin?: number
@@ -4846,8 +4965,8 @@ export namespace Prisma {
     nome: string
     email: string
     senhaHash: string
-    cargo?: string
-    status?: string
+    cargo?: $Enums.CargoUsuario
+    status?: $Enums.StatusUsuario
     emailVerificado?: boolean
     ultimoLogin?: Date | string | null
     tentativasLogin?: number
@@ -4864,8 +4983,8 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     senhaHash?: StringFieldUpdateOperationsInput | string
-    cargo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    cargo?: EnumCargoUsuarioFieldUpdateOperationsInput | $Enums.CargoUsuario
+    status?: EnumStatusUsuarioFieldUpdateOperationsInput | $Enums.StatusUsuario
     emailVerificado?: BoolFieldUpdateOperationsInput | boolean
     ultimoLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tentativasLogin?: IntFieldUpdateOperationsInput | number
@@ -4884,8 +5003,8 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     senhaHash?: StringFieldUpdateOperationsInput | string
-    cargo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    cargo?: EnumCargoUsuarioFieldUpdateOperationsInput | $Enums.CargoUsuario
+    status?: EnumStatusUsuarioFieldUpdateOperationsInput | $Enums.StatusUsuario
     emailVerificado?: BoolFieldUpdateOperationsInput | boolean
     ultimoLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tentativasLogin?: IntFieldUpdateOperationsInput | number
@@ -4903,8 +5022,8 @@ export namespace Prisma {
     nome: string
     email: string
     senhaHash: string
-    cargo?: string
-    status?: string
+    cargo?: $Enums.CargoUsuario
+    status?: $Enums.StatusUsuario
     emailVerificado?: boolean
     ultimoLogin?: Date | string | null
     tentativasLogin?: number
@@ -4920,8 +5039,8 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     senhaHash?: StringFieldUpdateOperationsInput | string
-    cargo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    cargo?: EnumCargoUsuarioFieldUpdateOperationsInput | $Enums.CargoUsuario
+    status?: EnumStatusUsuarioFieldUpdateOperationsInput | $Enums.StatusUsuario
     emailVerificado?: BoolFieldUpdateOperationsInput | boolean
     ultimoLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tentativasLogin?: IntFieldUpdateOperationsInput | number
@@ -4938,8 +5057,8 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     senhaHash?: StringFieldUpdateOperationsInput | string
-    cargo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    cargo?: EnumCargoUsuarioFieldUpdateOperationsInput | $Enums.CargoUsuario
+    status?: EnumStatusUsuarioFieldUpdateOperationsInput | $Enums.StatusUsuario
     emailVerificado?: BoolFieldUpdateOperationsInput | boolean
     ultimoLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tentativasLogin?: IntFieldUpdateOperationsInput | number
@@ -5059,6 +5178,20 @@ export namespace Prisma {
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type EnumPlanoTenantFilter<$PrismaModel = never> = {
+    equals?: $Enums.PlanoTenant | EnumPlanoTenantFieldRefInput<$PrismaModel>
+    in?: $Enums.PlanoTenant[] | ListEnumPlanoTenantFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PlanoTenant[] | ListEnumPlanoTenantFieldRefInput<$PrismaModel>
+    not?: NestedEnumPlanoTenantFilter<$PrismaModel> | $Enums.PlanoTenant
+  }
+
+  export type EnumStatusTenantFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusTenant | EnumStatusTenantFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusTenant[] | ListEnumStatusTenantFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusTenant[] | ListEnumStatusTenantFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusTenantFilter<$PrismaModel> | $Enums.StatusTenant
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -5230,6 +5363,26 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
+  export type EnumPlanoTenantWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PlanoTenant | EnumPlanoTenantFieldRefInput<$PrismaModel>
+    in?: $Enums.PlanoTenant[] | ListEnumPlanoTenantFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PlanoTenant[] | ListEnumPlanoTenantFieldRefInput<$PrismaModel>
+    not?: NestedEnumPlanoTenantWithAggregatesFilter<$PrismaModel> | $Enums.PlanoTenant
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPlanoTenantFilter<$PrismaModel>
+    _max?: NestedEnumPlanoTenantFilter<$PrismaModel>
+  }
+
+  export type EnumStatusTenantWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusTenant | EnumStatusTenantFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusTenant[] | ListEnumStatusTenantFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusTenant[] | ListEnumStatusTenantFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusTenantWithAggregatesFilter<$PrismaModel> | $Enums.StatusTenant
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusTenantFilter<$PrismaModel>
+    _max?: NestedEnumStatusTenantFilter<$PrismaModel>
+  }
+
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -5285,6 +5438,20 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type EnumCargoUsuarioFilter<$PrismaModel = never> = {
+    equals?: $Enums.CargoUsuario | EnumCargoUsuarioFieldRefInput<$PrismaModel>
+    in?: $Enums.CargoUsuario[] | ListEnumCargoUsuarioFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CargoUsuario[] | ListEnumCargoUsuarioFieldRefInput<$PrismaModel>
+    not?: NestedEnumCargoUsuarioFilter<$PrismaModel> | $Enums.CargoUsuario
+  }
+
+  export type EnumStatusUsuarioFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusUsuario | EnumStatusUsuarioFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusUsuario[] | ListEnumStatusUsuarioFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusUsuario[] | ListEnumStatusUsuarioFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusUsuarioFilter<$PrismaModel> | $Enums.StatusUsuario
+  }
+
   export type BoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
@@ -5314,6 +5481,11 @@ export namespace Prisma {
 
   export type RefreshTokenOrderByRelationAggregateInput = {
     _count?: SortOrder
+  }
+
+  export type UsuarioTenantIdEmailCompoundUniqueInput = {
+    tenantId: string
+    email: string
   }
 
   export type UsuarioCountOrderByAggregateInput = {
@@ -5374,6 +5546,26 @@ export namespace Prisma {
 
   export type UsuarioSumOrderByAggregateInput = {
     tentativasLogin?: SortOrder
+  }
+
+  export type EnumCargoUsuarioWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CargoUsuario | EnumCargoUsuarioFieldRefInput<$PrismaModel>
+    in?: $Enums.CargoUsuario[] | ListEnumCargoUsuarioFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CargoUsuario[] | ListEnumCargoUsuarioFieldRefInput<$PrismaModel>
+    not?: NestedEnumCargoUsuarioWithAggregatesFilter<$PrismaModel> | $Enums.CargoUsuario
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumCargoUsuarioFilter<$PrismaModel>
+    _max?: NestedEnumCargoUsuarioFilter<$PrismaModel>
+  }
+
+  export type EnumStatusUsuarioWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusUsuario | EnumStatusUsuarioFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusUsuario[] | ListEnumStatusUsuarioFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusUsuario[] | ListEnumStatusUsuarioFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusUsuarioWithAggregatesFilter<$PrismaModel> | $Enums.StatusUsuario
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusUsuarioFilter<$PrismaModel>
+    _max?: NestedEnumStatusUsuarioFilter<$PrismaModel>
   }
 
   export type BoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -5455,6 +5647,14 @@ export namespace Prisma {
     set?: string | null
   }
 
+  export type EnumPlanoTenantFieldUpdateOperationsInput = {
+    set?: $Enums.PlanoTenant
+  }
+
+  export type EnumStatusTenantFieldUpdateOperationsInput = {
+    set?: $Enums.StatusTenant
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -5513,6 +5713,14 @@ export namespace Prisma {
     connectOrCreate?: RefreshTokenCreateOrConnectWithoutUsuarioInput | RefreshTokenCreateOrConnectWithoutUsuarioInput[]
     createMany?: RefreshTokenCreateManyUsuarioInputEnvelope
     connect?: RefreshTokenWhereUniqueInput | RefreshTokenWhereUniqueInput[]
+  }
+
+  export type EnumCargoUsuarioFieldUpdateOperationsInput = {
+    set?: $Enums.CargoUsuario
+  }
+
+  export type EnumStatusUsuarioFieldUpdateOperationsInput = {
+    set?: $Enums.StatusUsuario
   }
 
   export type BoolFieldUpdateOperationsInput = {
@@ -5612,6 +5820,20 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type NestedEnumPlanoTenantFilter<$PrismaModel = never> = {
+    equals?: $Enums.PlanoTenant | EnumPlanoTenantFieldRefInput<$PrismaModel>
+    in?: $Enums.PlanoTenant[] | ListEnumPlanoTenantFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PlanoTenant[] | ListEnumPlanoTenantFieldRefInput<$PrismaModel>
+    not?: NestedEnumPlanoTenantFilter<$PrismaModel> | $Enums.PlanoTenant
+  }
+
+  export type NestedEnumStatusTenantFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusTenant | EnumStatusTenantFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusTenant[] | ListEnumStatusTenantFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusTenant[] | ListEnumStatusTenantFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusTenantFilter<$PrismaModel> | $Enums.StatusTenant
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -5693,6 +5915,26 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedEnumPlanoTenantWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PlanoTenant | EnumPlanoTenantFieldRefInput<$PrismaModel>
+    in?: $Enums.PlanoTenant[] | ListEnumPlanoTenantFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PlanoTenant[] | ListEnumPlanoTenantFieldRefInput<$PrismaModel>
+    not?: NestedEnumPlanoTenantWithAggregatesFilter<$PrismaModel> | $Enums.PlanoTenant
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPlanoTenantFilter<$PrismaModel>
+    _max?: NestedEnumPlanoTenantFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStatusTenantWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusTenant | EnumStatusTenantFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusTenant[] | ListEnumStatusTenantFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusTenant[] | ListEnumStatusTenantFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusTenantWithAggregatesFilter<$PrismaModel> | $Enums.StatusTenant
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusTenantFilter<$PrismaModel>
+    _max?: NestedEnumStatusTenantFilter<$PrismaModel>
+  }
+
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -5756,6 +5998,20 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type NestedEnumCargoUsuarioFilter<$PrismaModel = never> = {
+    equals?: $Enums.CargoUsuario | EnumCargoUsuarioFieldRefInput<$PrismaModel>
+    in?: $Enums.CargoUsuario[] | ListEnumCargoUsuarioFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CargoUsuario[] | ListEnumCargoUsuarioFieldRefInput<$PrismaModel>
+    not?: NestedEnumCargoUsuarioFilter<$PrismaModel> | $Enums.CargoUsuario
+  }
+
+  export type NestedEnumStatusUsuarioFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusUsuario | EnumStatusUsuarioFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusUsuario[] | ListEnumStatusUsuarioFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusUsuario[] | ListEnumStatusUsuarioFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusUsuarioFilter<$PrismaModel> | $Enums.StatusUsuario
+  }
+
   export type NestedBoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
@@ -5770,6 +6026,26 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedEnumCargoUsuarioWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CargoUsuario | EnumCargoUsuarioFieldRefInput<$PrismaModel>
+    in?: $Enums.CargoUsuario[] | ListEnumCargoUsuarioFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CargoUsuario[] | ListEnumCargoUsuarioFieldRefInput<$PrismaModel>
+    not?: NestedEnumCargoUsuarioWithAggregatesFilter<$PrismaModel> | $Enums.CargoUsuario
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumCargoUsuarioFilter<$PrismaModel>
+    _max?: NestedEnumCargoUsuarioFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStatusUsuarioWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusUsuario | EnumStatusUsuarioFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusUsuario[] | ListEnumStatusUsuarioFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusUsuario[] | ListEnumStatusUsuarioFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusUsuarioWithAggregatesFilter<$PrismaModel> | $Enums.StatusUsuario
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusUsuarioFilter<$PrismaModel>
+    _max?: NestedEnumStatusUsuarioFilter<$PrismaModel>
   }
 
   export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -5799,8 +6075,8 @@ export namespace Prisma {
     nome: string
     email: string
     senhaHash: string
-    cargo?: string
-    status?: string
+    cargo?: $Enums.CargoUsuario
+    status?: $Enums.StatusUsuario
     emailVerificado?: boolean
     ultimoLogin?: Date | string | null
     tentativasLogin?: number
@@ -5817,8 +6093,8 @@ export namespace Prisma {
     nome: string
     email: string
     senhaHash: string
-    cargo?: string
-    status?: string
+    cargo?: $Enums.CargoUsuario
+    status?: $Enums.StatusUsuario
     emailVerificado?: boolean
     ultimoLogin?: Date | string | null
     tentativasLogin?: number
@@ -5865,8 +6141,8 @@ export namespace Prisma {
     nome?: StringFilter<"Usuario"> | string
     email?: StringFilter<"Usuario"> | string
     senhaHash?: StringFilter<"Usuario"> | string
-    cargo?: StringFilter<"Usuario"> | string
-    status?: StringFilter<"Usuario"> | string
+    cargo?: EnumCargoUsuarioFilter<"Usuario"> | $Enums.CargoUsuario
+    status?: EnumStatusUsuarioFilter<"Usuario"> | $Enums.StatusUsuario
     emailVerificado?: BoolFilter<"Usuario"> | boolean
     ultimoLogin?: DateTimeNullableFilter<"Usuario"> | Date | string | null
     tentativasLogin?: IntFilter<"Usuario"> | number
@@ -5885,8 +6161,8 @@ export namespace Prisma {
     telefone?: string | null
     endereco?: string | null
     inscricaoEstadual?: string | null
-    plano?: string
-    status?: string
+    plano?: $Enums.PlanoTenant
+    status?: $Enums.StatusTenant
     limiteUsuarios?: number
     limitePedidosMes?: number
     configuracoes?: NullableJsonNullValueInput | InputJsonValue
@@ -5902,8 +6178,8 @@ export namespace Prisma {
     telefone?: string | null
     endereco?: string | null
     inscricaoEstadual?: string | null
-    plano?: string
-    status?: string
+    plano?: $Enums.PlanoTenant
+    status?: $Enums.StatusTenant
     limiteUsuarios?: number
     limitePedidosMes?: number
     configuracoes?: NullableJsonNullValueInput | InputJsonValue
@@ -5963,8 +6239,8 @@ export namespace Prisma {
     telefone?: NullableStringFieldUpdateOperationsInput | string | null
     endereco?: NullableStringFieldUpdateOperationsInput | string | null
     inscricaoEstadual?: NullableStringFieldUpdateOperationsInput | string | null
-    plano?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    plano?: EnumPlanoTenantFieldUpdateOperationsInput | $Enums.PlanoTenant
+    status?: EnumStatusTenantFieldUpdateOperationsInput | $Enums.StatusTenant
     limiteUsuarios?: IntFieldUpdateOperationsInput | number
     limitePedidosMes?: IntFieldUpdateOperationsInput | number
     configuracoes?: NullableJsonNullValueInput | InputJsonValue
@@ -5980,8 +6256,8 @@ export namespace Prisma {
     telefone?: NullableStringFieldUpdateOperationsInput | string | null
     endereco?: NullableStringFieldUpdateOperationsInput | string | null
     inscricaoEstadual?: NullableStringFieldUpdateOperationsInput | string | null
-    plano?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    plano?: EnumPlanoTenantFieldUpdateOperationsInput | $Enums.PlanoTenant
+    status?: EnumStatusTenantFieldUpdateOperationsInput | $Enums.StatusTenant
     limiteUsuarios?: IntFieldUpdateOperationsInput | number
     limitePedidosMes?: IntFieldUpdateOperationsInput | number
     configuracoes?: NullableJsonNullValueInput | InputJsonValue
@@ -6023,8 +6299,8 @@ export namespace Prisma {
     nome: string
     email: string
     senhaHash: string
-    cargo?: string
-    status?: string
+    cargo?: $Enums.CargoUsuario
+    status?: $Enums.StatusUsuario
     emailVerificado?: boolean
     ultimoLogin?: Date | string | null
     tentativasLogin?: number
@@ -6042,8 +6318,8 @@ export namespace Prisma {
     nome: string
     email: string
     senhaHash: string
-    cargo?: string
-    status?: string
+    cargo?: $Enums.CargoUsuario
+    status?: $Enums.StatusUsuario
     emailVerificado?: boolean
     ultimoLogin?: Date | string | null
     tentativasLogin?: number
@@ -6075,8 +6351,8 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     senhaHash?: StringFieldUpdateOperationsInput | string
-    cargo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    cargo?: EnumCargoUsuarioFieldUpdateOperationsInput | $Enums.CargoUsuario
+    status?: EnumStatusUsuarioFieldUpdateOperationsInput | $Enums.StatusUsuario
     emailVerificado?: BoolFieldUpdateOperationsInput | boolean
     ultimoLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tentativasLogin?: IntFieldUpdateOperationsInput | number
@@ -6094,8 +6370,8 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     senhaHash?: StringFieldUpdateOperationsInput | string
-    cargo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    cargo?: EnumCargoUsuarioFieldUpdateOperationsInput | $Enums.CargoUsuario
+    status?: EnumStatusUsuarioFieldUpdateOperationsInput | $Enums.StatusUsuario
     emailVerificado?: BoolFieldUpdateOperationsInput | boolean
     ultimoLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tentativasLogin?: IntFieldUpdateOperationsInput | number
@@ -6111,8 +6387,8 @@ export namespace Prisma {
     nome: string
     email: string
     senhaHash: string
-    cargo?: string
-    status?: string
+    cargo?: $Enums.CargoUsuario
+    status?: $Enums.StatusUsuario
     emailVerificado?: boolean
     ultimoLogin?: Date | string | null
     tentativasLogin?: number
@@ -6128,8 +6404,8 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     senhaHash?: StringFieldUpdateOperationsInput | string
-    cargo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    cargo?: EnumCargoUsuarioFieldUpdateOperationsInput | $Enums.CargoUsuario
+    status?: EnumStatusUsuarioFieldUpdateOperationsInput | $Enums.StatusUsuario
     emailVerificado?: BoolFieldUpdateOperationsInput | boolean
     ultimoLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tentativasLogin?: IntFieldUpdateOperationsInput | number
@@ -6146,8 +6422,8 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     senhaHash?: StringFieldUpdateOperationsInput | string
-    cargo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    cargo?: EnumCargoUsuarioFieldUpdateOperationsInput | $Enums.CargoUsuario
+    status?: EnumStatusUsuarioFieldUpdateOperationsInput | $Enums.StatusUsuario
     emailVerificado?: BoolFieldUpdateOperationsInput | boolean
     ultimoLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tentativasLogin?: IntFieldUpdateOperationsInput | number
@@ -6164,8 +6440,8 @@ export namespace Prisma {
     nome?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     senhaHash?: StringFieldUpdateOperationsInput | string
-    cargo?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    cargo?: EnumCargoUsuarioFieldUpdateOperationsInput | $Enums.CargoUsuario
+    status?: EnumStatusUsuarioFieldUpdateOperationsInput | $Enums.StatusUsuario
     emailVerificado?: BoolFieldUpdateOperationsInput | boolean
     ultimoLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tentativasLogin?: IntFieldUpdateOperationsInput | number

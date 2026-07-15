@@ -16,6 +16,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { TenantModule } from './modules/tenant/tenant.module';
 import { UsuarioModule } from './modules/usuario/usuario.module';
 import { HealthController } from './controllers/health.controller';
+import { resolverJwtSecret } from './common/jwt-secret';
 
 @Module({
   imports: [
@@ -33,7 +34,8 @@ import { HealthController } from './controllers/health.controller';
       global: true,
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.get('JWT_SECRET', 'dev-secret-trocar-em-producao'),
+        // Fail-fast: sem segredo em produção → throw no bootstrap.
+        secret: resolverJwtSecret(config.get<string>('JWT_SECRET')),
         signOptions: {
           expiresIn: config.get('JWT_EXPIRATION', '1h'),
           issuer: 'imestredigital',

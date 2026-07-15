@@ -47,6 +47,14 @@ enum NaturezaOperacao {
   BONIFICACAO
 }
 
+/// Modelo do documento fiscal (código SEFAZ). Enums Prisma não podem iniciar
+/// com dígito, por isso os valores usam prefixo MODELO_ e mapeiam para os
+/// códigos "55" (NF-e) e "65" (NFC-e) via helper na aplicação.
+enum ModeloDocumento {
+  MODELO_55 // NF-e
+  MODELO_65 // NFC-e
+}
+
 /// Nota Fiscal (NF-e, NFS-e, NFC-e)
 model NotaFiscal {
   id                   String   @id @default(uuid()) @db.Uuid
@@ -213,8 +221,11 @@ model ConfiguracaoFiscal {
   proximoNumeroNfe       Int      @default(1) @map("proximo_numero_nfe")
   serieNfce              String?  @default("1") @map("serie_nfce")
   proximoNumeroNfce      Int      @default(1) @map("proximo_numero_nfce")
-  tokenCsc               String?  @map("token_csc") // Token para NFC-e
-  idCsc                  String?  @map("id_csc") // ID CSC para NFC-e
+  tokenCsc               String?  @map("token_csc") // Token/CSC para NFC-e (mod. 65)
+  idCsc                  String?  @map("id_csc") // ID do CSC para NFC-e (mod. 65)
+  /// Natureza de operação padrão aplicada a novas notas quando o payload
+  /// não informa uma explicitamente (ex.: VENDA para PDV/emissão avulsa).
+  naturezaOperacaoPadrao NaturezaOperacao @default(VENDA) @map("natureza_operacao_padrao")
   // Dados da empresa emitente
   cnpj                   String?  // CNPJ da empresa emitente
   razaoSocial            String?  @map("razao_social") // Razão social
@@ -236,6 +247,30 @@ model ConfiguracaoFiscal {
   atualizadoEm           DateTime @updatedAt @map("atualizado_em")
 
   @@map("configuracoes_fiscais")
+}
+
+/// Sequência de numeração fiscal por tenant/modelo/série.
+///
+/// Fonte ATÔMICA da numeração de NF-e/NFC-e. Em vez de ler-e-depois-gravar o
+/// `proximoNumero` (sujeito a corrida → número duplicado, violando o
+/// @@unique de NotaFiscal), o serviço faz um UPDATE incremental com RETURNING
+/// dentro de transação, garantindo que cada chamada receba um número único
+/// mesmo sob concorrência.
+///
+/// `proximoNumero` é o PRÓXIMO valor a ser entregue (começa em 1).
+model SequenciaNumeracao {
+  id             String          @id @default(uuid()) @db.Uuid
+  tenantId       String          @map("tenant_id") @db.Uuid
+  modelo         ModeloDocumento
+  serie          String
+  proximoNumero  Int             @default(1) @map("proximo_numero")
+
+  criadoEm       DateTime        @default(now()) @map("criado_em")
+  atualizadoEm   DateTime        @updatedAt @map("atualizado_em")
+
+  @@unique([tenantId, modelo, serie])
+  @@index([tenantId])
+  @@map("sequencias_numeracao")
 }
 
 /// Regra Fiscal (Classificação de impostos por NCM, CFOP, UF, etc)

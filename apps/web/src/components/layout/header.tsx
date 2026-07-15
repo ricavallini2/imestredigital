@@ -30,7 +30,7 @@ const STATUS_COR: Record<string, string> = {
   CANCELADO:  'bg-red-100 text-red-700',
   ENVIADO:    'bg-sky-100 text-sky-700',
   FATURADO:   'bg-cyan-100 text-cyan-700',
-  SEPARANDO:  'bg-purple-100 text-purple-700',
+  EM_SEPARACAO: 'bg-purple-100 text-purple-700',
 };
 
 // ─── Notification helpers ─────────────────────────────────────────────────────

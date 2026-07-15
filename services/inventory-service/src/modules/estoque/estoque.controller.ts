@@ -42,7 +42,12 @@ export class EstoqueController {
   @Get('resumo')
   @ApiOperation({ summary: 'Resumo de estoque (todos os produtos)' })
   async resumo(@Request() req: any, @Query('depositoId') depositoId?: string) {
-    return this.estoqueService.resumo(req.tenantId, depositoId);
+    // Propaga o JWT para o enriquecimento com o catalog-service.
+    return this.estoqueService.resumo(
+      req.tenantId,
+      depositoId,
+      req.headers?.authorization,
+    );
   }
 
   /** Lista produtos com estoque baixo (abaixo do mínimo) */
@@ -56,27 +61,27 @@ export class EstoqueController {
   @Post('entrada')
   @ApiOperation({ summary: 'Registrar entrada de estoque' })
   async entrada(@Request() req: any, @Body() dto: EntradaEstoqueDto) {
-    return this.estoqueService.entrada(req.tenantId, dto);
+    return this.estoqueService.entrada(req.tenantId, dto, req.usuarioId);
   }
 
   /** Registra saída de estoque (venda, perda, etc.) */
   @Post('saida')
   @ApiOperation({ summary: 'Registrar saída de estoque' })
   async saida(@Request() req: any, @Body() dto: SaidaEstoqueDto) {
-    return this.estoqueService.saida(req.tenantId, dto);
+    return this.estoqueService.saida(req.tenantId, dto, req.usuarioId);
   }
 
   /** Transfere estoque entre depósitos */
   @Post('transferencia')
   @ApiOperation({ summary: 'Transferir estoque entre depósitos' })
   async transferencia(@Request() req: any, @Body() dto: TransferenciaEstoqueDto) {
-    return this.estoqueService.transferencia(req.tenantId, dto);
+    return this.estoqueService.transferencia(req.tenantId, dto, req.usuarioId);
   }
 
   /** Ajuste manual de estoque (inventário) */
   @Post('ajuste')
   @ApiOperation({ summary: 'Ajuste manual de estoque (inventário)' })
   async ajuste(@Request() req: any, @Body() dto: AjusteEstoqueDto) {
-    return this.estoqueService.ajuste(req.tenantId, dto);
+    return this.estoqueService.ajuste(req.tenantId, dto, req.usuarioId);
   }
 }
