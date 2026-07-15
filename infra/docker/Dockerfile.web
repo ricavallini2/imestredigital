@@ -47,6 +47,10 @@ COPY . .
 
 # Variáveis de build (substituir em CI/CD)
 ENV NEXT_TELEMETRY_DISABLED=1
+# CRÍTICO: os rewrites de /api/v1/* → microserviços são "assados" pelo next build
+# no routes-manifest.json. Precisa estar 'true' JÁ NO BUILD, senão o bundle de
+# produção serve os mock routes de app/api/v1 em vez de fazer proxy real.
+ENV USE_MICROSERVICES=true
 
 # Nome completo do workspace conforme package.json
 RUN npx turbo run build --filter=@imestredigital/web
