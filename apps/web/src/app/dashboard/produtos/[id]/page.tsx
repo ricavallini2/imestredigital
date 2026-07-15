@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -20,6 +20,7 @@ import {
   Tag,
   Zap,
   ChevronRight,
+  ChevronDown,
   AlertCircle,
   ShoppingCart,
   Percent,
@@ -27,6 +28,10 @@ import {
   Star,
   Plus,
   Trash2,
+  Images,
+  FileText,
+  Sparkles,
+  Receipt,
 } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { KPICard } from '@/components/ui/kpi-card';
@@ -355,7 +360,6 @@ type TabType = 'detalhes' | 'imagens' | 'precos' | 'estoque' | 'fiscal' | 'ia';
 
 export default function ProdutoDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const produtoId = params.id as string;
 
   const { data: produto, isLoading, isError } = useProduto(produtoId);
@@ -570,13 +574,13 @@ export default function ProdutoDetailPage() {
       </div>
     );
 
-  const TABS: { id: TabType; label: string }[] = [
-    { id: 'detalhes', label: 'Detalhes' },
-    { id: 'imagens', label: 'Imagens' },
-    { id: 'precos', label: 'Preços & Margem' },
-    { id: 'estoque', label: 'Estoque' },
-    { id: 'fiscal', label: 'Fiscal' },
-    { id: 'ia', label: '✦ IA' },
+  const TABS: { id: TabType; label: string; Icone: typeof Package }[] = [
+    { id: 'detalhes', label: 'Detalhes', Icone: Package },
+    { id: 'imagens', label: 'Imagens', Icone: Images },
+    { id: 'precos', label: 'Preços & Margem', Icone: DollarSign },
+    { id: 'estoque', label: 'Estoque', Icone: Box },
+    { id: 'fiscal', label: 'Fiscal', Icone: Receipt },
+    { id: 'ia', label: 'IA', Icone: Sparkles },
   ];
 
   const Field = ({
@@ -602,6 +606,27 @@ export default function ProdutoDetailPage() {
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumb — Dashboard fica acima do nome do produto e do botão Editar */}
+      <nav className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+        <Link
+          href="/dashboard"
+          className="font-medium transition-colors hover:text-marca-600 dark:hover:text-marca-400"
+        >
+          Dashboard
+        </Link>
+        <ChevronRight className="h-3.5 w-3.5 text-slate-300 dark:text-slate-600" />
+        <Link
+          href="/dashboard/produtos"
+          className="font-medium transition-colors hover:text-marca-600 dark:hover:text-marca-400"
+        >
+          Produtos
+        </Link>
+        <ChevronRight className="h-3.5 w-3.5 text-slate-300 dark:text-slate-600" />
+        <span className="max-w-[16rem] truncate font-semibold text-slate-700 dark:text-slate-200">
+          {p.nome}
+        </span>
+      </nav>
+
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -646,44 +671,12 @@ export default function ProdutoDetailPage() {
               </button>
             </>
           ) : (
-            <>
-              <button
-                onClick={() => {
-                  const v = p.variacoes?.[0];
-                  const item = {
-                    id: `${p.id}-${v?.sku ?? p.sku}-${Date.now()}`,
-                    produtoId: p.id,
-                    nome: p.nome,
-                    sku: v?.sku ?? p.sku,
-                    ean: p.ean,
-                    preco: v?.preco ?? p.preco,
-                    precoPromocional: p.precoPromocional,
-                    categoria: p.categoria,
-                    marca: p.marca,
-                    variacao: v?.tipo !== 'Única' ? v?.valor : undefined,
-                    variacaoTipo: v?.tipo !== 'Única' ? v?.tipo : undefined,
-                    quantidade: 1,
-                  };
-                  try {
-                    const existing = JSON.parse(sessionStorage.getItem('etiqueta-items') ?? '[]');
-                    sessionStorage.setItem('etiqueta-items', JSON.stringify([...existing, item]));
-                  } catch {
-                    /* ignore */
-                  }
-                  router.push('/dashboard/produtos/etiquetas');
-                }}
-                className="flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-amber-900/20 transition-colors"
-                title="Gerar etiqueta deste produto"
-              >
-                <Tag className="h-4 w-4" /> Etiqueta
-              </button>
-              <button
-                onClick={() => setEditando(true)}
-                className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
-              >
-                <Edit className="h-4 w-4" /> Editar
-              </button>
-            </>
+            <button
+              onClick={() => setEditando(true)}
+              className="flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-marca-600"
+            >
+              <Edit className="h-4 w-4" /> Editar
+            </button>
           )}
         </div>
       </div>
@@ -733,21 +726,28 @@ export default function ProdutoDetailPage() {
       )}
 
       {/* Abas */}
-      <div className="border-b border-slate-200 dark:border-slate-700">
-        <div className="flex gap-1 overflow-x-auto px-1">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setTabAtiva(tab.id)}
-              className={`flex shrink-0 items-center gap-1.5 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
-                tabAtiva === tab.id
-                  ? 'border-marca-500 text-marca-600 dark:text-marca-400'
-                  : 'border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
-              } ${tab.id === 'ia' ? 'text-purple-600 dark:text-purple-400' : ''}`}
-            >
-              {tab.label}
-            </button>
-          ))}
+      <div className="rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="flex gap-1 overflow-x-auto">
+          {TABS.map((tab) => {
+            const ativa = tabAtiva === tab.id;
+            const ehIA = tab.id === 'ia';
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setTabAtiva(tab.id)}
+                className={`flex shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all ${
+                  ativa
+                    ? ehIA
+                      ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-sm'
+                      : 'bg-marca-500 text-white shadow-sm'
+                    : `text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-700/60 dark:hover:text-slate-100 ${ehIA ? 'text-purple-600 dark:text-purple-400' : ''}`
+                }`}
+              >
+                <tab.Icone className="h-4 w-4" />
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -986,7 +986,7 @@ export default function ProdutoDetailPage() {
           </div>
 
           {/* Wizard de variação por grade (contrato novo: variacoes/prever + lote) */}
-          <WizardVariacaoGrade produtoId={produtoId} precoBase={p.preco} />
+          <WizardVariacaoGrade produtoId={produtoId} skuBase={p.sku} precoBase={p.preco} />
         </div>
       )}
 
