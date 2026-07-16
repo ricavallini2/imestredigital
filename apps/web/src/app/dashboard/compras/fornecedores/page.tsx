@@ -6,9 +6,14 @@ import {
   Building2, Plus, Search, Phone, Mail, MapPin,
   CheckCircle2, XCircle, ShoppingBag, DollarSign,
   Loader2, ChevronRight, X, AlertTriangle, Users,
-  TrendingUp, Calendar, Pencil,
+  TrendingUp, Calendar, Pencil, FileText, Clock, Ban, RefreshCw,
 } from 'lucide-react';
-import { useFornecedores, useCriarFornecedor, type Fornecedor } from '@/hooks/useCompras';
+import { useFornecedores, useCriarFornecedor } from '@/hooks/useFornecedores';
+import type {
+  Fornecedor,
+  FornecedorDto,
+  StatusFornecedor,
+} from '@/services/fornecedores.service';
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
@@ -19,7 +24,39 @@ const REGIMES_TRIBUTARIOS = [
   { value: 'LUCRO_PRESUMIDO', label: 'Lucro Presumido' },
   { value: 'LUCRO_REAL', label: 'Lucro Real' },
   { value: 'ISENTO', label: 'Isento' },
-] as const
+] as const;
+
+// Os quatro estados vêm do enum StatusCliente do customer-service — um parceiro
+// recém-criado nasce PROSPECT e pode ser bloqueado, então a tela precisa saber
+// exibir todos eles, não só ativo/inativo.
+const STATUS_CFG: Record<
+  StatusFornecedor,
+  { label: string; classe: string; icone: React.ReactNode }
+> = {
+  ATIVO: {
+    label: 'Ativo',
+    classe: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
+    icone: <CheckCircle2 className="h-3 w-3" />,
+  },
+  PROSPECT: {
+    label: 'Prospect',
+    classe: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+    icone: <Clock className="h-3 w-3" />,
+  },
+  INATIVO: {
+    label: 'Inativo',
+    classe: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400',
+    icone: <XCircle className="h-3 w-3" />,
+  },
+  BLOQUEADO: {
+    label: 'Bloqueado',
+    classe: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
+    icone: <Ban className="h-3 w-3" />,
+  },
+};
+
+// Traz um lote amplo numa página só: os KPIs abaixo agregam a lista carregada.
+const LIMITE_LISTA = 200;
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
@@ -27,6 +64,28 @@ const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const dtfmt = (iso: string) =>
   new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+
+/** O backend guarda documentos só com dígitos; a máscara é responsabilidade da tela. */
+function docfmt(f: Fornecedor): string {
+  if (f.tipo === 'PF') {
+    const cpf = f.cpf ?? '';
+    return cpf.length === 11
+      ? cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
+      : cpf;
+  }
+  const cnpj = f.cnpj ?? '';
+  return cnpj.length === 14
+    ? cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
+    : cnpj;
+}
+
+/** Nest devolve `message` como string ou string[] (erros de validação). */
+function extrairMensagemErro(erro: unknown, padrao: string): string {
+  const message = (erro as { response?: { data?: { message?: string | string[] } } })?.response
+    ?.data?.message;
+  if (Array.isArray(message)) return message[0] ?? padrao;
+  return message ?? padrao;
+}
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse rounded bg-slate-100 dark:bg-slate-700 ${className ?? ''}`} />;
@@ -41,9 +100,10 @@ function ModalNovoFornecedor({
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const { mutate: criar, isPending } = useCriarFornecedor();
+  const { mutateAsync: criar, isPending } = useCriarFornecedor();
   // Fornecedor = parceiro com papel FORNECEDOR (PF MEI/autônomo ou PJ).
-  // Ver docs/design/parceiro-unificado.md. Campos fiscais alinhados ao contrato.
+  // Ver docs/design/parceiro-unificado.md. Campos alinhados ao CriarClienteDto
+  // do customer-service.
   const [tipo, setTipo] = useState<'PF' | 'PJ'>('PJ');
   const [form, setForm] = useState({
     // PJ
@@ -74,7 +134,7 @@ function ModalNovoFornecedor({
   const setF = (field: string, value: string | number | boolean) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro('');
 
@@ -94,6 +154,13 @@ function ModalNovoFornecedor({
       }
     }
 
+    // O parceiro é identificado pelo e-mail no customer-service (único por
+    // tenant e obrigatório) — por isso a tela também exige.
+    if (!form.email.trim()) {
+      setErro('E-mail é obrigatório.');
+      return;
+    }
+
     const endereco = {
       logradouro: form.logradouro,
       numero: form.numero,
@@ -103,9 +170,7 @@ function ModalNovoFornecedor({
       cep: form.cep,
     };
 
-    // Payload alinhado ao contrato de parceiro (papel FORNECEDOR). A rota mock
-    // normaliza por `tipo` (PF: nome/cpf/rg · PJ: razaoSocial/cnpj/IE/IM/regime).
-    const payload =
+    const dto: FornecedorDto =
       tipo === 'PJ'
         ? {
             tipo,
@@ -132,13 +197,15 @@ function ModalNovoFornecedor({
             endereco,
           };
 
-    criar(payload, {
-      onSuccess: () => {
-        onSuccess();
-        onClose();
-      },
-      onError: () => setErro('Erro ao criar fornecedor. Tente novamente.'),
-    });
+    try {
+      await criar(dto);
+      onSuccess();
+      onClose();
+    } catch (e: unknown) {
+      // O backend recusa documento/e-mail duplicado (409) e documento inválido
+      // (400) — a mensagem dele é mais útil que um texto genérico.
+      setErro(extrairMensagemErro(e, 'Erro ao criar fornecedor. Tente novamente.'));
+    }
   };
 
   return (
@@ -307,7 +374,9 @@ function ModalNovoFornecedor({
                 </>
               )}
               <div>
-                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">E-mail</label>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                  E-mail <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="email"
                   value={form.email}
@@ -431,22 +500,22 @@ function ModalNovoFornecedor({
 
 export default function FornecedoresPage() {
   const [busca, setBusca] = useState('');
-  const [statusFiltro, setStatusFiltro] = useState<'ATIVO' | 'INATIVO' | ''>('');
+  const [statusFiltro, setStatusFiltro] = useState<StatusFornecedor | ''>('');
   const [showModal, setShowModal] = useState(false);
 
-  const { data, isLoading, refetch } = useFornecedores({
+  const { data, isLoading, isError, refetch } = useFornecedores({
     busca: busca || undefined,
     status: statusFiltro || undefined,
+    limite: LIMITE_LISTA,
   });
 
   const fornecedores: Fornecedor[] = data?.dados ?? [];
 
   const totalGasto = fornecedores.reduce((s, f) => s + f.totalCompras, 0);
   const ativos = fornecedores.filter((f) => f.status === 'ATIVO').length;
-  const ticketMedio = fornecedores.length > 0 && fornecedores.some(f => f.qtdCompras > 0)
-    ? fornecedores.reduce((s, f) => s + f.totalCompras, 0) /
-      Math.max(fornecedores.reduce((s, f) => s + f.qtdCompras, 0), 1)
-    : 0;
+  const totalQtdCompras = fornecedores.reduce((s, f) => s + f.qtdCompras, 0);
+  const ticketMedio = totalQtdCompras > 0 ? totalGasto / totalQtdCompras : 0;
+  const temFiltro = Boolean(busca || statusFiltro);
 
   return (
     <>
@@ -475,8 +544,8 @@ export default function FornecedoresPage() {
           </button>
         </div>
 
-        {/* KPIs */}
-        {!isLoading && (
+        {/* KPIs — agregados sobre a lista carregada (até LIMITE_LISTA registros) */}
+        {!isLoading && !isError && (
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {[
               { label: 'Total', value: String(data?.total ?? 0), icon: Users, color: 'text-marca-600', bg: 'bg-marca-50 dark:bg-marca-900/20' },
@@ -506,7 +575,8 @@ export default function FornecedoresPage() {
             <input
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
-              placeholder="Buscar por nome, CNPJ, CPF, e-mail..."
+              // O customer-service busca apenas por nome e e-mail.
+              placeholder="Buscar por nome ou e-mail..."
               className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-marca-500"
             />
           </div>
@@ -538,13 +608,27 @@ export default function FornecedoresPage() {
               <Skeleton key={i} className="h-48 rounded-2xl" />
             ))}
           </div>
+        ) : isError ? (
+          <div className="rounded-2xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/10 py-16 text-center">
+            <AlertTriangle className="mx-auto mb-3 h-12 w-12 text-red-300 dark:text-red-500/60" />
+            <p className="font-medium text-red-600 dark:text-red-400">
+              Não foi possível carregar os fornecedores
+            </p>
+            <button
+              onClick={() => refetch()}
+              className="mt-4 inline-flex items-center gap-2 rounded-xl border border-red-200 dark:border-red-800/50 px-4 py-2 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Tentar novamente
+            </button>
+          </div>
         ) : fornecedores.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-16 text-center">
             <Building2 className="mx-auto mb-3 h-12 w-12 text-slate-200 dark:text-slate-600" />
             <p className="text-slate-500 font-medium">
-              {busca || statusFiltro ? 'Nenhum fornecedor encontrado' : 'Nenhum fornecedor cadastrado'}
+              {temFiltro ? 'Nenhum fornecedor encontrado' : 'Nenhum fornecedor cadastrado'}
             </p>
-            {!busca && !statusFiltro && (
+            {!temFiltro && (
               <button
                 onClick={() => setShowModal(true)}
                 className="mt-4 inline-flex items-center gap-2 rounded-xl bg-marca-600 px-4 py-2 text-sm font-semibold text-white hover:bg-marca-700 transition-colors"
@@ -562,6 +646,13 @@ export default function FornecedoresPage() {
                 f.tipo === 'PF'
                   ? f.nome || f.razaoSocial
                   : f.nomeFantasia || f.razaoSocial;
+              const documento = docfmt(f);
+              // A listagem do customer-service não inclui a relação `enderecos`,
+              // então a localidade só aparece quando o backend a devolver.
+              const localidade = f.endereco?.cidade
+                ? `${f.endereco.cidade}${f.endereco.uf ? `/${f.endereco.uf}` : ''}`
+                : '';
+              const statusCfg = STATUS_CFG[f.status];
               return (
               <div
                 key={f.id}
@@ -579,7 +670,7 @@ export default function FornecedoresPage() {
                           {nomeExibicao}
                         </span>
                         <span className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
-                          {f.tipo ?? 'PJ'}
+                          {f.tipo}
                         </span>
                       </p>
                       <p className="text-xs text-slate-400 truncate">
@@ -588,28 +679,27 @@ export default function FornecedoresPage() {
                     </div>
                   </div>
                   <span
-                    className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                      f.status === 'ATIVO'
-                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                        : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-                    }`}
+                    className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold ${statusCfg.classe}`}
                   >
-                    {f.status === 'ATIVO'
-                      ? <CheckCircle2 className="h-3 w-3" />
-                      : <XCircle className="h-3 w-3" />
-                    }
-                    {f.status === 'ATIVO' ? 'Ativo' : 'Inativo'}
+                    {statusCfg.icone}
+                    {statusCfg.label}
                   </span>
                 </div>
 
                 {/* Info */}
                 <div className="space-y-1.5 mb-4">
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <MapPin className="h-3 w-3 shrink-0" />
-                    <span className="truncate">
-                      {f.endereco.cidade}/{f.endereco.uf} · {f.tipo === 'PF' ? f.cpf : f.cnpj}
-                    </span>
-                  </div>
+                  {documento && (
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <FileText className="h-3 w-3 shrink-0" />
+                      <span className="truncate font-mono">{documento}</span>
+                    </div>
+                  )}
+                  {localidade && (
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <MapPin className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{localidade}</span>
+                    </div>
+                  )}
                   {f.email && (
                     <div className="flex items-center gap-2 text-xs text-slate-500">
                       <Mail className="h-3 w-3 shrink-0" />
@@ -685,9 +775,9 @@ export default function FornecedoresPage() {
           </div>
         )}
 
-        {data && data.total > 0 && (
+        {!isLoading && !isError && (data?.total ?? 0) > 0 && (
           <p className="text-center text-xs text-slate-400">
-            {data.total} fornecedor{data.total !== 1 ? 'es' : ''} encontrado{data.total !== 1 ? 's' : ''}
+            {data?.total} fornecedor{data?.total !== 1 ? 'es' : ''} encontrado{data?.total !== 1 ? 's' : ''}
           </p>
         )}
       </div>

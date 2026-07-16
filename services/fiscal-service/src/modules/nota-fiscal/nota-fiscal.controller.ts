@@ -105,6 +105,24 @@ export class NotaFiscalController {
   }
 
   /**
+   * Estatísticas fiscais agregadas do tenant (KPIs da tela Fiscal).
+   *
+   * Rota ESTÁTICA declarada ANTES de `@Get(':id')`: se viesse depois, o Express
+   * casaria `/notas-fiscais/estatisticas` com `:id` e o Prisma tentaria
+   * `findFirst({ where: { id: 'estatisticas' } })` numa coluna UUID, quebrando
+   * com "Error creating UUID, invalid character".
+   */
+  @Get('estatisticas')
+  @ApiOperation({ summary: 'Estatísticas fiscais do tenant (faturamento, impostos, taxas)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Resumo estatístico das notas fiscais',
+  })
+  async obterEstatisticas(@Req() req: any) {
+    return this.notaFiscalService.obterEstatisticas(req.tenantId);
+  }
+
+  /**
    * Busca uma nota fiscal por ID.
    */
   @Get(':id')

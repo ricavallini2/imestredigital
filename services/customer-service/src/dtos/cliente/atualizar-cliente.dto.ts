@@ -14,14 +14,12 @@ import {
   IsNumber, Min, Max, Matches,
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { OrigemClienteEnum, PapelEnum, RegimeTributarioEnum } from './criar-cliente.dto';
-
-export enum StatusClienteEnum {
-  PROSPECT = 'PROSPECT',
-  ATIVO = 'ATIVO',
-  INATIVO = 'INATIVO',
-  BLOQUEADO = 'BLOQUEADO',
-}
+import {
+  OrigemClienteEnum,
+  PapelEnum,
+  RegimeTributarioEnum,
+  StatusClienteEnum,
+} from './criar-cliente.dto';
 
 export class AtualizarClienteDto {
   @ApiPropertyOptional({ description: 'Nome completo ou fantasia', example: 'João da Silva Atualizado' })

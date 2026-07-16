@@ -30,6 +30,7 @@ import { AssistenteService } from './assistente.service';
 import { IniciarConversaDTO } from './dtos/iniciar-conversa.dto';
 import { EnviarMensagemDTO } from './dtos/enviar-mensagem.dto';
 import { ComandoRapidoDTO } from './dtos/comando-rapido.dto';
+import { PaginacaoDTO } from '../../common/dtos/paginacao.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Assistente')
@@ -85,10 +86,10 @@ export class AssistenteController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Lista de conversas',
+    description: 'Lista de conversas (envelope paginado canônico)',
     schema: {
       example: {
-        conversas: [
+        dados: [
           {
             id: 'conv-1',
             titulo: 'Análise de vendas',
@@ -97,18 +98,21 @@ export class AssistenteController {
         ],
         total: 5,
         pagina: 0,
+        limite: 20,
+        totalPaginas: 1,
       },
     },
   })
-  async listarConversas(
-    @Request() req,
-    @Query('pagina') pagina: number = 0,
-    @Query('limite') limite: number = 20,
-  ) {
+  async listarConversas(@Request() req, @Query() filtros: PaginacaoDTO) {
     const tenantId = req.tenantId;
     const usuarioId = req.usuarioId || 'usuario-anonimo';
 
-    return this.service.listarConversas(tenantId, usuarioId, pagina, limite);
+    return this.service.listarConversas(
+      tenantId,
+      usuarioId,
+      filtros.pagina,
+      filtros.limite,
+    );
   }
 
   /**

@@ -114,6 +114,8 @@ export class ClienteService {
         observacoes: dto.observacoes,
         tags: dto.tags || [],
         ...(dto.origem ? { origem: dto.origem as any } : {}),
+        // Status inicial: quando omitido, o Prisma aplica o @default(PROSPECT)
+        ...(dto.status ? { status: dto.status as StatusCliente } : {}),
         // Grupo CLIENTE
         ...(dto.limiteCredito != null ? { limiteCredito: dto.limiteCredito } : {}),
         vendedorId: dto.vendedorId,

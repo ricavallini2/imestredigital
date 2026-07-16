@@ -24,6 +24,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { PrevisaoService } from './previsao.service';
+import { ListarPrevisoesDTO } from './dtos/listar-previsoes.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Previsão')
@@ -133,16 +134,7 @@ export class PrevisaoController {
     status: 200,
     description: 'Lista de previsões',
   })
-  async listar(
-    @Request() req,
-    @Query('produtoId') produtoId?: string,
-    @Query('pagina') pagina: number = 0,
-    @Query('limite') limite: number = 20,
-  ) {
-    return this.service.listarPrevisoes(req.tenantId, {
-      produtoId,
-      pagina,
-      limite,
-    });
+  async listar(@Request() req, @Query() filtros: ListarPrevisoesDTO) {
+    return this.service.listarPrevisoes(req.tenantId, filtros);
   }
 }

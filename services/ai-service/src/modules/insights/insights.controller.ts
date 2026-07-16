@@ -25,6 +25,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { InsightsService } from './insights.service';
+import { ListarInsightsDTO } from './dtos/listar-insights.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Insights')
@@ -46,21 +47,8 @@ export class InsightsController {
     status: 200,
     description: 'Lista de insights',
   })
-  async listar(
-    @Request() req,
-    @Query('tipo') tipo?: string,
-    @Query('prioridade') prioridade?: string,
-    @Query('apenasNaoLidos') apenasNaoLidos?: boolean,
-    @Query('pagina') pagina: number = 0,
-    @Query('limite') limite: number = 20,
-  ) {
-    return this.service.listarInsights(req.tenantId, {
-      tipo,
-      prioridade,
-      apenasNaoLidos,
-      pagina,
-      limite,
-    });
+  async listar(@Request() req, @Query() filtros: ListarInsightsDTO) {
+    return this.service.listarInsights(req.tenantId, filtros);
   }
 
   /**

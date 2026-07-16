@@ -88,8 +88,8 @@ export function useDashboardKPIs() {
 
 export function useDashboardInsights() {
   return useQuery({
-    queryKey: ['insights', { visualizado: false, limite: 5 }],
-    queryFn: () => iaService.listarInsights({ visualizado: false, limite: 5 }),
+    queryKey: ['insights', { apenasNaoLidos: true, limite: 5 }],
+    queryFn: () => iaService.listarInsights({ apenasNaoLidos: true, limite: 5 }),
     staleTime: 5 * 60 * 1000,
   });
 }

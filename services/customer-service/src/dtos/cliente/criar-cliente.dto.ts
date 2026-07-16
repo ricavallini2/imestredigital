@@ -33,6 +33,13 @@ export enum TipoClienteEnum {
   PJ = 'PJ',
 }
 
+export enum StatusClienteEnum {
+  PROSPECT = 'PROSPECT',
+  ATIVO = 'ATIVO',
+  INATIVO = 'INATIVO',
+  BLOQUEADO = 'BLOQUEADO',
+}
+
 export enum OrigemClienteEnum {
   MANUAL = 'MANUAL',
   MARKETPLACE = 'MARKETPLACE',
@@ -233,6 +240,15 @@ export class CriarClienteDto {
   @IsOptional()
   @IsEnum(OrigemClienteEnum, { message: 'Origem inválida' })
   origem?: string;
+
+  @ApiPropertyOptional({
+    description: 'Status inicial do parceiro. Quando omitido, o banco aplica o default PROSPECT.',
+    enum: StatusClienteEnum,
+    example: 'ATIVO',
+  })
+  @IsOptional()
+  @IsEnum(StatusClienteEnum, { message: 'Status inválido' })
+  status?: StatusClienteEnum;
 
   // ── Grupo CLIENTE ──────────────────────────────────────────────────────────
   @ApiPropertyOptional({ description: 'Limite de crédito (papel CLIENTE)', example: 5000 })

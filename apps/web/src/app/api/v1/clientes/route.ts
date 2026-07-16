@@ -4,7 +4,9 @@ import { CLIENTES_MOCK, TENANT_ID, Papel } from './_mock-data';
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const busca = searchParams.get('busca')?.toLowerCase() ?? '';
-  const status = searchParams.get('status') ?? '';
+  // No customer-service real `status` é um array (?status[]=ATIVO); aceitamos as
+  // duas formas para o mock responder igual ao backend.
+  const status = searchParams.get('status') ?? searchParams.get('status[]') ?? '';
   const tipo = searchParams.get('tipo') ?? '';
   const origem = searchParams.get('origem') ?? '';
   const papel = searchParams.get('papel') ?? '';

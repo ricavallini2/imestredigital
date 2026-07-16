@@ -314,12 +314,14 @@ export default function ImportarNFePage() {
                   {result.fornecedor.dados.cnpj}
                 </span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Cidade/UF</span>
-                <span className="font-medium text-slate-800 dark:text-slate-200">
-                  {result.fornecedor.dados.endereco.cidade}/{result.fornecedor.dados.endereco.uf}
-                </span>
-              </div>
+              {result.fornecedor.dados.endereco?.cidade && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Cidade/UF</span>
+                  <span className="font-medium text-slate-800 dark:text-slate-200">
+                    {result.fornecedor.dados.endereco.cidade}/{result.fornecedor.dados.endereco.uf}
+                  </span>
+                </div>
+              )}
               {result.fornecedor.criado && (
                 <div className="rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 px-3 py-2 mt-2">
                   <p className="text-xs text-amber-700 dark:text-amber-400">

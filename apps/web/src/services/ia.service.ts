@@ -29,8 +29,12 @@ export const iaService = {
   // ─── Insights ──────────────────────────────────────────────────────────────
   // O backend responde no envelope canônico { dados, total, ... }.
   // Desembrulhamos aqui e devolvemos Insight[] para os hooks/UI.
+  //
+  // Os nomes dos filtros espelham `ListarInsightsDTO` do ai-service: ele roda
+  // com `whitelist` + `forbidNonWhitelisted`, então qualquer chave fora do DTO
+  // (ex.: o antigo `visualizado`) faz a requisição responder 400.
   listarInsights: async (params?: {
-    visualizado?: boolean; tipo?: string; prioridade?: string; pagina?: number; limite?: number;
+    apenasNaoLidos?: boolean; tipo?: string; prioridade?: string; pagina?: number; limite?: number;
   }): Promise<Insight[]> => {
     const { data } = await api.get<RespostaPaginada<Insight>>('/v1/insights', { params });
     return data.dados;

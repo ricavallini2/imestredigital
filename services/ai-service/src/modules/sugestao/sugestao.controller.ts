@@ -28,6 +28,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { SugestaoService } from './sugestao.service';
+import { ListarSugestoesDTO } from './dtos/listar-sugestoes.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Sugestões')
@@ -177,19 +178,8 @@ export class SugestaoController {
     status: 200,
     description: 'Lista de sugestões',
   })
-  async listar(
-    @Request() req,
-    @Query('tipo') tipo?: string,
-    @Query('aceita') aceita?: boolean,
-    @Query('pagina') pagina: number = 0,
-    @Query('limite') limite: number = 20,
-  ) {
-    return this.service.listarSugestoes(req.tenantId, {
-      tipo,
-      aceita,
-      pagina,
-      limite,
-    });
+  async listar(@Request() req, @Query() filtros: ListarSugestoesDTO) {
+    return this.service.listarSugestoes(req.tenantId, filtros);
   }
 
   /**

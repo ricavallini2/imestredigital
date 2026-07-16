@@ -72,7 +72,8 @@ function getInsights() { return globalThis.__insightsMock!; }
 // Retorna o envelope paginado canônico: { dados, total, pagina, limite, totalPaginas }
 export async function GET(req: NextRequest) {
   const params = req.nextUrl.searchParams;
-  const visualizado = params.get('visualizado');
+  // O filtro espelha `ListarInsightsDTO` do ai-service: `apenasNaoLidos`.
+  const apenasNaoLidos = params.get('apenasNaoLidos');
   const tipo        = params.get('tipo');
   const prioridade  = params.get('prioridade');
   const pagina      = Number(params.get('pagina') ?? '0');
@@ -80,8 +81,8 @@ export async function GET(req: NextRequest) {
 
   let lista = [...getInsights()].sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
 
-  if (visualizado !== null) {
-    lista = lista.filter(i => i.visualizado === (visualizado === 'true'));
+  if (apenasNaoLidos === 'true') {
+    lista = lista.filter(i => !i.visualizado);
   }
   if (tipo) lista = lista.filter(i => i.tipo === tipo.toUpperCase());
   if (prioridade) lista = lista.filter(i => i.prioridade === prioridade.toUpperCase());

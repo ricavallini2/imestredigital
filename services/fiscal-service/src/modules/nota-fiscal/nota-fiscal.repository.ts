@@ -256,6 +256,56 @@ export class NotaFiscalRepository {
   }
 
   /**
+   * Agrega as estatísticas fiscais do tenant DIRETO no banco (groupBy +
+   * aggregate), sem carregar as notas em memória.
+   *
+   * `desde30`/`desde7` são as datas de corte das janelas de 30 e 7 dias,
+   * calculadas pelo service e recebidas aqui para manter o repositório puro
+   * (sem depender do relógio) e facilitar o teste.
+   *
+   * Devolve os agregados BRUTOS do Prisma — os somatórios ainda são `Decimal`;
+   * a conversão para `number` é responsabilidade do service.
+   */
+  async agregarEstatisticas(tenantId: string, desde30: Date, desde7: Date) {
+    const [porStatus, porTipo, janela30d, janela7d] = await Promise.all([
+      // Distribuição de todas as notas do tenant por status.
+      this.prisma.notaFiscal.groupBy({
+        by: ['status'],
+        where: { tenantId },
+        _count: { _all: true },
+      }),
+      // Distribuição de todas as notas do tenant por tipo (NFE/NFCE/NFSE).
+      this.prisma.notaFiscal.groupBy({
+        by: ['tipo'],
+        where: { tenantId },
+        _count: { _all: true },
+      }),
+      // Faturamento + impostos das notas AUTORIZADAS nos últimos 30 dias.
+      this.prisma.notaFiscal.aggregate({
+        where: {
+          tenantId,
+          status: StatusNotaFiscal.AUTORIZADA,
+          dataEmissao: { gte: desde30 },
+        },
+        _sum: { valorTotal: true, valorIcms: true, valorPis: true, valorCofins: true },
+        _count: { _all: true },
+      }),
+      // Faturamento das notas AUTORIZADAS nos últimos 7 dias.
+      this.prisma.notaFiscal.aggregate({
+        where: {
+          tenantId,
+          status: StatusNotaFiscal.AUTORIZADA,
+          dataEmissao: { gte: desde7 },
+        },
+        _sum: { valorTotal: true },
+        _count: { _all: true },
+      }),
+    ]);
+
+    return { porStatus, porTipo, janela30d, janela7d };
+  }
+
+  /**
    * Atualiza o status de uma nota fiscal.
    *
    * O update é escopado por { id, tenantId } (via updateMany) para nunca

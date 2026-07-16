@@ -60,6 +60,7 @@ export class AssistenteService {
 
     // Adicionar mensagem inicial do sistema
     await this.repository.adicionarMensagem({
+      tenantId,
       conversaId: conversa.id,
       papel: 'SISTEMA',
       conteudo: `Conversa iniciada: ${dados.titulo}`,
@@ -79,24 +80,29 @@ export class AssistenteService {
   ) {
     this.logger.debug(`Processando mensagem em conversa ${conversaId}`);
 
-    // Validar conversa existe e pertence ao tenant
-    const conversa = await this.repository.obterConversa(conversaId);
-    if (!conversa || conversa.tenantId !== tenantId) {
+    // Validar conversa existe e pertence ao tenant (filtro por tenantId na query)
+    const conversa = await this.repository.obterConversa(tenantId, conversaId);
+    if (!conversa) {
       throw new NotFoundException(
         'Conversa não encontrada ou não pertence a este tenant',
       );
     }
 
     // 1. Adicionar mensagem do usuário
-    const mensagemUsuario = await this.repository.adicionarMensagem({
+    await this.repository.adicionarMensagem({
+      tenantId,
       conversaId,
       papel: 'USUARIO',
       conteudo: dados.mensagem,
       metadados: { contextoExtra: dados.contextoExtra || {} },
     });
 
-    // 2. Obter histórico para contexto
-    const historico = await this.repository.obterUltimasMensagens(conversaId, 10);
+    // 2. Obter histórico para contexto (escopado pelo tenant da conversa)
+    const historico = await this.repository.obterUltimasMensagens(
+      tenantId,
+      conversaId,
+      10,
+    );
 
     // 3. Construir system prompt
     const contexto = { ...(conversa.contexto as Record<string, any>), ...dados.contextoExtra };
@@ -124,6 +130,7 @@ export class AssistenteService {
 
     // 6. Armazenar resposta
     const mensagemAssistente = await this.repository.adicionarMensagem({
+      tenantId,
       conversaId,
       papel: 'ASSISTENTE',
       conteudo: respostaLLM.conteudo,
@@ -134,6 +141,13 @@ export class AssistenteService {
         custo: respostaLLM.custo,
       },
     });
+
+    // adicionarMensagem retorna null quando a conversa não é do tenant
+    if (!mensagemAssistente) {
+      throw new NotFoundException(
+        'Conversa não encontrada ou não pertence a este tenant',
+      );
+    }
 
     this.logger.debug(
       `Resposta gerada: ${respostaLLM.tokensUsados} tokens, ~$${respostaLLM.custo.toFixed(4)}`,
@@ -192,7 +206,9 @@ export class AssistenteService {
   }
 
   /**
-   * Lista todas as conversas de um usuário
+   * Lista as conversas de um usuário no envelope paginado canônico:
+   * { dados, total, pagina, limite, totalPaginas } — mesmo contrato das demais
+   * listagens do serviço (ver InsightsService.listarInsights).
    */
   async listarConversas(
     tenantId: string,
@@ -201,16 +217,30 @@ export class AssistenteService {
     limite: number = 20,
   ) {
     const offset = pagina * limite;
-    return this.repository.listarConversas(tenantId, usuarioId, limite, offset);
+
+    const { conversas, total } = await this.repository.listarConversas(
+      tenantId,
+      usuarioId,
+      limite,
+      offset,
+    );
+
+    return {
+      dados: conversas,
+      total,
+      pagina,
+      limite,
+      totalPaginas: limite > 0 ? Math.ceil(total / limite) : 0,
+    };
   }
 
   /**
-   * Obtém uma conversa com seu histórico
+   * Obtém uma conversa com seu histórico (escopada por tenant na query)
    */
   async obterConversa(tenantId: string, conversaId: string) {
-    const conversa = await this.repository.obterConversa(conversaId);
+    const conversa = await this.repository.obterConversa(tenantId, conversaId);
 
-    if (!conversa || conversa.tenantId !== tenantId) {
+    if (!conversa) {
       throw new NotFoundException('Conversa não encontrada');
     }
 

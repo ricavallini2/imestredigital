@@ -4,9 +4,9 @@
 // CADASTRO (tela) — UNIFICADO: o cadastro de fornecedor é um PARCEIRO com papel
 // FORNECEDOR, gravado/lido pelo cadastro unificado em /api/v1/clientes (modelo
 // `Cliente` + `papeis[]`). A tela de Fornecedores (Compras) e os hooks de
-// useCompras (useFornecedores/useFornecedor/useCriarFornecedor) já operam sobre
-// /v1/clientes?papel=FORNECEDOR, mapeando Parceiro↔Fornecedor
-// (parceiroParaFornecedor/fornecedorParaParceiro em apps/web/src/hooks/useCompras.ts).
+// apps/web/src/hooks/useFornecedores.ts já operam sobre
+// /v1/clientes?papel=FORNECEDOR, mapeando Parceiro↔Fornecedor em
+// apps/web/src/services/fornecedores.service.ts.
 // A rota /api/v1/clientes suporta `?papel=FORNECEDOR` no GET e persiste todos os
 // campos fiscais do contrato no POST.
 //

@@ -34,6 +34,38 @@ import {
 } from '../provedor-fiscal/tipos/provedor-fiscal.tipos';
 import { montarDocumentoFiscal } from '../provedor-fiscal/montar-documento-fiscal';
 
+/**
+ * Contrato de resposta de GET /notas-fiscais/estatisticas.
+ *
+ * Espelha exatamente o tipo `EstatisticasFiscais` consumido pelo front
+ * (`apps/web/src/services/fiscal.service.ts` → tela `dashboard/fiscal`).
+ * Todos os valores monetários saem como `number` em REAIS (nunca `Decimal`).
+ */
+export interface EstatisticasFiscais {
+  /** Somatório de `valorTotal` das notas AUTORIZADAS nos últimos 30 dias. */
+  faturado30d: number;
+  /** Somatório de `valorTotal` das notas AUTORIZADAS nos últimos 7 dias. */
+  faturado7d: number;
+  /** ICMS + PIS + COFINS das notas AUTORIZADAS nos últimos 30 dias. */
+  impostos30d: number;
+  /** Total de notas do tenant, em qualquer status. */
+  totalNFs: number;
+  /** Quantidade de notas AUTORIZADAS nos últimos 30 dias. */
+  emitidas30d: number;
+  /** Quantidade de notas AUTORIZADAS nos últimos 7 dias. */
+  emitidas7d: number;
+  /** % de rejeitadas sobre as notas submetidas (fora rascunho), 1 decimal. */
+  taxaRejeicao: number;
+  /** % de autorizadas sobre as notas submetidas (fora rascunho), 1 decimal. */
+  taxaEmissao: number;
+  /** Distribuição de todas as notas por status (chaves do enum). */
+  porStatus: Record<string, number>;
+  /** Distribuição de todas as notas por tipo (NFE/NFCE/NFSE). */
+  porTipo: Record<string, number>;
+  /** Notas TRANSMITIDAS aguardando retorno da SEFAZ. */
+  processando: number;
+}
+
 @Injectable()
 export class NotaFiscalService {
   private readonly logger = new Logger('NotaFiscalService');
@@ -76,9 +108,7 @@ export class NotaFiscalService {
       // MESMA série seja usada na reserva atômica de número e na chave de
       // acesso (senão a numeração e o campo `serie` da nota poderiam divergir).
       const serieResolvida =
-        dados.serie ||
-        (dados.tipo === 'NFCE' ? config.serieNfce : config.serieNfe) ||
-        '1';
+        dados.serie || (dados.tipo === 'NFCE' ? config.serieNfce : config.serieNfe) || '1';
       const dadosNormalizados: CriarNotaFiscalDto = {
         ...dados,
         serie: serieResolvida,
@@ -118,6 +148,9 @@ export class NotaFiscalService {
         calculo.itens,
         calculo.totalizadores,
       );
+
+      // O rascunho já entra em `totalNFs`/`porStatus`/`porTipo` das estatísticas.
+      await this.invalidarEstatisticas(tenantId);
 
       this.logger.log(`Rascunho criado: ${nota.id} (número ${nota.numero})`);
       return nota;
@@ -183,6 +216,8 @@ export class NotaFiscalService {
       );
 
       await this.cache.remover(`nota:${tenantId}:${notaId}`).catch(() => undefined);
+      // RASCUNHO → VALIDADA muda `porStatus` (e o denominador das taxas).
+      await this.invalidarEstatisticas(tenantId);
       this.logger.log(`Nota ${notaId} validada com sucesso`);
 
       return this.notaFiscalRepository.buscarPorId(tenantId, notaId);
@@ -309,7 +344,12 @@ export class NotaFiscalService {
           motivoRejeicao: resultado.motivo,
           xmlRetorno: resultado.xml,
         });
-        await this.produtor.publicarNotaRejeitada(tenantId, notaId, resultado.motivo ?? 'Documento denegado pela SEFAZ', pedidoId);
+        await this.produtor.publicarNotaRejeitada(
+          tenantId,
+          notaId,
+          resultado.motivo ?? 'Documento denegado pela SEFAZ',
+          pedidoId,
+        );
         this.logger.warn(`Nota ${notaId} denegada: ${resultado.motivo ?? 'sem motivo'}`);
         break;
       }
@@ -331,11 +371,23 @@ export class NotaFiscalService {
           motivoRejeicao: resultado.motivo,
           xmlRetorno: resultado.xml,
         });
-        await this.produtor.publicarNotaRejeitada(tenantId, notaId, resultado.motivo ?? 'Documento rejeitado pela SEFAZ', pedidoId);
+        await this.produtor.publicarNotaRejeitada(
+          tenantId,
+          notaId,
+          resultado.motivo ?? 'Documento rejeitado pela SEFAZ',
+          pedidoId,
+        );
         this.logger.warn(`Nota ${notaId} rejeitada: ${resultado.motivo ?? 'sem motivo'}`);
         break;
       }
     }
+
+    // Invalida os KPIs DEPOIS de gravar o novo status. Invalidar antes abriria
+    // uma janela (a escrita acima tem vários awaits) na qual uma leitura de
+    // /notas-fiscais/estatisticas repovoaria o cache com o estado ANTERIOR e o
+    // congelaria por 60s — visível sobretudo no webhook, que roda fora do
+    // request do usuário (a nota autoriza e o contador não sobe).
+    await this.invalidarEstatisticas(tenantId);
   }
 
   /**
@@ -683,6 +735,117 @@ export class NotaFiscalService {
   }
 
   /**
+   * Estatísticas fiscais agregadas do tenant (KPIs da tela Fiscal).
+   *
+   * Agrega no BANCO (groupBy/aggregate) em vez de carregar as notas em
+   * memória: os totais cobrem TODAS as notas do tenant, e não apenas a
+   * primeira página como fazia o cálculo client-side.
+   *
+   * Semântica (espelha o que a tela `dashboard/fiscal` consome):
+   *  - janelas de 30/7 dias filtram por `dataEmissao` e status AUTORIZADA —
+   *    faturamento só considera nota efetivamente autorizada pela SEFAZ;
+   *  - `taxaEmissao`/`taxaRejeicao` têm como denominador as notas SUBMETIDAS
+   *    (total - RASCUNHO), pois rascunho ainda não foi à SEFAZ e não deve
+   *    diluir as taxas;
+   *  - `porStatus`/`porTipo` trazem apenas as chaves presentes; a UI já faz
+   *    fallback para 0 nas ausentes.
+   *
+   * Resultado cacheado por 60s (KPI tolera leve defasagem) e invalidado via
+   * `invalidarEstatisticas` sempre que uma nota do tenant nasce ou muda de
+   * status — o TTL é só a rede de segurança, não a via normal de atualização.
+   */
+  async obterEstatisticas(tenantId: string): Promise<EstatisticasFiscais> {
+    try {
+      const cacheKey = this.chaveEstatisticas(tenantId);
+      const emCache = await this.cache.obter<EstatisticasFiscais>(cacheKey);
+      if (emCache) {
+        return emCache;
+      }
+
+      const agora = Date.now();
+      const desde30 = new Date(agora - 30 * 24 * 60 * 60 * 1000);
+      const desde7 = new Date(agora - 7 * 24 * 60 * 60 * 1000);
+
+      const { porStatus, porTipo, janela30d, janela7d } =
+        await this.notaFiscalRepository.agregarEstatisticas(tenantId, desde30, desde7);
+
+      // Distribuição por status + total geral derivado das contagens.
+      const contagemStatus: Record<string, number> = {};
+      let totalNFs = 0;
+      for (const linha of porStatus) {
+        contagemStatus[linha.status] = linha._count._all;
+        totalNFs += linha._count._all;
+      }
+
+      const contagemTipo: Record<string, number> = {};
+      for (const linha of porTipo) {
+        contagemTipo[linha.tipo] = linha._count._all;
+      }
+
+      const autorizadas = contagemStatus[StatusNotaFiscal.AUTORIZADA] ?? 0;
+      const rejeitadas = contagemStatus[StatusNotaFiscal.REJEITADA] ?? 0;
+      const processando = contagemStatus[StatusNotaFiscal.TRANSMITIDA] ?? 0;
+      const rascunhos = contagemStatus[StatusNotaFiscal.RASCUNHO] ?? 0;
+      // Denominador das taxas: notas efetivamente submetidas à SEFAZ.
+      const submetidas = totalNFs - rascunhos;
+
+      // Decimal → number (reais) na fronteira da resposta.
+      const faturado30d = this.decimalParaNumero(janela30d._sum.valorTotal) ?? 0;
+      const faturado7d = this.decimalParaNumero(janela7d._sum.valorTotal) ?? 0;
+      const impostos30d =
+        (this.decimalParaNumero(janela30d._sum.valorIcms) ?? 0) +
+        (this.decimalParaNumero(janela30d._sum.valorPis) ?? 0) +
+        (this.decimalParaNumero(janela30d._sum.valorCofins) ?? 0);
+
+      const estatisticas: EstatisticasFiscais = {
+        faturado30d: this.arredondar(faturado30d, 2),
+        faturado7d: this.arredondar(faturado7d, 2),
+        impostos30d: this.arredondar(impostos30d, 2),
+        totalNFs,
+        emitidas30d: janela30d._count._all,
+        emitidas7d: janela7d._count._all,
+        taxaRejeicao: submetidas > 0 ? this.arredondar((rejeitadas / submetidas) * 100, 1) : 0,
+        taxaEmissao: submetidas > 0 ? this.arredondar((autorizadas / submetidas) * 100, 1) : 0,
+        porStatus: contagemStatus,
+        porTipo: contagemTipo,
+        processando,
+      };
+
+      await this.cache.armazenar(cacheKey, estatisticas, 60);
+
+      return estatisticas;
+    } catch (erro) {
+      this.logger.error('Erro ao agregar estatísticas fiscais:', erro);
+      throw erro;
+    }
+  }
+
+  /** Chave do cache de estatísticas fiscais do tenant (uma por tenant). */
+  private chaveEstatisticas(tenantId: string): string {
+    return `nota:estatisticas:${tenantId}`;
+  }
+
+  /**
+   * Invalida o cache de estatísticas do tenant.
+   *
+   * Deve ser chamado em TODO ponto que altera o conjunto de notas (criação) ou
+   * o status/valores de uma nota — senão os KPIs da tela Fiscal ficam até 60s
+   * defasados ("emiti a NF-e e o contador não subiu").
+   *
+   * Nunca derruba a operação de negócio: uma falha de Redis só custa a
+   * defasagem do TTL, então o erro é engolido (mesmo padrão da invalidação da
+   * nota individual).
+   */
+  private async invalidarEstatisticas(tenantId: string): Promise<void> {
+    await this.cache.remover(this.chaveEstatisticas(tenantId)).catch(() => undefined);
+  }
+
+  /** Arredonda para `casas` decimais devolvendo number (não a string de toFixed). */
+  private arredondar(valor: number, casas: number): number {
+    return Number(valor.toFixed(casas));
+  }
+
+  /**
    * Calcula impostos para uma lista de itens avulsos (endpoint
    * POST /calcular-impostos).
    *
@@ -784,7 +947,12 @@ export class NotaFiscalService {
       protocolo?: unknown;
       destinatario?: Prisma.JsonValue;
     },
-    config: { razaoSocial?: unknown; nomeFantasia?: unknown; cnpj?: unknown; ambienteSefaz?: unknown } | null,
+    config: {
+      razaoSocial?: unknown;
+      nomeFantasia?: unknown;
+      cnpj?: unknown;
+      ambienteSefaz?: unknown;
+    } | null,
   ): Buffer {
     const ehNfce = nota.tipo === 'NFCE';
     const dest = nota.destinatario as { nome?: string } | null;
@@ -794,9 +962,12 @@ export class NotaFiscalService {
       undefined;
 
     return gerarDanfePdfMinimo({
-      titulo: ehNfce ? 'DANFCE - Documento Auxiliar da NFC-e' : 'DANFE - Documento Auxiliar da NF-e',
+      titulo: ehNfce
+        ? 'DANFCE - Documento Auxiliar da NFC-e'
+        : 'DANFE - Documento Auxiliar da NF-e',
       chaveAcesso: typeof nota.chaveAcesso === 'string' ? nota.chaveAcesso : '',
-      numero: typeof nota.numero === 'number' || typeof nota.numero === 'string' ? nota.numero : '-',
+      numero:
+        typeof nota.numero === 'number' || typeof nota.numero === 'string' ? nota.numero : '-',
       serie: typeof nota.serie === 'string' || typeof nota.serie === 'number' ? nota.serie : '-',
       modelo: ehNfce ? '65' : '55',
       emitente,
@@ -816,7 +987,10 @@ export class NotaFiscalService {
     if (typeof valor === 'number') {
       return valor;
     }
-    if (typeof valor === 'object' && typeof (valor as { toNumber?: unknown }).toNumber === 'function') {
+    if (
+      typeof valor === 'object' &&
+      typeof (valor as { toNumber?: unknown }).toNumber === 'function'
+    ) {
       return (valor as { toNumber: () => number }).toNumber();
     }
     const n = Number(valor);

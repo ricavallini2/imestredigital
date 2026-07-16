@@ -3,8 +3,9 @@ import { useState, useCallback, useRef } from 'react';
 import { iaService, type ChatMessage, type ChatResponse } from '@/services/ia.service';
 
 // ─── Insights ─────────────────────────────────────────────────────────────────
+/** `params` segue o `ListarInsightsDTO` do ai-service (whitelist estrita). */
 export function useInsights(params?: {
-  visualizado?: boolean; tipo?: string; prioridade?: string; pagina?: number; limite?: number;
+  apenasNaoLidos?: boolean; tipo?: string; prioridade?: string; pagina?: number; limite?: number;
 }) {
   return useQuery({
     queryKey: ['insights', params],
