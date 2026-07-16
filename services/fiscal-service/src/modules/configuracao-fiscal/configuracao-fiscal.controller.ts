@@ -64,7 +64,8 @@ export class ConfiguracaoFiscalController {
   @ApiOperation({ summary: 'Fazer upload de certificado digital' })
   async uploadCertificado(
     @Req() req: any,
-    @UploadedFile() arquivo: Express.Multer.File,
+    // Tipo mínimo do arquivo enviado (evita depender de @types/multer no build).
+    @UploadedFile() arquivo: { buffer: Buffer; originalname?: string; mimetype?: string; size?: number },
     @Body() body: any,
   ) {
     if (!arquivo) {
