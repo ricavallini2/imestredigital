@@ -654,10 +654,18 @@ export default function DashboardPage() {
                     color="indigo"
                     indisponivel={!fonteOk('fiscal')}
                   />
+                  {/*
+                    `novosEsteMes` conta CADASTROS do mês (qualquer status) e `ativos` conta
+                    só os ATIVO — logo "+5 este mês" ao lado de "3" é fato, mas lido como
+                    badge de crescimento vira contradição aparente ("ganhei 5 e tenho 3?").
+                    O sub diz as duas coisas por extenso, sem o "+" de variação.
+                  */}
                   <KpiCard
                     label="Clientes Ativos"
                     value={fmtN(resumo?.clientes?.ativos ?? 0)}
-                    sub={`+${resumo?.clientes?.novosEsteMes ?? 0} este mês`}
+                    sub={`de ${fmtN(resumo?.clientes?.total ?? 0)} cadastrados · ${fmtN(
+                      resumo?.clientes?.novosEsteMes ?? 0,
+                    )} novo(s) no mês`}
                     icon={<Users className="w-5 h-5" />}
                     color="blue"
                     href="/dashboard/clientes"
