@@ -3,40 +3,32 @@ import { pedidosService } from '@/services/pedidos.service';
 import { estoqueService } from '@/services/estoque.service';
 import { iaService } from '@/services/ia.service';
 import { financeiroService } from '@/services/financeiro.service';
-import api from '@/lib/api';
+import { dashboardService } from '@/services/dashboard.service';
 
-// ─── Tipos do resumo agregado ─────────────────────────────────────────────────
-export interface VendaDia { data: string; label: string; receita: number; pedidos: number; }
-export interface CanalResumo { canal: string; label: string; qtd: number; valor: number; }
-export interface TopProduto { id: string; nome: string; sku: string; qtd: number; receita: number; }
-export interface PedidoRecente { id: string; numero: string; cliente: string; valor: number; status: string; canal: string; criadoEm: string; }
-export interface PedidoUrgente extends PedidoRecente { horasAtraso: number; }
-export interface AlertaEstoque { produtoId: string; produto: string; sku: string; disponivel: number; minimo: number; status: string; deposito: string; }
-
-export interface DashboardResumo {
-  receita30d: number; receita7d: number; receitaAnt: number; crescimentoReceita: number;
-  pedidos30d: number; pedidos7d: number; ticketMedio: number; pedidosPendentes: number;
-  vendas7d: VendaDia[];
-  porCanal: CanalResumo[];
-  porStatus: Record<string, number>;
-  topProdutos5: TopProduto[];
-  pedidosRecentes: PedidoRecente[];
-  pedidosUrgentes: PedidoUrgente[];
-  estoque: { valorEmEstoque: number; estoqueBaixo: number; semEstoque: number; totalProdutos: number; };
-  alertasEstoque: AlertaEstoque[];
-  fiscal: { faturado30d: number; impostos30d: number; emitidas30d: number; taxaEmissao: number; nfsPendentes: number; };
-  caixa: { aberto: boolean; operador?: string; caixa?: string; abertoDesde?: string; totalEntradas?: number; totalSaidas?: number; saldoAtual?: number; };
-  clientes: { total: number; ativos: number; novosEsteMes: number; ticketMedioCliente: number; };
-}
+// O resumo é COMPOSTO no service a partir dos endpoints reais de cada módulo
+// (não há agregador no backend). Os tipos vivem lá, junto da normalização; aqui
+// só reexportamos para as telas continuarem importando de um lugar só.
+export type {
+  AlertaEstoque,
+  CanalResumo,
+  DashboardResumo,
+  FonteDashboard,
+  PedidoRecente,
+  PedidoUrgente,
+  ResumoCaixaDashboard,
+  ResumoClientesDashboard,
+  ResumoEstoqueDashboard,
+  ResumoFiscalDashboard,
+  StatusFonte,
+  TopProduto,
+  VendaDia,
+} from '@/services/dashboard.service';
 
 // ─── Hook principal do dashboard ─────────────────────────────────────────────
 export function useDashboardResumo() {
-  return useQuery<DashboardResumo>({
+  return useQuery({
     queryKey: ['dashboard', 'resumo'],
-    queryFn: async () => {
-      const { data } = await api.get<DashboardResumo>('/v1/dashboard/resumo');
-      return data;
-    },
+    queryFn: () => dashboardService.obterResumo(),
     staleTime: 60_000, // 1 min
     refetchInterval: 2 * 60_000, // auto-refresh 2 min
   });
@@ -78,7 +70,9 @@ export function useDashboardKPIs() {
   return {
     loading,
     vendasHoje: resumoFinanceiro.data?.receitas ?? 0,
-    pedidosPendentes: estatisticasPedidos.data?.pedidosPorStatus?.['PENDENTE'] ?? 0,
+    // `porStatus` é o nome que `obterEstatisticas` entrega — `pedidosPorStatus`
+    // não existe em fonte nenhuma e chegava sempre `undefined` (0 fixo aqui).
+    pedidosPendentes: estatisticasPedidos.data?.porStatus?.['PENDENTE'] ?? 0,
     alertasEstoque: alertasEstoque.data?.length ?? 0,
     ticketMedio: estatisticasPedidos.data?.ticketMedio ?? 0,
     estatisticasPedidos: estatisticasPedidos.data,
@@ -86,10 +80,14 @@ export function useDashboardKPIs() {
   };
 }
 
+// `pagina` é BASE ZERO no `PaginacaoDTO` do ai-service (e no mock). Mandar
+// explícito evita depender do default do DTO; `apenasNaoLidos` é o nome exato do
+// filtro no `ListarInsightsDTO` — o serviço roda com `forbidNonWhitelisted`, e
+// qualquer chave fora do DTO devolve 400.
 export function useDashboardInsights() {
   return useQuery({
-    queryKey: ['insights', { apenasNaoLidos: true, limite: 5 }],
-    queryFn: () => iaService.listarInsights({ apenasNaoLidos: true, limite: 5 }),
+    queryKey: ['insights', { apenasNaoLidos: true, pagina: 0, limite: 5 }],
+    queryFn: () => iaService.listarInsights({ apenasNaoLidos: true, pagina: 0, limite: 5 }),
     staleTime: 5 * 60 * 1000,
   });
 }

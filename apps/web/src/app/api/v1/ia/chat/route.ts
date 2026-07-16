@@ -316,7 +316,8 @@ function gerarResposta(msg: string, _hist: ChatMessage[]): ChatResponse {
       ],
       acoes: [
         { label: 'Ver produto', href: `/dashboard/produtos/${produto.id}`, cor: 'blue' },
-        ...(st === 'SEM_ESTOQUE' || st === 'CRITICO' ? [{ label: 'Entrada de estoque', href: '/dashboard/estoque/entrada', cor: 'green' }] : []),
+        // `/dashboard/estoque/entrada` não existe — a entrada é o modal da tela de Estoque.
+        ...(st === 'SEM_ESTOQUE' || st === 'CRITICO' ? [{ label: 'Entrada de estoque', href: '/dashboard/estoque', cor: 'green' }] : []),
       ],
       processadoEm: Date.now(),
     };
@@ -357,7 +358,8 @@ function gerarResposta(msg: string, _hist: ChatMessage[]): ChatResponse {
       ],
       acoes: [
         { label: 'Ver estoque', href: '/dashboard/estoque', cor: 'blue' },
-        { label: 'Registrar entrada', href: '/dashboard/estoque/entrada', cor: 'green' },
+        // `/dashboard/estoque/entrada` não existe — a entrada é o modal da tela de Estoque.
+        { label: 'Registrar entrada', href: '/dashboard/estoque', cor: 'green' },
       ],
       processadoEm: Date.now(),
     };

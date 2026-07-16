@@ -370,15 +370,24 @@ export interface Pedido {
   criadoEm: string;
 }
 
+/**
+ * Estatísticas de pedidos JÁ NORMALIZADAS por `pedidosService.obterEstatisticas`
+ * — este é o shape que as telas leem, e não o cru da API.
+ *
+ * Os nomes do mock (`receita30d`/`pedidos30d`/`receita7d`/`pedidos7d`/
+ * `porCanal`/`pendentesUrgentes`) NÃO existem aqui: o service nunca os entregou.
+ * Enquanto o tipo os declarava, `stats?.receita30d` compilava e chegava
+ * `undefined` na tela — a de Pedidos exibia R$ 0,00 enquanto o Dashboard, na
+ * MESMA fonte, exibia a receita real. Campo que o service não entrega não entra
+ * neste contrato.
+ */
 export interface EstatisticasPedidos {
-  receita30d: number;
-  receita7d: number;
-  pedidos30d: number;
-  pedidos7d: number;
+  /** Janela = a do `periodo` pedido ao backend (as telas usam `mes`). */
+  pedidos: number;
+  receita: number;
   ticketMedio: number;
+  /** Contagem por status; a soma é sempre igual a `pedidos` (order-service). */
   porStatus: Record<string, number>;
-  porCanal: { canal: string; quantidade: number; valor: number }[];
-  pendentesUrgentes: { id: string; numero: string; cliente: string; valor: number; canal: string; criadoEm: string }[];
 }
 
 export interface FiltrosPedido {
@@ -389,6 +398,8 @@ export interface FiltrosPedido {
   dataFim?: string;
   pagina?: number;
   limite?: number;
+  /** 'criadoEm_asc' | 'criadoEm_desc' | 'valorTotal_asc' | 'valorTotal_desc'. */
+  ordenacao?: string;
 }
 
 // ═══════════════════════════════════════════════════════════

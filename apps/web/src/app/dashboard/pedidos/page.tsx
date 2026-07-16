@@ -5,21 +5,19 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Plus, ShoppingCart, TrendingUp, BarChart3, Search, Package,
-  Store, Briefcase, ChevronRight,
+  Store, Briefcase, ChevronRight, CloudOff,
 } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { KPICard } from '@/components/ui/kpi-card';
 import { usePedidos, useEstatisticasPedidos } from '@/hooks/usePedidos';
+import { canalInfo } from '@/lib/canais';
 
-const CANAL_CONFIG: Record<string, { label: string; emoji: string; cor: string }> = {
-  BALCAO:       { label: 'Balcão',        emoji: '🏪', cor: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' },
-  INTERNA:      { label: 'Interna',       emoji: '💼', cor: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' },
-  SHOPIFY:      { label: 'Shopify',       emoji: '🛍️', cor: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' },
-  MERCADO_LIVRE:{ label: 'Mercado Livre', emoji: '🟠', cor: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' },
-  SHOPEE:       { label: 'Shopee',        emoji: '🔴', cor: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' },
-  AMAZON:       { label: 'Amazon',        emoji: '📦', cor: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' },
-  OUTROS:       { label: 'Outros',        emoji: '🌐', cor: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300' },
-};
+// Rótulo e emoji vêm de `@/lib/canais`, que conhece os valores REAIS de
+// `canalOrigem` (BALCAO, SITE, MERCADOLIVRE, MAGALU…) além dos do mock. O mapa
+// local só tinha os nomes do mock: um pedido real de marketplace aparecia como
+// "MERCADOLIVRE" cru no chip. A cor do chip é neutra de propósito — o texto
+// precisa de contraste em light/dark, e o hex do gráfico não garante isso.
+const CHIP_CANAL = 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300';
 
 const STATUS_LABELS: Record<string, string> = {
   RASCUNHO: 'Rascunho', PENDENTE: 'Pendente', CONFIRMADO: 'Confirmado',
@@ -35,8 +33,11 @@ export default function PedidosPage() {
   const [canal, setCanal] = useState('');
   const [status, setStatus] = useState('');
 
-  const { data, isLoading } = usePedidos({ pagina: 1, limite: 100 });
-  const { data: stats, isLoading: loadingStats } = useEstatisticasPedidos();
+  // `isError` das duas queries é DADO DE HONESTIDADE, não detalhe técnico: sem
+  // ele, `?? 0` e `?? []` transformam "o serviço não respondeu" em "R$ 0,00" e
+  // "nenhum pedido encontrado" — afirmações sobre o negócio que ninguém apurou.
+  const { data, isLoading, isError: erroLista } = usePedidos({ pagina: 1, limite: 100 });
+  const { data: stats, isLoading: loadingStats, isError: erroStats } = useEstatisticasPedidos();
 
   const pedidos = data?.dados ?? [];
 
@@ -82,10 +83,17 @@ export default function PedidosPage() {
           ))
         ) : (
           <>
-            <KPICard label="Receita 30 dias" valor={fmt(stats?.receita30d ?? 0)} icone={<TrendingUp className="h-6 w-6" />} destaque />
-            <KPICard label="Pedidos 30 dias" valor={stats?.pedidos30d ?? 0} icone={<ShoppingCart className="h-6 w-6" />} />
-            <KPICard label="Ticket Médio" valor={fmt(stats?.ticketMedio ?? 0)} icone={<BarChart3 className="h-6 w-6" />} />
-            <KPICard label="Pendentes" valor={stats?.porStatus?.PENDENTE ?? 0} icone={<Package className="h-6 w-6" />} />
+            {/* Campos e janela IGUAIS aos do Dashboard (`periodo=mes`, os nomes que
+                o service entrega): é o mesmo endpoint, então os dois números têm
+                de ser o mesmo. Antes daqui saía `receita30d`, que o service nunca
+                entregou — esta tela mostrava R$ 0,00 e o Dashboard, a receita real.
+                Pelo mesmo motivo `indisponivel` acompanha o `isError`: com o
+                order-service fora, as duas telas precisam dizer a MESMA coisa
+                ("—", fonte indisponível) sobre o MESMO dado. */}
+            <KPICard label="Receita do Mês" valor={fmt(stats?.receita ?? 0)} icone={<TrendingUp className="h-6 w-6" />} destaque indisponivel={erroStats} />
+            <KPICard label="Pedidos do Mês" valor={stats?.pedidos ?? 0} icone={<ShoppingCart className="h-6 w-6" />} indisponivel={erroStats} />
+            <KPICard label="Ticket Médio" valor={fmt(stats?.ticketMedio ?? 0)} icone={<BarChart3 className="h-6 w-6" />} indisponivel={erroStats} />
+            <KPICard label="Pendentes" valor={stats?.porStatus?.PENDENTE ?? 0} icone={<Package className="h-6 w-6" />} indisponivel={erroStats} />
           </>
         )}
       </div>
@@ -99,7 +107,7 @@ export default function PedidosPage() {
             Todos
           </button>
           {canaisAtivos.map((c) => {
-            const cfg = CANAL_CONFIG[c] ?? { label: c, emoji: '📦', cor: '' };
+            const cfg = canalInfo(c);
             return (
               <button key={c} onClick={() => setCanal(c === canal ? '' : c)}
                 className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${c === canal ? 'bg-marca-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300'}`}>
@@ -138,6 +146,18 @@ export default function PedidosPage() {
             </div>
           ))}
         </div>
+      ) : erroLista ? (
+        /* Lista vazia por falha NÃO é "nenhum pedido encontrado": essa frase
+           afirma que a busca aconteceu e não achou nada. Mesmo padrão do
+           Dashboard — dizemos que não sabemos. */
+        <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-600 p-12 text-center">
+          <CloudOff className="mx-auto mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
+          <p className="font-medium text-slate-500">Informação indisponível</p>
+          <p className="text-sm text-slate-400 mt-1">
+            Não foi possível consultar os pedidos agora. Nada foi perdido — tente atualizar em
+            instantes.
+          </p>
+        </div>
       ) : filtrados.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-600 p-12 text-center">
           <Package className="mx-auto mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
@@ -159,7 +179,7 @@ export default function PedidosPage() {
           </div>
 
           {filtrados.map((p) => {
-            const cfg = CANAL_CONFIG[p.canal] ?? CANAL_CONFIG.OUTROS;
+            const cfg = canalInfo(p.canal);
             return (
               <div key={p.id}
                 onClick={() => router.push(`/dashboard/pedidos/${p.id}`)}
@@ -169,7 +189,7 @@ export default function PedidosPage() {
                   <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate max-w-[220px]">{p.cliente}</p>
                   <p className="text-xs text-slate-400">{p.itens} {p.itens === 1 ? 'item' : 'itens'} · {new Date(p.criadoEm ?? p.data).toLocaleDateString('pt-BR')}</p>
                 </div>
-                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${cfg.cor}`}>
+                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${CHIP_CANAL}`}>
                   {cfg.emoji} {cfg.label}
                 </span>
                 <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 tabular-nums">

@@ -1,6 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { pedidosService } from '@/services/pedidos.service';
-import type { CriarPedidoDTO, AtualizarStatusDTO } from '@/services/pedidos.service';
+import type {
+  CriarPedidoDTO,
+  AtualizarStatusDTO,
+  PeriodoEstatisticas,
+} from '@/services/pedidos.service';
 import type { FiltrosPedido } from '@/types';
 
 export function usePedidos(filtros?: FiltrosPedido) {
@@ -19,10 +23,20 @@ export function usePedido(id: string) {
   });
 }
 
-export function useEstatisticasPedidos() {
+/**
+ * KPIs de pedidos. `periodo` entra na `queryKey`: janelas diferentes são dados
+ * diferentes e não podem compartilhar a mesma entrada de cache.
+ *
+ * Quem consome PRECISA ler o `isError` da query (o React Query já o devolve) e
+ * não cair em `stats?.receita ?? 0`: com o order-service fora, esse `?? 0`
+ * exibia "R$ 0,00" — o Dashboard, no MESMO dado e na mesma sessão, mostrava "—
+ * Fonte indisponível". Zero é o fato "não houve venda"; fonte caída é outra
+ * coisa. Use `indisponivel` no `KPICard`.
+ */
+export function useEstatisticasPedidos(periodo: PeriodoEstatisticas = 'mes') {
   return useQuery({
-    queryKey: ['pedidos', 'estatisticas'],
-    queryFn: () => pedidosService.obterEstatisticas(),
+    queryKey: ['pedidos', 'estatisticas', periodo],
+    queryFn: () => pedidosService.obterEstatisticas(periodo),
     staleTime: 5 * 60 * 1000,
   });
 }

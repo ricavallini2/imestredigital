@@ -573,7 +573,9 @@ export default function IAPage() {
             { href: '/dashboard/pedidos/balcao',   label: 'Nova Venda Balcão',    icone: ShoppingCart, cor: 'text-indigo-500' },
             { href: '/dashboard/pedidos/interna',  label: 'Novo Pedido Interno',  icone: ShoppingCart, cor: 'text-blue-500' },
             { href: '/dashboard/fiscal/nova',      label: 'Emitir NF-e',          icone: FileText,     cor: 'text-cyan-500' },
-            { href: '/dashboard/estoque/entrada',  label: 'Entrada de Estoque',   icone: Package,      cor: 'text-green-500' },
+            // A entrada é o modal de movimentação da tela de Estoque; não existe
+            // `/dashboard/estoque/entrada` (era 404). Mesmo caso do atalho do Dashboard.
+            { href: '/dashboard/estoque',          label: 'Entrada de Estoque',   icone: Package,      cor: 'text-green-500' },
             { href: '/dashboard/clientes/novo',    label: 'Novo Cliente',         icone: Users,        cor: 'text-purple-500' },
             { href: '/dashboard/estoque',          label: 'Alertas Estoque',      icone: AlertTriangle,cor: 'text-red-500' },
             { href: '/dashboard/fiscal',           label: 'Módulo Fiscal',        icone: FileText,     cor: 'text-teal-500' },

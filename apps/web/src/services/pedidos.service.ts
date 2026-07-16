@@ -27,6 +27,9 @@ export interface CriarPedidoDTO {
   vendedor?: string;
 }
 
+/** Janelas aceitas pelo `PeriodoEstatisticasDto` do order-service. */
+export type PeriodoEstatisticas = 'hoje' | 'semana' | 'mes' | 'ano';
+
 export interface AtualizarStatusDTO {
   status: string;
   rastreio?: string;
@@ -106,16 +109,32 @@ export const pedidosService = {
     } as any;
   },
 
-  obterEstatisticas: async (): Promise<EstatisticasPedidos> => {
-    const { data } = await api.get('/v1/pedidos/estatisticas/dashboard');
-    // Tolerante aos dois shapes (mock: pedidos/receita · real: totalPedidos/totalVendas).
+  /**
+   * KPIs de pedidos da janela `periodo`.
+   *
+   * `periodo` é EXPLÍCITO e default 'mes' de propósito: sem ele o
+   * `PeriodoEstatisticasDto` não define nada, o switch do order-service cai no
+   * `default:` e calcula 30 DIAS CORRIDOS — uma janela diferente da que o
+   * Dashboard pede ('mes', mês-calendário). As duas telas mostravam "a receita"
+   * a partir do mesmo endpoint e discordavam por medirem períodos distintos.
+   * Só os valores do enum do backend valem: hoje | semana | mes | ano.
+   *
+   * Aceita os três shapes que a rota pode devolver: o real do order-service
+   * (`totalPedidos`/`totalVendas`) e o do mock do Next (`pedidos30d`/
+   * `receita30d`) — `pedidos`/`receita` cobrem uma fonte já normalizada.
+   */
+  obterEstatisticas: async (
+    periodo: PeriodoEstatisticas = 'mes',
+  ): Promise<EstatisticasPedidos> => {
+    const { data } = await api.get('/v1/pedidos/estatisticas/dashboard', {
+      params: { periodo },
+    });
     return {
-      ...data,
-      pedidos: Number(data?.pedidos ?? data?.totalPedidos) || 0,
-      receita: Number(data?.receita ?? data?.totalVendas) || 0,
+      pedidos: Number(data?.pedidos ?? data?.totalPedidos ?? data?.pedidos30d) || 0,
+      receita: Number(data?.receita ?? data?.totalVendas ?? data?.receita30d) || 0,
       ticketMedio: Number(data?.ticketMedio) || 0,
       porStatus: data?.porStatus ?? {},
-    } as any;
+    };
   },
 
   /**
