@@ -42,6 +42,7 @@ import {
   BookUser,
   Hash,
   Truck,
+  ClipboardList,
   ChevronDown,
   PanelLeftClose,
   PanelLeftOpen,
@@ -109,9 +110,17 @@ const MENU: MenuItem[] = [
     ],
   },
   { tipo: 'link', href: '/dashboard/estoque', label: 'Estoque', icone: Warehouse },
-  { tipo: 'link', href: '/dashboard/pedidos', label: 'Pedidos', icone: ShoppingCart },
+  {
+    tipo: 'grupo',
+    id: 'vendas',
+    label: 'Vendas',
+    icone: ShoppingCart,
+    filhos: [
+      { tipo: 'link', href: '/dashboard/caixa', label: 'Caixa', icone: Landmark },
+      { tipo: 'link', href: '/dashboard/pedidos', label: 'Pedidos', icone: ClipboardList },
+    ],
+  },
   { tipo: 'link', href: '/dashboard/compras', label: 'Compras', icone: ShoppingBag },
-  { tipo: 'link', href: '/dashboard/caixa', label: 'Caixa', icone: Landmark },
   {
     tipo: 'grupo',
     id: 'marketplace',
