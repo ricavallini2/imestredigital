@@ -447,6 +447,12 @@ services:
       KAFKA_BROKERS: redpanda:9093
       # Obrigatório: o TenantMiddleware verifica a assinatura do JWT (fail-fast no bootstrap).
       JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no .env}
+      # Obrigatória em produção: cripto AES-256-GCM dos tokens de marketplace em repouso.
+      MARKETPLACE_CRYPTO_KEY: ${MARKETPLACE_CRYPTO_KEY:?Defina MARKETPLACE_CRYPTO_KEY no .env}
+      # Credenciais do Mercado Livre (opcionais até conectar uma conta real).
+      ML_CLIENT_ID: ${ML_CLIENT_ID:-}
+      ML_CLIENT_SECRET: ${ML_CLIENT_SECRET:-}
+      ML_REDIRECT_URI: ${ML_REDIRECT_URI:-}
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3007/health || exit 1"]
       interval: 30s
