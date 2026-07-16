@@ -184,7 +184,7 @@ export default function ConfiguracoesPage() {
     ]);
 
     setModalNovoUsuario(false);
-    setNovoUsuario({ nome: '', email: '', papel: 'VENDEDOR', senha: '' });
+    setNovoUsuario({ nome: '', email: '', papel: 'VENDEDOR', senha: '', podeLiberarVenda: false });
   };
 
   const handleRemoverUsuario = (id: string) => {
