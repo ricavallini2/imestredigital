@@ -201,6 +201,11 @@ export class ListarComprasDto {
   @IsIn(STATUS_COMPRA as unknown as string[])
   status?: string;
 
+  @ApiPropertyOptional({ description: 'Filtra pedidos de um fornecedor (parceiro)' })
+  @IsOptional()
+  @IsUUID()
+  fornecedorId?: string;
+
   @ApiPropertyOptional({ description: 'Busca por número, fornecedor ou chave da NF-e' })
   @IsOptional()
   @IsString()

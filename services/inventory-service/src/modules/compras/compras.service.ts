@@ -46,9 +46,10 @@ export class ComprasService {
   // ─── Consulta ───────────────────────────────────────────────────────────────
 
   async listar(tenantId: string, filtros: ListarComprasDto) {
-    const { pagina = 1, limite = 20, status, busca } = filtros;
+    const { pagina = 1, limite = 20, status, busca, fornecedorId } = filtros;
     const where: Prisma.PedidoCompraWhereInput = { tenantId };
     if (status) where.status = status as StatusCompra;
+    if (fornecedorId) where.fornecedorId = fornecedorId;
     if (busca) {
       const numero = parseInt(busca, 10);
       where.OR = [
