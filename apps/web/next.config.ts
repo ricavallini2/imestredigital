@@ -112,6 +112,13 @@ const nextConfig: NextConfig = {
           source: '/api/v1/movimentacoes/:path*',
           destination: `${INVENTORY_SERVICE}/api/v1/movimentacoes/:path*`,
         },
+        // Compras (pedidos de compra, recebimento, importação de NF-e) — o módulo
+        // vive no inventory porque o recebimento É a entrada de estoque.
+        {
+          source: '/api/v1/compras/:path*',
+          destination: `${INVENTORY_SERVICE}/api/v1/compras/:path*`,
+        },
+        { source: '/api/v1/compras', destination: `${INVENTORY_SERVICE}/api/v1/compras` },
 
         // ── Order Service / Pedidos (3005) ──────────────────────────
         { source: '/api/v1/pedidos/:path*', destination: `${ORDER_SERVICE}/api/v1/pedidos/:path*` },

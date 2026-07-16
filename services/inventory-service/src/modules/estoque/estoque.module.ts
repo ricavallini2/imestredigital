@@ -17,6 +17,7 @@ import { PrismaModule } from '../prisma/prisma.module';
   imports: [PrismaModule],
   controllers: [EstoqueController, ConsumerController],
   providers: [EstoqueService, EstoqueRepository, CatalogClient, ProducerService],
-  exports: [EstoqueService],
+  // CatalogClient exportado: o módulo de Compras casa SKU→produto na importação de NF-e.
+  exports: [EstoqueService, CatalogClient],
 })
 export class EstoqueModule {}

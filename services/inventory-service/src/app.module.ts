@@ -18,6 +18,7 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { EstoqueModule } from './modules/estoque/estoque.module';
 import { DepositoModule } from './modules/deposito/deposito.module';
 import { MovimentacaoModule } from './modules/movimentacao/movimentacao.module';
+import { ComprasModule } from './modules/compras/compras.module';
 import { HealthController } from './controllers/health.controller';
 import { TenantMiddleware } from './middlewares/tenant.middleware';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -50,6 +51,7 @@ import { resolverJwtSecret } from './config/jwt.config';
     EstoqueModule,
     DepositoModule,
     MovimentacaoModule,
+    ComprasModule,
   ],
   controllers: [HealthController],
   providers: [JwtStrategy],

@@ -98,6 +98,9 @@ model ReservaEstoque {
   id         String        @id @default(uuid()) @db.Uuid
   tenantId   String        @map("tenant_id") @db.Uuid
   produtoId  String        @map("produto_id") @db.Uuid
+  /// Depósito de onde o estoque foi reservado. Nulo apenas em reservas
+  /// legadas criadas antes da reserva passar a ser por depósito.
+  depositoId String?       @map("deposito_id") @db.Uuid
   pedidoId   String        @map("pedido_id") @db.Uuid
   quantidade Int
   status     StatusReserva @default(ATIVA)
@@ -107,6 +110,24 @@ model ReservaEstoque {
   @@index([tenantId, pedidoId])
   @@index([tenantId, produtoId])
   @@map("reservas_estoque")
+}
+
+/// Registro de eventos já processados (idempotência do consumo Kafka).
+/// Garante que o mesmo evento (ex. pedido.pago para um pedidoId) só produza
+/// efeito colateral uma única vez, mesmo com reentrega do broker.
+model EventoProcessado {
+  id           String @id @default(uuid()) @db.Uuid
+  tenantId     String @map("tenant_id") @db.Uuid
+  /// Nome lógico do evento consumido (ex. "pedido.criado", "pedido.pago").
+  evento       String
+  /// Identificador do agregado de referência (ex. pedidoId).
+  referenciaId String @map("referencia_id")
+
+  processadoEm DateTime @default(now()) @map("processado_em")
+
+  @@unique([evento, referenciaId], name: "evento_referenciaId")
+  @@index([tenantId])
+  @@map("eventos_processados")
 }
 
 /// Movimentação (histórico de entrada/saída/ajuste/transferência)
@@ -132,4 +153,94 @@ model Movimentacao {
   @@index([criadoEm])
   @@index([tipo])
   @@map("movimentacoes")
+}
+
+// ─── Compras (suprimento) ─────────────────────────────────────
+
+/// O pedido de compra vive no inventory porque o efeito físico do
+/// RECEBIMENTO é a entrada no estoque: receber e movimentar acontecem
+/// no mesmo banco (mesma razão do caixa morar junto do pagamento no
+/// order-service). Fornecedor é referência por id+nome (mora no
+/// customer-service; sem FK cross-service, padrão do projeto).
+enum StatusCompra {
+  RASCUNHO
+  ENVIADO
+  AGUARDANDO_RECEBIMENTO
+  RECEBIDO_PARCIAL
+  RECEBIDO
+  CANCELADO
+}
+
+model PedidoCompra {
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @map("tenant_id") @db.Uuid
+
+  /// Sequencial por tenant, formatado na exibição (ex: "000012").
+  numero         Int
+  fornecedorId   String? @map("fornecedor_id") @db.Uuid
+  fornecedorNome String  @map("fornecedor_nome")
+
+  status StatusCompra @default(RASCUNHO)
+
+  // Totais (dinheiro SEMPRE Decimal)
+  valorProdutos Decimal @default(0) @map("valor_produtos") @db.Decimal(12, 2)
+  valorFrete    Decimal @default(0) @map("valor_frete") @db.Decimal(12, 2)
+  valorImpostos Decimal @default(0) @map("valor_impostos") @db.Decimal(12, 2)
+  valorTotal    Decimal @default(0) @map("valor_total") @db.Decimal(12, 2)
+
+  dataEmissao         DateTime  @default(now()) @map("data_emissao")
+  dataPrevistaEntrega DateTime? @map("data_prevista_entrega")
+  dataRecebimento     DateTime? @map("data_recebimento")
+
+  // NF-e de origem (importação): chave única por tenant deduplica reimportação.
+  nfeNumero String? @map("nfe_numero")
+  nfeSerie  String? @map("nfe_serie")
+  nfeChave  String? @map("nfe_chave")
+
+  condicaoPagamento String? @map("condicao_pagamento")
+  formaPagamento    String? @map("forma_pagamento")
+  observacoes       String? @db.Text
+
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  itens ItemPedidoCompra[]
+
+  @@unique([tenantId, numero])
+  @@unique([tenantId, nfeChave])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, fornecedorId])
+  @@map("pedidos_compra")
+}
+
+model ItemPedidoCompra {
+  id             String       @id @default(uuid()) @db.Uuid
+  pedidoCompraId String       @map("pedido_compra_id") @db.Uuid
+  pedidoCompra   PedidoCompra @relation(fields: [pedidoCompraId], references: [id], onDelete: Cascade)
+
+  /// Nulo quando o item veio de NF-e e o produto ainda não existe no
+  /// catálogo (v1 não cria produto automaticamente; casa por SKU quando dá).
+  produtoId   String? @map("produto_id") @db.Uuid
+  produtoNome String  @map("produto_nome")
+  sku         String
+  ncm         String?
+  cfop        String?
+  unidade     String  @default("UN")
+
+  quantidade         Decimal @db.Decimal(12, 3)
+  quantidadeRecebida Decimal @default(0) @map("quantidade_recebida") @db.Decimal(12, 3)
+
+  valorUnitario Decimal @map("valor_unitario") @db.Decimal(12, 4)
+  valorTotal    Decimal @map("valor_total") @db.Decimal(12, 2)
+  valorIcms     Decimal @default(0) @map("valor_icms") @db.Decimal(12, 2)
+  valorIpi      Decimal @default(0) @map("valor_ipi") @db.Decimal(12, 2)
+  valorPis      Decimal @default(0) @map("valor_pis") @db.Decimal(12, 2)
+  valorCofins   Decimal @default(0) @map("valor_cofins") @db.Decimal(12, 2)
+
+  criadoEm DateTime @default(now()) @map("criado_em")
+
+  @@index([pedidoCompraId])
+  @@index([produtoId])
+  @@map("itens_pedidos_compra")
 }

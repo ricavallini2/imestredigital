@@ -4,10 +4,26 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import {
-  ShoppingBag, Plus, Search, RefreshCw, Brain, TrendingDown,
-  ChevronRight, FileCheck, Truck, Building2, DollarSign,
-  Clock, CheckCircle2, XCircle, AlertTriangle, FileText,
-  Upload, PackageCheck, TrendingUp, X,
+  ShoppingBag,
+  Plus,
+  Search,
+  RefreshCw,
+  Brain,
+  TrendingDown,
+  ChevronRight,
+  FileCheck,
+  Truck,
+  Building2,
+  DollarSign,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  FileText,
+  Upload,
+  PackageCheck,
+  TrendingUp,
+  X,
 } from 'lucide-react';
 import {
   useCompras,
@@ -15,46 +31,83 @@ import {
   type PedidoCompra,
   type StatusCompra,
 } from '@/hooks/useCompras';
+import { useFornecedores } from '@/hooks/useFornecedores';
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
-const fmt = (v: number) =>
-  v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const dtfmt = (iso: string) =>
   new Date(iso).toLocaleDateString('pt-BR', {
-    day: '2-digit', month: '2-digit', year: '2-digit',
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
   });
 
 // ─── Status config ─────────────────────────────────────────────────────────────
 
-const STATUS_CFG: Record<StatusCompra, {
-  label: string;
-  bg: string;
-  text: string;
-  icon: React.ReactNode;
-}> = {
-  RASCUNHO:              { label: 'Rascunho',    bg: 'bg-slate-100 dark:bg-slate-700',        text: 'text-slate-600 dark:text-slate-400',      icon: <FileText className="h-3 w-3" /> },
-  ENVIADO:               { label: 'Enviado',     bg: 'bg-blue-100 dark:bg-blue-900/30',        text: 'text-blue-700 dark:text-blue-400',         icon: <Truck className="h-3 w-3" /> },
-  AGUARDANDO_RECEBIMENTO:{ label: 'Aguardando',  bg: 'bg-amber-100 dark:bg-amber-900/30',      text: 'text-amber-700 dark:text-amber-400',       icon: <Clock className="h-3 w-3 animate-pulse" /> },
-  RECEBIDO_PARCIAL:      { label: 'Rec. Parcial',bg: 'bg-orange-100 dark:bg-orange-900/30',    text: 'text-orange-700 dark:text-orange-400',     icon: <PackageCheck className="h-3 w-3" /> },
-  RECEBIDO:              { label: 'Recebido',    bg: 'bg-emerald-100 dark:bg-emerald-900/30',  text: 'text-emerald-700 dark:text-emerald-400',   icon: <CheckCircle2 className="h-3 w-3" /> },
-  CANCELADO:             { label: 'Cancelado',   bg: 'bg-red-100 dark:bg-red-900/30',          text: 'text-red-700 dark:text-red-400',           icon: <XCircle className="h-3 w-3" /> },
+const STATUS_CFG: Record<
+  StatusCompra,
+  {
+    label: string;
+    bg: string;
+    text: string;
+    icon: React.ReactNode;
+  }
+> = {
+  RASCUNHO: {
+    label: 'Rascunho',
+    bg: 'bg-slate-100 dark:bg-slate-700',
+    text: 'text-slate-600 dark:text-slate-400',
+    icon: <FileText className="h-3 w-3" />,
+  },
+  ENVIADO: {
+    label: 'Enviado',
+    bg: 'bg-blue-100 dark:bg-blue-900/30',
+    text: 'text-blue-700 dark:text-blue-400',
+    icon: <Truck className="h-3 w-3" />,
+  },
+  AGUARDANDO_RECEBIMENTO: {
+    label: 'Aguardando',
+    bg: 'bg-amber-100 dark:bg-amber-900/30',
+    text: 'text-amber-700 dark:text-amber-400',
+    icon: <Clock className="h-3 w-3 animate-pulse" />,
+  },
+  RECEBIDO_PARCIAL: {
+    label: 'Rec. Parcial',
+    bg: 'bg-orange-100 dark:bg-orange-900/30',
+    text: 'text-orange-700 dark:text-orange-400',
+    icon: <PackageCheck className="h-3 w-3" />,
+  },
+  RECEBIDO: {
+    label: 'Recebido',
+    bg: 'bg-emerald-100 dark:bg-emerald-900/30',
+    text: 'text-emerald-700 dark:text-emerald-400',
+    icon: <CheckCircle2 className="h-3 w-3" />,
+  },
+  CANCELADO: {
+    label: 'Cancelado',
+    bg: 'bg-red-100 dark:bg-red-900/30',
+    text: 'text-red-700 dark:text-red-400',
+    icon: <XCircle className="h-3 w-3" />,
+  },
 };
 
 const STATUS_FILTROS: { value: StatusCompra | ''; label: string }[] = [
-  { value: '',                     label: 'Todos' },
-  { value: 'RASCUNHO',             label: 'Rascunho' },
-  { value: 'ENVIADO',              label: 'Enviado' },
+  { value: '', label: 'Todos' },
+  { value: 'RASCUNHO', label: 'Rascunho' },
+  { value: 'ENVIADO', label: 'Enviado' },
   { value: 'AGUARDANDO_RECEBIMENTO', label: 'Aguardando' },
-  { value: 'RECEBIDO_PARCIAL',     label: 'Parcial' },
-  { value: 'RECEBIDO',             label: 'Recebido' },
-  { value: 'CANCELADO',            label: 'Cancelado' },
+  { value: 'RECEBIDO_PARCIAL', label: 'Parcial' },
+  { value: 'RECEBIDO', label: 'Recebido' },
+  { value: 'CANCELADO', label: 'Cancelado' },
 ];
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Skeleton({ className }: { className?: string }) {
-  return <div className={`animate-pulse rounded bg-slate-100 dark:bg-slate-700 ${className ?? ''}`} />;
+  return (
+    <div className={`animate-pulse rounded bg-slate-100 dark:bg-slate-700 ${className ?? ''}`} />
+  );
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -79,12 +132,19 @@ function ComprasContent() {
   const [status, setStatus] = useState<StatusCompra | ''>('');
   const [showIA, setShowIA] = useState(true);
 
-  const { data: comprasData, isLoading: loadingCompras, refetch } = useCompras({
+  const {
+    data: comprasData,
+    isLoading: loadingCompras,
+    refetch,
+  } = useCompras({
     status: status || undefined,
     fornecedorId: fornecedorId || undefined,
     busca: busca || undefined,
   });
   const { data: est, isLoading: loadingEst } = useEstatisticasCompras();
+  // Fornecedores vivem no customer-service — o backend de compras (inventory) não
+  // os conhece. limite:1 porque só o `total` do envelope interessa aqui.
+  const { data: fornecedoresAtivos } = useFornecedores({ status: 'ATIVO', limite: 1 });
 
   const compras: PedidoCompra[] = comprasData?.dados ?? [];
   const temNfes = (est?.nfesImportadas ?? 0) > 0;
@@ -165,72 +225,89 @@ function ComprasContent() {
       {loadingEst ? (
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+            <div
+              key={i}
+              className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4"
+            >
               <Skeleton className="h-3 w-24 mb-2" />
               <Skeleton className="h-7 w-32 mb-1" />
               <Skeleton className="h-3 w-20" />
             </div>
           ))}
         </div>
-      ) : est && (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {[
-            {
-              label: 'Gastos (30d)',
-              value: fmt(est.gastosTotal30d),
-              icon: DollarSign,
-              color: 'text-marca-600',
-              bg: 'bg-marca-50 dark:bg-marca-900/20',
-              sub: est.crescimentoGastos < 0
-                ? `${Math.abs(est.crescimentoGastos).toFixed(1)}% vs mês anterior`
-                : `+${est.crescimentoGastos.toFixed(1)}% vs mês anterior`,
-              subColor: est.crescimentoGastos < 0 ? 'text-emerald-500' : 'text-red-500',
-            },
-            {
-              label: 'Pedidos Pendentes',
-              value: String(est.pedidosPendentes),
-              icon: Clock,
-              color: 'text-amber-600',
-              bg: 'bg-amber-50 dark:bg-amber-900/20',
-              sub: `${est.pedidosRecebidos30d} recebidos este mês`,
-              subColor: 'text-slate-400',
-            },
-            {
-              label: 'NFs Importadas',
-              value: String(est.nfesImportadas),
-              icon: FileCheck,
-              color: 'text-blue-600',
-              bg: 'bg-blue-50 dark:bg-blue-900/20',
-              sub: `Ticket médio ${fmt(est.ticketMedioCompra)}`,
-              subColor: 'text-slate-400',
-            },
-            {
-              label: 'Fornecedores Ativos',
-              value: String(est.fornecedoresAtivos),
-              icon: Building2,
-              color: 'text-emerald-600',
-              bg: 'bg-emerald-50 dark:bg-emerald-900/20',
-              sub: est.topFornecedores[0] ? `Top: ${est.topFornecedores[0].nome}` : '—',
-              subColor: 'text-slate-400',
-            },
-          ].map(({ label, value, icon: Icon, color, bg, sub, subColor }) => (
-            <div
-              key={label}
-              className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4"
-            >
-              <div className="flex items-start justify-between">
-                <div className="min-w-0">
-                  <p className="text-xs text-slate-500">{label}</p>
-                  <p className={`text-xl font-bold mt-1 tabular-nums ${color}`}>{value}</p>
-                  <p className={`text-[11px] mt-0.5 truncate ${subColor}`}>{sub}</p>
-                </div>
-                <div className={`rounded-xl p-2 shrink-0 ${bg}`}>
-                  <Icon className={`h-4 w-4 ${color}`} />
+      ) : (
+        est && (
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {[
+              {
+                label: 'Gastos (30d)',
+                value: fmt(est.gastosTotal30d),
+                icon: DollarSign,
+                color: 'text-marca-600',
+                bg: 'bg-marca-50 dark:bg-marca-900/20',
+                // `crescimentoGastos` vem NULL quando não há 30 dias anteriores para
+                // comparar (o mock devolvia -8.5 fixo; o backend real não inventa).
+                sub:
+                  est.crescimentoGastos == null
+                    ? 'sem base de comparação'
+                    : est.crescimentoGastos < 0
+                      ? `${Math.abs(est.crescimentoGastos).toFixed(1)}% vs mês anterior`
+                      : `+${est.crescimentoGastos.toFixed(1)}% vs mês anterior`,
+                subColor:
+                  est.crescimentoGastos == null
+                    ? 'text-slate-400'
+                    : est.crescimentoGastos < 0
+                      ? 'text-emerald-500'
+                      : 'text-red-500',
+              },
+              {
+                label: 'Pedidos Pendentes',
+                value: String(est.pedidosPendentes),
+                icon: Clock,
+                color: 'text-amber-600',
+                bg: 'bg-amber-50 dark:bg-amber-900/20',
+                sub: `${est.pedidosRecebidos30d} recebidos este mês`,
+                subColor: 'text-slate-400',
+              },
+              {
+                label: 'NFs Importadas',
+                value: String(est.nfesImportadas),
+                icon: FileCheck,
+                color: 'text-blue-600',
+                bg: 'bg-blue-50 dark:bg-blue-900/20',
+                sub: `Ticket médio ${fmt(est.ticketMedioCompra)}`,
+                subColor: 'text-slate-400',
+              },
+              {
+                label: 'Fornecedores Ativos',
+                // Composto do customer-service (o backend de compras não conhece
+                // fornecedores). '—' enquanto carrega/indisponível — nunca zero falso.
+                value: fornecedoresAtivos ? String(fornecedoresAtivos.total) : '—',
+                icon: Building2,
+                color: 'text-emerald-600',
+                bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+                sub: est.topFornecedores[0] ? `Top: ${est.topFornecedores[0].nome}` : '—',
+                subColor: 'text-slate-400',
+              },
+            ].map(({ label, value, icon: Icon, color, bg, sub, subColor }) => (
+              <div
+                key={label}
+                className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs text-slate-500">{label}</p>
+                    <p className={`text-xl font-bold mt-1 tabular-nums ${color}`}>{value}</p>
+                    <p className={`text-[11px] mt-0.5 truncate ${subColor}`}>{sub}</p>
+                  </div>
+                  <div className={`rounded-xl p-2 shrink-0 ${bg}`}>
+                    <Icon className={`h-4 w-4 ${color}`} />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )
       )}
 
       {/* Painel IA */}
@@ -275,21 +352,26 @@ function ComprasContent() {
             </div>
 
             {/* Pedidos pendentes */}
-            <div className={`rounded-xl border p-4 ${
-              est.pedidosPendentes > 0
-                ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/50'
-                : 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800/50'
-            }`}>
+            <div
+              className={`rounded-xl border p-4 ${
+                est.pedidosPendentes > 0
+                  ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/50'
+                  : 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800/50'
+              }`}
+            >
               <div className="flex items-center gap-2 mb-2">
-                {est.pedidosPendentes > 0
-                  ? <AlertTriangle className="h-4 w-4 text-amber-600" />
-                  : <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                }
-                <p className={`text-xs font-semibold uppercase tracking-wide ${
-                  est.pedidosPendentes > 0
-                    ? 'text-amber-700 dark:text-amber-400'
-                    : 'text-emerald-700 dark:text-emerald-400'
-                }`}>
+                {est.pedidosPendentes > 0 ? (
+                  <AlertTriangle className="h-4 w-4 text-amber-600" />
+                ) : (
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                )}
+                <p
+                  className={`text-xs font-semibold uppercase tracking-wide ${
+                    est.pedidosPendentes > 0
+                      ? 'text-amber-700 dark:text-amber-400'
+                      : 'text-emerald-700 dark:text-emerald-400'
+                  }`}
+                >
                   Recebimentos Pendentes
                 </p>
               </div>
@@ -338,7 +420,8 @@ function ComprasContent() {
               Importe NF-e para automatizar suas compras
             </p>
             <p className="text-sm text-slate-500 mt-1">
-              Basta fazer upload do XML da nota fiscal — produtos, estoque e contas a pagar são atualizados automaticamente.
+              Basta fazer upload do XML da nota fiscal — produtos, estoque e contas a pagar são
+              atualizados automaticamente.
             </p>
           </div>
           <Link
@@ -413,14 +496,17 @@ function ComprasContent() {
                 <X className="h-4 w-4" />
                 Limpar filtro de fornecedor
               </button>
-            ) : !busca && !status && (
-              <Link
-                href="/dashboard/compras/importar-nfe"
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-marca-600 px-4 py-2 text-sm font-semibold text-white hover:bg-marca-700 transition-colors"
-              >
-                <Upload className="h-4 w-4" />
-                Importar primeira NF-e
-              </Link>
+            ) : (
+              !busca &&
+              !status && (
+                <Link
+                  href="/dashboard/compras/importar-nfe"
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-marca-600 px-4 py-2 text-sm font-semibold text-white hover:bg-marca-700 transition-colors"
+                >
+                  <Upload className="h-4 w-4" />
+                  Importar primeira NF-e
+                </Link>
+              )
             )}
           </div>
         ) : (
@@ -428,16 +514,22 @@ function ComprasContent() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
-                  {['Número', 'NF-e', 'Fornecedor', 'Data', 'Status', 'Valor Total', ''].map((h) => (
-                    <th
-                      key={h}
-                      className={`px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide ${
-                        h === 'Valor Total' ? 'text-right' : h === 'Status' ? 'text-center' : 'text-left'
-                      }`}
-                    >
-                      {h}
-                    </th>
-                  ))}
+                  {['Número', 'NF-e', 'Fornecedor', 'Data', 'Status', 'Valor Total', ''].map(
+                    (h) => (
+                      <th
+                        key={h}
+                        className={`px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide ${
+                          h === 'Valor Total'
+                            ? 'text-right'
+                            : h === 'Status'
+                              ? 'text-center'
+                              : 'text-left'
+                        }`}
+                      >
+                        {h}
+                      </th>
+                    ),
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
@@ -447,14 +539,17 @@ function ComprasContent() {
                     <tr
                       key={compra.id}
                       className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer"
-                      onClick={() => { window.location.href = `/dashboard/compras/${compra.id}`; }}
+                      onClick={() => {
+                        window.location.href = `/dashboard/compras/${compra.id}`;
+                      }}
                     >
                       <td className="px-4 py-3">
                         <div className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
                           #{compra.numero}
                         </div>
                         <div className="text-[10px] text-slate-400">
-                          {(compra as any).qtdItens ?? 0} {(compra as any).qtdItens === 1 ? 'item' : 'itens'}
+                          {(compra as any).qtdItens ?? 0}{' '}
+                          {(compra as any).qtdItens === 1 ? 'item' : 'itens'}
                         </div>
                       </td>
                       <td className="px-4 py-3">
@@ -508,7 +603,8 @@ function ComprasContent() {
 
       {comprasData && comprasData.total > 0 && (
         <p className="text-center text-xs text-slate-400">
-          {comprasData.total} pedido{comprasData.total !== 1 ? 's' : ''} de compra encontrado{comprasData.total !== 1 ? 's' : ''}
+          {comprasData.total} pedido{comprasData.total !== 1 ? 's' : ''} de compra encontrado
+          {comprasData.total !== 1 ? 's' : ''}
         </p>
       )}
     </div>

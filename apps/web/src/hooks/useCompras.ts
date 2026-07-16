@@ -70,75 +70,51 @@ export interface EstatisticasCompras {
   pedidosPendentes: number;
   pedidosRecebidos30d: number;
   nfesImportadas: number;
-  fornecedoresAtivos: number;
   ticketMedioCompra: number;
-  topFornecedores: Array<{ id: string; nome: string; total: number; qtd: number }>;
-  crescimentoGastos: number;
+  /** Agregado das compras RECEBIDAS por fornecedor (id pode ser null em compra sem vínculo). */
+  topFornecedores: Array<{ id: string | null; nome: string; total: number; qtd: number }>;
+  /**
+   * 30 dias atuais vs 30 anteriores. NULL quando não há base de comparação —
+   * a tela mostra "sem base de comparação" (o mock devolvia -8.5 inventado).
+   */
+  crescimentoGastos: number | null;
 }
 
+/**
+ * Contrato REAL do POST /v1/compras/importar-nfe (inventory-service).
+ *
+ * A v1 NÃO cria fornecedor, NÃO cria produto e NÃO gera conta a pagar — o mock
+ * antigo fingia esses efeitos. Os itens casam por SKU com o catálogo; o que não
+ * casar entra sem vínculo (itensSemProduto) e não movimenta estoque no
+ * recebimento até o produto ser cadastrado.
+ */
 export interface ResultadoImportacao {
   compra: PedidoCompra;
-  fornecedor: { criado: boolean; dados: Fornecedor };
-  produtos: Array<{ criado: boolean; produtoId: string; nome: string; quantidade: number }>;
-  estoque: { itensAtualizados: number };
-  financeiro: { contaId: string; valor: number; vencimento: string };
+  itensTotal: number;
+  itensSemProduto: number;
+  aviso: string | null;
   nfe: {
     chave: string;
     numero: string;
     serie: string;
     dataEmissao: string;
     naturezaOperacao: string;
-    fornecedor: {
-      cnpj: string;
-      razaoSocial: string;
-      nomeFantasia: string;
-      inscricaoEstadual: string;
-      telefone: string;
-      email: string;
-      endereco: {
-        logradouro: string;
-        numero: string;
-        complemento: string;
-        bairro: string;
-        cidade: string;
-        uf: string;
-        cep: string;
-      };
-    };
-    itens: Array<{
-      codigo: string;
-      ean: string;
-      descricao: string;
-      ncm: string;
-      cfop: string;
-      unidade: string;
-      quantidade: number;
-      valorUnitario: number;
-      valorTotal: number;
-      impostos: { vICMS: number; vIPI: number; vPIS: number; vCOFINS: number };
-    }>;
+    fornecedor: { cnpj: string; razaoSocial: string; nomeFantasia: string };
     totais: {
       valorProdutos: number;
       valorFrete: number;
-      valorSeguro: number;
-      valorDesconto: number;
-      valorIPI: number;
-      valorICMS: number;
-      valorPIS: number;
-      valorCOFINS: number;
       valorTotal: number;
-      valorTributos: number;
+      valorImpostos: number;
     };
-    pagamento: Array<{ forma: string; valor: number }>;
   };
 }
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
 
 export const comprasKeys = {
-  all:          ['compras'] as const,
-  lista:        (f?: object) => ['compras', 'lista', f ?? {}] as const,
-  detalhe:      (id: string) => ['compras', 'detalhe', id] as const,
+  all: ['compras'] as const,
+  lista: (f?: object) => ['compras', 'lista', f ?? {}] as const,
+  detalhe: (id: string) => ['compras', 'detalhe', id] as const,
   estatisticas: ['compras', 'estatisticas'] as const,
 };
 
@@ -202,7 +178,9 @@ export function useCriarCompra() {
 export function useReceberCompra(id: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (body: { itensRecebidos: Array<{ itemId: string; quantidadeRecebida: number }> }) => {
+    mutationFn: async (body: {
+      itensRecebidos: Array<{ itemId: string; quantidadeRecebida: number }>;
+    }) => {
       const { data } = await api.post(`/v1/compras/${id}/receber`, body);
       return data as PedidoCompra;
     },

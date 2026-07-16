@@ -3,20 +3,36 @@
 import { useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import {
-  Upload, FileText, CheckCircle2, XCircle, Package, Users,
-  Warehouse, DollarSign, FileCheck, ChevronRight, RotateCcw,
-  Eye, Loader2, AlertTriangle, Building2, ShoppingBag, ArrowLeft,
-  Sparkles, FileX,
+  Upload,
+  FileText,
+  CheckCircle2,
+  XCircle,
+  Package,
+  Users,
+  Warehouse,
+  DollarSign,
+  FileCheck,
+  ChevronRight,
+  RotateCcw,
+  Eye,
+  Loader2,
+  AlertTriangle,
+  Building2,
+  ShoppingBag,
+  ArrowLeft,
+  Sparkles,
+  FileX,
 } from 'lucide-react';
 import { useImportarNFe, type ResultadoImportacao } from '@/hooks/useCompras';
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
-const fmt = (v: number) =>
-  v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const dtfmt = (iso: string) =>
   new Date(iso).toLocaleDateString('pt-BR', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
   });
 
 type Step = 'upload' | 'processing' | 'success' | 'error';
@@ -159,8 +175,7 @@ export default function ImportarNFePage() {
           setStep('success');
         },
         onError: (err: any) => {
-          const msg =
-            err?.response?.data?.message ?? 'Erro ao processar a NF-e. Tente novamente.';
+          const msg = err?.response?.data?.message ?? 'Erro ao processar a NF-e. Tente novamente.';
           const dicas: string[] = err?.response?.data?.dicas ?? [
             'Verifique se o arquivo é uma NF-e válida (layout 4.00)',
             'Certifique-se que o encoding é UTF-8',
@@ -203,14 +218,21 @@ export default function ImportarNFePage() {
           </p>
         </div>
         <div className="flex flex-col gap-2 w-64">
-          {['Lendo XML da NF-e', 'Identificando fornecedor', 'Localizando produtos', 'Atualizando estoque', 'Criando conta a pagar'].map(
-            (label, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full border-2 border-marca-600 border-t-transparent animate-spin shrink-0" style={{ animationDelay: `${i * 0.2}s` }} />
-                <span className="text-sm text-slate-600 dark:text-slate-400">{label}</span>
-              </div>
-            ),
-          )}
+          {[
+            'Lendo XML da NF-e',
+            'Identificando fornecedor',
+            'Localizando produtos',
+            'Atualizando estoque',
+            'Criando conta a pagar',
+          ].map((label, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div
+                className="w-5 h-5 rounded-full border-2 border-marca-600 border-t-transparent animate-spin shrink-0"
+                style={{ animationDelay: `${i * 0.2}s` }}
+              />
+              <span className="text-sm text-slate-600 dark:text-slate-400">{label}</span>
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -219,9 +241,10 @@ export default function ImportarNFePage() {
   // ─── Success State ─────────────────────────────────────────────────────────
 
   if (step === 'success' && result) {
-    const chaveShort = result.nfe.chave.length > 20
-      ? `${result.nfe.chave.slice(0, 10)}...${result.nfe.chave.slice(-10)}`
-      : result.nfe.chave;
+    const chaveShort =
+      result.nfe.chave.length > 20
+        ? `${result.nfe.chave.slice(0, 10)}...${result.nfe.chave.slice(-10)}`
+        : result.nfe.chave;
 
     return (
       <div className="space-y-6 max-w-4xl mx-auto">
@@ -235,7 +258,9 @@ export default function ImportarNFePage() {
               </h1>
             </div>
             <p className="text-sm text-slate-500 mt-1">
-              NF-e {result.nfe.numero}/{result.nfe.serie} importada e todos os dados atualizados.
+              NF-e {result.nfe.numero}/{result.nfe.serie} importada — pedido de compra{' '}
+              {result.compra.numero} criado aguardando recebimento. A entrada no estoque acontece ao
+              receber.
             </p>
           </div>
         </div>
@@ -248,7 +273,9 @@ export default function ImportarNFePage() {
               <div className="rounded-xl bg-blue-50 dark:bg-blue-900/20 p-2">
                 <FileCheck className="h-5 w-5 text-blue-600" />
               </div>
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Nota Fiscal Eletrônica</h3>
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">
+                Nota Fiscal Eletrônica
+              </h3>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
@@ -277,12 +304,14 @@ export default function ImportarNFePage() {
               </div>
               <div className="flex justify-between text-sm border-t border-slate-100 dark:border-slate-700 pt-2 mt-2">
                 <span className="text-slate-500">Valor Total</span>
-                <span className="font-bold text-emerald-600">{fmt(result.nfe.totais.valorTotal)}</span>
+                <span className="font-bold text-emerald-600">
+                  {fmt(result.nfe.totais.valorTotal)}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Card Fornecedor */}
+          {/* Card Fornecedor (dados da NF-e — a importação NÃO cria o cadastro) */}
           <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
             <div className="flex items-center gap-2 mb-4">
               <div className="rounded-xl bg-purple-50 dark:bg-purple-900/20 p-2">
@@ -290,14 +319,8 @@ export default function ImportarNFePage() {
               </div>
               <div className="flex-1 flex items-center justify-between">
                 <h3 className="font-semibold text-slate-900 dark:text-slate-100">Fornecedor</h3>
-                <span
-                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                    result.fornecedor.criado
-                      ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
-                      : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                  }`}
-                >
-                  {result.fornecedor.criado ? 'Novo!' : 'Encontrado'}
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                  Da NF-e
                 </span>
               </div>
             </div>
@@ -305,107 +328,88 @@ export default function ImportarNFePage() {
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500">Razão Social</span>
                 <span className="font-medium text-slate-800 dark:text-slate-200 text-right max-w-[200px] truncate">
-                  {result.fornecedor.dados.razaoSocial}
+                  {result.nfe.fornecedor.razaoSocial}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500">CNPJ</span>
                 <span className="font-mono font-medium text-slate-800 dark:text-slate-200">
-                  {result.fornecedor.dados.cnpj}
+                  {result.nfe.fornecedor.cnpj}
                 </span>
               </div>
-              {result.fornecedor.dados.endereco?.cidade && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Cidade/UF</span>
-                  <span className="font-medium text-slate-800 dark:text-slate-200">
-                    {result.fornecedor.dados.endereco.cidade}/{result.fornecedor.dados.endereco.uf}
-                  </span>
-                </div>
-              )}
-              {result.fornecedor.criado && (
-                <div className="rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 px-3 py-2 mt-2">
-                  <p className="text-xs text-amber-700 dark:text-amber-400">
-                    Fornecedor criado automaticamente. Acesse Fornecedores para completar o cadastro.
-                  </p>
-                </div>
-              )}
+              <div className="rounded-lg bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 px-3 py-2 mt-2">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  A importação não cria o cadastro do fornecedor — se ele ainda não existir,
+                  cadastre em Cadastros → Fornecedores.
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Card Produtos */}
+          {/* Card Itens do pedido criado */}
           <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
             <div className="flex items-center gap-2 mb-4">
               <div className="rounded-xl bg-orange-50 dark:bg-orange-900/20 p-2">
                 <Package className="h-5 w-5 text-orange-600" />
               </div>
               <h3 className="font-semibold text-slate-900 dark:text-slate-100">
-                Produtos ({result.produtos.length})
+                Itens ({result.itensTotal})
               </h3>
             </div>
             <div className="space-y-2 max-h-48 overflow-y-auto">
-              {result.produtos.map((p, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+              {(result.compra.itens ?? []).map((p) => (
+                <div key={p.id} className="flex items-center gap-2">
+                  <CheckCircle2
+                    className={`h-3.5 w-3.5 shrink-0 ${p.produtoId ? 'text-emerald-500' : 'text-amber-500'}`}
+                  />
                   <span className="text-sm text-slate-700 dark:text-slate-300 flex-1 truncate">
-                    {p.nome}
+                    {p.produto}
                   </span>
-                  <span className="text-xs text-slate-400 whitespace-nowrap">
-                    {p.quantidade}x
-                  </span>
+                  <span className="text-xs text-slate-400 whitespace-nowrap">{p.quantidade}x</span>
                   <span
                     className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
-                      p.criado
-                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
-                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                      p.produtoId
+                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                        : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
                     }`}
                   >
-                    {p.criado ? 'Criado' : 'Atualizado'}
+                    {p.produtoId ? 'No catálogo' : 'Sem cadastro'}
                   </span>
                 </div>
               ))}
             </div>
+            {result.aviso && (
+              <div className="rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 px-3 py-2 mt-3">
+                <p className="text-xs text-amber-700 dark:text-amber-400">{result.aviso}</p>
+              </div>
+            )}
           </div>
 
-          {/* Cards Estoque e Financeiro */}
-          <div className="flex flex-col gap-4">
-            {/* Estoque */}
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 flex-1">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="rounded-xl bg-emerald-50 dark:bg-emerald-900/20 p-2">
-                  <Warehouse className="h-5 w-5 text-emerald-600" />
-                </div>
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100">Estoque</h3>
+          {/* Card do pedido criado — a entrada no estoque acontece no RECEBER */}
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 md:col-span-2">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="rounded-xl bg-emerald-50 dark:bg-emerald-900/20 p-2">
+                <Warehouse className="h-5 w-5 text-emerald-600" />
               </div>
-              <div className="flex items-center gap-3">
-                <div className="text-3xl font-bold text-emerald-600">
-                  {result.estoque.itensAtualizados}
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                    {result.estoque.itensAtualizados === 1 ? 'item atualizado' : 'itens atualizados'}
-                  </p>
-                  <p className="text-xs text-slate-400">Depósito Principal</p>
-                </div>
-              </div>
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">
+                Pedido de Compra {result.compra.numero}
+              </h3>
             </div>
-
-            {/* Financeiro */}
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 flex-1">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="rounded-xl bg-rose-50 dark:bg-rose-900/20 p-2">
-                  <DollarSign className="h-5 w-5 text-rose-600" />
-                </div>
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100">Financeiro</h3>
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-2">
+              <div>
+                <p className="text-xs text-slate-500">Status</p>
+                <p className="text-sm font-semibold text-amber-600">Aguardando recebimento</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm text-slate-500">Conta a pagar criada</p>
-                <p className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                  {fmt(result.financeiro.valor)}
-                </p>
-                <p className="text-xs text-slate-400">
-                  Vencimento: {dtfmt(result.financeiro.vencimento)}
+              <div>
+                <p className="text-xs text-slate-500">Valor total</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  {fmt(result.compra.valorTotal)}
                 </p>
               </div>
+              <p className="text-xs text-slate-400 flex-1 min-w-[240px]">
+                O estoque só é movimentado quando você <strong>receber</strong> os itens no pedido —
+                confira as quantidades na chegada da mercadoria.
+              </p>
             </div>
           </div>
         </div>
@@ -467,7 +471,10 @@ export default function ImportarNFePage() {
             </div>
             <ul className="space-y-1.5">
               {errorDicas.map((dica, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-400">
+                <li
+                  key={i}
+                  className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-400"
+                >
                   <ChevronRight className="h-4 w-4 shrink-0 mt-0.5" />
                   {dica}
                 </li>
@@ -509,9 +516,7 @@ export default function ImportarNFePage() {
           <ArrowLeft className="h-4 w-4 text-slate-500" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-            Importar NF-e
-          </h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Importar NF-e</h1>
           <p className="text-sm text-slate-500 mt-0.5">
             Faça upload do XML da nota fiscal para importar automaticamente
           </p>
@@ -521,12 +526,35 @@ export default function ImportarNFePage() {
       {/* Como funciona */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { icon: Upload, label: '1. Upload do XML', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-          { icon: FileText, label: '2. Leitura automática', color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/20' },
-          { icon: Warehouse, label: '3. Estoque atualizado', color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-          { icon: DollarSign, label: '4. Conta a pagar criada', color: 'text-rose-600', bg: 'bg-rose-50 dark:bg-rose-900/20' },
+          {
+            icon: Upload,
+            label: '1. Upload do XML',
+            color: 'text-blue-600',
+            bg: 'bg-blue-50 dark:bg-blue-900/20',
+          },
+          {
+            icon: FileText,
+            label: '2. Leitura automática',
+            color: 'text-purple-600',
+            bg: 'bg-purple-50 dark:bg-purple-900/20',
+          },
+          {
+            icon: Warehouse,
+            label: '3. Estoque atualizado',
+            color: 'text-emerald-600',
+            bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+          },
+          {
+            icon: DollarSign,
+            label: '4. Conta a pagar criada',
+            color: 'text-rose-600',
+            bg: 'bg-rose-50 dark:bg-rose-900/20',
+          },
         ].map(({ icon: Icon, label, color, bg }) => (
-          <div key={label} className={`rounded-xl ${bg} p-3 flex flex-col items-center gap-2 text-center`}>
+          <div
+            key={label}
+            className={`rounded-xl ${bg} p-3 flex flex-col items-center gap-2 text-center`}
+          >
             <Icon className={`h-5 w-5 ${color}`} />
             <p className={`text-xs font-medium ${color}`}>{label}</p>
           </div>
@@ -536,15 +564,18 @@ export default function ImportarNFePage() {
       {/* Zona de upload */}
       <div
         onDrop={handleDrop}
-        onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragOver(true);
+        }}
         onDragLeave={() => setIsDragOver(false)}
         onClick={() => !file && fileInputRef.current?.click()}
         className={`relative rounded-2xl border-2 border-dashed p-10 flex flex-col items-center gap-4 transition-all cursor-pointer ${
           isDragOver
             ? 'border-marca-500 bg-marca-50 dark:bg-marca-900/20 scale-[1.01]'
             : file
-            ? 'border-emerald-400 dark:border-emerald-600 bg-emerald-50/50 dark:bg-emerald-900/10 cursor-default'
-            : 'border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 hover:border-marca-400 hover:bg-marca-50/50 dark:hover:bg-marca-900/10'
+              ? 'border-emerald-400 dark:border-emerald-600 bg-emerald-50/50 dark:bg-emerald-900/10 cursor-default'
+              : 'border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 hover:border-marca-400 hover:bg-marca-50/50 dark:hover:bg-marca-900/10'
         }`}
       >
         <input
@@ -565,7 +596,10 @@ export default function ImportarNFePage() {
               <p className="text-sm text-slate-500 mt-0.5">{formatBytes(file.size)}</p>
             </div>
             <button
-              onClick={(e) => { e.stopPropagation(); resetar(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                resetar();
+              }}
               className="text-xs text-slate-400 hover:text-red-500 transition-colors underline"
             >
               Remover arquivo
@@ -573,8 +607,12 @@ export default function ImportarNFePage() {
           </>
         ) : (
           <>
-            <div className={`rounded-2xl p-4 transition-colors ${isDragOver ? 'bg-marca-100 dark:bg-marca-900/30' : 'bg-slate-100 dark:bg-slate-700'}`}>
-              <Upload className={`h-10 w-10 transition-colors ${isDragOver ? 'text-marca-600' : 'text-slate-400'}`} />
+            <div
+              className={`rounded-2xl p-4 transition-colors ${isDragOver ? 'bg-marca-100 dark:bg-marca-900/30' : 'bg-slate-100 dark:bg-slate-700'}`}
+            >
+              <Upload
+                className={`h-10 w-10 transition-colors ${isDragOver ? 'text-marca-600' : 'text-slate-400'}`}
+              />
             </div>
             <div className="text-center">
               <p className="font-semibold text-slate-900 dark:text-slate-100">
@@ -601,9 +639,13 @@ export default function ImportarNFePage() {
           className="w-full flex items-center justify-center gap-2 rounded-xl bg-destaque-500 hover:bg-destaque-600 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-3.5 text-base font-semibold text-white transition-colors shadow-sm"
         >
           {!xmlContent ? (
-            <><Loader2 className="h-5 w-5 animate-spin" /> Lendo arquivo...</>
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" /> Lendo arquivo...
+            </>
           ) : (
-            <><Sparkles className="h-5 w-5" /> Processar XML e Importar NF-e</>
+            <>
+              <Sparkles className="h-5 w-5" /> Processar XML e Importar NF-e
+            </>
           )}
         </button>
       )}
@@ -620,7 +662,9 @@ export default function ImportarNFePage() {
               Ver exemplo de XML NF-e
             </span>
           </div>
-          <ChevronRight className={`h-4 w-4 text-slate-400 transition-transform ${showExemplo ? 'rotate-90' : ''}`} />
+          <ChevronRight
+            className={`h-4 w-4 text-slate-400 transition-transform ${showExemplo ? 'rotate-90' : ''}`}
+          />
         </button>
         {showExemplo && (
           <div className="border-t border-slate-100 dark:border-slate-700 p-4">
@@ -628,7 +672,8 @@ export default function ImportarNFePage() {
               {EXEMPLO_XML}
             </pre>
             <p className="text-xs text-slate-400 mt-2">
-              Este é um XML de exemplo simplificado. A NF-e real deve conter todos os campos obrigatórios do layout 4.00.
+              Este é um XML de exemplo simplificado. A NF-e real deve conter todos os campos
+              obrigatórios do layout 4.00.
             </p>
           </div>
         )}

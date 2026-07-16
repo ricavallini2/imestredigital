@@ -181,6 +181,50 @@ exports.Prisma.MovimentacaoScalarFieldEnum = {
   criadoEm: 'criadoEm'
 };
 
+exports.Prisma.PedidoCompraScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  numero: 'numero',
+  fornecedorId: 'fornecedorId',
+  fornecedorNome: 'fornecedorNome',
+  status: 'status',
+  valorProdutos: 'valorProdutos',
+  valorFrete: 'valorFrete',
+  valorImpostos: 'valorImpostos',
+  valorTotal: 'valorTotal',
+  dataEmissao: 'dataEmissao',
+  dataPrevistaEntrega: 'dataPrevistaEntrega',
+  dataRecebimento: 'dataRecebimento',
+  nfeNumero: 'nfeNumero',
+  nfeSerie: 'nfeSerie',
+  nfeChave: 'nfeChave',
+  condicaoPagamento: 'condicaoPagamento',
+  formaPagamento: 'formaPagamento',
+  observacoes: 'observacoes',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+};
+
+exports.Prisma.ItemPedidoCompraScalarFieldEnum = {
+  id: 'id',
+  pedidoCompraId: 'pedidoCompraId',
+  produtoId: 'produtoId',
+  produtoNome: 'produtoNome',
+  sku: 'sku',
+  ncm: 'ncm',
+  cfop: 'cfop',
+  unidade: 'unidade',
+  quantidade: 'quantidade',
+  quantidadeRecebida: 'quantidadeRecebida',
+  valorUnitario: 'valorUnitario',
+  valorTotal: 'valorTotal',
+  valorIcms: 'valorIcms',
+  valorIpi: 'valorIpi',
+  valorPis: 'valorPis',
+  valorCofins: 'valorCofins',
+  criadoEm: 'criadoEm'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -226,12 +270,23 @@ exports.MotivoMovimentacao = exports.$Enums.MotivoMovimentacao = {
   OUTRO: 'OUTRO'
 };
 
+exports.StatusCompra = exports.$Enums.StatusCompra = {
+  RASCUNHO: 'RASCUNHO',
+  ENVIADO: 'ENVIADO',
+  AGUARDANDO_RECEBIMENTO: 'AGUARDANDO_RECEBIMENTO',
+  RECEBIDO_PARCIAL: 'RECEBIDO_PARCIAL',
+  RECEBIDO: 'RECEBIDO',
+  CANCELADO: 'CANCELADO'
+};
+
 exports.Prisma.ModelName = {
   Deposito: 'Deposito',
   SaldoEstoque: 'SaldoEstoque',
   ReservaEstoque: 'ReservaEstoque',
   EventoProcessado: 'EventoProcessado',
-  Movimentacao: 'Movimentacao'
+  Movimentacao: 'Movimentacao',
+  PedidoCompra: 'PedidoCompra',
+  ItemPedidoCompra: 'ItemPedidoCompra'
 };
 
 /**
