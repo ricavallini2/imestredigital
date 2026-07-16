@@ -83,9 +83,8 @@ export const pedidosService = {
         params: { itensPorPagina: 100, status: 'ATIVO', incluirVariacoes: true },
       }),
       api.get('/v1/estoque/resumo').catch(() => ({ data: { itens: [] } })),
-      api
-        .get('/v1/clientes', { params: { itensPorPagina: 100 } })
-        .catch(() => ({ data: { dados: [] } })),
+      // customer-service pagina com `limite` (não `itensPorPagina`).
+      api.get('/v1/clientes', { params: { limite: 100 } }).catch(() => ({ data: { dados: [] } })),
     ]);
 
     // Saldo disponível agregado por produto e por SKU (variação).
