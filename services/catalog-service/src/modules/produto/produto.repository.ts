@@ -95,7 +95,14 @@ export class ProdutoRepository {
 
   /** Lista produtos do tenant com paginação e filtros */
   async listar(tenantId: string, filtros: ListarProdutosDto) {
-    const { pagina = 1, itensPorPagina = 20, busca, status, categoriaId } = filtros;
+    const {
+      pagina = 1,
+      itensPorPagina = 20,
+      busca,
+      status,
+      categoriaId,
+      incluirVariacoes,
+    } = filtros;
     const skip = (pagina - 1) * itensPorPagina;
 
     const where: any = { tenantId };
@@ -120,6 +127,8 @@ export class ProdutoRepository {
           categoria: true,
           marca: true,
           imagens: { where: { principal: true }, take: 1 },
+          // Opt-in (PDV/catálogo de venda): variações com atributos, sem pesar a listagem padrão.
+          ...(incluirVariacoes ? { variacoes: { include: { atributos: true } } } : {}),
         },
         orderBy: { criadoEm: 'desc' },
       }),

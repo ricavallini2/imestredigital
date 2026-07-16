@@ -5,9 +5,9 @@
  * busca, paginação e filtros de listagem de produtos.
  */
 
-import { IsOptional, IsString, IsNumber, IsEnum, Min, Max } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsEnum, IsBoolean, Min, Max } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 
 /**
  * Valores de status aceitos no filtro de listagem.
@@ -39,6 +39,16 @@ export class ListarProdutosDto {
   @IsOptional()
   @IsString()
   categoriaId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Inclui as variações (com atributos) de cada produto na listagem — usado pelo PDV',
+    default: false,
+  })
+  @IsOptional()
+  // Transform explícito: @Type(() => Boolean) converteria a string "false" em true.
+  @Transform(({ value }) => value === true || value === 'true' || value === '1')
+  @IsBoolean()
+  incluirVariacoes?: boolean;
 
   @ApiPropertyOptional({ description: 'Número da página', default: 1 })
   @IsOptional()

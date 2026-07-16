@@ -220,6 +220,9 @@ services:
       PORT: 3010
       DATABASE_URL: postgresql://${POSTGRES_USER:-imestredigital}:${POSTGRES_PASSWORD}@postgres:5432/catalog_service
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       KAFKA_BROKERS: redpanda:9093
       # Obrigatório: o TenantMiddleware verifica a assinatura do JWT (fail-fast no bootstrap).
       JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no .env}
@@ -294,6 +297,9 @@ services:
       PORT: 3005
       DATABASE_URL: postgresql://${POSTGRES_USER:-imestredigital}:${POSTGRES_PASSWORD}@postgres:5432/order_service
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       KAFKA_BROKERS: redpanda:9093
       # Obrigatório: o TenantMiddleware verifica a assinatura do JWT (fail-fast no bootstrap).
       JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no .env}
@@ -330,6 +336,9 @@ services:
       PORT: 3006
       DATABASE_URL: postgresql://${POSTGRES_USER:-imestredigital}:${POSTGRES_PASSWORD}@postgres:5432/financial_service
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       KAFKA_BROKERS: redpanda:9093
       # Obrigatório: o TenantMiddleware verifica a assinatura do JWT (fail-fast no bootstrap).
       JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no .env}
@@ -485,6 +494,9 @@ services:
       PORT: 3008
       DATABASE_URL: postgresql://${POSTGRES_USER:-imestredigital}:${POSTGRES_PASSWORD}@postgres:5432/ai_service
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       KAFKA_BROKERS: redpanda:9093
       # Obrigatório: o TenantMiddleware verifica a assinatura do JWT (fail-fast no bootstrap).
       JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no .env}
@@ -523,6 +535,9 @@ services:
       PORT: 3009
       DATABASE_URL: postgresql://${POSTGRES_USER:-imestredigital}:${POSTGRES_PASSWORD}@postgres:5432/notification_service
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       KAFKA_BROKERS: redpanda:9093
       # Obrigatório: o TenantMiddleware verifica a assinatura do JWT (fail-fast no bootstrap).
       JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no .env}
