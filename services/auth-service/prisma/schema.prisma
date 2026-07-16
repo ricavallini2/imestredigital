@@ -18,11 +18,18 @@ datasource db {
 
 // ─── Enums ────────────────────────────────────────────────
 
+/// Cargo define o TEMPLATE inicial de permissões do usuário.
+/// As permissões efetivas ficam em PermissaoUsuario e podem ser
+/// ajustadas individualmente por admin/gerente.
 enum CargoUsuario {
   ADMIN
   GERENTE
-  OPERADOR
+  VENDEDOR
   CAIXA
+  ESTOQUISTA
+  FINANCEIRO
+  FUNCIONARIO
+  OPERADOR // legado: equivalente a VENDEDOR (mantido p/ usuários já criados)
   VISUALIZADOR
 }
 
@@ -115,11 +122,39 @@ model Usuario {
 
   // Relacionamentos
   refreshTokens   RefreshToken[]
+  permissoes      PermissaoUsuario[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
   @@index([email])
   @@map("usuarios")
+}
+
+// ─── Permissão por módulo ─────────────────────────────────
+
+/// Permissão efetiva do usuário em um módulo do ERP.
+/// Uma linha por usuário × módulo, com as 4 ações do CRUD.
+/// O cargo apenas semeia estes valores na criação; a partir daí
+/// admin/gerente ajustam individualmente.
+model PermissaoUsuario {
+  id           String   @id @default(uuid()) @db.Uuid
+  usuarioId    String   @map("usuario_id") @db.Uuid
+  usuario      Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  /// Chave do módulo (ver MODULOS no código: produtos, clientes, caixa...)
+  modulo       String
+
+  visualizar   Boolean  @default(false)
+  incluir      Boolean  @default(false)
+  editar       Boolean  @default(false)
+  excluir      Boolean  @default(false)
+
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  @@unique([usuarioId, modulo])
+  @@index([usuarioId])
+  @@map("permissoes_usuario")
 }
 
 // ─── Refresh Token ────────────────────────────────────────

@@ -147,12 +147,25 @@ exports.Prisma.UsuarioScalarFieldEnum = {
   senhaHash: 'senhaHash',
   cargo: 'cargo',
   status: 'status',
+  podeLiberarVenda: 'podeLiberarVenda',
   emailVerificado: 'emailVerificado',
   ultimoLogin: 'ultimoLogin',
   tentativasLogin: 'tentativasLogin',
   bloqueadoAte: 'bloqueadoAte',
   avatarUrl: 'avatarUrl',
   preferencias: 'preferencias',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+};
+
+exports.Prisma.PermissaoUsuarioScalarFieldEnum = {
+  id: 'id',
+  usuarioId: 'usuarioId',
+  modulo: 'modulo',
+  visualizar: 'visualizar',
+  incluir: 'incluir',
+  editar: 'editar',
+  excluir: 'excluir',
   criadoEm: 'criadoEm',
   atualizadoEm: 'atualizadoEm'
 };
@@ -209,6 +222,11 @@ exports.StatusTenant = exports.$Enums.StatusTenant = {
 exports.CargoUsuario = exports.$Enums.CargoUsuario = {
   ADMIN: 'ADMIN',
   GERENTE: 'GERENTE',
+  VENDEDOR: 'VENDEDOR',
+  CAIXA: 'CAIXA',
+  ESTOQUISTA: 'ESTOQUISTA',
+  FINANCEIRO: 'FINANCEIRO',
+  FUNCIONARIO: 'FUNCIONARIO',
   OPERADOR: 'OPERADOR',
   VISUALIZADOR: 'VISUALIZADOR'
 };
@@ -224,6 +242,7 @@ exports.StatusUsuario = exports.$Enums.StatusUsuario = {
 exports.Prisma.ModelName = {
   Tenant: 'Tenant',
   Usuario: 'Usuario',
+  PermissaoUsuario: 'PermissaoUsuario',
   RefreshToken: 'RefreshToken'
 };
 

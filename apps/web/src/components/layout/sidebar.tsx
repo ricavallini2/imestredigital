@@ -43,6 +43,7 @@ import {
   Hash,
   Truck,
   ClipboardList,
+  UserCog,
   ChevronDown,
   PanelLeftClose,
   PanelLeftOpen,
@@ -82,6 +83,7 @@ const MENU: MenuItem[] = [
     icone: BookUser,
     filhos: [
       { tipo: 'link', href: '/dashboard/clientes', label: 'Clientes', icone: Users },
+      { tipo: 'link', href: '/dashboard/cadastros/usuarios', label: 'Usuários', icone: UserCog },
       { tipo: 'link', href: '/dashboard/cadastros/cfop', label: 'CFOP', icone: Hash },
       {
         tipo: 'link',

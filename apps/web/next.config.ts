@@ -83,6 +83,8 @@ const nextConfig: NextConfig = {
           source: '/api/v1/usuarios/:path*',
           destination: `${AUTH_SERVICE}/api/v1/usuarios/:path*`,
         },
+        // Rota base explícita (o :path* acima não cobre a lista sem sufixo).
+        { source: '/api/v1/usuarios', destination: `${AUTH_SERVICE}/api/v1/usuarios` },
 
         // ── Catalog Service / Produtos (3010) ───────────────────────
         // Nota: /produtos/:id/variacoes(/prever,/lote) já caem no proxy de produtos abaixo.
