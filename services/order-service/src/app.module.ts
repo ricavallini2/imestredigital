@@ -22,6 +22,7 @@ import { TerminusModule } from '@nestjs/terminus';
 
 import { PedidoModule } from './modules/pedido/pedido.module';
 import { PagamentoModule } from './modules/pagamento/pagamento.module';
+import { FormaPagamentoModule } from './modules/forma-pagamento/forma-pagamento.module';
 import { DevolucaoModule } from './modules/devolucao/devolucao.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { CacheModule } from './modules/cache/cache.module';
@@ -64,6 +65,7 @@ import { resolverJwtSecret } from './config/jwt.config';
     EventosModule,
     PedidoModule,
     PagamentoModule,
+    FormaPagamentoModule,
     DevolucaoModule,
   ],
   controllers: [HealthController],

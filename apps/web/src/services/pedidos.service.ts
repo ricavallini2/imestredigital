@@ -188,13 +188,15 @@ export const pedidosService = {
    */
   registrarPagamento: async (
     pedidoId: string,
-    pgto: { forma: string; valor: number; parcelas?: number },
+    pgto: { forma: string; valor: number; parcelas?: number; descricao?: string },
   ): Promise<void> => {
     await api.post(`/v1/pagamentos/pedido/${pedidoId}`, {
       tipo: pgto.forma,
       status: 'PAGO',
       valor: pgto.valor,
       ...(pgto.parcelas && pgto.parcelas > 1 ? { parcelas: pgto.parcelas } : {}),
+      // Forma cadastrada usada (ex: "Amex Crédito 02x") — rastreável p/ conciliação.
+      ...(pgto.descricao ? { dadosGateway: { formaPagamento: pgto.descricao } } : {}),
     });
   },
 

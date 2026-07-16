@@ -118,6 +118,15 @@ const nextConfig: NextConfig = {
           source: '/api/v1/pagamentos/:path*',
           destination: `${ORDER_SERVICE}/api/v1/pagamentos/:path*`,
         },
+        // Cadastro de formas de pagamento (bandeira × parcelas, taxas, prazos)
+        {
+          source: '/api/v1/formas-pagamento/:path*',
+          destination: `${ORDER_SERVICE}/api/v1/formas-pagamento/:path*`,
+        },
+        {
+          source: '/api/v1/formas-pagamento',
+          destination: `${ORDER_SERVICE}/api/v1/formas-pagamento`,
+        },
 
         // ── Financial Service (3006) ────────────────────────────────
         // Controllers já usam path completo 'api/v1/lancamentos' etc.

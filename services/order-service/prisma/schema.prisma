@@ -344,3 +344,38 @@ model ItemDevolucao {
   @@index([itemPedidoId])
   @@map("itens_devolucoes")
 }
+
+// ─── Forma de Pagamento (cadastro por tenant) ─────────────────
+
+/// Catálogo de formas de pagamento usadas na venda/recebimento
+/// (ex: "Amex Crédito 2x", "PIX", "Dinheiro"). Cartões carregam
+/// bandeira + parcelas; taxas/prazo alimentam a conciliação futura.
+model FormaPagamento {
+  id                   String   @id @default(uuid()) @db.Uuid
+  tenantId             String   @map("tenant_id") @db.Uuid
+
+  descricao            String   // ex: "Amex Crédito 2x"
+  /// DINHEIRO | PIX | CARTAO_CREDITO | CARTAO_DEBITO | BOLETO | TRANSFERENCIA | OUTRO
+  tipo                 String
+  /// Bandeira do cartão (Visa, Mastercard, Amex, Elo...) — só para cartões.
+  bandeira             String?
+  /// Número de parcelas desta forma (1 = à vista).
+  parcelas             Int      @default(1)
+
+  /// Taxa percentual da operadora (ex: 4.92) — opcional.
+  taxaPct              Decimal? @db.Decimal(6, 3) @map("taxa_pct")
+  /// Taxa fixa em R$ por transação — opcional.
+  taxaFixa             Decimal? @db.Decimal(10, 2) @map("taxa_fixa")
+  /// Prazo (dias) para o valor cair na conta — opcional.
+  prazoRecebimentoDias Int?     @map("prazo_recebimento_dias")
+
+  ativa                Boolean  @default(true)
+
+  criadoEm             DateTime @default(now()) @map("criado_em")
+  atualizadoEm         DateTime @updatedAt @map("atualizado_em")
+
+  @@unique([tenantId, descricao])
+  @@index([tenantId])
+  @@index([tenantId, tipo])
+  @@map("formas_pagamento")
+}

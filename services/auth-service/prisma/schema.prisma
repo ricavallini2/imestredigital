@@ -96,6 +96,8 @@ model Usuario {
   // Permissões
   cargo           CargoUsuario @default(OPERADOR)
   status          StatusUsuario @default(ATIVO)
+  // Pode autorizar vendas com desconto acima do teto configurado (além de GERENTE/ADMIN).
+  podeLiberarVenda Boolean  @default(false) @map("pode_liberar_venda")
 
   // Verificação e segurança
   emailVerificado Boolean   @default(false) @map("email_verificado")

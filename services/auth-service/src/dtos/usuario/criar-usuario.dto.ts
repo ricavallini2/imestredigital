@@ -2,13 +2,14 @@
  * DTO para criar/convidar um novo usuário ao tenant.
  */
 
-import { IsString, IsNotEmpty, IsEmail, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, IsOptional, IsEnum, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum CargoUsuario {
   ADMIN = 'admin',
   GERENTE = 'gerente',
   OPERADOR = 'operador',
+  CAIXA = 'caixa',
   VISUALIZADOR = 'visualizador',
 }
 
@@ -27,4 +28,12 @@ export class CriarUsuarioDto {
   @IsOptional()
   @IsEnum(CargoUsuario, { message: 'Cargo inválido' })
   cargo?: string;
+
+  @ApiPropertyOptional({
+    description: 'Pode autorizar vendas com desconto acima do teto configurado',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  podeLiberarVenda?: boolean;
 }

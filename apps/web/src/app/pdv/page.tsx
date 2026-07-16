@@ -40,6 +40,13 @@ import { Logo } from '@/components/ui/logo';
 import { obterSessao, podeOperarCaixa } from '@/lib/sessao';
 import { pedidosService } from '@/services/pedidos.service';
 import type { VariacaoCatalogo } from '@/services/pedidos.service';
+import { useFormasPagamento } from '@/hooks/useFormasPagamento';
+import {
+  excedeDescontoMaximo,
+  percentualDesconto,
+  obterDescontoMaximoPct,
+} from '@/lib/config-vendas';
+import { ModalAutorizacao } from '@/components/ui/modal-autorizacao';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -62,6 +69,8 @@ interface PagamentoEntry {
   forma: FormaPgto;
   valor: string;
   parcelas: number;
+  /** Descrição da forma cadastrada escolhida (ex: "Amex Crédito 02x") — cartões. */
+  formaDescricao?: string;
 }
 
 type ProdutoCatalogo = {
@@ -285,9 +294,20 @@ export default function PdvPage() {
   );
   // Perfil do operador: CAIXA/ADMIN/GERENTE recebem na hora; vendedor envia ao caixa.
   const [ehCaixa, setEhCaixa] = useState(true);
+  const [cargoAtual, setCargoAtual] = useState('');
   useEffect(() => {
-    setEhCaixa(podeOperarCaixa(obterSessao()?.cargo));
+    const s = obterSessao();
+    setEhCaixa(podeOperarCaixa(s?.cargo));
+    setCargoAtual(String(s?.cargo ?? '').toUpperCase());
   }, []);
+
+  // Formas de pagamento cadastradas (bandeira × parcelas) — PDV e pagamento previsto.
+  const { data: formasCadastradas } = useFormasPagamento({ ativa: true });
+  // Vendedor: forma PREVISTA (viaja no pedido para o caixa receber pré-preenchido).
+  const [formaPrevista, setFormaPrevista] = useState('');
+  // Liberação de desconto acima do teto (gerente/admin/flag).
+  const [pedirLiberacao, setPedirLiberacao] = useState(false);
+  const [liberadoPor, setLiberadoPor] = useState<string | null>(null);
   const [erroMsg, setErroMsg] = useState<string | null>(null);
 
   const produtos = (catalogo?.produtos ?? []) as ProdutoCatalogo[];
@@ -402,6 +422,14 @@ export default function PdvPage() {
   // (o recebimento acontece depois, no caixa).
   const podeFinalizar = cart.length > 0 && !criar.isPending && (!ehCaixa || restante === 0);
 
+  // ── Teto de desconto (liberação) ──────────────────────────────────────────
+  const valorBruto = cart.reduce((s, i) => s + i.preco * i.quantidade, 0);
+  const descontoTotal = Math.max(0, valorBruto - total);
+  const descontoPct = percentualDesconto(valorBruto, descontoTotal);
+  const descontoExcede = excedeDescontoMaximo(valorBruto, descontoTotal);
+  // Gerente/admin autorizam a própria venda; caixa puro precisa de liberação.
+  const autoAutorizado = cargoAtual === 'ADMIN' || cargoAtual === 'GERENTE';
+
   // ── Payment helpers ───────────────────────────────────────────────────────
 
   const addPagamento = () =>
@@ -420,6 +448,11 @@ export default function PdvPage() {
 
   const handleFinalizar = async () => {
     if (!podeFinalizar) return;
+    // Desconto acima do teto: caixa precisa de liberação (gerente/admin passam direto).
+    if (ehCaixa && descontoExcede && !autoAutorizado && !liberadoPor) {
+      setPedirLiberacao(true);
+      return;
+    }
     setErroMsg(null);
     try {
       // Só o caixa registra pagamento; vendedor deixa a venda em aberto.
@@ -429,9 +462,18 @@ export default function PdvPage() {
             .map((p) => ({
               forma: p.forma,
               valor: Number(p.valor),
+              descricao: p.formaDescricao,
               ...(p.forma === 'CARTAO_CREDITO' ? { parcelas: p.parcelas } : {}),
             }))
         : [];
+      // Vendedor: forma PREVISTA (opcional) viaja no pedido p/ pré-preencher o caixa.
+      const previstaCadastrada = formasCadastradas?.find((f) => f.descricao === formaPrevista);
+      const observacoesPartes = [
+        liberadoPor ? `Desconto ${descontoPct.toFixed(1)}% liberado por: ${liberadoPor}` : '',
+        !ehCaixa && descontoExcede
+          ? `[LIBERAR] Desconto ${descontoPct.toFixed(1)}% acima do máximo`
+          : '',
+      ].filter(Boolean);
       const result = await criar.mutateAsync({
         canal: 'BALCAO',
         itensList: cart.map((i) => ({
@@ -447,8 +489,11 @@ export default function PdvPage() {
         desconto: descontoGeral,
         frete: 0,
         formasPagamento: ehCaixa ? formasPagamento : undefined,
+        formaPagamento: !ehCaixa && formaPrevista ? formaPrevista : undefined,
+        parcelas: !ehCaixa && previstaCadastrada ? previstaCadastrada.parcelas : undefined,
         troco: ehCaixa && troco > 0 ? troco : undefined,
         vendedor: vendedor || undefined,
+        observacoes: observacoesPartes.length ? observacoesPartes.join(' · ') : undefined,
       });
       const pedidoId = (result as any).id;
       // Caixa: registra o RECEBIMENTO (uma entrada por forma de pagamento).
@@ -460,6 +505,8 @@ export default function PdvPage() {
       setSucesso({ numero: (result as any).numero, id: pedidoId, pago: ehCaixa });
       setCart([]);
       setDesconto('');
+      setFormaPrevista('');
+      setLiberadoPor(null);
       setPagamentos([{ id: uid(), forma: 'PIX', valor: '', parcelas: 1 }]);
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? 'Erro ao finalizar venda. Tente novamente.';
@@ -1011,14 +1058,32 @@ export default function PdvPage() {
 
             {/* ── Payment section (só quem opera o caixa recebe na hora) ── */}
             {!ehCaixa && (
-              <div className="border-t-2 border-slate-200 dark:border-slate-800 px-4 py-3 shrink-0 bg-amber-50 dark:bg-amber-900/10">
+              <div className="border-t-2 border-slate-200 dark:border-slate-800 px-4 py-3 shrink-0 space-y-2.5 bg-amber-50 dark:bg-amber-900/10">
                 <div className="flex items-start gap-2">
                   <Wallet className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
                   <p className="text-xs text-amber-700 dark:text-amber-400">
-                    <span className="font-semibold">Recebimento no caixa.</span> Ao fechar, a venda
-                    fica em aberto para o operador de caixa receber e emitir a nota.
+                    <span className="font-semibold">Recebimento no caixa.</span> Selecione o
+                    pagamento previsto para facilitar — o caixa recebe já preenchido.
                   </p>
                 </div>
+                <select
+                  value={formaPrevista}
+                  onChange={(e) => setFormaPrevista(e.target.value)}
+                  className="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm dark:border-amber-800 dark:bg-slate-800 dark:text-slate-100"
+                >
+                  <option value="">Pagamento previsto (opcional)...</option>
+                  {(formasCadastradas ?? []).map((f) => (
+                    <option key={f.id} value={f.descricao}>
+                      {f.descricao}
+                    </option>
+                  ))}
+                </select>
+                {descontoExcede && (
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-[11px] font-medium text-red-700 dark:border-red-800 dark:bg-red-950/20 dark:text-red-400">
+                    Desconto de {descontoPct.toFixed(1)}% acima do máximo (
+                    {obterDescontoMaximoPct()}%) — o caixa precisará de liberação do gerente.
+                  </p>
+                )}
               </div>
             )}
             <div
@@ -1093,24 +1158,62 @@ export default function PdvPage() {
                           </button>
                         )}
                       </div>
-                      {pg.forma === 'CARTAO_CREDITO' && (
-                        <div className="flex items-center gap-2 border-t border-slate-100 dark:border-slate-700 px-3 py-2">
-                          <label className="text-[10px] text-slate-500 shrink-0">Parcelas</label>
-                          <select
-                            value={pg.parcelas}
-                            onChange={(e) =>
-                              updatePagamento(pg.id, { parcelas: Number(e.target.value) })
-                            }
-                            className="flex-1 rounded-lg border border-slate-200 dark:border-slate-600 bg-transparent px-2 py-1 text-xs dark:text-white"
-                          >
-                            {[1, 2, 3, 4, 6, 10, 12].map((n) => (
-                              <option key={n} value={n}>
-                                {n}× de {fmt((Number(pg.valor) || total) / n)}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
+                      {(pg.forma === 'CARTAO_CREDITO' || pg.forma === 'CARTAO_DEBITO') &&
+                        (() => {
+                          // Formas cadastradas do tipo (ex: Amex Crédito 02x) — bandeira × parcelas.
+                          const doTipo = (formasCadastradas ?? []).filter(
+                            (f) => f.tipo === pg.forma,
+                          );
+                          if (doTipo.length === 0)
+                            return pg.forma === 'CARTAO_CREDITO' ? (
+                              <div className="flex items-center gap-2 border-t border-slate-100 dark:border-slate-700 px-3 py-2">
+                                <label className="text-[10px] text-slate-500 shrink-0">
+                                  Parcelas
+                                </label>
+                                <select
+                                  value={pg.parcelas}
+                                  onChange={(e) =>
+                                    updatePagamento(pg.id, { parcelas: Number(e.target.value) })
+                                  }
+                                  className="flex-1 rounded-lg border border-slate-200 dark:border-slate-600 bg-transparent px-2 py-1 text-xs dark:text-white"
+                                >
+                                  {[1, 2, 3, 4, 6, 10, 12].map((n) => (
+                                    <option key={n} value={n}>
+                                      {n}× de {fmt((Number(pg.valor) || total) / n)}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            ) : null;
+                          return (
+                            <div className="flex items-center gap-2 border-t border-slate-100 dark:border-slate-700 px-3 py-2">
+                              <label className="text-[10px] text-slate-500 shrink-0">
+                                Bandeira/parcelas
+                              </label>
+                              <select
+                                value={pg.formaDescricao ?? ''}
+                                onChange={(e) => {
+                                  const f = doTipo.find((x) => x.descricao === e.target.value);
+                                  updatePagamento(pg.id, {
+                                    formaDescricao: e.target.value || undefined,
+                                    parcelas: f?.parcelas ?? 1,
+                                  });
+                                }}
+                                className="flex-1 rounded-lg border border-slate-200 dark:border-slate-600 bg-transparent px-2 py-1 text-xs dark:text-white"
+                              >
+                                <option value="">Selecione...</option>
+                                {doTipo.map((f) => (
+                                  <option key={f.id} value={f.descricao}>
+                                    {f.descricao}
+                                    {f.parcelas > 1
+                                      ? ` — ${f.parcelas}× de ${fmt((Number(pg.valor) || total) / f.parcelas)}`
+                                      : ''}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          );
+                        })()}
                       {pg.forma === 'DINHEIRO' && troco > 0 && totalPago >= total && (
                         <div className="flex justify-between items-center border-t border-emerald-100 dark:border-emerald-900/40 bg-emerald-50 dark:bg-emerald-900/10 px-3 py-1.5">
                           <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
@@ -1145,6 +1248,16 @@ export default function PdvPage() {
 
             {/* Finalize button */}
             <div className="shrink-0 px-4 py-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              {ehCaixa && liberadoPor && (
+                <p className="mb-2 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-center text-[11px] font-semibold text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
+                  ✓ Desconto liberado por {liberadoPor} — confirme a venda
+                </p>
+              )}
+              {ehCaixa && descontoExcede && !autoAutorizado && !liberadoPor && (
+                <p className="mb-2 rounded-lg bg-amber-50 px-2.5 py-1.5 text-center text-[11px] font-semibold text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+                  Desconto {descontoPct.toFixed(1)}% acima do máximo — será pedida liberação
+                </p>
+              )}
               <button
                 onClick={handleFinalizar}
                 disabled={!podeFinalizar}
@@ -1168,6 +1281,17 @@ export default function PdvPage() {
           </div>
         </div>
       </div>
+
+      {/* Liberação de venda (desconto acima do teto) */}
+      <ModalAutorizacao
+        aberto={pedirLiberacao}
+        motivo={`Desconto de ${descontoPct.toFixed(1)}% excede o máximo configurado (${obterDescontoMaximoPct() ?? 0}%). Informe as credenciais de quem autoriza.`}
+        onClose={() => setPedirLiberacao(false)}
+        onAutorizado={(nome) => {
+          setPedirLiberacao(false);
+          setLiberadoPor(nome);
+        }}
+      />
     </>
   );
 }

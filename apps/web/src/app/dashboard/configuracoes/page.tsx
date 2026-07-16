@@ -5,11 +5,31 @@
  * Dados da empresa, usuários, integrações e notificações
  */
 
-import { useState } from 'react';
-import { Building2, Users, Bell, Link as LinkIcon, Save, Plus, Edit, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import {
+  Building2,
+  Users,
+  Bell,
+  Link as LinkIcon,
+  Save,
+  Plus,
+  Edit,
+  Trash2,
+  CreditCard,
+  Percent,
+  Loader2,
+} from 'lucide-react';
 import { FormField } from '@/components/ui/form-field';
 import { Tabs } from '@/components/ui/tabs';
 import { Modal } from '@/components/ui/modal';
+import {
+  useFormasPagamento,
+  useCriarFormaPagamento,
+  useAtualizarFormaPagamento,
+  useRemoverFormaPagamento,
+} from '@/hooks/useFormasPagamento';
+import { TIPO_FORMA_LABELS, type TipoFormaPagamento } from '@/services/formas-pagamento.service';
+import { obterDescontoMaximoPct, salvarDescontoMaximoPct } from '@/lib/config-vendas';
 
 // Dados mock
 const usuariosMock = [
@@ -64,7 +84,84 @@ export default function ConfiguracoesPage() {
     email: '',
     papel: 'VENDEDOR',
     senha: '',
+    podeLiberarVenda: false,
   });
+
+  // ── Política de venda: teto de desconto (%) ────────────────────────────────
+  const [descontoMax, setDescontoMax] = useState('');
+  const [descontoSalvo, setDescontoSalvo] = useState(false);
+  useEffect(() => {
+    const v = obterDescontoMaximoPct();
+    setDescontoMax(v === null ? '' : String(v));
+  }, []);
+  const handleSalvarDesconto = () => {
+    salvarDescontoMaximoPct(descontoMax === '' ? null : Number(descontoMax));
+    setDescontoSalvo(true);
+    setTimeout(() => setDescontoSalvo(false), 2000);
+  };
+
+  // ── Cadastro de formas de pagamento (CRUD real no order-service) ───────────
+  const { data: formas, isLoading: loadingFormas } = useFormasPagamento({});
+  const criarForma = useCriarFormaPagamento();
+  const atualizarForma = useAtualizarFormaPagamento();
+  const removerForma = useRemoverFormaPagamento();
+  const [modalForma, setModalForma] = useState<null | { id?: string }>(null);
+  const [erroForma, setErroForma] = useState('');
+  const formaVazia = {
+    descricao: '',
+    tipo: 'CARTAO_CREDITO' as TipoFormaPagamento,
+    bandeira: 'Visa',
+    parcelas: 1,
+    taxaPct: '',
+    taxaFixa: '',
+    prazoRecebimentoDias: '',
+    ativa: true,
+  };
+  const [formForma, setFormForma] = useState(formaVazia);
+  const ehCartao = formForma.tipo === 'CARTAO_CREDITO' || formForma.tipo === 'CARTAO_DEBITO';
+
+  const abrirNovaForma = () => {
+    setFormForma(formaVazia);
+    setErroForma('');
+    setModalForma({});
+  };
+  const abrirEditarForma = (f: any) => {
+    setFormForma({
+      descricao: f.descricao,
+      tipo: f.tipo,
+      bandeira: f.bandeira ?? 'Visa',
+      parcelas: f.parcelas ?? 1,
+      taxaPct: f.taxaPct != null ? String(f.taxaPct) : '',
+      taxaFixa: f.taxaFixa != null ? String(f.taxaFixa) : '',
+      prazoRecebimentoDias: f.prazoRecebimentoDias != null ? String(f.prazoRecebimentoDias) : '',
+      ativa: f.ativa,
+    });
+    setErroForma('');
+    setModalForma({ id: f.id });
+  };
+  const salvarForma = async () => {
+    setErroForma('');
+    if (!formForma.descricao.trim()) return setErroForma('Informe a descrição.');
+    const dto = {
+      descricao: formForma.descricao.trim(),
+      tipo: formForma.tipo,
+      bandeira: ehCartao ? formForma.bandeira : undefined,
+      parcelas: formForma.tipo === 'CARTAO_CREDITO' ? Number(formForma.parcelas) || 1 : 1,
+      taxaPct: formForma.taxaPct !== '' ? Number(formForma.taxaPct) : undefined,
+      taxaFixa: formForma.taxaFixa !== '' ? Number(formForma.taxaFixa) : undefined,
+      prazoRecebimentoDias:
+        formForma.prazoRecebimentoDias !== '' ? Number(formForma.prazoRecebimentoDias) : undefined,
+      ativa: formForma.ativa,
+    };
+    try {
+      if (modalForma?.id) await atualizarForma.mutateAsync({ id: modalForma.id, dto });
+      else await criarForma.mutateAsync(dto);
+      setModalForma(null);
+    } catch (e: any) {
+      const m = e?.response?.data?.message;
+      setErroForma(Array.isArray(m) ? m[0] : (m ?? 'Erro ao salvar a forma de pagamento.'));
+    }
+  };
 
   const handleSalvarEmpresa = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -214,6 +311,151 @@ export default function ConfiguracoesPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: 'vendas',
+      label: 'Vendas e Pagamentos',
+      icon: <CreditCard className="h-4 w-4" />,
+      content: (
+        <div className="space-y-6">
+          {/* Política de desconto */}
+          <div className="rounded-xl border border-slate-200 p-5 dark:border-slate-700">
+            <h3 className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
+              <Percent className="h-4 w-4 text-marca-500" /> Desconto máximo na venda
+            </h3>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Vendas com desconto acima deste percentual exigem liberação de um gerente ou de um
+              usuário com permissão de liberar venda. Vazio = sem limite.
+            </p>
+            <div className="mt-3 flex items-center gap-3">
+              <div className="relative w-40">
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.5"
+                  value={descontoMax}
+                  onChange={(e) => setDescontoMax(e.target.value)}
+                  placeholder="ex: 10"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 pr-8 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                />
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">
+                  %
+                </span>
+              </div>
+              <button
+                onClick={handleSalvarDesconto}
+                className="flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2 text-sm font-medium text-white hover:bg-marca-600"
+              >
+                <Save className="h-4 w-4" /> Salvar
+              </button>
+              {descontoSalvo && (
+                <span className="text-sm font-medium text-emerald-600">✓ salvo</span>
+              )}
+            </div>
+          </div>
+
+          {/* Cadastro de formas de pagamento */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-700">
+              <div>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100">
+                  Formas de Pagamento
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Usadas no PDV e no recebimento do caixa (bandeira × parcelas, taxas e prazos).
+                </p>
+              </div>
+              <button
+                onClick={abrirNovaForma}
+                className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+              >
+                <Plus className="h-4 w-4" /> Incluir forma
+              </button>
+            </div>
+            {loadingFormas ? (
+              <div className="flex items-center justify-center py-10">
+                <Loader2 className="h-6 w-6 animate-spin text-marca-500" />
+              </div>
+            ) : (formas ?? []).length === 0 ? (
+              <p className="px-5 py-8 text-center text-sm text-slate-400">
+                Nenhuma forma cadastrada. Clique em “Incluir forma”.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-400 dark:bg-slate-700/40">
+                    <tr>
+                      <th className="px-5 py-2.5">Descrição</th>
+                      <th className="px-3 py-2.5">Tipo</th>
+                      <th className="px-3 py-2.5">Bandeira</th>
+                      <th className="px-3 py-2.5 text-center">Parcelas</th>
+                      <th className="px-3 py-2.5 text-right">Taxa</th>
+                      <th className="px-3 py-2.5 text-center">Prazo</th>
+                      <th className="px-3 py-2.5 text-center">Situação</th>
+                      <th className="px-3 py-2.5" />
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                    {(formas ?? []).map((f) => (
+                      <tr key={f.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                        <td className="px-5 py-2.5 font-medium text-slate-900 dark:text-slate-100">
+                          {f.descricao}
+                        </td>
+                        <td className="px-3 py-2.5 text-slate-600 dark:text-slate-400">
+                          {TIPO_FORMA_LABELS[f.tipo] ?? f.tipo}
+                        </td>
+                        <td className="px-3 py-2.5 text-slate-600 dark:text-slate-400">
+                          {f.bandeira ?? '—'}
+                        </td>
+                        <td className="px-3 py-2.5 text-center tabular-nums">{f.parcelas}×</td>
+                        <td className="px-3 py-2.5 text-right tabular-nums text-slate-600 dark:text-slate-400">
+                          {f.taxaPct != null ? `${f.taxaPct.toFixed(2)}%` : '—'}
+                          {f.taxaFixa != null ? ` + R$ ${f.taxaFixa.toFixed(2)}` : ''}
+                        </td>
+                        <td className="px-3 py-2.5 text-center text-slate-600 dark:text-slate-400">
+                          {f.prazoRecebimentoDias != null ? `${f.prazoRecebimentoDias}d` : '—'}
+                        </td>
+                        <td className="px-3 py-2.5 text-center">
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                              f.ativa
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400'
+                            }`}
+                          >
+                            {f.ativa ? 'Ativa' : 'Inativa'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="flex justify-end gap-1">
+                            <button
+                              onClick={() => abrirEditarForma(f)}
+                              className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700"
+                              title="Editar"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            {f.ativa && (
+                              <button
+                                onClick={() => removerForma.mutate(f.id)}
+                                className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                title="Inativar"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       ),
@@ -401,6 +643,158 @@ export default function ConfiguracoesPage() {
             onChange={(e) => setNovoUsuario((prev) => ({ ...prev, senha: e.target.value }))}
             hint="O usuário poderá alterar na primeira acesso"
           />
+
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+            <input
+              type="checkbox"
+              checked={novoUsuario.podeLiberarVenda}
+              onChange={(e) =>
+                setNovoUsuario((prev) => ({ ...prev, podeLiberarVenda: e.target.checked }))
+              }
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-marca-600 focus:ring-marca-400"
+            />
+            <span>
+              <span className="block text-sm font-medium text-slate-900 dark:text-slate-100">
+                Pode liberar venda
+              </span>
+              <span className="block text-xs text-slate-500 dark:text-slate-400">
+                Autoriza vendas com desconto acima do máximo configurado (gerentes e administradores
+                já podem por padrão).
+              </span>
+            </span>
+          </label>
+        </div>
+      </Modal>
+
+      {/* Modal Forma de Pagamento */}
+      <Modal
+        isOpen={modalForma !== null}
+        onClose={() => setModalForma(null)}
+        title={modalForma?.id ? 'Editar Forma de Pagamento' : 'Nova Forma de Pagamento'}
+        size="md"
+        footer={
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setModalForma(null)}
+              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={salvarForma}
+              disabled={criarForma.isPending || atualizarForma.isPending}
+              className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+            >
+              {criarForma.isPending || atualizarForma.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Salvar
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <FormField
+            label="Descrição"
+            placeholder="ex: Amex Crédito 02x"
+            value={formForma.descricao}
+            onChange={(e) => setFormForma((p) => ({ ...p, descricao: e.target.value }))}
+            required
+          />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                Tipo de pagamento
+              </label>
+              <select
+                value={formForma.tipo}
+                onChange={(e) =>
+                  setFormForma((p) => ({ ...p, tipo: e.target.value as TipoFormaPagamento }))
+                }
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              >
+                {Object.entries(TIPO_FORMA_LABELS).map(([v, l]) => (
+                  <option key={v} value={v}>
+                    {l}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {ehCartao && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Bandeira
+                </label>
+                <select
+                  value={formForma.bandeira}
+                  onChange={(e) => setFormForma((p) => ({ ...p, bandeira: e.target.value }))}
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                >
+                  {['Visa', 'Mastercard', 'Amex', 'Elo', 'Hipercard', 'Diners', 'Outra'].map(
+                    (b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ),
+                  )}
+                </select>
+              </div>
+            )}
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            {formForma.tipo === 'CARTAO_CREDITO' && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Parcelas
+                </label>
+                <select
+                  value={formForma.parcelas}
+                  onChange={(e) =>
+                    setFormForma((p) => ({ ...p, parcelas: Number(e.target.value) }))
+                  }
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                >
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
+                    <option key={n} value={n}>
+                      {n}×
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <FormField
+              label="Taxa (%)"
+              type="number"
+              placeholder="ex: 4.92"
+              value={formForma.taxaPct}
+              onChange={(e) => setFormForma((p) => ({ ...p, taxaPct: e.target.value }))}
+            />
+            <FormField
+              label="Prazo receb. (dias)"
+              type="number"
+              placeholder="ex: 30"
+              value={formForma.prazoRecebimentoDias}
+              onChange={(e) =>
+                setFormForma((p) => ({ ...p, prazoRecebimentoDias: e.target.value }))
+              }
+            />
+          </div>
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={formForma.ativa}
+              onChange={(e) => setFormForma((p) => ({ ...p, ativa: e.target.checked }))}
+              className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400"
+            />
+            <span className="text-sm text-slate-700 dark:text-slate-300">Ativa</span>
+          </label>
+          {erroForma && (
+            <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700 dark:border-red-800 dark:bg-red-950/20 dark:text-red-400">
+              {erroForma}
+            </p>
+          )}
         </div>
       </Modal>
     </div>

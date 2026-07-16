@@ -222,6 +222,49 @@ async function main() {
 
   console.log('✅ Seed concluído com sucesso!');
   console.log(`📊 Criados 3 pedidos de teste para tenant: ${TENANT_ID}`);
+
+  // ─── Formas de pagamento padrão (idempotente via upsert) ──────────────────
+  const formas: Array<{
+    descricao: string;
+    tipo: string;
+    bandeira?: string;
+    parcelas?: number;
+    taxaPct?: number;
+    prazoRecebimentoDias?: number;
+  }> = [
+    { descricao: 'Dinheiro', tipo: 'DINHEIRO', prazoRecebimentoDias: 0 },
+    { descricao: 'PIX', tipo: 'PIX', prazoRecebimentoDias: 0 },
+    { descricao: 'Boleto', tipo: 'BOLETO', prazoRecebimentoDias: 2 },
+  ];
+  const bandeiras = ['Visa', 'Mastercard', 'Amex', 'Elo'];
+  for (const b of bandeiras) {
+    formas.push({
+      descricao: `${b} Débito`,
+      tipo: 'CARTAO_DEBITO',
+      bandeira: b,
+      parcelas: 1,
+      taxaPct: 1.99,
+      prazoRecebimentoDias: 1,
+    });
+    for (let n = 1; n <= 6; n++) {
+      formas.push({
+        descricao: `${b} Crédito ${String(n).padStart(2, '0')}x`,
+        tipo: 'CARTAO_CREDITO',
+        bandeira: b,
+        parcelas: n,
+        taxaPct: n === 1 ? 3.19 : 3.19 + n * 0.55,
+        prazoRecebimentoDias: 30,
+      });
+    }
+  }
+  for (const f of formas) {
+    await prisma.formaPagamento.upsert({
+      where: { tenantId_descricao: { tenantId: TENANT_ID, descricao: f.descricao } },
+      update: {},
+      create: { tenantId: TENANT_ID, ativa: true, parcelas: 1, ...f },
+    });
+  }
+  console.log(`💳 ${formas.length} formas de pagamento garantidas (upsert)`);
 }
 
 main()

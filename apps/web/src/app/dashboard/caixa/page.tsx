@@ -32,6 +32,14 @@ import {
   useRegistrarMovimentacao,
 } from '@/hooks/useCaixa';
 import { pedidosService } from '@/services/pedidos.service';
+import { useFormasPagamento } from '@/hooks/useFormasPagamento';
+import {
+  excedeDescontoMaximo,
+  percentualDesconto,
+  obterDescontoMaximoPct,
+} from '@/lib/config-vendas';
+import { obterSessao } from '@/lib/sessao';
+import { ModalAutorizacao } from '@/components/ui/modal-autorizacao';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -537,18 +545,65 @@ export default function CaixaPage() {
   const pendentes = ((vendasAbertas as any)?.dados ?? []) as any[];
   const [receber, setReceber] = useState<any | null>(null);
   const [formaReceb, setFormaReceb] = useState('DINHEIRO');
+  const [formaDescReceb, setFormaDescReceb] = useState('');
   const [valorReceb, setValorReceb] = useState('');
   const [parcelasReceb, setParcelasReceb] = useState(1);
   const [recebendo, setRecebendo] = useState(false);
   const [recebidoOk, setRecebidoOk] = useState<{ id: string; numero: string } | null>(null);
   const [erroReceb, setErroReceb] = useState('');
+  const [liberacaoPend, setLiberacaoPend] = useState<any | null>(null);
+  const [liberadoPorReceb, setLiberadoPorReceb] = useState<string | null>(null);
 
-  const abrirReceber = (p: any) => {
+  // Formas de pagamento cadastradas (bandeira × parcelas).
+  const { data: formasCadastradas } = useFormasPagamento({ ativa: true });
+
+  /** % de desconto do pedido (bruto = total líquido + desconto; PDV não usa frete). */
+  const descontoPedidoPct = (p: any) => {
+    const descontoV = Number(p?.valorDesconto ?? 0);
+    const bruto = Number(p?.valorTotal ?? 0) + descontoV - Number(p?.valorFrete ?? 0);
+    return percentualDesconto(bruto, descontoV);
+  };
+  const pedidoExcedeTeto = (p: any) => {
+    const descontoV = Number(p?.valorDesconto ?? 0);
+    const bruto = Number(p?.valorTotal ?? 0) + descontoV - Number(p?.valorFrete ?? 0);
+    return excedeDescontoMaximo(bruto, descontoV);
+  };
+
+  /** Abre o modal de recebimento, pré-preenchido com o pagamento PREVISTO do pedido. */
+  const abrirReceberEfetivo = (p: any) => {
     setReceber(p);
-    setFormaReceb('DINHEIRO');
     setValorReceb(String(Number(p.valorTotal ?? 0).toFixed(2)));
-    setParcelasReceb(1);
     setErroReceb('');
+    // Pré-preenche: metodoPagamento pode ser uma forma cadastrada ("Amex Crédito 02x")
+    // ou um tipo puro ("PIX"). Casa com o cadastro para preencher tipo+parcelas.
+    const previsto = String(p.metodoPagamento ?? '');
+    const forma = (formasCadastradas ?? []).find((f) => f.descricao === previsto);
+    if (forma) {
+      setFormaReceb(forma.tipo);
+      setFormaDescReceb(forma.descricao);
+      setParcelasReceb(forma.parcelas ?? 1);
+    } else if (
+      ['DINHEIRO', 'PIX', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'BOLETO'].includes(previsto)
+    ) {
+      setFormaReceb(previsto);
+      setFormaDescReceb('');
+      setParcelasReceb(Number(p.parcelas) || 1);
+    } else {
+      setFormaReceb('DINHEIRO');
+      setFormaDescReceb('');
+      setParcelasReceb(1);
+    }
+  };
+
+  /** Gate de liberação: desconto acima do teto exige gerente/admin ou flag. */
+  const abrirReceber = (p: any) => {
+    setLiberadoPorReceb(null);
+    const cargo = String(obterSessao()?.cargo ?? '').toUpperCase();
+    if (pedidoExcedeTeto(p) && cargo !== 'ADMIN' && cargo !== 'GERENTE') {
+      setLiberacaoPend(p);
+      return;
+    }
+    abrirReceberEfetivo(p);
   };
 
   const confirmarRecebimento = async () => {
@@ -560,6 +615,8 @@ export default function CaixaPage() {
         forma: formaReceb,
         valor: Number(valorReceb) || Number(receber.valorTotal ?? 0),
         parcelas: formaReceb === 'CARTAO_CREDITO' ? parcelasReceb : undefined,
+        descricao:
+          formaDescReceb || (liberadoPorReceb ? `Liberado por: ${liberadoPorReceb}` : undefined),
       });
       setRecebidoOk({ id: receber.id, numero: receber.numero ?? receber.id });
       setReceber(null);
@@ -967,7 +1024,11 @@ export default function CaixaPage() {
                   {(['DINHEIRO', 'PIX', 'CARTAO_CREDITO', 'CARTAO_DEBITO'] as const).map((f) => (
                     <button
                       key={f}
-                      onClick={() => setFormaReceb(f)}
+                      onClick={() => {
+                        setFormaReceb(f);
+                        setFormaDescReceb('');
+                        if (f !== 'CARTAO_CREDITO') setParcelasReceb(1);
+                      }}
                       className={`rounded-lg py-1.5 text-[10px] font-bold transition-colors ${
                         formaReceb === f
                           ? 'bg-emerald-600 text-white'
@@ -984,6 +1045,37 @@ export default function CaixaPage() {
                     </button>
                   ))}
                 </div>
+                {(formaReceb === 'CARTAO_CREDITO' || formaReceb === 'CARTAO_DEBITO') &&
+                  (formasCadastradas ?? []).some((f) => f.tipo === formaReceb) && (
+                    <select
+                      value={formaDescReceb}
+                      onChange={(e) => {
+                        const f = (formasCadastradas ?? []).find(
+                          (x) => x.descricao === e.target.value,
+                        );
+                        setFormaDescReceb(e.target.value);
+                        if (f) setParcelasReceb(f.parcelas ?? 1);
+                      }}
+                      className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                    >
+                      <option value="">Bandeira / parcelas...</option>
+                      {(formasCadastradas ?? [])
+                        .filter((f) => f.tipo === formaReceb)
+                        .map((f) => (
+                          <option key={f.id} value={f.descricao}>
+                            {f.descricao}
+                          </option>
+                        ))}
+                    </select>
+                  )}
+                {receber?.metodoPagamento && (
+                  <p className="mt-1.5 text-[11px] text-slate-400">
+                    Previsto pelo vendedor:{' '}
+                    <span className="font-semibold text-slate-500 dark:text-slate-300">
+                      {receber.metodoPagamento}
+                    </span>
+                  </p>
+                )}
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -1050,6 +1142,23 @@ export default function CaixaPage() {
           </div>
         </div>
       )}
+
+      {/* Liberação de recebimento com desconto acima do teto */}
+      <ModalAutorizacao
+        aberto={liberacaoPend !== null}
+        motivo={
+          liberacaoPend
+            ? `Pedido ${liberacaoPend.numero ?? ''} tem desconto de ${descontoPedidoPct(liberacaoPend).toFixed(1)}%, acima do máximo configurado (${obterDescontoMaximoPct() ?? 0}%). Informe as credenciais de quem autoriza o recebimento.`
+            : ''
+        }
+        onClose={() => setLiberacaoPend(null)}
+        onAutorizado={(nome) => {
+          const p = liberacaoPend;
+          setLiberacaoPend(null);
+          setLiberadoPorReceb(nome);
+          if (p) abrirReceberEfetivo(p);
+        }}
+      />
     </div>
   );
 }

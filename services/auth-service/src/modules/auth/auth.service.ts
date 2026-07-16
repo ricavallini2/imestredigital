@@ -199,6 +199,8 @@ export class AuthService {
         email: usuario.email,
         // lowercase para bater com o payload JWT e o frontend
         cargo: usuario.cargo.toLowerCase(),
+        // Autorização de liberação de venda (desconto acima do teto).
+        podeLiberarVenda: (usuario as any).podeLiberarVenda ?? false,
         tenant: {
           id: usuario.tenant.id,
           nome: usuario.tenant.nome,
