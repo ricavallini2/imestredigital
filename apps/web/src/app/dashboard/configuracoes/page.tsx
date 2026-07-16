@@ -6,16 +6,7 @@
  */
 
 import { useState } from 'react';
-import {
-  Building2,
-  Users,
-  Bell,
-  Link as LinkIcon,
-  Save,
-  Plus,
-  Edit,
-  Trash2,
-} from 'lucide-react';
+import { Building2, Users, Bell, Link as LinkIcon, Save, Plus, Edit, Trash2 } from 'lucide-react';
 import { FormField } from '@/components/ui/form-field';
 import { Tabs } from '@/components/ui/tabs';
 import { Modal } from '@/components/ui/modal';
@@ -115,9 +106,7 @@ export default function ConfiguracoesPage() {
           <FormField
             label="Nome da Empresa"
             value={formEmpresa.nome}
-            onChange={(e) =>
-              setFormEmpresa((prev) => ({ ...prev, nome: e.target.value }))
-            }
+            onChange={(e) => setFormEmpresa((prev) => ({ ...prev, nome: e.target.value }))}
             required
           />
 
@@ -125,9 +114,7 @@ export default function ConfiguracoesPage() {
             label="CNPJ"
             placeholder="00.000.000/0000-00"
             value={formEmpresa.cnpj}
-            onChange={(e) =>
-              setFormEmpresa((prev) => ({ ...prev, cnpj: e.target.value }))
-            }
+            onChange={(e) => setFormEmpresa((prev) => ({ ...prev, cnpj: e.target.value }))}
             required
           />
 
@@ -135,9 +122,7 @@ export default function ConfiguracoesPage() {
             label="Email"
             type="email"
             value={formEmpresa.email}
-            onChange={(e) =>
-              setFormEmpresa((prev) => ({ ...prev, email: e.target.value }))
-            }
+            onChange={(e) => setFormEmpresa((prev) => ({ ...prev, email: e.target.value }))}
             required
           />
 
@@ -198,12 +183,8 @@ export default function ConfiguracoesPage() {
                 className="flex items-center justify-between rounded-lg border border-slate-200 p-4 dark:border-slate-700"
               >
                 <div>
-                  <p className="font-medium text-slate-900 dark:text-slate-100">
-                    {usuario.nome}
-                  </p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {usuario.email}
-                  </p>
+                  <p className="font-medium text-slate-900 dark:text-slate-100">{usuario.nome}</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">{usuario.email}</p>
                   <div className="mt-2 flex gap-2">
                     <span className="rounded-lg bg-marca-100 px-2 py-0.5 text-xs font-semibold text-marca-700 dark:bg-marca-900/30 dark:text-marca-400">
                       {usuario.papel}
@@ -265,9 +246,7 @@ export default function ConfiguracoesPage() {
                   }
                   className="h-4 w-4 rounded"
                 />
-                <span className="font-medium text-slate-900 dark:text-slate-100">
-                  {label}
-                </span>
+                <span className="font-medium text-slate-900 dark:text-slate-100">{label}</span>
               </label>
             ))}
           </div>
@@ -289,9 +268,7 @@ export default function ConfiguracoesPage() {
                   }
                   className="h-4 w-4 rounded"
                 />
-                <span className="text-sm text-slate-700 dark:text-slate-300">
-                  Email
-                </span>
+                <span className="text-sm text-slate-700 dark:text-slate-300">Email</span>
               </label>
               <label className="flex items-center gap-3">
                 <input
@@ -305,9 +282,7 @@ export default function ConfiguracoesPage() {
                   }
                   className="h-4 w-4 rounded"
                 />
-                <span className="text-sm text-slate-700 dark:text-slate-300">
-                  WhatsApp
-                </span>
+                <span className="text-sm text-slate-700 dark:text-slate-300">WhatsApp</span>
               </label>
             </div>
           </div>
@@ -321,9 +296,7 @@ export default function ConfiguracoesPage() {
       content: (
         <div className="space-y-4">
           <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
-            <h3 className="font-semibold text-slate-900 dark:text-slate-100">
-              API Tokens
-            </h3>
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100">API Tokens</h3>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
               Gerenciar tokens para integração com aplicações externas
             </p>
@@ -333,9 +306,7 @@ export default function ConfiguracoesPage() {
           </div>
 
           <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
-            <h3 className="font-semibold text-slate-900 dark:text-slate-100">
-              Webhooks
-            </h3>
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100">Webhooks</h3>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
               Configure notificações em tempo real para seus sistemas
             </p>
@@ -352,9 +323,7 @@ export default function ConfiguracoesPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-          Configurações
-        </h1>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Configurações</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-400">
           Configure sua conta e preferências
         </p>
@@ -393,9 +362,7 @@ export default function ConfiguracoesPage() {
             label="Nome"
             placeholder="Nome completo"
             value={novoUsuario.nome}
-            onChange={(e) =>
-              setNovoUsuario((prev) => ({ ...prev, nome: e.target.value }))
-            }
+            onChange={(e) => setNovoUsuario((prev) => ({ ...prev, nome: e.target.value }))}
             required
           />
 
@@ -404,9 +371,7 @@ export default function ConfiguracoesPage() {
             type="email"
             placeholder="email@example.com"
             value={novoUsuario.email}
-            onChange={(e) =>
-              setNovoUsuario((prev) => ({ ...prev, email: e.target.value }))
-            }
+            onChange={(e) => setNovoUsuario((prev) => ({ ...prev, email: e.target.value }))}
             required
           />
 
@@ -417,13 +382,12 @@ export default function ConfiguracoesPage() {
             </label>
             <select
               value={novoUsuario.papel}
-              onChange={(e) =>
-                setNovoUsuario((prev) => ({ ...prev, papel: e.target.value }))
-              }
+              onChange={(e) => setNovoUsuario((prev) => ({ ...prev, papel: e.target.value }))}
               className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 dark:border-slate-600 dark:bg-slate-800"
             >
               <option value="ADMIN">Administrador</option>
               <option value="GERENTE">Gerente</option>
+              <option value="CAIXA">Caixa — recebe pagamentos e emite nota</option>
               <option value="VENDEDOR">Vendedor</option>
               <option value="OPERADOR">Operador</option>
             </select>
@@ -434,9 +398,7 @@ export default function ConfiguracoesPage() {
             type="password"
             placeholder="Será enviada por email"
             value={novoUsuario.senha}
-            onChange={(e) =>
-              setNovoUsuario((prev) => ({ ...prev, senha: e.target.value }))
-            }
+            onChange={(e) => setNovoUsuario((prev) => ({ ...prev, senha: e.target.value }))}
             hint="O usuário poderá alterar na primeira acesso"
           />
         </div>

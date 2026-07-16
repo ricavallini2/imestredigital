@@ -12,6 +12,9 @@ export interface CriarPedidoDTO {
     desconto?: number;
     variacaoId?: string;
     variacao?: string;
+    /** SKU e nome do item — exigidos pelo contrato real do order-service. */
+    sku?: string;
+    nome?: string;
   }[];
   desconto?: number;
   frete?: number;
@@ -140,9 +143,59 @@ export const pedidosService = {
     return { produtos, clientes };
   },
 
+  /**
+   * Cria o pedido traduzindo o shape da UI para o contrato REAL do
+   * order-service (CriarPedidoDto): itens[{produtoId, sku, titulo, quantidade,
+   * valorUnitario, valorDesconto, variacaoId}], clienteNome, origem etc.
+   * O pagamento NÃO entra aqui — é registrado à parte via registrarPagamento
+   * (fluxo do caixa), deixando o pedido "em aberto" quando quem vende não é caixa.
+   */
   criar: async (dto: CriarPedidoDTO): Promise<Pedido> => {
-    const { data } = await api.post('/v1/pedidos', dto);
+    const observacaoPartes = [
+      dto.vendedor ? `Vendedor: ${dto.vendedor}` : '',
+      dto.troco && dto.troco > 0 ? `Troco: R$ ${dto.troco.toFixed(2)}` : '',
+      dto.observacoes ?? '',
+    ].filter(Boolean);
+
+    const payload = {
+      origem: 'LOJA_FISICA',
+      canalOrigem: dto.canal ?? 'BALCAO',
+      clienteId: dto.clienteId || undefined,
+      clienteNome: dto.cliente || 'Consumidor Final',
+      itens: dto.itensList.map((i) => ({
+        produtoId: i.produtoId,
+        variacaoId: i.variacaoId || undefined,
+        sku: i.sku ?? '',
+        titulo: [i.nome ?? 'Item', i.variacao].filter(Boolean).join(' — '),
+        quantidade: i.quantidade,
+        valorUnitario: i.precoUnitario ?? 0,
+        valorDesconto: i.desconto || undefined,
+      })),
+      metodoPagamento: dto.formasPagamento?.[0]?.forma ?? dto.formaPagamento,
+      parcelas: dto.formasPagamento?.[0]?.parcelas ?? dto.parcelas,
+      valorDesconto: dto.desconto || undefined,
+      valorFrete: dto.frete || undefined,
+      observacao: observacaoPartes.length ? observacaoPartes.join(' · ') : undefined,
+    };
+    const { data } = await api.post('/v1/pedidos', payload);
     return data;
+  },
+
+  /**
+   * Registra o RECEBIMENTO de um pedido (fluxo do caixa).
+   * POST /v1/pagamentos/pedido/:pedidoId com status PAGO — o order-service
+   * atualiza o statusPagamento do pedido e publica o evento de captura.
+   */
+  registrarPagamento: async (
+    pedidoId: string,
+    pgto: { forma: string; valor: number; parcelas?: number },
+  ): Promise<void> => {
+    await api.post(`/v1/pagamentos/pedido/${pedidoId}`, {
+      tipo: pgto.forma,
+      status: 'PAGO',
+      valor: pgto.valor,
+      ...(pgto.parcelas && pgto.parcelas > 1 ? { parcelas: pgto.parcelas } : {}),
+    });
   },
 
   confirmar: async (id: string): Promise<Pedido> => {

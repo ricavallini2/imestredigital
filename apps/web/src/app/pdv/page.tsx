@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import {
   ShoppingCart,
@@ -37,6 +37,8 @@ import {
 import { useCatalogoPedidos, useCriarPedido } from '@/hooks/usePedidos';
 import { useCaixaAtual } from '@/hooks/useCaixa';
 import { Logo } from '@/components/ui/logo';
+import { obterSessao, podeOperarCaixa } from '@/lib/sessao';
+import { pedidosService } from '@/services/pedidos.service';
 import type { VariacaoCatalogo } from '@/services/pedidos.service';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -278,7 +280,14 @@ export default function PdvPage() {
 
   // Misc
   const [vendedor, setVendedor] = useState('');
-  const [sucesso, setSucesso] = useState<{ numero: string; id: string } | null>(null);
+  const [sucesso, setSucesso] = useState<{ numero: string; id: string; pago: boolean } | null>(
+    null,
+  );
+  // Perfil do operador: CAIXA/ADMIN/GERENTE recebem na hora; vendedor envia ao caixa.
+  const [ehCaixa, setEhCaixa] = useState(true);
+  useEffect(() => {
+    setEhCaixa(podeOperarCaixa(obterSessao()?.cargo));
+  }, []);
   const [erroMsg, setErroMsg] = useState<string | null>(null);
 
   const produtos = (catalogo?.produtos ?? []) as ProdutoCatalogo[];
@@ -389,7 +398,9 @@ export default function PdvPage() {
   const restante = Math.max(0, total - totalPago);
   const troco =
     totalPago > total && pagamentos.some((p) => p.forma === 'DINHEIRO') ? totalPago - total : 0;
-  const podeFinalizar = cart.length > 0 && restante === 0 && !criar.isPending;
+  // Caixa precisa cobrir o total com pagamentos; vendedor só precisa de itens
+  // (o recebimento acontece depois, no caixa).
+  const podeFinalizar = cart.length > 0 && !criar.isPending && (!ehCaixa || restante === 0);
 
   // ── Payment helpers ───────────────────────────────────────────────────────
 
@@ -411,11 +422,16 @@ export default function PdvPage() {
     if (!podeFinalizar) return;
     setErroMsg(null);
     try {
-      const formasPagamento = pagamentos.map((p) => ({
-        forma: p.forma,
-        valor: Number(p.valor),
-        ...(p.forma === 'CARTAO_CREDITO' ? { parcelas: p.parcelas } : {}),
-      }));
+      // Só o caixa registra pagamento; vendedor deixa a venda em aberto.
+      const formasPagamento = ehCaixa
+        ? pagamentos
+            .filter((p) => Number(p.valor) > 0)
+            .map((p) => ({
+              forma: p.forma,
+              valor: Number(p.valor),
+              ...(p.forma === 'CARTAO_CREDITO' ? { parcelas: p.parcelas } : {}),
+            }))
+        : [];
       const result = await criar.mutateAsync({
         canal: 'BALCAO',
         itensList: cart.map((i) => ({
@@ -425,14 +441,23 @@ export default function PdvPage() {
           desconto: i.desconto,
           variacaoId: i.variacaoId,
           variacao: i.variacaoLabel,
+          sku: i.sku,
+          nome: i.nome,
         })),
         desconto: descontoGeral,
         frete: 0,
-        formasPagamento,
-        troco: troco > 0 ? troco : undefined,
+        formasPagamento: ehCaixa ? formasPagamento : undefined,
+        troco: ehCaixa && troco > 0 ? troco : undefined,
         vendedor: vendedor || undefined,
       });
-      setSucesso({ numero: (result as any).numero, id: (result as any).id });
+      const pedidoId = (result as any).id;
+      // Caixa: registra o RECEBIMENTO (uma entrada por forma de pagamento).
+      if (ehCaixa && pedidoId) {
+        for (const pg of formasPagamento) {
+          await pedidosService.registrarPagamento(pedidoId, pg);
+        }
+      }
+      setSucesso({ numero: (result as any).numero, id: pedidoId, pago: ehCaixa });
       setCart([]);
       setDesconto('');
       setPagamentos([{ id: uid(), forma: 'PIX', valor: '', parcelas: 1 }]);
@@ -464,17 +489,26 @@ export default function PdvPage() {
         </div>
         <div className="text-center">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-            Venda Realizada!
+            {sucesso.pago ? 'Venda Realizada!' : 'Venda Enviada ao Caixa!'}
           </h2>
           <p className="mt-1 text-slate-500 dark:text-slate-400">
-            Pedido <span className="font-mono font-semibold">{sucesso.numero}</span> registrado com
-            sucesso.
+            Pedido <span className="font-mono font-semibold">{sucesso.numero}</span>{' '}
+            {sucesso.pago ? 'registrado com sucesso.' : 'aguardando recebimento no caixa.'}
           </p>
-          <p className="mt-0.5 text-xs text-emerald-600 dark:text-emerald-400">
-            Movimentação registrada no caixa <span className="font-semibold">{sessao.numero}</span>
-          </p>
+          {sucesso.pago ? (
+            <p className="mt-0.5 text-xs text-emerald-600 dark:text-emerald-400">
+              Movimentação registrada no caixa{' '}
+              <span className="font-semibold">{sessao.numero}</span>
+            </p>
+          ) : (
+            <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-400">
+              O operador de caixa fará o recebimento e a emissão da nota fiscal.
+            </p>
+          )}
         </div>
-        <div className="w-full max-w-sm rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden">
+        <div
+          className={`w-full max-w-sm rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden ${sucesso.pago ? '' : 'hidden'}`}
+        >
           <div className="bg-slate-50 dark:bg-slate-700/50 px-5 py-3 border-b border-slate-200 dark:border-slate-700">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
               Emitir Nota Fiscal
@@ -975,8 +1009,21 @@ export default function PdvPage() {
               </div>
             </div>
 
-            {/* ── Payment section ── */}
-            <div className="border-t-2 border-slate-200 dark:border-slate-800 px-4 py-3 space-y-3 shrink-0 bg-slate-50 dark:bg-slate-800/50">
+            {/* ── Payment section (só quem opera o caixa recebe na hora) ── */}
+            {!ehCaixa && (
+              <div className="border-t-2 border-slate-200 dark:border-slate-800 px-4 py-3 shrink-0 bg-amber-50 dark:bg-amber-900/10">
+                <div className="flex items-start gap-2">
+                  <Wallet className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                  <p className="text-xs text-amber-700 dark:text-amber-400">
+                    <span className="font-semibold">Recebimento no caixa.</span> Ao fechar, a venda
+                    fica em aberto para o operador de caixa receber e emitir a nota.
+                  </p>
+                </div>
+              </div>
+            )}
+            <div
+              className={`border-t-2 border-slate-200 dark:border-slate-800 px-4 py-3 space-y-3 shrink-0 bg-slate-50 dark:bg-slate-800/50 ${ehCaixa ? '' : 'hidden'}`}
+            >
               <div className="flex items-center justify-between">
                 <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
                   <SplitSquareHorizontal className="h-3.5 w-3.5" /> Pagamento
@@ -1107,9 +1154,13 @@ export default function PdvPage() {
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" /> Processando...
                   </>
-                ) : (
+                ) : ehCaixa ? (
                   <>
                     <CheckCircle2 className="h-4 w-4" /> Finalizar Venda · {fmt(total)}
+                  </>
+                ) : (
+                  <>
+                    <Wallet className="h-4 w-4" /> Enviar para o Caixa · {fmt(total)}
                   </>
                 )}
               </button>
