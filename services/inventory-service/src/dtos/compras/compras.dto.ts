@@ -7,7 +7,6 @@ import {
   IsOptional,
   IsNumber,
   IsInt,
-  IsUUID,
   IsArray,
   IsIn,
   Min,
@@ -16,9 +15,17 @@ import {
   ValidateNested,
   IsNotEmpty,
   IsDateString,
+  Matches,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+/**
+ * Formato UUID SEM validar o dígito de versão: os IDs do seed demo são
+ * sintéticos (ex: 50000000-0000-...-0003, "versão 0") e o @IsUUID() os
+ * rejeitaria. A segurança real vem do filtro por tenantId em toda query.
+ */
+const UUID_FORMATO = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const STATUS_COMPRA = [
   'RASCUNHO',
@@ -32,7 +39,7 @@ export const STATUS_COMPRA = [
 export class ItemCompraDto {
   @ApiPropertyOptional({ description: 'UUID do produto no catálogo (opcional em item de NF-e)' })
   @IsOptional()
-  @IsUUID()
+  @Matches(UUID_FORMATO, { message: 'deve ter formato de UUID' })
   produtoId?: string;
 
   @ApiProperty({ description: 'Nome do produto' })
@@ -103,7 +110,7 @@ export class ItemCompraDto {
 export class CriarCompraDto {
   @ApiPropertyOptional({ description: 'UUID do fornecedor (parceiro no customer-service)' })
   @IsOptional()
-  @IsUUID()
+  @Matches(UUID_FORMATO, { message: 'deve ter formato de UUID' })
   fornecedorId?: string;
 
   @ApiProperty({ description: 'Nome do fornecedor (desnormalizado, padrão do projeto)' })
@@ -158,7 +165,7 @@ export class CriarCompraDto {
 
 export class ItemRecebidoDto {
   @ApiProperty({ description: 'UUID do item do pedido de compra' })
-  @IsUUID()
+  @Matches(UUID_FORMATO, { message: 'deve ter formato de UUID' })
   itemId: string;
 
   @ApiProperty({ description: 'Quantidade recebida AGORA (incremental)' })
@@ -178,7 +185,7 @@ export class ReceberCompraDto {
     description: 'Depósito de destino da entrada. Default: primeiro depósito ativo do tenant.',
   })
   @IsOptional()
-  @IsUUID()
+  @Matches(UUID_FORMATO, { message: 'deve ter formato de UUID' })
   depositoId?: string;
 
   @ApiPropertyOptional()
@@ -203,7 +210,7 @@ export class ListarComprasDto {
 
   @ApiPropertyOptional({ description: 'Filtra pedidos de um fornecedor (parceiro)' })
   @IsOptional()
-  @IsUUID()
+  @Matches(UUID_FORMATO, { message: 'deve ter formato de UUID' })
   fornecedorId?: string;
 
   @ApiPropertyOptional({ description: 'Busca por número, fornecedor ou chave da NF-e' })
