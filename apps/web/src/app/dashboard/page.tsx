@@ -989,7 +989,10 @@ export default function DashboardPage() {
                         <span
                           className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${STATUS_COR[p.status] ?? ''}`}
                         >
-                          {p.status}
+                          {/* Mesmo rótulo do pipeline logo acima: exibir o enum cru
+                            ('EM_SEPARACAO') ao lado de 'Em Separação' faz a mesma tela
+                            grafar o mesmo status de duas formas. */}
+                          {STATUS_LABEL[p.status] ?? p.status.replace(/_/g, ' ')}
                         </span>
                       </div>
                       {/* `canal` já sai do service com fallback 'OUTROS': `canalOrigem`
