@@ -6,6 +6,7 @@ import {
   CheckCircle2, AlertTriangle, XCircle, Loader2, User, Clock,
 } from 'lucide-react';
 import { useSessaoCaixa } from '@/hooks/useCaixa';
+import { baseConferencia } from '@/services/caixa.service';
 
 const fmt  = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const dthr = (iso: string) => new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
@@ -20,32 +21,44 @@ const CATEGORIA_CONFIG: Record<string, { label: string; cor: string; bg: string 
   OUTROS:     { label: 'Outros',     cor: 'text-slate-600 dark:text-slate-400',     bg: 'bg-slate-100 dark:bg-slate-700' },
 };
 
+/** Cobre todo o enum TipoPagamento do order-service (+ MISTO, legado do mock). */
 const FORMA_LABEL: Record<string, string> = {
   DINHEIRO: 'Dinheiro', PIX: 'PIX',
-  CARTAO_CREDITO: 'Crédito', CARTAO_DEBITO: 'Débito', MISTO: 'Misto',
+  CARTAO_CREDITO: 'Crédito', CARTAO_DEBITO: 'Débito',
+  BOLETO: 'Boleto', TRANSFERENCIA: 'Transferência', MARKETPLACE: 'Marketplace',
+  MISTO: 'Misto',
 };
 
 export default function SessaoCaixaPage() {
   const { id }  = useParams<{ id: string }>();
   const router  = useRouter();
-  const { data, isLoading } = useSessaoCaixa(id);
+  const { data, isLoading, isError } = useSessaoCaixa(id);
 
   if (isLoading) return (
     <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-marca-500" /></div>
   );
 
-  if (!data?.sessao) return (
+  // O backend devolve 404 (axios lança) quando a sessão não é do tenant; o
+  // `!data?.sessao` cobre uma resposta 200 sem corpo útil.
+  if (isError || !data?.sessao) return (
     <div className="text-center py-16 text-slate-500">Sessão não encontrada</div>
   );
 
   const s    = data.sessao;
-  const movs = data.movimentacoes ?? [];
+  const movs = data.movimentacoes;
 
+  // `diferenca` só existe em sessão FECHADO; o ?? 0 vale para o ABERTO.
   const dif = s.diferenca ?? 0;
   const difOk = s.status === 'ABERTO' || Math.abs(dif) < 0.01;
 
-  const entradas = movs.filter((m: any) => m.tipo === 'ENTRADA');
-  const saidas   = movs.filter((m: any) => m.tipo === 'SAIDA');
+  // Esta é a tela onde se investiga divergência: o número exibido ao lado de
+  // Contado e Diferença tem de ser a base REAL da conferência (a gaveta), senão
+  // os três não fecham. O movimento do turno continua visível no resumo, mas
+  // separado e com rótulo próprio.
+  const esperadoGaveta = baseConferencia(s);
+
+  const entradas = movs.filter((m) => m.tipo === 'ENTRADA');
+  const saidas   = movs.filter((m) => m.tipo === 'SAIDA');
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -75,7 +88,7 @@ export default function SessaoCaixaPage() {
             { label: 'Abertura', value: fmt(s.valorAbertura), sub: dthr(s.aberturaEm) },
             { label: 'Entradas', value: fmt(s.totalEntradas), color: 'text-emerald-600 dark:text-emerald-400' },
             { label: 'Saídas',   value: fmt(s.totalSaidas),   color: 'text-red-600 dark:text-red-400' },
-            { label: 'Saldo Esperado', value: fmt(s.saldoEsperado), bold: true },
+            { label: 'Movimento do Turno', value: fmt(s.saldoEsperado), sub: 'todas as formas', bold: true },
           ].map(({ label, value, sub, color, bold }) => (
             <div key={label} className="bg-white dark:bg-slate-800 p-4">
               <p className="text-xs text-slate-500">{label}</p>
@@ -89,14 +102,19 @@ export default function SessaoCaixaPage() {
         {s.status === 'FECHADO' && (
           <div className="px-5 py-4 border-t border-slate-100 dark:border-slate-700 space-y-3">
             <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Fechamento</h3>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               <div>
                 <p className="text-xs text-slate-500">Fechado em</p>
                 <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{s.fechamentoEm ? dthr(s.fechamentoEm) : '—'}</p>
               </div>
               <div>
+                <p className="text-xs text-slate-500">Esperado na gaveta</p>
+                <p className="text-sm font-medium text-slate-800 dark:text-slate-200 tabular-nums">{fmt(esperadoGaveta)}</p>
+                <p className="text-[10px] text-slate-400">só dinheiro</p>
+              </div>
+              <div>
                 <p className="text-xs text-slate-500">Valor Contado</p>
-                <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{fmt(s.valorContado ?? 0)}</p>
+                <p className="text-sm font-medium text-slate-800 dark:text-slate-200 tabular-nums">{fmt(s.valorContado ?? 0)}</p>
               </div>
               <div>
                 <p className="text-xs text-slate-500">Diferença</p>
@@ -133,7 +151,7 @@ export default function SessaoCaixaPage() {
           <div className="py-10 text-center text-slate-400 text-sm">Nenhuma movimentação neste turno</div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
-            {movs.map((mov: any) => {
+            {movs.map((mov) => {
               const cfg = CATEGORIA_CONFIG[mov.categoria] ?? CATEGORIA_CONFIG.OUTROS;
               const isEntrada = mov.tipo === 'ENTRADA';
               return (
@@ -149,7 +167,7 @@ export default function SessaoCaixaPage() {
                         {cfg.label}
                       </span>
                       {mov.formaPagamento && (
-                        <span className="text-[10px] text-slate-400">{FORMA_LABEL[mov.formaPagamento]}</span>
+                        <span className="text-[10px] text-slate-400">{FORMA_LABEL[mov.formaPagamento] ?? mov.formaPagamento}</span>
                       )}
                       {mov.pedidoNumero && (
                         <span className="text-[10px] text-slate-400 font-mono">{mov.pedidoNumero}</span>

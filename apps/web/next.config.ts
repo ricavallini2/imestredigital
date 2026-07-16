@@ -129,6 +129,12 @@ const nextConfig: NextConfig = {
           source: '/api/v1/formas-pagamento',
           destination: `${ORDER_SERVICE}/api/v1/formas-pagamento`,
         },
+        // Caixa: sessões de turno, movimentações, abertura e fechamento.
+        // Cobre /caixa/atual, /caixa/:id, /caixa/:id/fechar e /caixa/:id/movimentacoes.
+        { source: '/api/v1/caixa/:path*', destination: `${ORDER_SERVICE}/api/v1/caixa/:path*` },
+        // Rota base explícita: o :path* acima NÃO casa com /api/v1/caixa sem
+        // sufixo (histórico e abertura de caixa cairiam no mock).
+        { source: '/api/v1/caixa', destination: `${ORDER_SERVICE}/api/v1/caixa` },
 
         // ── Financial Service (3006) ────────────────────────────────
         // Controllers já usam path completo 'api/v1/lancamentos' etc.
@@ -234,7 +240,7 @@ const nextConfig: NextConfig = {
         },
       ],
       // afterFiles: rotas não cobertas acima continuam sendo servidas
-      // pelos route handlers mock em app/api/v1/ (dashboard, caixa, etc.)
+      // pelos route handlers mock em app/api/v1/ (dashboard, ia, etc.)
       afterFiles: [],
       fallback: [],
     };

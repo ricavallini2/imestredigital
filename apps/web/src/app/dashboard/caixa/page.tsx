@@ -31,6 +31,7 @@ import {
   useFecharCaixa,
   useRegistrarMovimentacao,
 } from '@/hooks/useCaixa';
+import { baseConferencia, type SessaoCaixa } from '@/services/caixa.service';
 import { pedidosService } from '@/services/pedidos.service';
 import { useFormasPagamento } from '@/hooks/useFormasPagamento';
 import {
@@ -43,10 +44,20 @@ import { ModalAutorizacao } from '@/components/ui/modal-autorizacao';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+/** Dinheiro em 2 casas: impede que a subtração de floats vaze para o backend. */
+const arredondar = (v: number) => Math.round((v + Number.EPSILON) * 100) / 100;
+/** Um centavo de folga — comparação de dinheiro nunca usa igualdade exata. */
+const EPS = 0.004;
 const hora = (iso: string) =>
   new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 const dthr = (iso: string) =>
   new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+
+/** Extrai a mensagem do erro do backend (que pode vir como array do class-validator). */
+const mensagemErro = (e: any, padrao: string) => {
+  const m = e?.response?.data?.message;
+  return Array.isArray(m) ? m[0] : (m ?? padrao);
+};
 
 function tempoAberto(iso: string) {
   const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
@@ -89,11 +100,15 @@ const CATEGORIA_CONFIG: Record<string, { label: string; cor: string; bg: string 
   },
 };
 
+/** Cobre todo o enum TipoPagamento do order-service (+ MISTO, legado do mock). */
 const FORMA_LABEL: Record<string, string> = {
   DINHEIRO: 'Dinheiro',
   PIX: 'PIX',
   CARTAO_CREDITO: 'Crédito',
   CARTAO_DEBITO: 'Débito',
+  BOLETO: 'Boleto',
+  TRANSFERENCIA: 'Transferência',
+  MARKETPLACE: 'Marketplace',
   MISTO: 'Misto',
 };
 
@@ -102,6 +117,7 @@ function ModalAbertura({
   onClose,
   onConfirm,
   loading,
+  erro,
 }: {
   onClose: () => void;
   onConfirm: (v: {
@@ -111,6 +127,8 @@ function ModalAbertura({
     observacoes: string;
   }) => void;
   loading: boolean;
+  /** Ex.: 409 quando já existe um caixa aberto no tenant. */
+  erro?: string;
 }) {
   const [operador, setOperador] = useState('');
   const [valor, setValor] = useState('200');
@@ -194,6 +212,12 @@ function ModalAbertura({
             />
           </div>
 
+          {erro && (
+            <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700 dark:border-red-800 dark:bg-red-950/20 dark:text-red-400">
+              {erro}
+            </p>
+          )}
+
           <div className="flex gap-3 pt-2">
             <button
               onClick={onClose}
@@ -205,7 +229,9 @@ function ModalAbertura({
               onClick={() =>
                 onConfirm({ operador, valorAbertura: Number(valor), caixa, observacoes: obs })
               }
-              disabled={!operador || loading}
+              // Campo vazio abriria o turno com R$ 0,00: `Number('')` é 0 e passa
+              // no `@Min(0)` do backend. Zero digitado continua válido.
+              disabled={!operador || valor.trim() === '' || loading}
               className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-emerald-500 py-2.5 text-sm font-bold text-white hover:bg-emerald-600 disabled:opacity-50"
             >
               {loading ? (
@@ -241,7 +267,14 @@ function ModalMovimentacao({
   const [descricao, setDescricao] = useState('');
   const [valor, setValor] = useState('');
   const [forma, setForma] = useState('DINHEIRO');
+  const [erro, setErro] = useState('');
   const registrar = useRegistrarMovimentacao();
+
+  // Suprimento e sangria são movimento de GAVETA por definição — o backend os
+  // trata como dinheiro qualquer que seja a forma enviada ("sangria via PIX" não
+  // existe). Oferecer o select só geraria dado ruim (PIX negativo nos totais por
+  // forma). Despesa e outros, sim, podem sair por outra forma.
+  const escolheForma = tipo === 'DESPESA' || tipo === 'OUTROS';
 
   const cfg = {
     SUPRIMENTO: {
@@ -271,15 +304,21 @@ function ModalMovimentacao({
   }[tipo];
 
   const handleConfirm = async () => {
-    await registrar.mutateAsync({
-      sessaoId,
-      categoria: tipo,
-      descricao,
-      valor: Number(valor),
-      formaPagamento: forma,
-      operador,
-    });
-    onSuccess();
+    setErro('');
+    try {
+      await registrar.mutateAsync({
+        sessaoId,
+        categoria: tipo,
+        descricao,
+        valor: Number(valor),
+        formaPagamento: escolheForma ? forma : 'DINHEIRO',
+        operador,
+      });
+      onSuccess();
+    } catch (e: any) {
+      // 422 quando o caixa foi fechado em outra aba entre abrir o modal e confirmar.
+      setErro(mensagemErro(e, 'Erro ao registrar a movimentação.'));
+    }
   };
 
   return (
@@ -319,21 +358,33 @@ function ModalMovimentacao({
               />
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-              Forma de Pagamento
-            </label>
-            <select
-              value={forma}
-              onChange={(e) => setForma(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm dark:text-white"
-            >
-              <option value="DINHEIRO">Dinheiro</option>
-              <option value="PIX">PIX</option>
-              <option value="CARTAO_CREDITO">Cartão Crédito</option>
-              <option value="CARTAO_DEBITO">Cartão Débito</option>
-            </select>
-          </div>
+          {escolheForma ? (
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                Forma de Pagamento
+              </label>
+              <select
+                value={forma}
+                onChange={(e) => setForma(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm dark:text-white"
+              >
+                <option value="DINHEIRO">Dinheiro</option>
+                <option value="PIX">PIX</option>
+                <option value="CARTAO_CREDITO">Cartão Crédito</option>
+                <option value="CARTAO_DEBITO">Cartão Débito</option>
+              </select>
+            </div>
+          ) : (
+            <p className="rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-500 dark:bg-slate-700/50 dark:text-slate-400">
+              Movimentação em <span className="font-semibold">dinheiro</span> — entra e sai da
+              gaveta.
+            </p>
+          )}
+          {erro && (
+            <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700 dark:border-red-800 dark:bg-red-950/20 dark:text-red-400">
+              {erro}
+            </p>
+          )}
           <div className="flex gap-3 pt-1">
             <button
               onClick={onClose}
@@ -362,19 +413,36 @@ function ModalFechamento({
   onClose,
   onConfirm,
   loading,
+  erro,
 }: {
-  sessao: any;
+  sessao: SessaoCaixa;
   onClose: () => void;
   onConfirm: (valorContado: number, obs: string) => void;
   loading: boolean;
+  /** Ex.: 422 quando o turno já foi fechado em outra aba. */
+  erro?: string;
 }) {
-  const [valor, setValor] = useState(String(sessao.saldoEsperado?.toFixed(2) ?? '0'));
+  // A conferência é contra o DINHEIRO da gaveta, não contra o movimento total do
+  // turno: cartão e PIX entram no `saldoEsperado` mas não estão fisicamente ali.
+  // O service já garante `number` e já degrada `saldoEsperadoDinheiro` para
+  // `saldoEsperado` quando o backend não expõe o campo.
+  const esperadoDinheiro = sessao.saldoEsperadoDinheiro;
+  // Começa VAZIO de propósito: pré-preencher com o esperado faz o operador só
+  // clicar em Confirmar, a diferença dá zero sempre e a conferência vira teatro
+  // (uma sangria não registrada nunca apareceria). A contagem tem que ser digitada.
+  const [valor, setValor] = useState('');
   const [obs, setObs] = useState('');
 
+  const contou = valor.trim() !== '';
   const contado = Number(valor) || 0;
-  const esperado = sessao.saldoEsperado ?? 0;
-  const diferenca = contado - esperado;
+  const diferenca = contado - esperadoDinheiro;
   const ok = Math.abs(diferenca) < 0.01;
+
+  // Formas que NÃO entram na conferência: explicam por que o esperado em dinheiro
+  // é menor que o movimento do turno. Formas zeradas só poluiriam o modal.
+  const outrasFormas = sessao.totaisPorForma.filter(
+    (t) => t.formaPagamento !== 'DINHEIRO' && Math.abs(t.liquido) >= 0.01,
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
@@ -395,10 +463,10 @@ function ModalFechamento({
           {/* Resumo da sessão */}
           <div className="rounded-2xl bg-slate-50 dark:bg-slate-700/50 p-4 grid grid-cols-2 gap-3">
             {[
-              { label: 'Abertura', valor: fmt(sessao.valorAbertura ?? 0), neutral: true },
-              { label: 'Total Entradas', valor: fmt(sessao.totalEntradas ?? 0), positive: true },
-              { label: 'Total Saídas', valor: fmt(sessao.totalSaidas ?? 0), negative: true },
-              { label: 'Saldo Esperado', valor: fmt(esperado), bold: true },
+              { label: 'Abertura', valor: fmt(sessao.valorAbertura), neutral: true },
+              { label: 'Total Entradas', valor: fmt(sessao.totalEntradas), positive: true },
+              { label: 'Total Saídas', valor: fmt(sessao.totalSaidas), negative: true },
+              { label: 'Movimento Total do Turno', valor: fmt(sessao.saldoEsperado), bold: true },
             ].map(({ label, valor: v, positive, negative, neutral, bold }) => (
               <div key={label} className="flex flex-col">
                 <span className="text-xs text-slate-500 dark:text-slate-400">{label}</span>
@@ -409,6 +477,42 @@ function ModalFechamento({
                 </span>
               </div>
             ))}
+          </div>
+
+          {/* Base da conferência: só o dinheiro da gaveta */}
+          <div className="rounded-2xl border border-marca-200 dark:border-marca-800 bg-marca-50 dark:bg-marca-900/20 px-5 py-4">
+            <div className="flex items-baseline justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-marca-800 dark:text-marca-200">
+                  Dinheiro na gaveta (esperado)
+                </p>
+                <p className="text-xs text-marca-600/80 dark:text-marca-400/80">
+                  Base da conferência
+                </p>
+              </div>
+              <span className="text-2xl font-bold tabular-nums text-marca-700 dark:text-marca-300">
+                {fmt(esperadoDinheiro)}
+              </span>
+            </div>
+
+            {outrasFormas.length > 0 && (
+              <div className="mt-3 border-t border-marca-200/70 dark:border-marca-800/70 pt-2.5">
+                <p className="flex flex-wrap gap-x-2 gap-y-0.5 text-xs text-slate-500 dark:text-slate-400">
+                  {outrasFormas.map((t, i) => (
+                    <span key={t.formaPagamento}>
+                      {i > 0 && <span className="mr-2 text-slate-300 dark:text-slate-600">·</span>}
+                      {FORMA_LABEL[t.formaPagamento] ?? t.formaPagamento}{' '}
+                      <span className="font-semibold tabular-nums text-slate-600 dark:text-slate-300">
+                        {fmt(t.liquido)}
+                      </span>
+                    </span>
+                  ))}
+                </p>
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Não entram na conferência — não estão na gaveta.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Contagem física */}
@@ -438,44 +542,56 @@ function ModalFechamento({
           <div
             className={`rounded-xl px-5 py-4 flex items-center justify-between
             ${
-              ok
-                ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800'
-                : diferenca > 0
-                  ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
-                  : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+              !contou
+                ? 'bg-slate-50 dark:bg-slate-700/30 border border-slate-200 dark:border-slate-700'
+                : ok
+                  ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800'
+                  : diferenca > 0
+                    ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
+                    : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
             }`}
           >
             <div>
               <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Diferença</p>
               <p className="text-xs text-slate-500">
-                {ok
-                  ? 'Caixa conferido — sem divergência'
-                  : diferenca > 0
-                    ? 'Sobra de caixa'
-                    : 'Falta de caixa'}
+                {!contou
+                  ? 'Conte o dinheiro da gaveta e informe o valor acima'
+                  : ok
+                    ? 'Caixa conferido — sem divergência'
+                    : diferenca > 0
+                      ? 'Sobra de caixa'
+                      : 'Falta de caixa'}
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {ok ? (
-                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-              ) : diferenca > 0 ? (
-                <AlertTriangle className="h-5 w-5 text-blue-500" />
+              {!contou ? (
+                <span className="text-xl font-bold tabular-nums text-slate-300 dark:text-slate-600">
+                  —
+                </span>
               ) : (
-                <XCircle className="h-5 w-5 text-red-500" />
+                <>
+                  {ok ? (
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                  ) : diferenca > 0 ? (
+                    <AlertTriangle className="h-5 w-5 text-blue-500" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-red-500" />
+                  )}
+                  <span
+                    className={`text-xl font-bold tabular-nums
+                    ${
+                      ok
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : diferenca > 0
+                          ? 'text-blue-600 dark:text-blue-400'
+                          : 'text-red-600 dark:text-red-400'
+                    }`}
+                  >
+                    {diferenca >= 0 ? '+' : ''}
+                    {fmt(diferenca)}
+                  </span>
+                </>
               )}
-              <span
-                className={`text-xl font-bold tabular-nums
-                ${
-                  ok
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : diferenca > 0
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-red-600 dark:text-red-400'
-                }`}
-              >
-                {diferenca >= 0 ? '+' : ''}
-                {fmt(diferenca)}
-              </span>
             </div>
           </div>
 
@@ -492,6 +608,12 @@ function ModalFechamento({
             />
           </div>
 
+          {erro && (
+            <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700 dark:border-red-800 dark:bg-red-950/20 dark:text-red-400">
+              {erro}
+            </p>
+          )}
+
           <div className="flex gap-3">
             <button
               onClick={onClose}
@@ -501,7 +623,8 @@ function ModalFechamento({
             </button>
             <button
               onClick={() => onConfirm(contado, obs)}
-              disabled={loading}
+              // Sem contagem digitada não há conferência: o botão fica travado.
+              disabled={loading || !contou}
               className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-slate-800 dark:bg-slate-700 py-2.5 text-sm font-bold text-white hover:bg-slate-900 disabled:opacity-50"
             >
               {loading ? (
@@ -521,7 +644,7 @@ function ModalFechamento({
 // ─── Página Principal ─────────────────────────────────────────────────────────
 export default function CaixaPage() {
   const router = useRouter();
-  const { data, isLoading, refetch } = useCaixaAtual();
+  const { data, isLoading, isError, error, refetch } = useCaixaAtual();
   const { data: historico } = useSessoesCaixa();
 
   const abrir = useAbrirCaixa();
@@ -529,6 +652,8 @@ export default function CaixaPage() {
 
   const [showAbertura, setShowAbertura] = useState(false);
   const [showFechamento, setShowFechamento] = useState(false);
+  const [erroAbertura, setErroAbertura] = useState('');
+  const [erroFechamento, setErroFechamento] = useState('');
   const [showMovModal, setShowMovModal] = useState<'SUPRIMENTO' | 'SANGRIA' | 'DESPESA' | null>(
     null,
   );
@@ -549,7 +674,12 @@ export default function CaixaPage() {
   const [valorReceb, setValorReceb] = useState('');
   const [parcelasReceb, setParcelasReceb] = useState(1);
   const [recebendo, setRecebendo] = useState(false);
-  const [recebidoOk, setRecebidoOk] = useState<{ id: string; numero: string } | null>(null);
+  const [recebidoOk, setRecebidoOk] = useState<{
+    id: string;
+    numero: string;
+    /** Excedente devolvido ao cliente — não foi recebido, é só aviso ao operador. */
+    troco: number;
+  } | null>(null);
   const [erroReceb, setErroReceb] = useState('');
   const [liberacaoPend, setLiberacaoPend] = useState<any | null>(null);
   const [liberadoPorReceb, setLiberadoPorReceb] = useState<string | null>(null);
@@ -606,19 +736,43 @@ export default function CaixaPage() {
     abrirReceberEfetivo(p);
   };
 
+  // ── Valor recebido × total do pedido ──────────────────────────────────────
+  // O campo é editável, então o operador digita o que o cliente ENTREGOU. Em
+  // dinheiro, o excedente é TROCO (volta para o cliente) e não pode ser
+  // registrado como pagamento — a gaveta não fica com ele. Nas demais formas não
+  // existe troco: valor acima do total é erro de digitação, e registrar inflaria
+  // o caixa em silêncio.
+  const totalPedidoReceb = arredondar(Number(receber?.valorTotal ?? 0));
+  const informadoReceb = arredondar(Number(valorReceb) || 0);
+  const excedenteReceb = Math.max(0, arredondar(informadoReceb - totalPedidoReceb));
+  const trocoReceb = formaReceb === 'DINHEIRO' ? excedenteReceb : 0;
+  const excedenteInvalido = formaReceb !== 'DINHEIRO' && excedenteReceb > EPS;
+
   const confirmarRecebimento = async () => {
     if (!receber) return;
+    if (excedenteInvalido) {
+      setErroReceb(
+        `Valor acima do total do pedido (${fmt(totalPedidoReceb)}). Em ${
+          FORMA_LABEL[formaReceb] ?? formaReceb
+        } não há troco — corrija o valor recebido.`,
+      );
+      return;
+    }
+    // Pagamento = o que a loja RETÉM. Com troco, o registro é pelo total do
+    // pedido; o excedente só é informado ao operador para devolução.
+    const valorPago =
+      informadoReceb > 0 ? arredondar(informadoReceb - trocoReceb) : totalPedidoReceb;
     setRecebendo(true);
     setErroReceb('');
     try {
       await pedidosService.registrarPagamento(receber.id, {
         forma: formaReceb,
-        valor: Number(valorReceb) || Number(receber.valorTotal ?? 0),
+        valor: valorPago,
         parcelas: formaReceb === 'CARTAO_CREDITO' ? parcelasReceb : undefined,
         descricao:
           formaDescReceb || (liberadoPorReceb ? `Liberado por: ${liberadoPorReceb}` : undefined),
       });
-      setRecebidoOk({ id: receber.id, numero: receber.numero ?? receber.id });
+      setRecebidoOk({ id: receber.id, numero: receber.numero ?? receber.id, troco: trocoReceb });
       setReceber(null);
       refetchVendas();
       refetch();
@@ -632,17 +786,36 @@ export default function CaixaPage() {
   const movs = data?.movimentacoes ?? [];
   const sessoes = historico?.sessoes ?? [];
 
-  const handleAbrir = async (dto: any) => {
-    await abrir.mutateAsync(dto);
-    setShowAbertura(false);
-    refetch();
+  const handleAbrir = async (dto: {
+    operador: string;
+    valorAbertura: number;
+    caixa: string;
+    observacoes: string;
+  }) => {
+    setErroAbertura('');
+    try {
+      await abrir.mutateAsync(dto);
+      setShowAbertura(false);
+      refetch();
+    } catch (e: any) {
+      // 409: outro operador já abriu o caixa deste tenant.
+      setErroAbertura(mensagemErro(e, 'Erro ao abrir o caixa.'));
+      refetch();
+    }
   };
 
   const handleFechar = async (valorContado: number, obs: string) => {
     if (!sessaoAberta) return;
-    await fechar.mutateAsync({ id: sessaoAberta.id, valorContado, observacoes: obs });
-    setShowFechamento(false);
-    refetch();
+    setErroFechamento('');
+    try {
+      await fechar.mutateAsync({ id: sessaoAberta.id, valorContado, observacoes: obs });
+      setShowFechamento(false);
+      refetch();
+    } catch (e: any) {
+      // 422: o turno já havia sido fechado (ex.: outra aba).
+      setErroFechamento(mensagemErro(e, 'Erro ao fechar o caixa.'));
+      refetch();
+    }
   };
 
   return (
@@ -674,6 +847,24 @@ export default function CaixaPage() {
         <div className="flex items-center justify-center h-48">
           <Loader2 className="h-8 w-8 animate-spin text-marca-500" />
         </div>
+      ) : isError ? (
+        // Falha ao consultar o caixa: NÃO cair no estado "Caixa Fechado", que
+        // convidaria a abrir um segundo turno em cima de um já aberto.
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-10 text-center dark:border-red-800 dark:bg-red-900/20">
+          <XCircle className="mx-auto mb-3 h-10 w-10 text-red-400" />
+          <h2 className="text-lg font-bold text-red-800 dark:text-red-300">
+            Não foi possível carregar o caixa
+          </h2>
+          <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+            {mensagemErro(error, 'Verifique sua conexão e tente novamente.')}
+          </p>
+          <button
+            onClick={() => refetch()}
+            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-red-700"
+          >
+            Tentar novamente
+          </button>
+        </div>
       ) : !sessaoAberta ? (
         // ── SEM CAIXA ABERTO ──────────────────────────────────────────────────
         <div className="space-y-6">
@@ -686,7 +877,10 @@ export default function CaixaPage() {
               Nenhum turno em andamento. Abra o caixa para começar a operar.
             </p>
             <button
-              onClick={() => setShowAbertura(true)}
+              onClick={() => {
+                setErroAbertura('');
+                setShowAbertura(true);
+              }}
               className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-8 py-3 font-bold text-white hover:bg-emerald-600 transition-colors text-base"
             >
               <Unlock className="h-5 w-5" /> Abrir Caixa
@@ -720,9 +914,11 @@ export default function CaixaPage() {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
+                        {/* Ao lado da diferença só cabe a base dela: a gaveta. */}
                         <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                          {fmt(s.saldoEsperado)}
+                          {fmt(baseConferencia(s))}
                         </p>
+                        <p className="text-[10px] text-slate-400">esperado na gaveta</p>
                         {s.diferenca !== undefined && (
                           <p
                             className={`text-xs font-medium ${s.diferenca === 0 ? 'text-emerald-600' : s.diferenca > 0 ? 'text-blue-600' : 'text-red-600'}`}
@@ -767,7 +963,10 @@ export default function CaixaPage() {
               </div>
             </div>
             <button
-              onClick={() => setShowFechamento(true)}
+              onClick={() => {
+                setErroFechamento('');
+                setShowFechamento(true);
+              }}
               className="flex items-center gap-2 rounded-xl bg-white/20 hover:bg-white/30 px-5 py-2.5 text-sm font-bold text-white transition-colors border border-white/30"
             >
               <Lock className="h-4 w-4" /> Fechar Caixa
@@ -776,14 +975,23 @@ export default function CaixaPage() {
 
           {/* KPIs */}
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {/* Saldo atual */}
+            {/* Saldo atual — dinheiro na gaveta, o mesmo número que o fechamento
+                pede na conferência. O movimento do turno (cartão/PIX incluídos)
+                fica abaixo, como informação, para não competir com a gaveta. */}
             <div className="col-span-2 lg:col-span-1 rounded-2xl bg-slate-900 dark:bg-slate-950 p-5">
               <p className="text-sm text-slate-400">Saldo em Caixa</p>
+              <p className="text-[11px] text-slate-500">Dinheiro na gaveta</p>
               <p className="mt-1 text-2xl font-bold text-white tabular-nums">
-                {fmt(sessaoAberta.saldoEsperado)}
+                {fmt(sessaoAberta.saldoEsperadoDinheiro)}
               </p>
               <p className="mt-1 text-xs text-slate-500">
                 Abertura: {fmt(sessaoAberta.valorAbertura)}
+              </p>
+              <p className="mt-0.5 text-xs text-slate-500">
+                Movimento do turno (todas as formas):{' '}
+                <span className="tabular-nums text-slate-400">
+                  {fmt(sessaoAberta.saldoEsperado)}
+                </span>
               </p>
             </div>
             <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 p-5">
@@ -848,6 +1056,9 @@ export default function CaixaPage() {
               <p className="flex-1 text-sm text-emerald-700 dark:text-emerald-300">
                 Pedido <span className="font-mono font-semibold">{recebidoOk.numero}</span> recebido
                 com sucesso.
+                {recebidoOk.troco > 0 && (
+                  <span className="font-semibold"> Troco a devolver: {fmt(recebidoOk.troco)}.</span>
+                )}
               </p>
               <Link
                 href={`/dashboard/fiscal/nova?pedidoId=${recebidoOk.id}&tipo=NFCE`}
@@ -945,7 +1156,7 @@ export default function CaixaPage() {
                           </span>
                           {mov.formaPagamento && (
                             <span className="text-[10px] text-slate-400">
-                              {FORMA_LABEL[mov.formaPagamento]}
+                              {FORMA_LABEL[mov.formaPagamento] ?? mov.formaPagamento}
                             </span>
                           )}
                         </div>
@@ -978,6 +1189,7 @@ export default function CaixaPage() {
           onClose={() => setShowAbertura(false)}
           onConfirm={handleAbrir}
           loading={abrir.isPending}
+          erro={erroAbertura}
         />
       )}
       {showFechamento && sessaoAberta && (
@@ -986,6 +1198,7 @@ export default function CaixaPage() {
           onClose={() => setShowFechamento(false)}
           onConfirm={handleFechar}
           loading={fechar.isPending}
+          erro={erroFechamento}
         />
       )}
       {showMovModal && sessaoAberta && (
@@ -1094,6 +1307,33 @@ export default function CaixaPage() {
                     className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-base font-bold dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                   />
                 </div>
+                <p className="mt-1.5 text-[11px] text-slate-400">
+                  Total do pedido:{' '}
+                  <span className="font-semibold text-slate-500 dark:text-slate-300 tabular-nums">
+                    {fmt(totalPedidoReceb)}
+                  </span>
+                </p>
+                {trocoReceb > 0 && (
+                  <div className="mt-2 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 dark:border-emerald-800 dark:bg-emerald-900/20">
+                    <div>
+                      <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                        Troco
+                      </p>
+                      <p className="text-[10px] text-emerald-600/80 dark:text-emerald-500/80">
+                        Devolver ao cliente — o caixa recebe {fmt(totalPedidoReceb)}
+                      </p>
+                    </div>
+                    <span className="text-sm font-bold tabular-nums text-emerald-700 dark:text-emerald-400">
+                      {fmt(trocoReceb)}
+                    </span>
+                  </div>
+                )}
+                {excedenteInvalido && (
+                  <p className="mt-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-medium text-red-700 dark:border-red-800 dark:bg-red-950/20 dark:text-red-400">
+                    Valor acima do total do pedido ({fmt(totalPedidoReceb)}). Em{' '}
+                    {FORMA_LABEL[formaReceb] ?? formaReceb} não há troco — corrija o valor.
+                  </p>
+                )}
               </div>
               {formaReceb === 'CARTAO_CREDITO' && (
                 <div>
@@ -1127,7 +1367,7 @@ export default function CaixaPage() {
                 </button>
                 <button
                   onClick={confirmarRecebimento}
-                  disabled={recebendo || !(Number(valorReceb) > 0)}
+                  disabled={recebendo || !(Number(valorReceb) > 0) || excedenteInvalido}
                   className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
                 >
                   {recebendo ? (

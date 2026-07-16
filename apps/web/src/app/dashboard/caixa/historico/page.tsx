@@ -3,13 +3,14 @@
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, CheckCircle2, AlertTriangle, XCircle, ChevronRight, Loader2, Landmark } from 'lucide-react';
 import { useSessoesCaixa } from '@/hooks/useCaixa';
+import { baseConferencia, type SessaoCaixa } from '@/services/caixa.service';
 
 const fmt  = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const dthr = (iso: string) => new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 
 export default function CaixaHistoricoPage() {
   const router = useRouter();
-  const { data, isLoading } = useSessoesCaixa();
+  const { data, isLoading, isError, refetch } = useSessoesCaixa();
   const sessoes = data?.sessoes ?? [];
 
   return (
@@ -26,6 +27,14 @@ export default function CaixaHistoricoPage() {
 
       {isLoading ? (
         <div className="flex justify-center py-12"><Loader2 className="h-7 w-7 animate-spin text-marca-500" /></div>
+      ) : isError ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-12 text-center dark:border-red-800 dark:bg-red-900/20">
+          <XCircle className="mx-auto mb-3 h-10 w-10 text-red-400" />
+          <p className="text-red-700 dark:text-red-400">Não foi possível carregar o histórico</p>
+          <button onClick={() => refetch()} className="mt-4 rounded-xl bg-red-600 px-5 py-2 text-sm font-bold text-white hover:bg-red-700">
+            Tentar novamente
+          </button>
+        </div>
       ) : sessoes.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-600 p-12 text-center">
           <Landmark className="mx-auto mb-3 h-10 w-10 text-slate-300" />
@@ -33,7 +42,8 @@ export default function CaixaHistoricoPage() {
         </div>
       ) : (
         <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden">
-          {sessoes.map((s: any, i: number) => {
+          {sessoes.map((s: SessaoCaixa) => {
+            // `diferenca` só existe em sessão FECHADO; o ?? 0 vale para o ABERTO.
             const dif = s.diferenca ?? 0;
             const ok  = s.status === 'ABERTO' || Math.abs(dif) < 0.01;
             return (
@@ -53,7 +63,13 @@ export default function CaixaHistoricoPage() {
                   <p className="text-xs text-slate-500 mt-0.5">{s.operador} · {s.caixa} · {dthr(s.aberturaEm)}</p>
                 </div>
                 <div className="text-right flex-shrink-0 space-y-0.5">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{fmt(s.saldoEsperado)}</p>
+                  {/* O número em destaque é a BASE da diferença exibida logo abaixo
+                      — o esperado na gaveta. O movimento do turno (com cartão e
+                      PIX) fica como informação secundária: não se confere contra
+                      ele. */}
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{fmt(baseConferencia(s))}</p>
+                  <p className="text-[10px] text-slate-400">esperado na gaveta</p>
+                  <p className="text-[10px] text-slate-400">turno: {fmt(s.saldoEsperado)}</p>
                   {s.status === 'FECHADO' && s.diferenca !== undefined && (
                     <div className="flex items-center justify-end gap-1">
                       {ok ? <CheckCircle2 className="h-3 w-3 text-emerald-500" />

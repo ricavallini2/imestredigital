@@ -379,3 +379,112 @@ model FormaPagamento {
   @@index([tenantId, tipo])
   @@map("formas_pagamento")
 }
+
+// ─── Caixa (sessão de PDV / balcão) ───────────────────────────
+//
+// O Caixa vive no order-service (e não no financial-service) porque a sessão
+// pertence ao domínio de venda/PDV e o pagamento (modelo Pagamento, acima)
+// precisa virar movimentação de caixa na MESMA transação e no MESMO banco.
+// No financial-service o vínculo dependeria de evento assíncrono e o caixa
+// poderia divergir da venda.
+
+enum StatusSessaoCaixa {
+  ABERTO
+  FECHADO
+}
+
+enum TipoMovimentacaoCaixa {
+  ENTRADA
+  SAIDA
+}
+
+enum CategoriaMovimentacaoCaixa {
+  VENDA
+  SUPRIMENTO
+  SANGRIA
+  DESPESA
+  REEMBOLSO
+  OUTROS
+}
+
+/// Turno de caixa de um terminal. Regra: no máximo UMA sessão ABERTO por tenant.
+model SessaoCaixa {
+  id       String            @id @default(uuid()) @db.Uuid
+  tenantId String            @map("tenant_id") @db.Uuid
+
+  /// Numeração legível por tenant/ano: "CAIXA-2026-003".
+  numero   String
+  status   StatusSessaoCaixa @default(ABERTO)
+
+  /// Terminal ("Caixa 01"). Hoje é string livre — não há cadastro de terminais.
+  caixa    String
+
+  /// Nome do operador do turno (o front envia texto livre).
+  operador   String
+  /// Usuário do JWT que abriu o turno, quando disponível.
+  operadorId String? @map("operador_id") @db.Uuid
+
+  aberturaEm          DateTime @default(now()) @map("abertura_em")
+  valorAbertura       Decimal  @db.Decimal(12, 2) @map("valor_abertura")
+  observacoesAbertura String?  @map("observacoes_abertura") @db.Text
+
+  fechamentoEm          DateTime? @map("fechamento_em")
+  valorContado          Decimal?  @db.Decimal(12, 2) @map("valor_contado")
+  /// Snapshot do saldo esperado no instante do fechamento (auditoria).
+  valorEsperado         Decimal?  @db.Decimal(12, 2) @map("valor_esperado")
+  /// valorContado - valorEsperado. > 0 sobra, < 0 falta.
+  diferenca             Decimal?  @db.Decimal(12, 2)
+  observacoesFechamento String?   @map("observacoes_fechamento") @db.Text
+
+  /// Trava de unicidade REAL de "1 caixa aberto por tenant", garantida pelo banco:
+  /// recebe o tenantId enquanto a sessão está ABERTO e volta a NULL no fechamento.
+  /// No Postgres NULLs são distintos entre si num índice único, então N sessões
+  /// FECHADO convivem, mas uma segunda ABERTO do mesmo tenant viola o unique (P2002).
+  /// Sem isso, duas aberturas simultâneas passariam pelo check da aplicação.
+  travaCaixaAberto String? @unique @map("trava_caixa_aberto") @db.Uuid
+
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  movimentacoes MovimentacaoCaixa[]
+
+  @@unique([tenantId, numero])
+  @@index([tenantId, status])
+  @@index([tenantId, aberturaEm])
+  @@map("sessoes_caixa")
+}
+
+/// Lançamento de caixa. `valor` é SEMPRE positivo — o sinal vem de `tipo`.
+model MovimentacaoCaixa {
+  id       String      @id @default(uuid()) @db.Uuid
+  tenantId String      @map("tenant_id") @db.Uuid
+  sessaoId String      @map("sessao_id") @db.Uuid
+  sessao   SessaoCaixa @relation(fields: [sessaoId], references: [id], onDelete: Cascade)
+
+  tipo      TipoMovimentacaoCaixa
+  categoria CategoriaMovimentacaoCaixa
+  descricao String                     @db.Text
+  valor     Decimal                    @db.Decimal(12, 2)
+
+  /// Forma usada (reaproveita o enum de Pagamento) — base dos totais por forma.
+  formaPagamento TipoPagamento? @map("forma_pagamento")
+
+  pedidoId     String? @map("pedido_id") @db.Uuid
+  pedidoNumero String? @map("pedido_numero")
+  /// Vínculo com o Pagamento que originou o lançamento (VENDA e o REEMBOLSO do
+  /// respectivo estorno). A idempotência é o unique COMPOSTO [pagamentoId,
+  /// categoria], e não o pagamentoId sozinho: um mesmo pagamento produz até
+  /// duas movimentações — a VENDA e, se estornado, o REEMBOLSO. Cada uma delas
+  /// continua única (retry/reprocessamento não duplica).
+  pagamentoId  String? @map("pagamento_id") @db.Uuid
+
+  operador String
+
+  criadoEm DateTime @default(now()) @map("criado_em")
+
+  /// NULLs são distintos entre si no Postgres: movimentações manuais (sem
+  /// pagamentoId) não disputam esta trava.
+  @@unique([pagamentoId, categoria])
+  @@index([tenantId, sessaoId, criadoEm])
+  @@map("movimentacoes_caixa")
+}

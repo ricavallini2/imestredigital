@@ -5,7 +5,7 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService, ClientePrisma } from '../prisma/prisma.service';
 import { Decimal } from '@prisma/client/runtime/library';
 import { StatusPagamentoDetalhado } from '../../../generated/client';
 
@@ -15,9 +15,12 @@ export class PagamentoRepository {
 
   /**
    * Criar novo registro de pagamento.
+   *
+   * Aceita um `cliente` alternativo (o tx de um $transaction) para que o
+   * pagamento e a movimentação de caixa sejam gravados atomicamente.
    */
-  async criar(tenantId: string, pedidoId: string, dados: any) {
-    return this.prisma.pagamento.create({
+  async criar(tenantId: string, pedidoId: string, dados: any, cliente: ClientePrisma = this.prisma) {
+    return cliente.pagamento.create({
       data: {
         ...dados,
         tenantId,
@@ -57,13 +60,17 @@ export class PagamentoRepository {
    *
    * Write multi-tenant seguro: filtra por { id, tenantId } via updateMany
    * e retorna o pagamento atualizado (buscado com o mesmo filtro de tenant).
+   *
+   * Aceita um `cliente` alternativo (o tx de um $transaction) para que o estorno
+   * e o reembolso no caixa sejam gravados atomicamente.
    */
   async atualizarStatus(
     tenantId: string,
     pagamentoId: string,
     novoStatus: string,
+    cliente: ClientePrisma = this.prisma,
   ) {
-    await this.prisma.pagamento.updateMany({
+    await cliente.pagamento.updateMany({
       where: { id: pagamentoId, tenantId },
       data: {
         status: novoStatus as StatusPagamentoDetalhado,
@@ -72,7 +79,7 @@ export class PagamentoRepository {
       },
     });
 
-    return this.prisma.pagamento.findFirst({
+    return cliente.pagamento.findFirst({
       where: { id: pagamentoId, tenantId },
     });
   }

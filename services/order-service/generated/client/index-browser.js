@@ -236,6 +236,58 @@ exports.Prisma.ItemDevolucaoScalarFieldEnum = {
   criadoEm: 'criadoEm'
 };
 
+exports.Prisma.FormaPagamentoScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  descricao: 'descricao',
+  tipo: 'tipo',
+  bandeira: 'bandeira',
+  parcelas: 'parcelas',
+  taxaPct: 'taxaPct',
+  taxaFixa: 'taxaFixa',
+  prazoRecebimentoDias: 'prazoRecebimentoDias',
+  ativa: 'ativa',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+};
+
+exports.Prisma.SessaoCaixaScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  numero: 'numero',
+  status: 'status',
+  caixa: 'caixa',
+  operador: 'operador',
+  operadorId: 'operadorId',
+  aberturaEm: 'aberturaEm',
+  valorAbertura: 'valorAbertura',
+  observacoesAbertura: 'observacoesAbertura',
+  fechamentoEm: 'fechamentoEm',
+  valorContado: 'valorContado',
+  valorEsperado: 'valorEsperado',
+  diferenca: 'diferenca',
+  observacoesFechamento: 'observacoesFechamento',
+  travaCaixaAberto: 'travaCaixaAberto',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+};
+
+exports.Prisma.MovimentacaoCaixaScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  sessaoId: 'sessaoId',
+  tipo: 'tipo',
+  categoria: 'categoria',
+  descricao: 'descricao',
+  valor: 'valor',
+  formaPagamento: 'formaPagamento',
+  pedidoId: 'pedidoId',
+  pedidoNumero: 'pedidoNumero',
+  pagamentoId: 'pagamentoId',
+  operador: 'operador',
+  criadoEm: 'criadoEm'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -334,6 +386,25 @@ exports.StatusDevolucao = exports.$Enums.StatusDevolucao = {
   REJEITADA: 'REJEITADA'
 };
 
+exports.StatusSessaoCaixa = exports.$Enums.StatusSessaoCaixa = {
+  ABERTO: 'ABERTO',
+  FECHADO: 'FECHADO'
+};
+
+exports.TipoMovimentacaoCaixa = exports.$Enums.TipoMovimentacaoCaixa = {
+  ENTRADA: 'ENTRADA',
+  SAIDA: 'SAIDA'
+};
+
+exports.CategoriaMovimentacaoCaixa = exports.$Enums.CategoriaMovimentacaoCaixa = {
+  VENDA: 'VENDA',
+  SUPRIMENTO: 'SUPRIMENTO',
+  SANGRIA: 'SANGRIA',
+  DESPESA: 'DESPESA',
+  REEMBOLSO: 'REEMBOLSO',
+  OUTROS: 'OUTROS'
+};
+
 exports.Prisma.ModelName = {
   Pedido: 'Pedido',
   ItemPedido: 'ItemPedido',
@@ -341,7 +412,10 @@ exports.Prisma.ModelName = {
   EventoProcessado: 'EventoProcessado',
   Pagamento: 'Pagamento',
   Devolucao: 'Devolucao',
-  ItemDevolucao: 'ItemDevolucao'
+  ItemDevolucao: 'ItemDevolucao',
+  FormaPagamento: 'FormaPagamento',
+  SessaoCaixa: 'SessaoCaixa',
+  MovimentacaoCaixa: 'MovimentacaoCaixa'
 };
 
 /**

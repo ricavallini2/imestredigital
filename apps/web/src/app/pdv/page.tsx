@@ -89,6 +89,61 @@ type ProdutoCatalogo = {
 const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const uid = () => Math.random().toString(36).slice(2, 9);
 
+/** Dinheiro em 2 casas: impede que 0.1 + 0.2 vaze para o valor enviado ao backend. */
+const arredondar = (v: number) => Math.round((v + Number.EPSILON) * 100) / 100;
+
+/** Um centavo de folga — comparação de dinheiro nunca usa igualdade exata. */
+const EPS = 0.004;
+
+interface PagamentoEfetivo {
+  forma: FormaPgto;
+  valor: number;
+  parcelas: number;
+  formaDescricao?: string;
+}
+
+/**
+ * Converte as linhas digitadas (valor ENTREGUE pelo cliente) no valor
+ * EFETIVAMENTE pago em cada forma: a soma passa a ser exatamente o total do
+ * pedido.
+ *
+ * Troco NÃO é pagamento — é devolução do excedente, e só sai de dinheiro. Por
+ * isso o excedente é abatido apenas das linhas em DINHEIRO, da última para a
+ * primeira (a última é a que o operador usa para "fechar" a conta). Uma linha
+ * em dinheiro totalmente consumida pelo troco simplesmente deixa de existir.
+ *
+ * O que sobrar sem lastro em dinheiro volta em `excedenteNaoDinheiro`: não há
+ * troco de PIX/cartão, então quem chama bloqueia em vez de inflar o caixa.
+ */
+function calcularPagamentosEfetivos(entradas: PagamentoEntry[], total: number) {
+  const linhas = entradas
+    .map((p) => ({ ...p, efetivo: arredondar(Number(p.valor) || 0) }))
+    .filter((p) => p.efetivo > 0);
+
+  let excedente = arredondar(linhas.reduce((s, p) => s + p.efetivo, 0) - total);
+  let troco = 0;
+  for (let i = linhas.length - 1; i >= 0 && excedente > EPS; i--) {
+    if (linhas[i].forma !== 'DINHEIRO') continue;
+    const abater = Math.min(linhas[i].efetivo, excedente);
+    linhas[i].efetivo = arredondar(linhas[i].efetivo - abater);
+    excedente = arredondar(excedente - abater);
+    troco = arredondar(troco + abater);
+  }
+
+  return {
+    linhas: linhas
+      .filter((p) => p.efetivo > 0)
+      .map<PagamentoEfetivo>((p) => ({
+        forma: p.forma,
+        valor: p.efetivo,
+        parcelas: p.parcelas,
+        formaDescricao: p.formaDescricao,
+      })),
+    troco,
+    excedenteNaoDinheiro: excedente > EPS ? excedente : 0,
+  };
+}
+
 const CATEGORIAS = [
   'Todos',
   'Eletrônicos',
@@ -312,10 +367,11 @@ export default function PdvPage() {
 
   const produtos = (catalogo?.produtos ?? []) as ProdutoCatalogo[];
 
-  // Get unique categories from actual products
+  // Categorias reais dos produtos. O type guard no filter é necessário:
+  // `filter(Boolean)` não estreita `(string | undefined)[]` para `string[]`.
   const categoriasDisponiveis = [
     'Todos',
-    ...Array.from(new Set(produtos.map((p) => p.categoria).filter(Boolean))),
+    ...Array.from(new Set(produtos.map((p) => p.categoria).filter((c): c is string => Boolean(c)))),
   ];
 
   const produtosFiltrados = produtos.filter((p) => {
@@ -414,10 +470,12 @@ export default function PdvPage() {
   const descontoGeral = Number(desconto) || 0;
   const total = Math.max(0, subtotal - descontoGeral);
 
-  const totalPago = pagamentos.reduce((s, p) => s + (Number(p.valor) || 0), 0);
-  const restante = Math.max(0, total - totalPago);
-  const troco =
-    totalPago > total && pagamentos.some((p) => p.forma === 'DINHEIRO') ? totalPago - total : 0;
+  // `totalPago` é o TENDIDO (o que o cliente entregou); `efetivos` é o que fica
+  // com a loja, já sem o troco — é este que vai para o pedido e para o caixa.
+  const totalPago = arredondar(pagamentos.reduce((s, p) => s + (Number(p.valor) || 0), 0));
+  const restante = Math.max(0, arredondar(total - totalPago));
+  const efetivos = calcularPagamentosEfetivos(pagamentos, total);
+  const troco = efetivos.troco;
   // Caixa precisa cobrir o total com pagamentos; vendedor só precisa de itens
   // (o recebimento acontece depois, no caixa).
   const podeFinalizar = cart.length > 0 && !criar.isPending && (!ehCaixa || restante === 0);
@@ -454,17 +512,24 @@ export default function PdvPage() {
       return;
     }
     setErroMsg(null);
+    // Excedente sem lastro em dinheiro seria troco de PIX/cartão: não existe.
+    // Registrar do jeito que está inflaria a venda — melhor barrar e corrigir.
+    if (ehCaixa && efetivos.excedenteNaoDinheiro > 0) {
+      setErroMsg(
+        `Os pagamentos somam ${fmt(efetivos.excedenteNaoDinheiro)} acima do total sem lastro em dinheiro. Só a linha em DINHEIRO gera troco — ajuste os valores.`,
+      );
+      return;
+    }
     try {
       // Só o caixa registra pagamento; vendedor deixa a venda em aberto.
+      // Valores EFETIVOS (troco já abatido): a soma bate exatamente com o total.
       const formasPagamento = ehCaixa
-        ? pagamentos
-            .filter((p) => Number(p.valor) > 0)
-            .map((p) => ({
-              forma: p.forma,
-              valor: Number(p.valor),
-              descricao: p.formaDescricao,
-              ...(p.forma === 'CARTAO_CREDITO' ? { parcelas: p.parcelas } : {}),
-            }))
+        ? efetivos.linhas.map((p) => ({
+            forma: p.forma,
+            valor: p.valor,
+            descricao: p.formaDescricao,
+            ...(p.forma === 'CARTAO_CREDITO' ? { parcelas: p.parcelas } : {}),
+          }))
         : [];
       // Vendedor: forma PREVISTA (opcional) viaja no pedido p/ pré-preencher o caixa.
       const previstaCadastrada = formasCadastradas?.find((f) => f.descricao === formaPrevista);

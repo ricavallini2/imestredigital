@@ -66,6 +66,7 @@ async function bootstrap() {
     .addBearerAuth()
     .addTag('pedidos', 'Gerenciamento de pedidos')
     .addTag('pagamentos', 'Gestão de pagamentos')
+    .addTag('caixa', 'Sessões de caixa (PDV/balcão) e movimentações')
     .addTag('devolucoes', 'Gestão de devoluções e reembolsos')
     .addTag('frete', 'Cálculo e rastreamento de frete')
     .addTag('estatisticas', 'Dashboard e KPIs')

@@ -52,6 +52,23 @@ export type Devolucao = $Result.DefaultSelection<Prisma.$DevolucaoPayload>
  * Itens específicos que fazem parte da devolução.
  */
 export type ItemDevolucao = $Result.DefaultSelection<Prisma.$ItemDevolucaoPayload>
+/**
+ * Model FormaPagamento
+ * Catálogo de formas de pagamento usadas na venda/recebimento
+ * (ex: "Amex Crédito 2x", "PIX", "Dinheiro"). Cartões carregam
+ * bandeira + parcelas; taxas/prazo alimentam a conciliação futura.
+ */
+export type FormaPagamento = $Result.DefaultSelection<Prisma.$FormaPagamentoPayload>
+/**
+ * Model SessaoCaixa
+ * Turno de caixa de um terminal. Regra: no máximo UMA sessão ABERTO por tenant.
+ */
+export type SessaoCaixa = $Result.DefaultSelection<Prisma.$SessaoCaixaPayload>
+/**
+ * Model MovimentacaoCaixa
+ * Lançamento de caixa. `valor` é SEMPRE positivo — o sinal vem de `tipo`.
+ */
+export type MovimentacaoCaixa = $Result.DefaultSelection<Prisma.$MovimentacaoCaixaPayload>
 
 /**
  * Enums
@@ -153,6 +170,34 @@ export const StatusDevolucao: {
 
 export type StatusDevolucao = (typeof StatusDevolucao)[keyof typeof StatusDevolucao]
 
+
+export const StatusSessaoCaixa: {
+  ABERTO: 'ABERTO',
+  FECHADO: 'FECHADO'
+};
+
+export type StatusSessaoCaixa = (typeof StatusSessaoCaixa)[keyof typeof StatusSessaoCaixa]
+
+
+export const TipoMovimentacaoCaixa: {
+  ENTRADA: 'ENTRADA',
+  SAIDA: 'SAIDA'
+};
+
+export type TipoMovimentacaoCaixa = (typeof TipoMovimentacaoCaixa)[keyof typeof TipoMovimentacaoCaixa]
+
+
+export const CategoriaMovimentacaoCaixa: {
+  VENDA: 'VENDA',
+  SUPRIMENTO: 'SUPRIMENTO',
+  SANGRIA: 'SANGRIA',
+  DESPESA: 'DESPESA',
+  REEMBOLSO: 'REEMBOLSO',
+  OUTROS: 'OUTROS'
+};
+
+export type CategoriaMovimentacaoCaixa = (typeof CategoriaMovimentacaoCaixa)[keyof typeof CategoriaMovimentacaoCaixa]
+
 }
 
 export type OrigemPedido = $Enums.OrigemPedido
@@ -186,6 +231,18 @@ export const MotivoDevolucao: typeof $Enums.MotivoDevolucao
 export type StatusDevolucao = $Enums.StatusDevolucao
 
 export const StatusDevolucao: typeof $Enums.StatusDevolucao
+
+export type StatusSessaoCaixa = $Enums.StatusSessaoCaixa
+
+export const StatusSessaoCaixa: typeof $Enums.StatusSessaoCaixa
+
+export type TipoMovimentacaoCaixa = $Enums.TipoMovimentacaoCaixa
+
+export const TipoMovimentacaoCaixa: typeof $Enums.TipoMovimentacaoCaixa
+
+export type CategoriaMovimentacaoCaixa = $Enums.CategoriaMovimentacaoCaixa
+
+export const CategoriaMovimentacaoCaixa: typeof $Enums.CategoriaMovimentacaoCaixa
 
 /**
  * ##  Prisma Client ʲˢ
@@ -379,6 +436,36 @@ export class PrismaClient<
     * ```
     */
   get itemDevolucao(): Prisma.ItemDevolucaoDelegate<ExtArgs>;
+
+  /**
+   * `prisma.formaPagamento`: Exposes CRUD operations for the **FormaPagamento** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FormaPagamentos
+    * const formaPagamentos = await prisma.formaPagamento.findMany()
+    * ```
+    */
+  get formaPagamento(): Prisma.FormaPagamentoDelegate<ExtArgs>;
+
+  /**
+   * `prisma.sessaoCaixa`: Exposes CRUD operations for the **SessaoCaixa** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SessaoCaixas
+    * const sessaoCaixas = await prisma.sessaoCaixa.findMany()
+    * ```
+    */
+  get sessaoCaixa(): Prisma.SessaoCaixaDelegate<ExtArgs>;
+
+  /**
+   * `prisma.movimentacaoCaixa`: Exposes CRUD operations for the **MovimentacaoCaixa** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more MovimentacaoCaixas
+    * const movimentacaoCaixas = await prisma.movimentacaoCaixa.findMany()
+    * ```
+    */
+  get movimentacaoCaixa(): Prisma.MovimentacaoCaixaDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -826,7 +913,10 @@ export namespace Prisma {
     EventoProcessado: 'EventoProcessado',
     Pagamento: 'Pagamento',
     Devolucao: 'Devolucao',
-    ItemDevolucao: 'ItemDevolucao'
+    ItemDevolucao: 'ItemDevolucao',
+    FormaPagamento: 'FormaPagamento',
+    SessaoCaixa: 'SessaoCaixa',
+    MovimentacaoCaixa: 'MovimentacaoCaixa'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -842,7 +932,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "pedido" | "itemPedido" | "historicoPedido" | "eventoProcessado" | "pagamento" | "devolucao" | "itemDevolucao"
+      modelProps: "pedido" | "itemPedido" | "historicoPedido" | "eventoProcessado" | "pagamento" | "devolucao" | "itemDevolucao" | "formaPagamento" | "sessaoCaixa" | "movimentacaoCaixa"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1336,6 +1426,216 @@ export namespace Prisma {
           }
         }
       }
+      FormaPagamento: {
+        payload: Prisma.$FormaPagamentoPayload<ExtArgs>
+        fields: Prisma.FormaPagamentoFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FormaPagamentoFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormaPagamentoPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FormaPagamentoFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormaPagamentoPayload>
+          }
+          findFirst: {
+            args: Prisma.FormaPagamentoFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormaPagamentoPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FormaPagamentoFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormaPagamentoPayload>
+          }
+          findMany: {
+            args: Prisma.FormaPagamentoFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormaPagamentoPayload>[]
+          }
+          create: {
+            args: Prisma.FormaPagamentoCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormaPagamentoPayload>
+          }
+          createMany: {
+            args: Prisma.FormaPagamentoCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FormaPagamentoCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormaPagamentoPayload>[]
+          }
+          delete: {
+            args: Prisma.FormaPagamentoDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormaPagamentoPayload>
+          }
+          update: {
+            args: Prisma.FormaPagamentoUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormaPagamentoPayload>
+          }
+          deleteMany: {
+            args: Prisma.FormaPagamentoDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FormaPagamentoUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.FormaPagamentoUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormaPagamentoPayload>
+          }
+          aggregate: {
+            args: Prisma.FormaPagamentoAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFormaPagamento>
+          }
+          groupBy: {
+            args: Prisma.FormaPagamentoGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FormaPagamentoGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FormaPagamentoCountArgs<ExtArgs>
+            result: $Utils.Optional<FormaPagamentoCountAggregateOutputType> | number
+          }
+        }
+      }
+      SessaoCaixa: {
+        payload: Prisma.$SessaoCaixaPayload<ExtArgs>
+        fields: Prisma.SessaoCaixaFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SessaoCaixaFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessaoCaixaPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SessaoCaixaFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessaoCaixaPayload>
+          }
+          findFirst: {
+            args: Prisma.SessaoCaixaFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessaoCaixaPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SessaoCaixaFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessaoCaixaPayload>
+          }
+          findMany: {
+            args: Prisma.SessaoCaixaFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessaoCaixaPayload>[]
+          }
+          create: {
+            args: Prisma.SessaoCaixaCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessaoCaixaPayload>
+          }
+          createMany: {
+            args: Prisma.SessaoCaixaCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SessaoCaixaCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessaoCaixaPayload>[]
+          }
+          delete: {
+            args: Prisma.SessaoCaixaDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessaoCaixaPayload>
+          }
+          update: {
+            args: Prisma.SessaoCaixaUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessaoCaixaPayload>
+          }
+          deleteMany: {
+            args: Prisma.SessaoCaixaDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SessaoCaixaUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.SessaoCaixaUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SessaoCaixaPayload>
+          }
+          aggregate: {
+            args: Prisma.SessaoCaixaAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSessaoCaixa>
+          }
+          groupBy: {
+            args: Prisma.SessaoCaixaGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SessaoCaixaGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SessaoCaixaCountArgs<ExtArgs>
+            result: $Utils.Optional<SessaoCaixaCountAggregateOutputType> | number
+          }
+        }
+      }
+      MovimentacaoCaixa: {
+        payload: Prisma.$MovimentacaoCaixaPayload<ExtArgs>
+        fields: Prisma.MovimentacaoCaixaFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.MovimentacaoCaixaFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MovimentacaoCaixaPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.MovimentacaoCaixaFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MovimentacaoCaixaPayload>
+          }
+          findFirst: {
+            args: Prisma.MovimentacaoCaixaFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MovimentacaoCaixaPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.MovimentacaoCaixaFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MovimentacaoCaixaPayload>
+          }
+          findMany: {
+            args: Prisma.MovimentacaoCaixaFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MovimentacaoCaixaPayload>[]
+          }
+          create: {
+            args: Prisma.MovimentacaoCaixaCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MovimentacaoCaixaPayload>
+          }
+          createMany: {
+            args: Prisma.MovimentacaoCaixaCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.MovimentacaoCaixaCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MovimentacaoCaixaPayload>[]
+          }
+          delete: {
+            args: Prisma.MovimentacaoCaixaDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MovimentacaoCaixaPayload>
+          }
+          update: {
+            args: Prisma.MovimentacaoCaixaUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MovimentacaoCaixaPayload>
+          }
+          deleteMany: {
+            args: Prisma.MovimentacaoCaixaDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.MovimentacaoCaixaUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.MovimentacaoCaixaUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MovimentacaoCaixaPayload>
+          }
+          aggregate: {
+            args: Prisma.MovimentacaoCaixaAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMovimentacaoCaixa>
+          }
+          groupBy: {
+            args: Prisma.MovimentacaoCaixaGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MovimentacaoCaixaGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.MovimentacaoCaixaCountArgs<ExtArgs>
+            result: $Utils.Optional<MovimentacaoCaixaCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1609,6 +1909,37 @@ export namespace Prisma {
    */
   export type DevolucaoCountOutputTypeCountItensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ItemDevolucaoWhereInput
+  }
+
+
+  /**
+   * Count Type SessaoCaixaCountOutputType
+   */
+
+  export type SessaoCaixaCountOutputType = {
+    movimentacoes: number
+  }
+
+  export type SessaoCaixaCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    movimentacoes?: boolean | SessaoCaixaCountOutputTypeCountMovimentacoesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * SessaoCaixaCountOutputType without action
+   */
+  export type SessaoCaixaCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessaoCaixaCountOutputType
+     */
+    select?: SessaoCaixaCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * SessaoCaixaCountOutputType without action
+   */
+  export type SessaoCaixaCountOutputTypeCountMovimentacoesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MovimentacaoCaixaWhereInput
   }
 
 
@@ -9158,6 +9489,3280 @@ export namespace Prisma {
 
 
   /**
+   * Model FormaPagamento
+   */
+
+  export type AggregateFormaPagamento = {
+    _count: FormaPagamentoCountAggregateOutputType | null
+    _avg: FormaPagamentoAvgAggregateOutputType | null
+    _sum: FormaPagamentoSumAggregateOutputType | null
+    _min: FormaPagamentoMinAggregateOutputType | null
+    _max: FormaPagamentoMaxAggregateOutputType | null
+  }
+
+  export type FormaPagamentoAvgAggregateOutputType = {
+    parcelas: number | null
+    taxaPct: Decimal | null
+    taxaFixa: Decimal | null
+    prazoRecebimentoDias: number | null
+  }
+
+  export type FormaPagamentoSumAggregateOutputType = {
+    parcelas: number | null
+    taxaPct: Decimal | null
+    taxaFixa: Decimal | null
+    prazoRecebimentoDias: number | null
+  }
+
+  export type FormaPagamentoMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    descricao: string | null
+    tipo: string | null
+    bandeira: string | null
+    parcelas: number | null
+    taxaPct: Decimal | null
+    taxaFixa: Decimal | null
+    prazoRecebimentoDias: number | null
+    ativa: boolean | null
+    criadoEm: Date | null
+    atualizadoEm: Date | null
+  }
+
+  export type FormaPagamentoMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    descricao: string | null
+    tipo: string | null
+    bandeira: string | null
+    parcelas: number | null
+    taxaPct: Decimal | null
+    taxaFixa: Decimal | null
+    prazoRecebimentoDias: number | null
+    ativa: boolean | null
+    criadoEm: Date | null
+    atualizadoEm: Date | null
+  }
+
+  export type FormaPagamentoCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    descricao: number
+    tipo: number
+    bandeira: number
+    parcelas: number
+    taxaPct: number
+    taxaFixa: number
+    prazoRecebimentoDias: number
+    ativa: number
+    criadoEm: number
+    atualizadoEm: number
+    _all: number
+  }
+
+
+  export type FormaPagamentoAvgAggregateInputType = {
+    parcelas?: true
+    taxaPct?: true
+    taxaFixa?: true
+    prazoRecebimentoDias?: true
+  }
+
+  export type FormaPagamentoSumAggregateInputType = {
+    parcelas?: true
+    taxaPct?: true
+    taxaFixa?: true
+    prazoRecebimentoDias?: true
+  }
+
+  export type FormaPagamentoMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    descricao?: true
+    tipo?: true
+    bandeira?: true
+    parcelas?: true
+    taxaPct?: true
+    taxaFixa?: true
+    prazoRecebimentoDias?: true
+    ativa?: true
+    criadoEm?: true
+    atualizadoEm?: true
+  }
+
+  export type FormaPagamentoMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    descricao?: true
+    tipo?: true
+    bandeira?: true
+    parcelas?: true
+    taxaPct?: true
+    taxaFixa?: true
+    prazoRecebimentoDias?: true
+    ativa?: true
+    criadoEm?: true
+    atualizadoEm?: true
+  }
+
+  export type FormaPagamentoCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    descricao?: true
+    tipo?: true
+    bandeira?: true
+    parcelas?: true
+    taxaPct?: true
+    taxaFixa?: true
+    prazoRecebimentoDias?: true
+    ativa?: true
+    criadoEm?: true
+    atualizadoEm?: true
+    _all?: true
+  }
+
+  export type FormaPagamentoAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FormaPagamento to aggregate.
+     */
+    where?: FormaPagamentoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FormaPagamentos to fetch.
+     */
+    orderBy?: FormaPagamentoOrderByWithRelationInput | FormaPagamentoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FormaPagamentoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FormaPagamentos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FormaPagamentos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FormaPagamentos
+    **/
+    _count?: true | FormaPagamentoCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FormaPagamentoAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FormaPagamentoSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FormaPagamentoMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FormaPagamentoMaxAggregateInputType
+  }
+
+  export type GetFormaPagamentoAggregateType<T extends FormaPagamentoAggregateArgs> = {
+        [P in keyof T & keyof AggregateFormaPagamento]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFormaPagamento[P]>
+      : GetScalarType<T[P], AggregateFormaPagamento[P]>
+  }
+
+
+
+
+  export type FormaPagamentoGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FormaPagamentoWhereInput
+    orderBy?: FormaPagamentoOrderByWithAggregationInput | FormaPagamentoOrderByWithAggregationInput[]
+    by: FormaPagamentoScalarFieldEnum[] | FormaPagamentoScalarFieldEnum
+    having?: FormaPagamentoScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FormaPagamentoCountAggregateInputType | true
+    _avg?: FormaPagamentoAvgAggregateInputType
+    _sum?: FormaPagamentoSumAggregateInputType
+    _min?: FormaPagamentoMinAggregateInputType
+    _max?: FormaPagamentoMaxAggregateInputType
+  }
+
+  export type FormaPagamentoGroupByOutputType = {
+    id: string
+    tenantId: string
+    descricao: string
+    tipo: string
+    bandeira: string | null
+    parcelas: number
+    taxaPct: Decimal | null
+    taxaFixa: Decimal | null
+    prazoRecebimentoDias: number | null
+    ativa: boolean
+    criadoEm: Date
+    atualizadoEm: Date
+    _count: FormaPagamentoCountAggregateOutputType | null
+    _avg: FormaPagamentoAvgAggregateOutputType | null
+    _sum: FormaPagamentoSumAggregateOutputType | null
+    _min: FormaPagamentoMinAggregateOutputType | null
+    _max: FormaPagamentoMaxAggregateOutputType | null
+  }
+
+  type GetFormaPagamentoGroupByPayload<T extends FormaPagamentoGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FormaPagamentoGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FormaPagamentoGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FormaPagamentoGroupByOutputType[P]>
+            : GetScalarType<T[P], FormaPagamentoGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FormaPagamentoSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    descricao?: boolean
+    tipo?: boolean
+    bandeira?: boolean
+    parcelas?: boolean
+    taxaPct?: boolean
+    taxaFixa?: boolean
+    prazoRecebimentoDias?: boolean
+    ativa?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }, ExtArgs["result"]["formaPagamento"]>
+
+  export type FormaPagamentoSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    descricao?: boolean
+    tipo?: boolean
+    bandeira?: boolean
+    parcelas?: boolean
+    taxaPct?: boolean
+    taxaFixa?: boolean
+    prazoRecebimentoDias?: boolean
+    ativa?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }, ExtArgs["result"]["formaPagamento"]>
+
+  export type FormaPagamentoSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    descricao?: boolean
+    tipo?: boolean
+    bandeira?: boolean
+    parcelas?: boolean
+    taxaPct?: boolean
+    taxaFixa?: boolean
+    prazoRecebimentoDias?: boolean
+    ativa?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }
+
+
+  export type $FormaPagamentoPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FormaPagamento"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      descricao: string
+      /**
+       * DINHEIRO | PIX | CARTAO_CREDITO | CARTAO_DEBITO | BOLETO | TRANSFERENCIA | OUTRO
+       */
+      tipo: string
+      /**
+       * Bandeira do cartão (Visa, Mastercard, Amex, Elo...) — só para cartões.
+       */
+      bandeira: string | null
+      /**
+       * Número de parcelas desta forma (1 = à vista).
+       */
+      parcelas: number
+      /**
+       * Taxa percentual da operadora (ex: 4.92) — opcional.
+       */
+      taxaPct: Prisma.Decimal | null
+      /**
+       * Taxa fixa em R$ por transação — opcional.
+       */
+      taxaFixa: Prisma.Decimal | null
+      /**
+       * Prazo (dias) para o valor cair na conta — opcional.
+       */
+      prazoRecebimentoDias: number | null
+      ativa: boolean
+      criadoEm: Date
+      atualizadoEm: Date
+    }, ExtArgs["result"]["formaPagamento"]>
+    composites: {}
+  }
+
+  type FormaPagamentoGetPayload<S extends boolean | null | undefined | FormaPagamentoDefaultArgs> = $Result.GetResult<Prisma.$FormaPagamentoPayload, S>
+
+  type FormaPagamentoCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<FormaPagamentoFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: FormaPagamentoCountAggregateInputType | true
+    }
+
+  export interface FormaPagamentoDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FormaPagamento'], meta: { name: 'FormaPagamento' } }
+    /**
+     * Find zero or one FormaPagamento that matches the filter.
+     * @param {FormaPagamentoFindUniqueArgs} args - Arguments to find a FormaPagamento
+     * @example
+     * // Get one FormaPagamento
+     * const formaPagamento = await prisma.formaPagamento.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FormaPagamentoFindUniqueArgs>(args: SelectSubset<T, FormaPagamentoFindUniqueArgs<ExtArgs>>): Prisma__FormaPagamentoClient<$Result.GetResult<Prisma.$FormaPagamentoPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one FormaPagamento that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {FormaPagamentoFindUniqueOrThrowArgs} args - Arguments to find a FormaPagamento
+     * @example
+     * // Get one FormaPagamento
+     * const formaPagamento = await prisma.formaPagamento.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FormaPagamentoFindUniqueOrThrowArgs>(args: SelectSubset<T, FormaPagamentoFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FormaPagamentoClient<$Result.GetResult<Prisma.$FormaPagamentoPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first FormaPagamento that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormaPagamentoFindFirstArgs} args - Arguments to find a FormaPagamento
+     * @example
+     * // Get one FormaPagamento
+     * const formaPagamento = await prisma.formaPagamento.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FormaPagamentoFindFirstArgs>(args?: SelectSubset<T, FormaPagamentoFindFirstArgs<ExtArgs>>): Prisma__FormaPagamentoClient<$Result.GetResult<Prisma.$FormaPagamentoPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first FormaPagamento that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormaPagamentoFindFirstOrThrowArgs} args - Arguments to find a FormaPagamento
+     * @example
+     * // Get one FormaPagamento
+     * const formaPagamento = await prisma.formaPagamento.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FormaPagamentoFindFirstOrThrowArgs>(args?: SelectSubset<T, FormaPagamentoFindFirstOrThrowArgs<ExtArgs>>): Prisma__FormaPagamentoClient<$Result.GetResult<Prisma.$FormaPagamentoPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more FormaPagamentos that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormaPagamentoFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FormaPagamentos
+     * const formaPagamentos = await prisma.formaPagamento.findMany()
+     * 
+     * // Get first 10 FormaPagamentos
+     * const formaPagamentos = await prisma.formaPagamento.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const formaPagamentoWithIdOnly = await prisma.formaPagamento.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FormaPagamentoFindManyArgs>(args?: SelectSubset<T, FormaPagamentoFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormaPagamentoPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a FormaPagamento.
+     * @param {FormaPagamentoCreateArgs} args - Arguments to create a FormaPagamento.
+     * @example
+     * // Create one FormaPagamento
+     * const FormaPagamento = await prisma.formaPagamento.create({
+     *   data: {
+     *     // ... data to create a FormaPagamento
+     *   }
+     * })
+     * 
+     */
+    create<T extends FormaPagamentoCreateArgs>(args: SelectSubset<T, FormaPagamentoCreateArgs<ExtArgs>>): Prisma__FormaPagamentoClient<$Result.GetResult<Prisma.$FormaPagamentoPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many FormaPagamentos.
+     * @param {FormaPagamentoCreateManyArgs} args - Arguments to create many FormaPagamentos.
+     * @example
+     * // Create many FormaPagamentos
+     * const formaPagamento = await prisma.formaPagamento.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FormaPagamentoCreateManyArgs>(args?: SelectSubset<T, FormaPagamentoCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FormaPagamentos and returns the data saved in the database.
+     * @param {FormaPagamentoCreateManyAndReturnArgs} args - Arguments to create many FormaPagamentos.
+     * @example
+     * // Create many FormaPagamentos
+     * const formaPagamento = await prisma.formaPagamento.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FormaPagamentos and only return the `id`
+     * const formaPagamentoWithIdOnly = await prisma.formaPagamento.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FormaPagamentoCreateManyAndReturnArgs>(args?: SelectSubset<T, FormaPagamentoCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormaPagamentoPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a FormaPagamento.
+     * @param {FormaPagamentoDeleteArgs} args - Arguments to delete one FormaPagamento.
+     * @example
+     * // Delete one FormaPagamento
+     * const FormaPagamento = await prisma.formaPagamento.delete({
+     *   where: {
+     *     // ... filter to delete one FormaPagamento
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FormaPagamentoDeleteArgs>(args: SelectSubset<T, FormaPagamentoDeleteArgs<ExtArgs>>): Prisma__FormaPagamentoClient<$Result.GetResult<Prisma.$FormaPagamentoPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one FormaPagamento.
+     * @param {FormaPagamentoUpdateArgs} args - Arguments to update one FormaPagamento.
+     * @example
+     * // Update one FormaPagamento
+     * const formaPagamento = await prisma.formaPagamento.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FormaPagamentoUpdateArgs>(args: SelectSubset<T, FormaPagamentoUpdateArgs<ExtArgs>>): Prisma__FormaPagamentoClient<$Result.GetResult<Prisma.$FormaPagamentoPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more FormaPagamentos.
+     * @param {FormaPagamentoDeleteManyArgs} args - Arguments to filter FormaPagamentos to delete.
+     * @example
+     * // Delete a few FormaPagamentos
+     * const { count } = await prisma.formaPagamento.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FormaPagamentoDeleteManyArgs>(args?: SelectSubset<T, FormaPagamentoDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FormaPagamentos.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormaPagamentoUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FormaPagamentos
+     * const formaPagamento = await prisma.formaPagamento.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FormaPagamentoUpdateManyArgs>(args: SelectSubset<T, FormaPagamentoUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one FormaPagamento.
+     * @param {FormaPagamentoUpsertArgs} args - Arguments to update or create a FormaPagamento.
+     * @example
+     * // Update or create a FormaPagamento
+     * const formaPagamento = await prisma.formaPagamento.upsert({
+     *   create: {
+     *     // ... data to create a FormaPagamento
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FormaPagamento we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FormaPagamentoUpsertArgs>(args: SelectSubset<T, FormaPagamentoUpsertArgs<ExtArgs>>): Prisma__FormaPagamentoClient<$Result.GetResult<Prisma.$FormaPagamentoPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of FormaPagamentos.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormaPagamentoCountArgs} args - Arguments to filter FormaPagamentos to count.
+     * @example
+     * // Count the number of FormaPagamentos
+     * const count = await prisma.formaPagamento.count({
+     *   where: {
+     *     // ... the filter for the FormaPagamentos we want to count
+     *   }
+     * })
+    **/
+    count<T extends FormaPagamentoCountArgs>(
+      args?: Subset<T, FormaPagamentoCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FormaPagamentoCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FormaPagamento.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormaPagamentoAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FormaPagamentoAggregateArgs>(args: Subset<T, FormaPagamentoAggregateArgs>): Prisma.PrismaPromise<GetFormaPagamentoAggregateType<T>>
+
+    /**
+     * Group by FormaPagamento.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormaPagamentoGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FormaPagamentoGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FormaPagamentoGroupByArgs['orderBy'] }
+        : { orderBy?: FormaPagamentoGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FormaPagamentoGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFormaPagamentoGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FormaPagamento model
+   */
+  readonly fields: FormaPagamentoFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FormaPagamento.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FormaPagamentoClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FormaPagamento model
+   */ 
+  interface FormaPagamentoFieldRefs {
+    readonly id: FieldRef<"FormaPagamento", 'String'>
+    readonly tenantId: FieldRef<"FormaPagamento", 'String'>
+    readonly descricao: FieldRef<"FormaPagamento", 'String'>
+    readonly tipo: FieldRef<"FormaPagamento", 'String'>
+    readonly bandeira: FieldRef<"FormaPagamento", 'String'>
+    readonly parcelas: FieldRef<"FormaPagamento", 'Int'>
+    readonly taxaPct: FieldRef<"FormaPagamento", 'Decimal'>
+    readonly taxaFixa: FieldRef<"FormaPagamento", 'Decimal'>
+    readonly prazoRecebimentoDias: FieldRef<"FormaPagamento", 'Int'>
+    readonly ativa: FieldRef<"FormaPagamento", 'Boolean'>
+    readonly criadoEm: FieldRef<"FormaPagamento", 'DateTime'>
+    readonly atualizadoEm: FieldRef<"FormaPagamento", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FormaPagamento findUnique
+   */
+  export type FormaPagamentoFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormaPagamento
+     */
+    select?: FormaPagamentoSelect<ExtArgs> | null
+    /**
+     * Filter, which FormaPagamento to fetch.
+     */
+    where: FormaPagamentoWhereUniqueInput
+  }
+
+  /**
+   * FormaPagamento findUniqueOrThrow
+   */
+  export type FormaPagamentoFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormaPagamento
+     */
+    select?: FormaPagamentoSelect<ExtArgs> | null
+    /**
+     * Filter, which FormaPagamento to fetch.
+     */
+    where: FormaPagamentoWhereUniqueInput
+  }
+
+  /**
+   * FormaPagamento findFirst
+   */
+  export type FormaPagamentoFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormaPagamento
+     */
+    select?: FormaPagamentoSelect<ExtArgs> | null
+    /**
+     * Filter, which FormaPagamento to fetch.
+     */
+    where?: FormaPagamentoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FormaPagamentos to fetch.
+     */
+    orderBy?: FormaPagamentoOrderByWithRelationInput | FormaPagamentoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FormaPagamentos.
+     */
+    cursor?: FormaPagamentoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FormaPagamentos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FormaPagamentos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FormaPagamentos.
+     */
+    distinct?: FormaPagamentoScalarFieldEnum | FormaPagamentoScalarFieldEnum[]
+  }
+
+  /**
+   * FormaPagamento findFirstOrThrow
+   */
+  export type FormaPagamentoFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormaPagamento
+     */
+    select?: FormaPagamentoSelect<ExtArgs> | null
+    /**
+     * Filter, which FormaPagamento to fetch.
+     */
+    where?: FormaPagamentoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FormaPagamentos to fetch.
+     */
+    orderBy?: FormaPagamentoOrderByWithRelationInput | FormaPagamentoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FormaPagamentos.
+     */
+    cursor?: FormaPagamentoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FormaPagamentos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FormaPagamentos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FormaPagamentos.
+     */
+    distinct?: FormaPagamentoScalarFieldEnum | FormaPagamentoScalarFieldEnum[]
+  }
+
+  /**
+   * FormaPagamento findMany
+   */
+  export type FormaPagamentoFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormaPagamento
+     */
+    select?: FormaPagamentoSelect<ExtArgs> | null
+    /**
+     * Filter, which FormaPagamentos to fetch.
+     */
+    where?: FormaPagamentoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FormaPagamentos to fetch.
+     */
+    orderBy?: FormaPagamentoOrderByWithRelationInput | FormaPagamentoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FormaPagamentos.
+     */
+    cursor?: FormaPagamentoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FormaPagamentos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FormaPagamentos.
+     */
+    skip?: number
+    distinct?: FormaPagamentoScalarFieldEnum | FormaPagamentoScalarFieldEnum[]
+  }
+
+  /**
+   * FormaPagamento create
+   */
+  export type FormaPagamentoCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormaPagamento
+     */
+    select?: FormaPagamentoSelect<ExtArgs> | null
+    /**
+     * The data needed to create a FormaPagamento.
+     */
+    data: XOR<FormaPagamentoCreateInput, FormaPagamentoUncheckedCreateInput>
+  }
+
+  /**
+   * FormaPagamento createMany
+   */
+  export type FormaPagamentoCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FormaPagamentos.
+     */
+    data: FormaPagamentoCreateManyInput | FormaPagamentoCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FormaPagamento createManyAndReturn
+   */
+  export type FormaPagamentoCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormaPagamento
+     */
+    select?: FormaPagamentoSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many FormaPagamentos.
+     */
+    data: FormaPagamentoCreateManyInput | FormaPagamentoCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FormaPagamento update
+   */
+  export type FormaPagamentoUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormaPagamento
+     */
+    select?: FormaPagamentoSelect<ExtArgs> | null
+    /**
+     * The data needed to update a FormaPagamento.
+     */
+    data: XOR<FormaPagamentoUpdateInput, FormaPagamentoUncheckedUpdateInput>
+    /**
+     * Choose, which FormaPagamento to update.
+     */
+    where: FormaPagamentoWhereUniqueInput
+  }
+
+  /**
+   * FormaPagamento updateMany
+   */
+  export type FormaPagamentoUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FormaPagamentos.
+     */
+    data: XOR<FormaPagamentoUpdateManyMutationInput, FormaPagamentoUncheckedUpdateManyInput>
+    /**
+     * Filter which FormaPagamentos to update
+     */
+    where?: FormaPagamentoWhereInput
+  }
+
+  /**
+   * FormaPagamento upsert
+   */
+  export type FormaPagamentoUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormaPagamento
+     */
+    select?: FormaPagamentoSelect<ExtArgs> | null
+    /**
+     * The filter to search for the FormaPagamento to update in case it exists.
+     */
+    where: FormaPagamentoWhereUniqueInput
+    /**
+     * In case the FormaPagamento found by the `where` argument doesn't exist, create a new FormaPagamento with this data.
+     */
+    create: XOR<FormaPagamentoCreateInput, FormaPagamentoUncheckedCreateInput>
+    /**
+     * In case the FormaPagamento was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FormaPagamentoUpdateInput, FormaPagamentoUncheckedUpdateInput>
+  }
+
+  /**
+   * FormaPagamento delete
+   */
+  export type FormaPagamentoDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormaPagamento
+     */
+    select?: FormaPagamentoSelect<ExtArgs> | null
+    /**
+     * Filter which FormaPagamento to delete.
+     */
+    where: FormaPagamentoWhereUniqueInput
+  }
+
+  /**
+   * FormaPagamento deleteMany
+   */
+  export type FormaPagamentoDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FormaPagamentos to delete
+     */
+    where?: FormaPagamentoWhereInput
+  }
+
+  /**
+   * FormaPagamento without action
+   */
+  export type FormaPagamentoDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormaPagamento
+     */
+    select?: FormaPagamentoSelect<ExtArgs> | null
+  }
+
+
+  /**
+   * Model SessaoCaixa
+   */
+
+  export type AggregateSessaoCaixa = {
+    _count: SessaoCaixaCountAggregateOutputType | null
+    _avg: SessaoCaixaAvgAggregateOutputType | null
+    _sum: SessaoCaixaSumAggregateOutputType | null
+    _min: SessaoCaixaMinAggregateOutputType | null
+    _max: SessaoCaixaMaxAggregateOutputType | null
+  }
+
+  export type SessaoCaixaAvgAggregateOutputType = {
+    valorAbertura: Decimal | null
+    valorContado: Decimal | null
+    valorEsperado: Decimal | null
+    diferenca: Decimal | null
+  }
+
+  export type SessaoCaixaSumAggregateOutputType = {
+    valorAbertura: Decimal | null
+    valorContado: Decimal | null
+    valorEsperado: Decimal | null
+    diferenca: Decimal | null
+  }
+
+  export type SessaoCaixaMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    numero: string | null
+    status: $Enums.StatusSessaoCaixa | null
+    caixa: string | null
+    operador: string | null
+    operadorId: string | null
+    aberturaEm: Date | null
+    valorAbertura: Decimal | null
+    observacoesAbertura: string | null
+    fechamentoEm: Date | null
+    valorContado: Decimal | null
+    valorEsperado: Decimal | null
+    diferenca: Decimal | null
+    observacoesFechamento: string | null
+    travaCaixaAberto: string | null
+    criadoEm: Date | null
+    atualizadoEm: Date | null
+  }
+
+  export type SessaoCaixaMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    numero: string | null
+    status: $Enums.StatusSessaoCaixa | null
+    caixa: string | null
+    operador: string | null
+    operadorId: string | null
+    aberturaEm: Date | null
+    valorAbertura: Decimal | null
+    observacoesAbertura: string | null
+    fechamentoEm: Date | null
+    valorContado: Decimal | null
+    valorEsperado: Decimal | null
+    diferenca: Decimal | null
+    observacoesFechamento: string | null
+    travaCaixaAberto: string | null
+    criadoEm: Date | null
+    atualizadoEm: Date | null
+  }
+
+  export type SessaoCaixaCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    numero: number
+    status: number
+    caixa: number
+    operador: number
+    operadorId: number
+    aberturaEm: number
+    valorAbertura: number
+    observacoesAbertura: number
+    fechamentoEm: number
+    valorContado: number
+    valorEsperado: number
+    diferenca: number
+    observacoesFechamento: number
+    travaCaixaAberto: number
+    criadoEm: number
+    atualizadoEm: number
+    _all: number
+  }
+
+
+  export type SessaoCaixaAvgAggregateInputType = {
+    valorAbertura?: true
+    valorContado?: true
+    valorEsperado?: true
+    diferenca?: true
+  }
+
+  export type SessaoCaixaSumAggregateInputType = {
+    valorAbertura?: true
+    valorContado?: true
+    valorEsperado?: true
+    diferenca?: true
+  }
+
+  export type SessaoCaixaMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    numero?: true
+    status?: true
+    caixa?: true
+    operador?: true
+    operadorId?: true
+    aberturaEm?: true
+    valorAbertura?: true
+    observacoesAbertura?: true
+    fechamentoEm?: true
+    valorContado?: true
+    valorEsperado?: true
+    diferenca?: true
+    observacoesFechamento?: true
+    travaCaixaAberto?: true
+    criadoEm?: true
+    atualizadoEm?: true
+  }
+
+  export type SessaoCaixaMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    numero?: true
+    status?: true
+    caixa?: true
+    operador?: true
+    operadorId?: true
+    aberturaEm?: true
+    valorAbertura?: true
+    observacoesAbertura?: true
+    fechamentoEm?: true
+    valorContado?: true
+    valorEsperado?: true
+    diferenca?: true
+    observacoesFechamento?: true
+    travaCaixaAberto?: true
+    criadoEm?: true
+    atualizadoEm?: true
+  }
+
+  export type SessaoCaixaCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    numero?: true
+    status?: true
+    caixa?: true
+    operador?: true
+    operadorId?: true
+    aberturaEm?: true
+    valorAbertura?: true
+    observacoesAbertura?: true
+    fechamentoEm?: true
+    valorContado?: true
+    valorEsperado?: true
+    diferenca?: true
+    observacoesFechamento?: true
+    travaCaixaAberto?: true
+    criadoEm?: true
+    atualizadoEm?: true
+    _all?: true
+  }
+
+  export type SessaoCaixaAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SessaoCaixa to aggregate.
+     */
+    where?: SessaoCaixaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SessaoCaixas to fetch.
+     */
+    orderBy?: SessaoCaixaOrderByWithRelationInput | SessaoCaixaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SessaoCaixaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SessaoCaixas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SessaoCaixas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SessaoCaixas
+    **/
+    _count?: true | SessaoCaixaCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: SessaoCaixaAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: SessaoCaixaSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SessaoCaixaMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SessaoCaixaMaxAggregateInputType
+  }
+
+  export type GetSessaoCaixaAggregateType<T extends SessaoCaixaAggregateArgs> = {
+        [P in keyof T & keyof AggregateSessaoCaixa]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSessaoCaixa[P]>
+      : GetScalarType<T[P], AggregateSessaoCaixa[P]>
+  }
+
+
+
+
+  export type SessaoCaixaGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SessaoCaixaWhereInput
+    orderBy?: SessaoCaixaOrderByWithAggregationInput | SessaoCaixaOrderByWithAggregationInput[]
+    by: SessaoCaixaScalarFieldEnum[] | SessaoCaixaScalarFieldEnum
+    having?: SessaoCaixaScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SessaoCaixaCountAggregateInputType | true
+    _avg?: SessaoCaixaAvgAggregateInputType
+    _sum?: SessaoCaixaSumAggregateInputType
+    _min?: SessaoCaixaMinAggregateInputType
+    _max?: SessaoCaixaMaxAggregateInputType
+  }
+
+  export type SessaoCaixaGroupByOutputType = {
+    id: string
+    tenantId: string
+    numero: string
+    status: $Enums.StatusSessaoCaixa
+    caixa: string
+    operador: string
+    operadorId: string | null
+    aberturaEm: Date
+    valorAbertura: Decimal
+    observacoesAbertura: string | null
+    fechamentoEm: Date | null
+    valorContado: Decimal | null
+    valorEsperado: Decimal | null
+    diferenca: Decimal | null
+    observacoesFechamento: string | null
+    travaCaixaAberto: string | null
+    criadoEm: Date
+    atualizadoEm: Date
+    _count: SessaoCaixaCountAggregateOutputType | null
+    _avg: SessaoCaixaAvgAggregateOutputType | null
+    _sum: SessaoCaixaSumAggregateOutputType | null
+    _min: SessaoCaixaMinAggregateOutputType | null
+    _max: SessaoCaixaMaxAggregateOutputType | null
+  }
+
+  type GetSessaoCaixaGroupByPayload<T extends SessaoCaixaGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SessaoCaixaGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SessaoCaixaGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SessaoCaixaGroupByOutputType[P]>
+            : GetScalarType<T[P], SessaoCaixaGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SessaoCaixaSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    numero?: boolean
+    status?: boolean
+    caixa?: boolean
+    operador?: boolean
+    operadorId?: boolean
+    aberturaEm?: boolean
+    valorAbertura?: boolean
+    observacoesAbertura?: boolean
+    fechamentoEm?: boolean
+    valorContado?: boolean
+    valorEsperado?: boolean
+    diferenca?: boolean
+    observacoesFechamento?: boolean
+    travaCaixaAberto?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+    movimentacoes?: boolean | SessaoCaixa$movimentacoesArgs<ExtArgs>
+    _count?: boolean | SessaoCaixaCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["sessaoCaixa"]>
+
+  export type SessaoCaixaSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    numero?: boolean
+    status?: boolean
+    caixa?: boolean
+    operador?: boolean
+    operadorId?: boolean
+    aberturaEm?: boolean
+    valorAbertura?: boolean
+    observacoesAbertura?: boolean
+    fechamentoEm?: boolean
+    valorContado?: boolean
+    valorEsperado?: boolean
+    diferenca?: boolean
+    observacoesFechamento?: boolean
+    travaCaixaAberto?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }, ExtArgs["result"]["sessaoCaixa"]>
+
+  export type SessaoCaixaSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    numero?: boolean
+    status?: boolean
+    caixa?: boolean
+    operador?: boolean
+    operadorId?: boolean
+    aberturaEm?: boolean
+    valorAbertura?: boolean
+    observacoesAbertura?: boolean
+    fechamentoEm?: boolean
+    valorContado?: boolean
+    valorEsperado?: boolean
+    diferenca?: boolean
+    observacoesFechamento?: boolean
+    travaCaixaAberto?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }
+
+  export type SessaoCaixaInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    movimentacoes?: boolean | SessaoCaixa$movimentacoesArgs<ExtArgs>
+    _count?: boolean | SessaoCaixaCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type SessaoCaixaIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $SessaoCaixaPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SessaoCaixa"
+    objects: {
+      movimentacoes: Prisma.$MovimentacaoCaixaPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      /**
+       * Numeração legível por tenant/ano: "CAIXA-2026-003".
+       */
+      numero: string
+      status: $Enums.StatusSessaoCaixa
+      /**
+       * Terminal ("Caixa 01"). Hoje é string livre — não há cadastro de terminais.
+       */
+      caixa: string
+      /**
+       * Nome do operador do turno (o front envia texto livre).
+       */
+      operador: string
+      /**
+       * Usuário do JWT que abriu o turno, quando disponível.
+       */
+      operadorId: string | null
+      aberturaEm: Date
+      valorAbertura: Prisma.Decimal
+      observacoesAbertura: string | null
+      fechamentoEm: Date | null
+      valorContado: Prisma.Decimal | null
+      /**
+       * Snapshot do saldo esperado no instante do fechamento (auditoria).
+       */
+      valorEsperado: Prisma.Decimal | null
+      /**
+       * valorContado - valorEsperado. > 0 sobra, < 0 falta.
+       */
+      diferenca: Prisma.Decimal | null
+      observacoesFechamento: string | null
+      /**
+       * Trava de unicidade REAL de "1 caixa aberto por tenant", garantida pelo banco:
+       * recebe o tenantId enquanto a sessão está ABERTO e volta a NULL no fechamento.
+       * No Postgres NULLs são distintos entre si num índice único, então N sessões
+       * FECHADO convivem, mas uma segunda ABERTO do mesmo tenant viola o unique (P2002).
+       * Sem isso, duas aberturas simultâneas passariam pelo check da aplicação.
+       */
+      travaCaixaAberto: string | null
+      criadoEm: Date
+      atualizadoEm: Date
+    }, ExtArgs["result"]["sessaoCaixa"]>
+    composites: {}
+  }
+
+  type SessaoCaixaGetPayload<S extends boolean | null | undefined | SessaoCaixaDefaultArgs> = $Result.GetResult<Prisma.$SessaoCaixaPayload, S>
+
+  type SessaoCaixaCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<SessaoCaixaFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: SessaoCaixaCountAggregateInputType | true
+    }
+
+  export interface SessaoCaixaDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SessaoCaixa'], meta: { name: 'SessaoCaixa' } }
+    /**
+     * Find zero or one SessaoCaixa that matches the filter.
+     * @param {SessaoCaixaFindUniqueArgs} args - Arguments to find a SessaoCaixa
+     * @example
+     * // Get one SessaoCaixa
+     * const sessaoCaixa = await prisma.sessaoCaixa.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SessaoCaixaFindUniqueArgs>(args: SelectSubset<T, SessaoCaixaFindUniqueArgs<ExtArgs>>): Prisma__SessaoCaixaClient<$Result.GetResult<Prisma.$SessaoCaixaPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one SessaoCaixa that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {SessaoCaixaFindUniqueOrThrowArgs} args - Arguments to find a SessaoCaixa
+     * @example
+     * // Get one SessaoCaixa
+     * const sessaoCaixa = await prisma.sessaoCaixa.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SessaoCaixaFindUniqueOrThrowArgs>(args: SelectSubset<T, SessaoCaixaFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SessaoCaixaClient<$Result.GetResult<Prisma.$SessaoCaixaPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first SessaoCaixa that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessaoCaixaFindFirstArgs} args - Arguments to find a SessaoCaixa
+     * @example
+     * // Get one SessaoCaixa
+     * const sessaoCaixa = await prisma.sessaoCaixa.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SessaoCaixaFindFirstArgs>(args?: SelectSubset<T, SessaoCaixaFindFirstArgs<ExtArgs>>): Prisma__SessaoCaixaClient<$Result.GetResult<Prisma.$SessaoCaixaPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first SessaoCaixa that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessaoCaixaFindFirstOrThrowArgs} args - Arguments to find a SessaoCaixa
+     * @example
+     * // Get one SessaoCaixa
+     * const sessaoCaixa = await prisma.sessaoCaixa.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SessaoCaixaFindFirstOrThrowArgs>(args?: SelectSubset<T, SessaoCaixaFindFirstOrThrowArgs<ExtArgs>>): Prisma__SessaoCaixaClient<$Result.GetResult<Prisma.$SessaoCaixaPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more SessaoCaixas that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessaoCaixaFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SessaoCaixas
+     * const sessaoCaixas = await prisma.sessaoCaixa.findMany()
+     * 
+     * // Get first 10 SessaoCaixas
+     * const sessaoCaixas = await prisma.sessaoCaixa.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const sessaoCaixaWithIdOnly = await prisma.sessaoCaixa.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SessaoCaixaFindManyArgs>(args?: SelectSubset<T, SessaoCaixaFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessaoCaixaPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a SessaoCaixa.
+     * @param {SessaoCaixaCreateArgs} args - Arguments to create a SessaoCaixa.
+     * @example
+     * // Create one SessaoCaixa
+     * const SessaoCaixa = await prisma.sessaoCaixa.create({
+     *   data: {
+     *     // ... data to create a SessaoCaixa
+     *   }
+     * })
+     * 
+     */
+    create<T extends SessaoCaixaCreateArgs>(args: SelectSubset<T, SessaoCaixaCreateArgs<ExtArgs>>): Prisma__SessaoCaixaClient<$Result.GetResult<Prisma.$SessaoCaixaPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many SessaoCaixas.
+     * @param {SessaoCaixaCreateManyArgs} args - Arguments to create many SessaoCaixas.
+     * @example
+     * // Create many SessaoCaixas
+     * const sessaoCaixa = await prisma.sessaoCaixa.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SessaoCaixaCreateManyArgs>(args?: SelectSubset<T, SessaoCaixaCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SessaoCaixas and returns the data saved in the database.
+     * @param {SessaoCaixaCreateManyAndReturnArgs} args - Arguments to create many SessaoCaixas.
+     * @example
+     * // Create many SessaoCaixas
+     * const sessaoCaixa = await prisma.sessaoCaixa.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SessaoCaixas and only return the `id`
+     * const sessaoCaixaWithIdOnly = await prisma.sessaoCaixa.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SessaoCaixaCreateManyAndReturnArgs>(args?: SelectSubset<T, SessaoCaixaCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessaoCaixaPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a SessaoCaixa.
+     * @param {SessaoCaixaDeleteArgs} args - Arguments to delete one SessaoCaixa.
+     * @example
+     * // Delete one SessaoCaixa
+     * const SessaoCaixa = await prisma.sessaoCaixa.delete({
+     *   where: {
+     *     // ... filter to delete one SessaoCaixa
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SessaoCaixaDeleteArgs>(args: SelectSubset<T, SessaoCaixaDeleteArgs<ExtArgs>>): Prisma__SessaoCaixaClient<$Result.GetResult<Prisma.$SessaoCaixaPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one SessaoCaixa.
+     * @param {SessaoCaixaUpdateArgs} args - Arguments to update one SessaoCaixa.
+     * @example
+     * // Update one SessaoCaixa
+     * const sessaoCaixa = await prisma.sessaoCaixa.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SessaoCaixaUpdateArgs>(args: SelectSubset<T, SessaoCaixaUpdateArgs<ExtArgs>>): Prisma__SessaoCaixaClient<$Result.GetResult<Prisma.$SessaoCaixaPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more SessaoCaixas.
+     * @param {SessaoCaixaDeleteManyArgs} args - Arguments to filter SessaoCaixas to delete.
+     * @example
+     * // Delete a few SessaoCaixas
+     * const { count } = await prisma.sessaoCaixa.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SessaoCaixaDeleteManyArgs>(args?: SelectSubset<T, SessaoCaixaDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SessaoCaixas.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessaoCaixaUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SessaoCaixas
+     * const sessaoCaixa = await prisma.sessaoCaixa.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SessaoCaixaUpdateManyArgs>(args: SelectSubset<T, SessaoCaixaUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one SessaoCaixa.
+     * @param {SessaoCaixaUpsertArgs} args - Arguments to update or create a SessaoCaixa.
+     * @example
+     * // Update or create a SessaoCaixa
+     * const sessaoCaixa = await prisma.sessaoCaixa.upsert({
+     *   create: {
+     *     // ... data to create a SessaoCaixa
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SessaoCaixa we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SessaoCaixaUpsertArgs>(args: SelectSubset<T, SessaoCaixaUpsertArgs<ExtArgs>>): Prisma__SessaoCaixaClient<$Result.GetResult<Prisma.$SessaoCaixaPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of SessaoCaixas.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessaoCaixaCountArgs} args - Arguments to filter SessaoCaixas to count.
+     * @example
+     * // Count the number of SessaoCaixas
+     * const count = await prisma.sessaoCaixa.count({
+     *   where: {
+     *     // ... the filter for the SessaoCaixas we want to count
+     *   }
+     * })
+    **/
+    count<T extends SessaoCaixaCountArgs>(
+      args?: Subset<T, SessaoCaixaCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SessaoCaixaCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SessaoCaixa.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessaoCaixaAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SessaoCaixaAggregateArgs>(args: Subset<T, SessaoCaixaAggregateArgs>): Prisma.PrismaPromise<GetSessaoCaixaAggregateType<T>>
+
+    /**
+     * Group by SessaoCaixa.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SessaoCaixaGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SessaoCaixaGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SessaoCaixaGroupByArgs['orderBy'] }
+        : { orderBy?: SessaoCaixaGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SessaoCaixaGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSessaoCaixaGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SessaoCaixa model
+   */
+  readonly fields: SessaoCaixaFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SessaoCaixa.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SessaoCaixaClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    movimentacoes<T extends SessaoCaixa$movimentacoesArgs<ExtArgs> = {}>(args?: Subset<T, SessaoCaixa$movimentacoesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MovimentacaoCaixaPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SessaoCaixa model
+   */ 
+  interface SessaoCaixaFieldRefs {
+    readonly id: FieldRef<"SessaoCaixa", 'String'>
+    readonly tenantId: FieldRef<"SessaoCaixa", 'String'>
+    readonly numero: FieldRef<"SessaoCaixa", 'String'>
+    readonly status: FieldRef<"SessaoCaixa", 'StatusSessaoCaixa'>
+    readonly caixa: FieldRef<"SessaoCaixa", 'String'>
+    readonly operador: FieldRef<"SessaoCaixa", 'String'>
+    readonly operadorId: FieldRef<"SessaoCaixa", 'String'>
+    readonly aberturaEm: FieldRef<"SessaoCaixa", 'DateTime'>
+    readonly valorAbertura: FieldRef<"SessaoCaixa", 'Decimal'>
+    readonly observacoesAbertura: FieldRef<"SessaoCaixa", 'String'>
+    readonly fechamentoEm: FieldRef<"SessaoCaixa", 'DateTime'>
+    readonly valorContado: FieldRef<"SessaoCaixa", 'Decimal'>
+    readonly valorEsperado: FieldRef<"SessaoCaixa", 'Decimal'>
+    readonly diferenca: FieldRef<"SessaoCaixa", 'Decimal'>
+    readonly observacoesFechamento: FieldRef<"SessaoCaixa", 'String'>
+    readonly travaCaixaAberto: FieldRef<"SessaoCaixa", 'String'>
+    readonly criadoEm: FieldRef<"SessaoCaixa", 'DateTime'>
+    readonly atualizadoEm: FieldRef<"SessaoCaixa", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SessaoCaixa findUnique
+   */
+  export type SessaoCaixaFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessaoCaixa
+     */
+    select?: SessaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessaoCaixaInclude<ExtArgs> | null
+    /**
+     * Filter, which SessaoCaixa to fetch.
+     */
+    where: SessaoCaixaWhereUniqueInput
+  }
+
+  /**
+   * SessaoCaixa findUniqueOrThrow
+   */
+  export type SessaoCaixaFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessaoCaixa
+     */
+    select?: SessaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessaoCaixaInclude<ExtArgs> | null
+    /**
+     * Filter, which SessaoCaixa to fetch.
+     */
+    where: SessaoCaixaWhereUniqueInput
+  }
+
+  /**
+   * SessaoCaixa findFirst
+   */
+  export type SessaoCaixaFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessaoCaixa
+     */
+    select?: SessaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessaoCaixaInclude<ExtArgs> | null
+    /**
+     * Filter, which SessaoCaixa to fetch.
+     */
+    where?: SessaoCaixaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SessaoCaixas to fetch.
+     */
+    orderBy?: SessaoCaixaOrderByWithRelationInput | SessaoCaixaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SessaoCaixas.
+     */
+    cursor?: SessaoCaixaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SessaoCaixas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SessaoCaixas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SessaoCaixas.
+     */
+    distinct?: SessaoCaixaScalarFieldEnum | SessaoCaixaScalarFieldEnum[]
+  }
+
+  /**
+   * SessaoCaixa findFirstOrThrow
+   */
+  export type SessaoCaixaFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessaoCaixa
+     */
+    select?: SessaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessaoCaixaInclude<ExtArgs> | null
+    /**
+     * Filter, which SessaoCaixa to fetch.
+     */
+    where?: SessaoCaixaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SessaoCaixas to fetch.
+     */
+    orderBy?: SessaoCaixaOrderByWithRelationInput | SessaoCaixaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SessaoCaixas.
+     */
+    cursor?: SessaoCaixaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SessaoCaixas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SessaoCaixas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SessaoCaixas.
+     */
+    distinct?: SessaoCaixaScalarFieldEnum | SessaoCaixaScalarFieldEnum[]
+  }
+
+  /**
+   * SessaoCaixa findMany
+   */
+  export type SessaoCaixaFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessaoCaixa
+     */
+    select?: SessaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessaoCaixaInclude<ExtArgs> | null
+    /**
+     * Filter, which SessaoCaixas to fetch.
+     */
+    where?: SessaoCaixaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SessaoCaixas to fetch.
+     */
+    orderBy?: SessaoCaixaOrderByWithRelationInput | SessaoCaixaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SessaoCaixas.
+     */
+    cursor?: SessaoCaixaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SessaoCaixas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SessaoCaixas.
+     */
+    skip?: number
+    distinct?: SessaoCaixaScalarFieldEnum | SessaoCaixaScalarFieldEnum[]
+  }
+
+  /**
+   * SessaoCaixa create
+   */
+  export type SessaoCaixaCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessaoCaixa
+     */
+    select?: SessaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessaoCaixaInclude<ExtArgs> | null
+    /**
+     * The data needed to create a SessaoCaixa.
+     */
+    data: XOR<SessaoCaixaCreateInput, SessaoCaixaUncheckedCreateInput>
+  }
+
+  /**
+   * SessaoCaixa createMany
+   */
+  export type SessaoCaixaCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SessaoCaixas.
+     */
+    data: SessaoCaixaCreateManyInput | SessaoCaixaCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SessaoCaixa createManyAndReturn
+   */
+  export type SessaoCaixaCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessaoCaixa
+     */
+    select?: SessaoCaixaSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many SessaoCaixas.
+     */
+    data: SessaoCaixaCreateManyInput | SessaoCaixaCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SessaoCaixa update
+   */
+  export type SessaoCaixaUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessaoCaixa
+     */
+    select?: SessaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessaoCaixaInclude<ExtArgs> | null
+    /**
+     * The data needed to update a SessaoCaixa.
+     */
+    data: XOR<SessaoCaixaUpdateInput, SessaoCaixaUncheckedUpdateInput>
+    /**
+     * Choose, which SessaoCaixa to update.
+     */
+    where: SessaoCaixaWhereUniqueInput
+  }
+
+  /**
+   * SessaoCaixa updateMany
+   */
+  export type SessaoCaixaUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SessaoCaixas.
+     */
+    data: XOR<SessaoCaixaUpdateManyMutationInput, SessaoCaixaUncheckedUpdateManyInput>
+    /**
+     * Filter which SessaoCaixas to update
+     */
+    where?: SessaoCaixaWhereInput
+  }
+
+  /**
+   * SessaoCaixa upsert
+   */
+  export type SessaoCaixaUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessaoCaixa
+     */
+    select?: SessaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessaoCaixaInclude<ExtArgs> | null
+    /**
+     * The filter to search for the SessaoCaixa to update in case it exists.
+     */
+    where: SessaoCaixaWhereUniqueInput
+    /**
+     * In case the SessaoCaixa found by the `where` argument doesn't exist, create a new SessaoCaixa with this data.
+     */
+    create: XOR<SessaoCaixaCreateInput, SessaoCaixaUncheckedCreateInput>
+    /**
+     * In case the SessaoCaixa was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SessaoCaixaUpdateInput, SessaoCaixaUncheckedUpdateInput>
+  }
+
+  /**
+   * SessaoCaixa delete
+   */
+  export type SessaoCaixaDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessaoCaixa
+     */
+    select?: SessaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessaoCaixaInclude<ExtArgs> | null
+    /**
+     * Filter which SessaoCaixa to delete.
+     */
+    where: SessaoCaixaWhereUniqueInput
+  }
+
+  /**
+   * SessaoCaixa deleteMany
+   */
+  export type SessaoCaixaDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SessaoCaixas to delete
+     */
+    where?: SessaoCaixaWhereInput
+  }
+
+  /**
+   * SessaoCaixa.movimentacoes
+   */
+  export type SessaoCaixa$movimentacoesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MovimentacaoCaixa
+     */
+    select?: MovimentacaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MovimentacaoCaixaInclude<ExtArgs> | null
+    where?: MovimentacaoCaixaWhereInput
+    orderBy?: MovimentacaoCaixaOrderByWithRelationInput | MovimentacaoCaixaOrderByWithRelationInput[]
+    cursor?: MovimentacaoCaixaWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MovimentacaoCaixaScalarFieldEnum | MovimentacaoCaixaScalarFieldEnum[]
+  }
+
+  /**
+   * SessaoCaixa without action
+   */
+  export type SessaoCaixaDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SessaoCaixa
+     */
+    select?: SessaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SessaoCaixaInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model MovimentacaoCaixa
+   */
+
+  export type AggregateMovimentacaoCaixa = {
+    _count: MovimentacaoCaixaCountAggregateOutputType | null
+    _avg: MovimentacaoCaixaAvgAggregateOutputType | null
+    _sum: MovimentacaoCaixaSumAggregateOutputType | null
+    _min: MovimentacaoCaixaMinAggregateOutputType | null
+    _max: MovimentacaoCaixaMaxAggregateOutputType | null
+  }
+
+  export type MovimentacaoCaixaAvgAggregateOutputType = {
+    valor: Decimal | null
+  }
+
+  export type MovimentacaoCaixaSumAggregateOutputType = {
+    valor: Decimal | null
+  }
+
+  export type MovimentacaoCaixaMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    sessaoId: string | null
+    tipo: $Enums.TipoMovimentacaoCaixa | null
+    categoria: $Enums.CategoriaMovimentacaoCaixa | null
+    descricao: string | null
+    valor: Decimal | null
+    formaPagamento: $Enums.TipoPagamento | null
+    pedidoId: string | null
+    pedidoNumero: string | null
+    pagamentoId: string | null
+    operador: string | null
+    criadoEm: Date | null
+  }
+
+  export type MovimentacaoCaixaMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    sessaoId: string | null
+    tipo: $Enums.TipoMovimentacaoCaixa | null
+    categoria: $Enums.CategoriaMovimentacaoCaixa | null
+    descricao: string | null
+    valor: Decimal | null
+    formaPagamento: $Enums.TipoPagamento | null
+    pedidoId: string | null
+    pedidoNumero: string | null
+    pagamentoId: string | null
+    operador: string | null
+    criadoEm: Date | null
+  }
+
+  export type MovimentacaoCaixaCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    sessaoId: number
+    tipo: number
+    categoria: number
+    descricao: number
+    valor: number
+    formaPagamento: number
+    pedidoId: number
+    pedidoNumero: number
+    pagamentoId: number
+    operador: number
+    criadoEm: number
+    _all: number
+  }
+
+
+  export type MovimentacaoCaixaAvgAggregateInputType = {
+    valor?: true
+  }
+
+  export type MovimentacaoCaixaSumAggregateInputType = {
+    valor?: true
+  }
+
+  export type MovimentacaoCaixaMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    sessaoId?: true
+    tipo?: true
+    categoria?: true
+    descricao?: true
+    valor?: true
+    formaPagamento?: true
+    pedidoId?: true
+    pedidoNumero?: true
+    pagamentoId?: true
+    operador?: true
+    criadoEm?: true
+  }
+
+  export type MovimentacaoCaixaMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    sessaoId?: true
+    tipo?: true
+    categoria?: true
+    descricao?: true
+    valor?: true
+    formaPagamento?: true
+    pedidoId?: true
+    pedidoNumero?: true
+    pagamentoId?: true
+    operador?: true
+    criadoEm?: true
+  }
+
+  export type MovimentacaoCaixaCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    sessaoId?: true
+    tipo?: true
+    categoria?: true
+    descricao?: true
+    valor?: true
+    formaPagamento?: true
+    pedidoId?: true
+    pedidoNumero?: true
+    pagamentoId?: true
+    operador?: true
+    criadoEm?: true
+    _all?: true
+  }
+
+  export type MovimentacaoCaixaAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MovimentacaoCaixa to aggregate.
+     */
+    where?: MovimentacaoCaixaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MovimentacaoCaixas to fetch.
+     */
+    orderBy?: MovimentacaoCaixaOrderByWithRelationInput | MovimentacaoCaixaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: MovimentacaoCaixaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MovimentacaoCaixas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MovimentacaoCaixas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned MovimentacaoCaixas
+    **/
+    _count?: true | MovimentacaoCaixaCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: MovimentacaoCaixaAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: MovimentacaoCaixaSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: MovimentacaoCaixaMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: MovimentacaoCaixaMaxAggregateInputType
+  }
+
+  export type GetMovimentacaoCaixaAggregateType<T extends MovimentacaoCaixaAggregateArgs> = {
+        [P in keyof T & keyof AggregateMovimentacaoCaixa]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateMovimentacaoCaixa[P]>
+      : GetScalarType<T[P], AggregateMovimentacaoCaixa[P]>
+  }
+
+
+
+
+  export type MovimentacaoCaixaGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MovimentacaoCaixaWhereInput
+    orderBy?: MovimentacaoCaixaOrderByWithAggregationInput | MovimentacaoCaixaOrderByWithAggregationInput[]
+    by: MovimentacaoCaixaScalarFieldEnum[] | MovimentacaoCaixaScalarFieldEnum
+    having?: MovimentacaoCaixaScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: MovimentacaoCaixaCountAggregateInputType | true
+    _avg?: MovimentacaoCaixaAvgAggregateInputType
+    _sum?: MovimentacaoCaixaSumAggregateInputType
+    _min?: MovimentacaoCaixaMinAggregateInputType
+    _max?: MovimentacaoCaixaMaxAggregateInputType
+  }
+
+  export type MovimentacaoCaixaGroupByOutputType = {
+    id: string
+    tenantId: string
+    sessaoId: string
+    tipo: $Enums.TipoMovimentacaoCaixa
+    categoria: $Enums.CategoriaMovimentacaoCaixa
+    descricao: string
+    valor: Decimal
+    formaPagamento: $Enums.TipoPagamento | null
+    pedidoId: string | null
+    pedidoNumero: string | null
+    pagamentoId: string | null
+    operador: string
+    criadoEm: Date
+    _count: MovimentacaoCaixaCountAggregateOutputType | null
+    _avg: MovimentacaoCaixaAvgAggregateOutputType | null
+    _sum: MovimentacaoCaixaSumAggregateOutputType | null
+    _min: MovimentacaoCaixaMinAggregateOutputType | null
+    _max: MovimentacaoCaixaMaxAggregateOutputType | null
+  }
+
+  type GetMovimentacaoCaixaGroupByPayload<T extends MovimentacaoCaixaGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<MovimentacaoCaixaGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof MovimentacaoCaixaGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], MovimentacaoCaixaGroupByOutputType[P]>
+            : GetScalarType<T[P], MovimentacaoCaixaGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type MovimentacaoCaixaSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    sessaoId?: boolean
+    tipo?: boolean
+    categoria?: boolean
+    descricao?: boolean
+    valor?: boolean
+    formaPagamento?: boolean
+    pedidoId?: boolean
+    pedidoNumero?: boolean
+    pagamentoId?: boolean
+    operador?: boolean
+    criadoEm?: boolean
+    sessao?: boolean | SessaoCaixaDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["movimentacaoCaixa"]>
+
+  export type MovimentacaoCaixaSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    sessaoId?: boolean
+    tipo?: boolean
+    categoria?: boolean
+    descricao?: boolean
+    valor?: boolean
+    formaPagamento?: boolean
+    pedidoId?: boolean
+    pedidoNumero?: boolean
+    pagamentoId?: boolean
+    operador?: boolean
+    criadoEm?: boolean
+    sessao?: boolean | SessaoCaixaDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["movimentacaoCaixa"]>
+
+  export type MovimentacaoCaixaSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    sessaoId?: boolean
+    tipo?: boolean
+    categoria?: boolean
+    descricao?: boolean
+    valor?: boolean
+    formaPagamento?: boolean
+    pedidoId?: boolean
+    pedidoNumero?: boolean
+    pagamentoId?: boolean
+    operador?: boolean
+    criadoEm?: boolean
+  }
+
+  export type MovimentacaoCaixaInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    sessao?: boolean | SessaoCaixaDefaultArgs<ExtArgs>
+  }
+  export type MovimentacaoCaixaIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    sessao?: boolean | SessaoCaixaDefaultArgs<ExtArgs>
+  }
+
+  export type $MovimentacaoCaixaPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "MovimentacaoCaixa"
+    objects: {
+      sessao: Prisma.$SessaoCaixaPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      sessaoId: string
+      tipo: $Enums.TipoMovimentacaoCaixa
+      categoria: $Enums.CategoriaMovimentacaoCaixa
+      descricao: string
+      valor: Prisma.Decimal
+      /**
+       * Forma usada (reaproveita o enum de Pagamento) — base dos totais por forma.
+       */
+      formaPagamento: $Enums.TipoPagamento | null
+      pedidoId: string | null
+      pedidoNumero: string | null
+      /**
+       * Vínculo com o Pagamento que originou o lançamento (VENDA e o REEMBOLSO do
+       * respectivo estorno). A idempotência é o unique COMPOSTO [pagamentoId,
+       * categoria], e não o pagamentoId sozinho: um mesmo pagamento produz até
+       * duas movimentações — a VENDA e, se estornado, o REEMBOLSO. Cada uma delas
+       * continua única (retry/reprocessamento não duplica).
+       */
+      pagamentoId: string | null
+      operador: string
+      criadoEm: Date
+    }, ExtArgs["result"]["movimentacaoCaixa"]>
+    composites: {}
+  }
+
+  type MovimentacaoCaixaGetPayload<S extends boolean | null | undefined | MovimentacaoCaixaDefaultArgs> = $Result.GetResult<Prisma.$MovimentacaoCaixaPayload, S>
+
+  type MovimentacaoCaixaCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<MovimentacaoCaixaFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: MovimentacaoCaixaCountAggregateInputType | true
+    }
+
+  export interface MovimentacaoCaixaDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['MovimentacaoCaixa'], meta: { name: 'MovimentacaoCaixa' } }
+    /**
+     * Find zero or one MovimentacaoCaixa that matches the filter.
+     * @param {MovimentacaoCaixaFindUniqueArgs} args - Arguments to find a MovimentacaoCaixa
+     * @example
+     * // Get one MovimentacaoCaixa
+     * const movimentacaoCaixa = await prisma.movimentacaoCaixa.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends MovimentacaoCaixaFindUniqueArgs>(args: SelectSubset<T, MovimentacaoCaixaFindUniqueArgs<ExtArgs>>): Prisma__MovimentacaoCaixaClient<$Result.GetResult<Prisma.$MovimentacaoCaixaPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one MovimentacaoCaixa that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {MovimentacaoCaixaFindUniqueOrThrowArgs} args - Arguments to find a MovimentacaoCaixa
+     * @example
+     * // Get one MovimentacaoCaixa
+     * const movimentacaoCaixa = await prisma.movimentacaoCaixa.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends MovimentacaoCaixaFindUniqueOrThrowArgs>(args: SelectSubset<T, MovimentacaoCaixaFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MovimentacaoCaixaClient<$Result.GetResult<Prisma.$MovimentacaoCaixaPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first MovimentacaoCaixa that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MovimentacaoCaixaFindFirstArgs} args - Arguments to find a MovimentacaoCaixa
+     * @example
+     * // Get one MovimentacaoCaixa
+     * const movimentacaoCaixa = await prisma.movimentacaoCaixa.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends MovimentacaoCaixaFindFirstArgs>(args?: SelectSubset<T, MovimentacaoCaixaFindFirstArgs<ExtArgs>>): Prisma__MovimentacaoCaixaClient<$Result.GetResult<Prisma.$MovimentacaoCaixaPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first MovimentacaoCaixa that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MovimentacaoCaixaFindFirstOrThrowArgs} args - Arguments to find a MovimentacaoCaixa
+     * @example
+     * // Get one MovimentacaoCaixa
+     * const movimentacaoCaixa = await prisma.movimentacaoCaixa.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends MovimentacaoCaixaFindFirstOrThrowArgs>(args?: SelectSubset<T, MovimentacaoCaixaFindFirstOrThrowArgs<ExtArgs>>): Prisma__MovimentacaoCaixaClient<$Result.GetResult<Prisma.$MovimentacaoCaixaPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more MovimentacaoCaixas that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MovimentacaoCaixaFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all MovimentacaoCaixas
+     * const movimentacaoCaixas = await prisma.movimentacaoCaixa.findMany()
+     * 
+     * // Get first 10 MovimentacaoCaixas
+     * const movimentacaoCaixas = await prisma.movimentacaoCaixa.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const movimentacaoCaixaWithIdOnly = await prisma.movimentacaoCaixa.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends MovimentacaoCaixaFindManyArgs>(args?: SelectSubset<T, MovimentacaoCaixaFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MovimentacaoCaixaPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a MovimentacaoCaixa.
+     * @param {MovimentacaoCaixaCreateArgs} args - Arguments to create a MovimentacaoCaixa.
+     * @example
+     * // Create one MovimentacaoCaixa
+     * const MovimentacaoCaixa = await prisma.movimentacaoCaixa.create({
+     *   data: {
+     *     // ... data to create a MovimentacaoCaixa
+     *   }
+     * })
+     * 
+     */
+    create<T extends MovimentacaoCaixaCreateArgs>(args: SelectSubset<T, MovimentacaoCaixaCreateArgs<ExtArgs>>): Prisma__MovimentacaoCaixaClient<$Result.GetResult<Prisma.$MovimentacaoCaixaPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many MovimentacaoCaixas.
+     * @param {MovimentacaoCaixaCreateManyArgs} args - Arguments to create many MovimentacaoCaixas.
+     * @example
+     * // Create many MovimentacaoCaixas
+     * const movimentacaoCaixa = await prisma.movimentacaoCaixa.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends MovimentacaoCaixaCreateManyArgs>(args?: SelectSubset<T, MovimentacaoCaixaCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many MovimentacaoCaixas and returns the data saved in the database.
+     * @param {MovimentacaoCaixaCreateManyAndReturnArgs} args - Arguments to create many MovimentacaoCaixas.
+     * @example
+     * // Create many MovimentacaoCaixas
+     * const movimentacaoCaixa = await prisma.movimentacaoCaixa.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many MovimentacaoCaixas and only return the `id`
+     * const movimentacaoCaixaWithIdOnly = await prisma.movimentacaoCaixa.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends MovimentacaoCaixaCreateManyAndReturnArgs>(args?: SelectSubset<T, MovimentacaoCaixaCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MovimentacaoCaixaPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a MovimentacaoCaixa.
+     * @param {MovimentacaoCaixaDeleteArgs} args - Arguments to delete one MovimentacaoCaixa.
+     * @example
+     * // Delete one MovimentacaoCaixa
+     * const MovimentacaoCaixa = await prisma.movimentacaoCaixa.delete({
+     *   where: {
+     *     // ... filter to delete one MovimentacaoCaixa
+     *   }
+     * })
+     * 
+     */
+    delete<T extends MovimentacaoCaixaDeleteArgs>(args: SelectSubset<T, MovimentacaoCaixaDeleteArgs<ExtArgs>>): Prisma__MovimentacaoCaixaClient<$Result.GetResult<Prisma.$MovimentacaoCaixaPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one MovimentacaoCaixa.
+     * @param {MovimentacaoCaixaUpdateArgs} args - Arguments to update one MovimentacaoCaixa.
+     * @example
+     * // Update one MovimentacaoCaixa
+     * const movimentacaoCaixa = await prisma.movimentacaoCaixa.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends MovimentacaoCaixaUpdateArgs>(args: SelectSubset<T, MovimentacaoCaixaUpdateArgs<ExtArgs>>): Prisma__MovimentacaoCaixaClient<$Result.GetResult<Prisma.$MovimentacaoCaixaPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more MovimentacaoCaixas.
+     * @param {MovimentacaoCaixaDeleteManyArgs} args - Arguments to filter MovimentacaoCaixas to delete.
+     * @example
+     * // Delete a few MovimentacaoCaixas
+     * const { count } = await prisma.movimentacaoCaixa.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends MovimentacaoCaixaDeleteManyArgs>(args?: SelectSubset<T, MovimentacaoCaixaDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MovimentacaoCaixas.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MovimentacaoCaixaUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many MovimentacaoCaixas
+     * const movimentacaoCaixa = await prisma.movimentacaoCaixa.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends MovimentacaoCaixaUpdateManyArgs>(args: SelectSubset<T, MovimentacaoCaixaUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one MovimentacaoCaixa.
+     * @param {MovimentacaoCaixaUpsertArgs} args - Arguments to update or create a MovimentacaoCaixa.
+     * @example
+     * // Update or create a MovimentacaoCaixa
+     * const movimentacaoCaixa = await prisma.movimentacaoCaixa.upsert({
+     *   create: {
+     *     // ... data to create a MovimentacaoCaixa
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the MovimentacaoCaixa we want to update
+     *   }
+     * })
+     */
+    upsert<T extends MovimentacaoCaixaUpsertArgs>(args: SelectSubset<T, MovimentacaoCaixaUpsertArgs<ExtArgs>>): Prisma__MovimentacaoCaixaClient<$Result.GetResult<Prisma.$MovimentacaoCaixaPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of MovimentacaoCaixas.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MovimentacaoCaixaCountArgs} args - Arguments to filter MovimentacaoCaixas to count.
+     * @example
+     * // Count the number of MovimentacaoCaixas
+     * const count = await prisma.movimentacaoCaixa.count({
+     *   where: {
+     *     // ... the filter for the MovimentacaoCaixas we want to count
+     *   }
+     * })
+    **/
+    count<T extends MovimentacaoCaixaCountArgs>(
+      args?: Subset<T, MovimentacaoCaixaCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], MovimentacaoCaixaCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a MovimentacaoCaixa.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MovimentacaoCaixaAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends MovimentacaoCaixaAggregateArgs>(args: Subset<T, MovimentacaoCaixaAggregateArgs>): Prisma.PrismaPromise<GetMovimentacaoCaixaAggregateType<T>>
+
+    /**
+     * Group by MovimentacaoCaixa.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MovimentacaoCaixaGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends MovimentacaoCaixaGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: MovimentacaoCaixaGroupByArgs['orderBy'] }
+        : { orderBy?: MovimentacaoCaixaGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, MovimentacaoCaixaGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMovimentacaoCaixaGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the MovimentacaoCaixa model
+   */
+  readonly fields: MovimentacaoCaixaFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for MovimentacaoCaixa.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__MovimentacaoCaixaClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    sessao<T extends SessaoCaixaDefaultArgs<ExtArgs> = {}>(args?: Subset<T, SessaoCaixaDefaultArgs<ExtArgs>>): Prisma__SessaoCaixaClient<$Result.GetResult<Prisma.$SessaoCaixaPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the MovimentacaoCaixa model
+   */ 
+  interface MovimentacaoCaixaFieldRefs {
+    readonly id: FieldRef<"MovimentacaoCaixa", 'String'>
+    readonly tenantId: FieldRef<"MovimentacaoCaixa", 'String'>
+    readonly sessaoId: FieldRef<"MovimentacaoCaixa", 'String'>
+    readonly tipo: FieldRef<"MovimentacaoCaixa", 'TipoMovimentacaoCaixa'>
+    readonly categoria: FieldRef<"MovimentacaoCaixa", 'CategoriaMovimentacaoCaixa'>
+    readonly descricao: FieldRef<"MovimentacaoCaixa", 'String'>
+    readonly valor: FieldRef<"MovimentacaoCaixa", 'Decimal'>
+    readonly formaPagamento: FieldRef<"MovimentacaoCaixa", 'TipoPagamento'>
+    readonly pedidoId: FieldRef<"MovimentacaoCaixa", 'String'>
+    readonly pedidoNumero: FieldRef<"MovimentacaoCaixa", 'String'>
+    readonly pagamentoId: FieldRef<"MovimentacaoCaixa", 'String'>
+    readonly operador: FieldRef<"MovimentacaoCaixa", 'String'>
+    readonly criadoEm: FieldRef<"MovimentacaoCaixa", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * MovimentacaoCaixa findUnique
+   */
+  export type MovimentacaoCaixaFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MovimentacaoCaixa
+     */
+    select?: MovimentacaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MovimentacaoCaixaInclude<ExtArgs> | null
+    /**
+     * Filter, which MovimentacaoCaixa to fetch.
+     */
+    where: MovimentacaoCaixaWhereUniqueInput
+  }
+
+  /**
+   * MovimentacaoCaixa findUniqueOrThrow
+   */
+  export type MovimentacaoCaixaFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MovimentacaoCaixa
+     */
+    select?: MovimentacaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MovimentacaoCaixaInclude<ExtArgs> | null
+    /**
+     * Filter, which MovimentacaoCaixa to fetch.
+     */
+    where: MovimentacaoCaixaWhereUniqueInput
+  }
+
+  /**
+   * MovimentacaoCaixa findFirst
+   */
+  export type MovimentacaoCaixaFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MovimentacaoCaixa
+     */
+    select?: MovimentacaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MovimentacaoCaixaInclude<ExtArgs> | null
+    /**
+     * Filter, which MovimentacaoCaixa to fetch.
+     */
+    where?: MovimentacaoCaixaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MovimentacaoCaixas to fetch.
+     */
+    orderBy?: MovimentacaoCaixaOrderByWithRelationInput | MovimentacaoCaixaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MovimentacaoCaixas.
+     */
+    cursor?: MovimentacaoCaixaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MovimentacaoCaixas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MovimentacaoCaixas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MovimentacaoCaixas.
+     */
+    distinct?: MovimentacaoCaixaScalarFieldEnum | MovimentacaoCaixaScalarFieldEnum[]
+  }
+
+  /**
+   * MovimentacaoCaixa findFirstOrThrow
+   */
+  export type MovimentacaoCaixaFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MovimentacaoCaixa
+     */
+    select?: MovimentacaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MovimentacaoCaixaInclude<ExtArgs> | null
+    /**
+     * Filter, which MovimentacaoCaixa to fetch.
+     */
+    where?: MovimentacaoCaixaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MovimentacaoCaixas to fetch.
+     */
+    orderBy?: MovimentacaoCaixaOrderByWithRelationInput | MovimentacaoCaixaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MovimentacaoCaixas.
+     */
+    cursor?: MovimentacaoCaixaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MovimentacaoCaixas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MovimentacaoCaixas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MovimentacaoCaixas.
+     */
+    distinct?: MovimentacaoCaixaScalarFieldEnum | MovimentacaoCaixaScalarFieldEnum[]
+  }
+
+  /**
+   * MovimentacaoCaixa findMany
+   */
+  export type MovimentacaoCaixaFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MovimentacaoCaixa
+     */
+    select?: MovimentacaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MovimentacaoCaixaInclude<ExtArgs> | null
+    /**
+     * Filter, which MovimentacaoCaixas to fetch.
+     */
+    where?: MovimentacaoCaixaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MovimentacaoCaixas to fetch.
+     */
+    orderBy?: MovimentacaoCaixaOrderByWithRelationInput | MovimentacaoCaixaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing MovimentacaoCaixas.
+     */
+    cursor?: MovimentacaoCaixaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MovimentacaoCaixas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MovimentacaoCaixas.
+     */
+    skip?: number
+    distinct?: MovimentacaoCaixaScalarFieldEnum | MovimentacaoCaixaScalarFieldEnum[]
+  }
+
+  /**
+   * MovimentacaoCaixa create
+   */
+  export type MovimentacaoCaixaCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MovimentacaoCaixa
+     */
+    select?: MovimentacaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MovimentacaoCaixaInclude<ExtArgs> | null
+    /**
+     * The data needed to create a MovimentacaoCaixa.
+     */
+    data: XOR<MovimentacaoCaixaCreateInput, MovimentacaoCaixaUncheckedCreateInput>
+  }
+
+  /**
+   * MovimentacaoCaixa createMany
+   */
+  export type MovimentacaoCaixaCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many MovimentacaoCaixas.
+     */
+    data: MovimentacaoCaixaCreateManyInput | MovimentacaoCaixaCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MovimentacaoCaixa createManyAndReturn
+   */
+  export type MovimentacaoCaixaCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MovimentacaoCaixa
+     */
+    select?: MovimentacaoCaixaSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many MovimentacaoCaixas.
+     */
+    data: MovimentacaoCaixaCreateManyInput | MovimentacaoCaixaCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MovimentacaoCaixaIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * MovimentacaoCaixa update
+   */
+  export type MovimentacaoCaixaUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MovimentacaoCaixa
+     */
+    select?: MovimentacaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MovimentacaoCaixaInclude<ExtArgs> | null
+    /**
+     * The data needed to update a MovimentacaoCaixa.
+     */
+    data: XOR<MovimentacaoCaixaUpdateInput, MovimentacaoCaixaUncheckedUpdateInput>
+    /**
+     * Choose, which MovimentacaoCaixa to update.
+     */
+    where: MovimentacaoCaixaWhereUniqueInput
+  }
+
+  /**
+   * MovimentacaoCaixa updateMany
+   */
+  export type MovimentacaoCaixaUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update MovimentacaoCaixas.
+     */
+    data: XOR<MovimentacaoCaixaUpdateManyMutationInput, MovimentacaoCaixaUncheckedUpdateManyInput>
+    /**
+     * Filter which MovimentacaoCaixas to update
+     */
+    where?: MovimentacaoCaixaWhereInput
+  }
+
+  /**
+   * MovimentacaoCaixa upsert
+   */
+  export type MovimentacaoCaixaUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MovimentacaoCaixa
+     */
+    select?: MovimentacaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MovimentacaoCaixaInclude<ExtArgs> | null
+    /**
+     * The filter to search for the MovimentacaoCaixa to update in case it exists.
+     */
+    where: MovimentacaoCaixaWhereUniqueInput
+    /**
+     * In case the MovimentacaoCaixa found by the `where` argument doesn't exist, create a new MovimentacaoCaixa with this data.
+     */
+    create: XOR<MovimentacaoCaixaCreateInput, MovimentacaoCaixaUncheckedCreateInput>
+    /**
+     * In case the MovimentacaoCaixa was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<MovimentacaoCaixaUpdateInput, MovimentacaoCaixaUncheckedUpdateInput>
+  }
+
+  /**
+   * MovimentacaoCaixa delete
+   */
+  export type MovimentacaoCaixaDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MovimentacaoCaixa
+     */
+    select?: MovimentacaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MovimentacaoCaixaInclude<ExtArgs> | null
+    /**
+     * Filter which MovimentacaoCaixa to delete.
+     */
+    where: MovimentacaoCaixaWhereUniqueInput
+  }
+
+  /**
+   * MovimentacaoCaixa deleteMany
+   */
+  export type MovimentacaoCaixaDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MovimentacaoCaixas to delete
+     */
+    where?: MovimentacaoCaixaWhereInput
+  }
+
+  /**
+   * MovimentacaoCaixa without action
+   */
+  export type MovimentacaoCaixaDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MovimentacaoCaixa
+     */
+    select?: MovimentacaoCaixaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MovimentacaoCaixaInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -9304,6 +12909,67 @@ export namespace Prisma {
   };
 
   export type ItemDevolucaoScalarFieldEnum = (typeof ItemDevolucaoScalarFieldEnum)[keyof typeof ItemDevolucaoScalarFieldEnum]
+
+
+  export const FormaPagamentoScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    descricao: 'descricao',
+    tipo: 'tipo',
+    bandeira: 'bandeira',
+    parcelas: 'parcelas',
+    taxaPct: 'taxaPct',
+    taxaFixa: 'taxaFixa',
+    prazoRecebimentoDias: 'prazoRecebimentoDias',
+    ativa: 'ativa',
+    criadoEm: 'criadoEm',
+    atualizadoEm: 'atualizadoEm'
+  };
+
+  export type FormaPagamentoScalarFieldEnum = (typeof FormaPagamentoScalarFieldEnum)[keyof typeof FormaPagamentoScalarFieldEnum]
+
+
+  export const SessaoCaixaScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    numero: 'numero',
+    status: 'status',
+    caixa: 'caixa',
+    operador: 'operador',
+    operadorId: 'operadorId',
+    aberturaEm: 'aberturaEm',
+    valorAbertura: 'valorAbertura',
+    observacoesAbertura: 'observacoesAbertura',
+    fechamentoEm: 'fechamentoEm',
+    valorContado: 'valorContado',
+    valorEsperado: 'valorEsperado',
+    diferenca: 'diferenca',
+    observacoesFechamento: 'observacoesFechamento',
+    travaCaixaAberto: 'travaCaixaAberto',
+    criadoEm: 'criadoEm',
+    atualizadoEm: 'atualizadoEm'
+  };
+
+  export type SessaoCaixaScalarFieldEnum = (typeof SessaoCaixaScalarFieldEnum)[keyof typeof SessaoCaixaScalarFieldEnum]
+
+
+  export const MovimentacaoCaixaScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    sessaoId: 'sessaoId',
+    tipo: 'tipo',
+    categoria: 'categoria',
+    descricao: 'descricao',
+    valor: 'valor',
+    formaPagamento: 'formaPagamento',
+    pedidoId: 'pedidoId',
+    pedidoNumero: 'pedidoNumero',
+    pagamentoId: 'pagamentoId',
+    operador: 'operador',
+    criadoEm: 'criadoEm'
+  };
+
+  export type MovimentacaoCaixaScalarFieldEnum = (typeof MovimentacaoCaixaScalarFieldEnum)[keyof typeof MovimentacaoCaixaScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -9524,6 +13190,55 @@ export namespace Prisma {
    * Reference to a field of type 'StatusDevolucao[]'
    */
   export type ListEnumStatusDevolucaoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusDevolucao[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusSessaoCaixa'
+   */
+  export type EnumStatusSessaoCaixaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusSessaoCaixa'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusSessaoCaixa[]'
+   */
+  export type ListEnumStatusSessaoCaixaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusSessaoCaixa[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'TipoMovimentacaoCaixa'
+   */
+  export type EnumTipoMovimentacaoCaixaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoMovimentacaoCaixa'>
+    
+
+
+  /**
+   * Reference to a field of type 'TipoMovimentacaoCaixa[]'
+   */
+  export type ListEnumTipoMovimentacaoCaixaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoMovimentacaoCaixa[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'CategoriaMovimentacaoCaixa'
+   */
+  export type EnumCategoriaMovimentacaoCaixaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CategoriaMovimentacaoCaixa'>
+    
+
+
+  /**
+   * Reference to a field of type 'CategoriaMovimentacaoCaixa[]'
+   */
+  export type ListEnumCategoriaMovimentacaoCaixaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CategoriaMovimentacaoCaixa[]'>
     
 
 
@@ -10244,6 +13959,317 @@ export namespace Prisma {
     quantidade?: IntWithAggregatesFilter<"ItemDevolucao"> | number
     motivo?: EnumMotivoDevolucaoWithAggregatesFilter<"ItemDevolucao"> | $Enums.MotivoDevolucao
     criadoEm?: DateTimeWithAggregatesFilter<"ItemDevolucao"> | Date | string
+  }
+
+  export type FormaPagamentoWhereInput = {
+    AND?: FormaPagamentoWhereInput | FormaPagamentoWhereInput[]
+    OR?: FormaPagamentoWhereInput[]
+    NOT?: FormaPagamentoWhereInput | FormaPagamentoWhereInput[]
+    id?: UuidFilter<"FormaPagamento"> | string
+    tenantId?: UuidFilter<"FormaPagamento"> | string
+    descricao?: StringFilter<"FormaPagamento"> | string
+    tipo?: StringFilter<"FormaPagamento"> | string
+    bandeira?: StringNullableFilter<"FormaPagamento"> | string | null
+    parcelas?: IntFilter<"FormaPagamento"> | number
+    taxaPct?: DecimalNullableFilter<"FormaPagamento"> | Decimal | DecimalJsLike | number | string | null
+    taxaFixa?: DecimalNullableFilter<"FormaPagamento"> | Decimal | DecimalJsLike | number | string | null
+    prazoRecebimentoDias?: IntNullableFilter<"FormaPagamento"> | number | null
+    ativa?: BoolFilter<"FormaPagamento"> | boolean
+    criadoEm?: DateTimeFilter<"FormaPagamento"> | Date | string
+    atualizadoEm?: DateTimeFilter<"FormaPagamento"> | Date | string
+  }
+
+  export type FormaPagamentoOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    descricao?: SortOrder
+    tipo?: SortOrder
+    bandeira?: SortOrderInput | SortOrder
+    parcelas?: SortOrder
+    taxaPct?: SortOrderInput | SortOrder
+    taxaFixa?: SortOrderInput | SortOrder
+    prazoRecebimentoDias?: SortOrderInput | SortOrder
+    ativa?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type FormaPagamentoWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    tenantId_descricao?: FormaPagamentoTenantIdDescricaoCompoundUniqueInput
+    AND?: FormaPagamentoWhereInput | FormaPagamentoWhereInput[]
+    OR?: FormaPagamentoWhereInput[]
+    NOT?: FormaPagamentoWhereInput | FormaPagamentoWhereInput[]
+    tenantId?: UuidFilter<"FormaPagamento"> | string
+    descricao?: StringFilter<"FormaPagamento"> | string
+    tipo?: StringFilter<"FormaPagamento"> | string
+    bandeira?: StringNullableFilter<"FormaPagamento"> | string | null
+    parcelas?: IntFilter<"FormaPagamento"> | number
+    taxaPct?: DecimalNullableFilter<"FormaPagamento"> | Decimal | DecimalJsLike | number | string | null
+    taxaFixa?: DecimalNullableFilter<"FormaPagamento"> | Decimal | DecimalJsLike | number | string | null
+    prazoRecebimentoDias?: IntNullableFilter<"FormaPagamento"> | number | null
+    ativa?: BoolFilter<"FormaPagamento"> | boolean
+    criadoEm?: DateTimeFilter<"FormaPagamento"> | Date | string
+    atualizadoEm?: DateTimeFilter<"FormaPagamento"> | Date | string
+  }, "id" | "tenantId_descricao">
+
+  export type FormaPagamentoOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    descricao?: SortOrder
+    tipo?: SortOrder
+    bandeira?: SortOrderInput | SortOrder
+    parcelas?: SortOrder
+    taxaPct?: SortOrderInput | SortOrder
+    taxaFixa?: SortOrderInput | SortOrder
+    prazoRecebimentoDias?: SortOrderInput | SortOrder
+    ativa?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+    _count?: FormaPagamentoCountOrderByAggregateInput
+    _avg?: FormaPagamentoAvgOrderByAggregateInput
+    _max?: FormaPagamentoMaxOrderByAggregateInput
+    _min?: FormaPagamentoMinOrderByAggregateInput
+    _sum?: FormaPagamentoSumOrderByAggregateInput
+  }
+
+  export type FormaPagamentoScalarWhereWithAggregatesInput = {
+    AND?: FormaPagamentoScalarWhereWithAggregatesInput | FormaPagamentoScalarWhereWithAggregatesInput[]
+    OR?: FormaPagamentoScalarWhereWithAggregatesInput[]
+    NOT?: FormaPagamentoScalarWhereWithAggregatesInput | FormaPagamentoScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"FormaPagamento"> | string
+    tenantId?: UuidWithAggregatesFilter<"FormaPagamento"> | string
+    descricao?: StringWithAggregatesFilter<"FormaPagamento"> | string
+    tipo?: StringWithAggregatesFilter<"FormaPagamento"> | string
+    bandeira?: StringNullableWithAggregatesFilter<"FormaPagamento"> | string | null
+    parcelas?: IntWithAggregatesFilter<"FormaPagamento"> | number
+    taxaPct?: DecimalNullableWithAggregatesFilter<"FormaPagamento"> | Decimal | DecimalJsLike | number | string | null
+    taxaFixa?: DecimalNullableWithAggregatesFilter<"FormaPagamento"> | Decimal | DecimalJsLike | number | string | null
+    prazoRecebimentoDias?: IntNullableWithAggregatesFilter<"FormaPagamento"> | number | null
+    ativa?: BoolWithAggregatesFilter<"FormaPagamento"> | boolean
+    criadoEm?: DateTimeWithAggregatesFilter<"FormaPagamento"> | Date | string
+    atualizadoEm?: DateTimeWithAggregatesFilter<"FormaPagamento"> | Date | string
+  }
+
+  export type SessaoCaixaWhereInput = {
+    AND?: SessaoCaixaWhereInput | SessaoCaixaWhereInput[]
+    OR?: SessaoCaixaWhereInput[]
+    NOT?: SessaoCaixaWhereInput | SessaoCaixaWhereInput[]
+    id?: UuidFilter<"SessaoCaixa"> | string
+    tenantId?: UuidFilter<"SessaoCaixa"> | string
+    numero?: StringFilter<"SessaoCaixa"> | string
+    status?: EnumStatusSessaoCaixaFilter<"SessaoCaixa"> | $Enums.StatusSessaoCaixa
+    caixa?: StringFilter<"SessaoCaixa"> | string
+    operador?: StringFilter<"SessaoCaixa"> | string
+    operadorId?: UuidNullableFilter<"SessaoCaixa"> | string | null
+    aberturaEm?: DateTimeFilter<"SessaoCaixa"> | Date | string
+    valorAbertura?: DecimalFilter<"SessaoCaixa"> | Decimal | DecimalJsLike | number | string
+    observacoesAbertura?: StringNullableFilter<"SessaoCaixa"> | string | null
+    fechamentoEm?: DateTimeNullableFilter<"SessaoCaixa"> | Date | string | null
+    valorContado?: DecimalNullableFilter<"SessaoCaixa"> | Decimal | DecimalJsLike | number | string | null
+    valorEsperado?: DecimalNullableFilter<"SessaoCaixa"> | Decimal | DecimalJsLike | number | string | null
+    diferenca?: DecimalNullableFilter<"SessaoCaixa"> | Decimal | DecimalJsLike | number | string | null
+    observacoesFechamento?: StringNullableFilter<"SessaoCaixa"> | string | null
+    travaCaixaAberto?: UuidNullableFilter<"SessaoCaixa"> | string | null
+    criadoEm?: DateTimeFilter<"SessaoCaixa"> | Date | string
+    atualizadoEm?: DateTimeFilter<"SessaoCaixa"> | Date | string
+    movimentacoes?: MovimentacaoCaixaListRelationFilter
+  }
+
+  export type SessaoCaixaOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    numero?: SortOrder
+    status?: SortOrder
+    caixa?: SortOrder
+    operador?: SortOrder
+    operadorId?: SortOrderInput | SortOrder
+    aberturaEm?: SortOrder
+    valorAbertura?: SortOrder
+    observacoesAbertura?: SortOrderInput | SortOrder
+    fechamentoEm?: SortOrderInput | SortOrder
+    valorContado?: SortOrderInput | SortOrder
+    valorEsperado?: SortOrderInput | SortOrder
+    diferenca?: SortOrderInput | SortOrder
+    observacoesFechamento?: SortOrderInput | SortOrder
+    travaCaixaAberto?: SortOrderInput | SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+    movimentacoes?: MovimentacaoCaixaOrderByRelationAggregateInput
+  }
+
+  export type SessaoCaixaWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    travaCaixaAberto?: string
+    tenantId_numero?: SessaoCaixaTenantIdNumeroCompoundUniqueInput
+    AND?: SessaoCaixaWhereInput | SessaoCaixaWhereInput[]
+    OR?: SessaoCaixaWhereInput[]
+    NOT?: SessaoCaixaWhereInput | SessaoCaixaWhereInput[]
+    tenantId?: UuidFilter<"SessaoCaixa"> | string
+    numero?: StringFilter<"SessaoCaixa"> | string
+    status?: EnumStatusSessaoCaixaFilter<"SessaoCaixa"> | $Enums.StatusSessaoCaixa
+    caixa?: StringFilter<"SessaoCaixa"> | string
+    operador?: StringFilter<"SessaoCaixa"> | string
+    operadorId?: UuidNullableFilter<"SessaoCaixa"> | string | null
+    aberturaEm?: DateTimeFilter<"SessaoCaixa"> | Date | string
+    valorAbertura?: DecimalFilter<"SessaoCaixa"> | Decimal | DecimalJsLike | number | string
+    observacoesAbertura?: StringNullableFilter<"SessaoCaixa"> | string | null
+    fechamentoEm?: DateTimeNullableFilter<"SessaoCaixa"> | Date | string | null
+    valorContado?: DecimalNullableFilter<"SessaoCaixa"> | Decimal | DecimalJsLike | number | string | null
+    valorEsperado?: DecimalNullableFilter<"SessaoCaixa"> | Decimal | DecimalJsLike | number | string | null
+    diferenca?: DecimalNullableFilter<"SessaoCaixa"> | Decimal | DecimalJsLike | number | string | null
+    observacoesFechamento?: StringNullableFilter<"SessaoCaixa"> | string | null
+    criadoEm?: DateTimeFilter<"SessaoCaixa"> | Date | string
+    atualizadoEm?: DateTimeFilter<"SessaoCaixa"> | Date | string
+    movimentacoes?: MovimentacaoCaixaListRelationFilter
+  }, "id" | "travaCaixaAberto" | "tenantId_numero">
+
+  export type SessaoCaixaOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    numero?: SortOrder
+    status?: SortOrder
+    caixa?: SortOrder
+    operador?: SortOrder
+    operadorId?: SortOrderInput | SortOrder
+    aberturaEm?: SortOrder
+    valorAbertura?: SortOrder
+    observacoesAbertura?: SortOrderInput | SortOrder
+    fechamentoEm?: SortOrderInput | SortOrder
+    valorContado?: SortOrderInput | SortOrder
+    valorEsperado?: SortOrderInput | SortOrder
+    diferenca?: SortOrderInput | SortOrder
+    observacoesFechamento?: SortOrderInput | SortOrder
+    travaCaixaAberto?: SortOrderInput | SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+    _count?: SessaoCaixaCountOrderByAggregateInput
+    _avg?: SessaoCaixaAvgOrderByAggregateInput
+    _max?: SessaoCaixaMaxOrderByAggregateInput
+    _min?: SessaoCaixaMinOrderByAggregateInput
+    _sum?: SessaoCaixaSumOrderByAggregateInput
+  }
+
+  export type SessaoCaixaScalarWhereWithAggregatesInput = {
+    AND?: SessaoCaixaScalarWhereWithAggregatesInput | SessaoCaixaScalarWhereWithAggregatesInput[]
+    OR?: SessaoCaixaScalarWhereWithAggregatesInput[]
+    NOT?: SessaoCaixaScalarWhereWithAggregatesInput | SessaoCaixaScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"SessaoCaixa"> | string
+    tenantId?: UuidWithAggregatesFilter<"SessaoCaixa"> | string
+    numero?: StringWithAggregatesFilter<"SessaoCaixa"> | string
+    status?: EnumStatusSessaoCaixaWithAggregatesFilter<"SessaoCaixa"> | $Enums.StatusSessaoCaixa
+    caixa?: StringWithAggregatesFilter<"SessaoCaixa"> | string
+    operador?: StringWithAggregatesFilter<"SessaoCaixa"> | string
+    operadorId?: UuidNullableWithAggregatesFilter<"SessaoCaixa"> | string | null
+    aberturaEm?: DateTimeWithAggregatesFilter<"SessaoCaixa"> | Date | string
+    valorAbertura?: DecimalWithAggregatesFilter<"SessaoCaixa"> | Decimal | DecimalJsLike | number | string
+    observacoesAbertura?: StringNullableWithAggregatesFilter<"SessaoCaixa"> | string | null
+    fechamentoEm?: DateTimeNullableWithAggregatesFilter<"SessaoCaixa"> | Date | string | null
+    valorContado?: DecimalNullableWithAggregatesFilter<"SessaoCaixa"> | Decimal | DecimalJsLike | number | string | null
+    valorEsperado?: DecimalNullableWithAggregatesFilter<"SessaoCaixa"> | Decimal | DecimalJsLike | number | string | null
+    diferenca?: DecimalNullableWithAggregatesFilter<"SessaoCaixa"> | Decimal | DecimalJsLike | number | string | null
+    observacoesFechamento?: StringNullableWithAggregatesFilter<"SessaoCaixa"> | string | null
+    travaCaixaAberto?: UuidNullableWithAggregatesFilter<"SessaoCaixa"> | string | null
+    criadoEm?: DateTimeWithAggregatesFilter<"SessaoCaixa"> | Date | string
+    atualizadoEm?: DateTimeWithAggregatesFilter<"SessaoCaixa"> | Date | string
+  }
+
+  export type MovimentacaoCaixaWhereInput = {
+    AND?: MovimentacaoCaixaWhereInput | MovimentacaoCaixaWhereInput[]
+    OR?: MovimentacaoCaixaWhereInput[]
+    NOT?: MovimentacaoCaixaWhereInput | MovimentacaoCaixaWhereInput[]
+    id?: UuidFilter<"MovimentacaoCaixa"> | string
+    tenantId?: UuidFilter<"MovimentacaoCaixa"> | string
+    sessaoId?: UuidFilter<"MovimentacaoCaixa"> | string
+    tipo?: EnumTipoMovimentacaoCaixaFilter<"MovimentacaoCaixa"> | $Enums.TipoMovimentacaoCaixa
+    categoria?: EnumCategoriaMovimentacaoCaixaFilter<"MovimentacaoCaixa"> | $Enums.CategoriaMovimentacaoCaixa
+    descricao?: StringFilter<"MovimentacaoCaixa"> | string
+    valor?: DecimalFilter<"MovimentacaoCaixa"> | Decimal | DecimalJsLike | number | string
+    formaPagamento?: EnumTipoPagamentoNullableFilter<"MovimentacaoCaixa"> | $Enums.TipoPagamento | null
+    pedidoId?: UuidNullableFilter<"MovimentacaoCaixa"> | string | null
+    pedidoNumero?: StringNullableFilter<"MovimentacaoCaixa"> | string | null
+    pagamentoId?: UuidNullableFilter<"MovimentacaoCaixa"> | string | null
+    operador?: StringFilter<"MovimentacaoCaixa"> | string
+    criadoEm?: DateTimeFilter<"MovimentacaoCaixa"> | Date | string
+    sessao?: XOR<SessaoCaixaRelationFilter, SessaoCaixaWhereInput>
+  }
+
+  export type MovimentacaoCaixaOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    sessaoId?: SortOrder
+    tipo?: SortOrder
+    categoria?: SortOrder
+    descricao?: SortOrder
+    valor?: SortOrder
+    formaPagamento?: SortOrderInput | SortOrder
+    pedidoId?: SortOrderInput | SortOrder
+    pedidoNumero?: SortOrderInput | SortOrder
+    pagamentoId?: SortOrderInput | SortOrder
+    operador?: SortOrder
+    criadoEm?: SortOrder
+    sessao?: SessaoCaixaOrderByWithRelationInput
+  }
+
+  export type MovimentacaoCaixaWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    pagamentoId_categoria?: MovimentacaoCaixaPagamentoIdCategoriaCompoundUniqueInput
+    AND?: MovimentacaoCaixaWhereInput | MovimentacaoCaixaWhereInput[]
+    OR?: MovimentacaoCaixaWhereInput[]
+    NOT?: MovimentacaoCaixaWhereInput | MovimentacaoCaixaWhereInput[]
+    tenantId?: UuidFilter<"MovimentacaoCaixa"> | string
+    sessaoId?: UuidFilter<"MovimentacaoCaixa"> | string
+    tipo?: EnumTipoMovimentacaoCaixaFilter<"MovimentacaoCaixa"> | $Enums.TipoMovimentacaoCaixa
+    categoria?: EnumCategoriaMovimentacaoCaixaFilter<"MovimentacaoCaixa"> | $Enums.CategoriaMovimentacaoCaixa
+    descricao?: StringFilter<"MovimentacaoCaixa"> | string
+    valor?: DecimalFilter<"MovimentacaoCaixa"> | Decimal | DecimalJsLike | number | string
+    formaPagamento?: EnumTipoPagamentoNullableFilter<"MovimentacaoCaixa"> | $Enums.TipoPagamento | null
+    pedidoId?: UuidNullableFilter<"MovimentacaoCaixa"> | string | null
+    pedidoNumero?: StringNullableFilter<"MovimentacaoCaixa"> | string | null
+    pagamentoId?: UuidNullableFilter<"MovimentacaoCaixa"> | string | null
+    operador?: StringFilter<"MovimentacaoCaixa"> | string
+    criadoEm?: DateTimeFilter<"MovimentacaoCaixa"> | Date | string
+    sessao?: XOR<SessaoCaixaRelationFilter, SessaoCaixaWhereInput>
+  }, "id" | "pagamentoId_categoria">
+
+  export type MovimentacaoCaixaOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    sessaoId?: SortOrder
+    tipo?: SortOrder
+    categoria?: SortOrder
+    descricao?: SortOrder
+    valor?: SortOrder
+    formaPagamento?: SortOrderInput | SortOrder
+    pedidoId?: SortOrderInput | SortOrder
+    pedidoNumero?: SortOrderInput | SortOrder
+    pagamentoId?: SortOrderInput | SortOrder
+    operador?: SortOrder
+    criadoEm?: SortOrder
+    _count?: MovimentacaoCaixaCountOrderByAggregateInput
+    _avg?: MovimentacaoCaixaAvgOrderByAggregateInput
+    _max?: MovimentacaoCaixaMaxOrderByAggregateInput
+    _min?: MovimentacaoCaixaMinOrderByAggregateInput
+    _sum?: MovimentacaoCaixaSumOrderByAggregateInput
+  }
+
+  export type MovimentacaoCaixaScalarWhereWithAggregatesInput = {
+    AND?: MovimentacaoCaixaScalarWhereWithAggregatesInput | MovimentacaoCaixaScalarWhereWithAggregatesInput[]
+    OR?: MovimentacaoCaixaScalarWhereWithAggregatesInput[]
+    NOT?: MovimentacaoCaixaScalarWhereWithAggregatesInput | MovimentacaoCaixaScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"MovimentacaoCaixa"> | string
+    tenantId?: UuidWithAggregatesFilter<"MovimentacaoCaixa"> | string
+    sessaoId?: UuidWithAggregatesFilter<"MovimentacaoCaixa"> | string
+    tipo?: EnumTipoMovimentacaoCaixaWithAggregatesFilter<"MovimentacaoCaixa"> | $Enums.TipoMovimentacaoCaixa
+    categoria?: EnumCategoriaMovimentacaoCaixaWithAggregatesFilter<"MovimentacaoCaixa"> | $Enums.CategoriaMovimentacaoCaixa
+    descricao?: StringWithAggregatesFilter<"MovimentacaoCaixa"> | string
+    valor?: DecimalWithAggregatesFilter<"MovimentacaoCaixa"> | Decimal | DecimalJsLike | number | string
+    formaPagamento?: EnumTipoPagamentoNullableWithAggregatesFilter<"MovimentacaoCaixa"> | $Enums.TipoPagamento | null
+    pedidoId?: UuidNullableWithAggregatesFilter<"MovimentacaoCaixa"> | string | null
+    pedidoNumero?: StringNullableWithAggregatesFilter<"MovimentacaoCaixa"> | string | null
+    pagamentoId?: UuidNullableWithAggregatesFilter<"MovimentacaoCaixa"> | string | null
+    operador?: StringWithAggregatesFilter<"MovimentacaoCaixa"> | string
+    criadoEm?: DateTimeWithAggregatesFilter<"MovimentacaoCaixa"> | Date | string
   }
 
   export type PedidoCreateInput = {
@@ -11059,6 +15085,373 @@ export namespace Prisma {
     itemPedidoId?: StringFieldUpdateOperationsInput | string
     quantidade?: IntFieldUpdateOperationsInput | number
     motivo?: EnumMotivoDevolucaoFieldUpdateOperationsInput | $Enums.MotivoDevolucao
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FormaPagamentoCreateInput = {
+    id?: string
+    tenantId: string
+    descricao: string
+    tipo: string
+    bandeira?: string | null
+    parcelas?: number
+    taxaPct?: Decimal | DecimalJsLike | number | string | null
+    taxaFixa?: Decimal | DecimalJsLike | number | string | null
+    prazoRecebimentoDias?: number | null
+    ativa?: boolean
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type FormaPagamentoUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    descricao: string
+    tipo: string
+    bandeira?: string | null
+    parcelas?: number
+    taxaPct?: Decimal | DecimalJsLike | number | string | null
+    taxaFixa?: Decimal | DecimalJsLike | number | string | null
+    prazoRecebimentoDias?: number | null
+    ativa?: boolean
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type FormaPagamentoUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    descricao?: StringFieldUpdateOperationsInput | string
+    tipo?: StringFieldUpdateOperationsInput | string
+    bandeira?: NullableStringFieldUpdateOperationsInput | string | null
+    parcelas?: IntFieldUpdateOperationsInput | number
+    taxaPct?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taxaFixa?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    prazoRecebimentoDias?: NullableIntFieldUpdateOperationsInput | number | null
+    ativa?: BoolFieldUpdateOperationsInput | boolean
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FormaPagamentoUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    descricao?: StringFieldUpdateOperationsInput | string
+    tipo?: StringFieldUpdateOperationsInput | string
+    bandeira?: NullableStringFieldUpdateOperationsInput | string | null
+    parcelas?: IntFieldUpdateOperationsInput | number
+    taxaPct?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taxaFixa?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    prazoRecebimentoDias?: NullableIntFieldUpdateOperationsInput | number | null
+    ativa?: BoolFieldUpdateOperationsInput | boolean
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FormaPagamentoCreateManyInput = {
+    id?: string
+    tenantId: string
+    descricao: string
+    tipo: string
+    bandeira?: string | null
+    parcelas?: number
+    taxaPct?: Decimal | DecimalJsLike | number | string | null
+    taxaFixa?: Decimal | DecimalJsLike | number | string | null
+    prazoRecebimentoDias?: number | null
+    ativa?: boolean
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type FormaPagamentoUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    descricao?: StringFieldUpdateOperationsInput | string
+    tipo?: StringFieldUpdateOperationsInput | string
+    bandeira?: NullableStringFieldUpdateOperationsInput | string | null
+    parcelas?: IntFieldUpdateOperationsInput | number
+    taxaPct?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taxaFixa?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    prazoRecebimentoDias?: NullableIntFieldUpdateOperationsInput | number | null
+    ativa?: BoolFieldUpdateOperationsInput | boolean
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FormaPagamentoUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    descricao?: StringFieldUpdateOperationsInput | string
+    tipo?: StringFieldUpdateOperationsInput | string
+    bandeira?: NullableStringFieldUpdateOperationsInput | string | null
+    parcelas?: IntFieldUpdateOperationsInput | number
+    taxaPct?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    taxaFixa?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    prazoRecebimentoDias?: NullableIntFieldUpdateOperationsInput | number | null
+    ativa?: BoolFieldUpdateOperationsInput | boolean
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessaoCaixaCreateInput = {
+    id?: string
+    tenantId: string
+    numero: string
+    status?: $Enums.StatusSessaoCaixa
+    caixa: string
+    operador: string
+    operadorId?: string | null
+    aberturaEm?: Date | string
+    valorAbertura: Decimal | DecimalJsLike | number | string
+    observacoesAbertura?: string | null
+    fechamentoEm?: Date | string | null
+    valorContado?: Decimal | DecimalJsLike | number | string | null
+    valorEsperado?: Decimal | DecimalJsLike | number | string | null
+    diferenca?: Decimal | DecimalJsLike | number | string | null
+    observacoesFechamento?: string | null
+    travaCaixaAberto?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+    movimentacoes?: MovimentacaoCaixaCreateNestedManyWithoutSessaoInput
+  }
+
+  export type SessaoCaixaUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    numero: string
+    status?: $Enums.StatusSessaoCaixa
+    caixa: string
+    operador: string
+    operadorId?: string | null
+    aberturaEm?: Date | string
+    valorAbertura: Decimal | DecimalJsLike | number | string
+    observacoesAbertura?: string | null
+    fechamentoEm?: Date | string | null
+    valorContado?: Decimal | DecimalJsLike | number | string | null
+    valorEsperado?: Decimal | DecimalJsLike | number | string | null
+    diferenca?: Decimal | DecimalJsLike | number | string | null
+    observacoesFechamento?: string | null
+    travaCaixaAberto?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+    movimentacoes?: MovimentacaoCaixaUncheckedCreateNestedManyWithoutSessaoInput
+  }
+
+  export type SessaoCaixaUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    numero?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusSessaoCaixaFieldUpdateOperationsInput | $Enums.StatusSessaoCaixa
+    caixa?: StringFieldUpdateOperationsInput | string
+    operador?: StringFieldUpdateOperationsInput | string
+    operadorId?: NullableStringFieldUpdateOperationsInput | string | null
+    aberturaEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    valorAbertura?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    observacoesAbertura?: NullableStringFieldUpdateOperationsInput | string | null
+    fechamentoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    valorContado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valorEsperado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    diferenca?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    observacoesFechamento?: NullableStringFieldUpdateOperationsInput | string | null
+    travaCaixaAberto?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    movimentacoes?: MovimentacaoCaixaUpdateManyWithoutSessaoNestedInput
+  }
+
+  export type SessaoCaixaUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    numero?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusSessaoCaixaFieldUpdateOperationsInput | $Enums.StatusSessaoCaixa
+    caixa?: StringFieldUpdateOperationsInput | string
+    operador?: StringFieldUpdateOperationsInput | string
+    operadorId?: NullableStringFieldUpdateOperationsInput | string | null
+    aberturaEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    valorAbertura?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    observacoesAbertura?: NullableStringFieldUpdateOperationsInput | string | null
+    fechamentoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    valorContado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valorEsperado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    diferenca?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    observacoesFechamento?: NullableStringFieldUpdateOperationsInput | string | null
+    travaCaixaAberto?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    movimentacoes?: MovimentacaoCaixaUncheckedUpdateManyWithoutSessaoNestedInput
+  }
+
+  export type SessaoCaixaCreateManyInput = {
+    id?: string
+    tenantId: string
+    numero: string
+    status?: $Enums.StatusSessaoCaixa
+    caixa: string
+    operador: string
+    operadorId?: string | null
+    aberturaEm?: Date | string
+    valorAbertura: Decimal | DecimalJsLike | number | string
+    observacoesAbertura?: string | null
+    fechamentoEm?: Date | string | null
+    valorContado?: Decimal | DecimalJsLike | number | string | null
+    valorEsperado?: Decimal | DecimalJsLike | number | string | null
+    diferenca?: Decimal | DecimalJsLike | number | string | null
+    observacoesFechamento?: string | null
+    travaCaixaAberto?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type SessaoCaixaUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    numero?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusSessaoCaixaFieldUpdateOperationsInput | $Enums.StatusSessaoCaixa
+    caixa?: StringFieldUpdateOperationsInput | string
+    operador?: StringFieldUpdateOperationsInput | string
+    operadorId?: NullableStringFieldUpdateOperationsInput | string | null
+    aberturaEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    valorAbertura?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    observacoesAbertura?: NullableStringFieldUpdateOperationsInput | string | null
+    fechamentoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    valorContado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valorEsperado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    diferenca?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    observacoesFechamento?: NullableStringFieldUpdateOperationsInput | string | null
+    travaCaixaAberto?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessaoCaixaUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    numero?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusSessaoCaixaFieldUpdateOperationsInput | $Enums.StatusSessaoCaixa
+    caixa?: StringFieldUpdateOperationsInput | string
+    operador?: StringFieldUpdateOperationsInput | string
+    operadorId?: NullableStringFieldUpdateOperationsInput | string | null
+    aberturaEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    valorAbertura?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    observacoesAbertura?: NullableStringFieldUpdateOperationsInput | string | null
+    fechamentoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    valorContado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valorEsperado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    diferenca?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    observacoesFechamento?: NullableStringFieldUpdateOperationsInput | string | null
+    travaCaixaAberto?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MovimentacaoCaixaCreateInput = {
+    id?: string
+    tenantId: string
+    tipo: $Enums.TipoMovimentacaoCaixa
+    categoria: $Enums.CategoriaMovimentacaoCaixa
+    descricao: string
+    valor: Decimal | DecimalJsLike | number | string
+    formaPagamento?: $Enums.TipoPagamento | null
+    pedidoId?: string | null
+    pedidoNumero?: string | null
+    pagamentoId?: string | null
+    operador: string
+    criadoEm?: Date | string
+    sessao: SessaoCaixaCreateNestedOneWithoutMovimentacoesInput
+  }
+
+  export type MovimentacaoCaixaUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    sessaoId: string
+    tipo: $Enums.TipoMovimentacaoCaixa
+    categoria: $Enums.CategoriaMovimentacaoCaixa
+    descricao: string
+    valor: Decimal | DecimalJsLike | number | string
+    formaPagamento?: $Enums.TipoPagamento | null
+    pedidoId?: string | null
+    pedidoNumero?: string | null
+    pagamentoId?: string | null
+    operador: string
+    criadoEm?: Date | string
+  }
+
+  export type MovimentacaoCaixaUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoMovimentacaoCaixaFieldUpdateOperationsInput | $Enums.TipoMovimentacaoCaixa
+    categoria?: EnumCategoriaMovimentacaoCaixaFieldUpdateOperationsInput | $Enums.CategoriaMovimentacaoCaixa
+    descricao?: StringFieldUpdateOperationsInput | string
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    formaPagamento?: NullableEnumTipoPagamentoFieldUpdateOperationsInput | $Enums.TipoPagamento | null
+    pedidoId?: NullableStringFieldUpdateOperationsInput | string | null
+    pedidoNumero?: NullableStringFieldUpdateOperationsInput | string | null
+    pagamentoId?: NullableStringFieldUpdateOperationsInput | string | null
+    operador?: StringFieldUpdateOperationsInput | string
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    sessao?: SessaoCaixaUpdateOneRequiredWithoutMovimentacoesNestedInput
+  }
+
+  export type MovimentacaoCaixaUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    sessaoId?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoMovimentacaoCaixaFieldUpdateOperationsInput | $Enums.TipoMovimentacaoCaixa
+    categoria?: EnumCategoriaMovimentacaoCaixaFieldUpdateOperationsInput | $Enums.CategoriaMovimentacaoCaixa
+    descricao?: StringFieldUpdateOperationsInput | string
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    formaPagamento?: NullableEnumTipoPagamentoFieldUpdateOperationsInput | $Enums.TipoPagamento | null
+    pedidoId?: NullableStringFieldUpdateOperationsInput | string | null
+    pedidoNumero?: NullableStringFieldUpdateOperationsInput | string | null
+    pagamentoId?: NullableStringFieldUpdateOperationsInput | string | null
+    operador?: StringFieldUpdateOperationsInput | string
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MovimentacaoCaixaCreateManyInput = {
+    id?: string
+    tenantId: string
+    sessaoId: string
+    tipo: $Enums.TipoMovimentacaoCaixa
+    categoria: $Enums.CategoriaMovimentacaoCaixa
+    descricao: string
+    valor: Decimal | DecimalJsLike | number | string
+    formaPagamento?: $Enums.TipoPagamento | null
+    pedidoId?: string | null
+    pedidoNumero?: string | null
+    pagamentoId?: string | null
+    operador: string
+    criadoEm?: Date | string
+  }
+
+  export type MovimentacaoCaixaUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoMovimentacaoCaixaFieldUpdateOperationsInput | $Enums.TipoMovimentacaoCaixa
+    categoria?: EnumCategoriaMovimentacaoCaixaFieldUpdateOperationsInput | $Enums.CategoriaMovimentacaoCaixa
+    descricao?: StringFieldUpdateOperationsInput | string
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    formaPagamento?: NullableEnumTipoPagamentoFieldUpdateOperationsInput | $Enums.TipoPagamento | null
+    pedidoId?: NullableStringFieldUpdateOperationsInput | string | null
+    pedidoNumero?: NullableStringFieldUpdateOperationsInput | string | null
+    pagamentoId?: NullableStringFieldUpdateOperationsInput | string | null
+    operador?: StringFieldUpdateOperationsInput | string
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MovimentacaoCaixaUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    sessaoId?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoMovimentacaoCaixaFieldUpdateOperationsInput | $Enums.TipoMovimentacaoCaixa
+    categoria?: EnumCategoriaMovimentacaoCaixaFieldUpdateOperationsInput | $Enums.CategoriaMovimentacaoCaixa
+    descricao?: StringFieldUpdateOperationsInput | string
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    formaPagamento?: NullableEnumTipoPagamentoFieldUpdateOperationsInput | $Enums.TipoPagamento | null
+    pedidoId?: NullableStringFieldUpdateOperationsInput | string | null
+    pedidoNumero?: NullableStringFieldUpdateOperationsInput | string | null
+    pagamentoId?: NullableStringFieldUpdateOperationsInput | string | null
+    operador?: StringFieldUpdateOperationsInput | string
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -12009,6 +16402,309 @@ export namespace Prisma {
     quantidade?: SortOrder
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type FormaPagamentoTenantIdDescricaoCompoundUniqueInput = {
+    tenantId: string
+    descricao: string
+  }
+
+  export type FormaPagamentoCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    descricao?: SortOrder
+    tipo?: SortOrder
+    bandeira?: SortOrder
+    parcelas?: SortOrder
+    taxaPct?: SortOrder
+    taxaFixa?: SortOrder
+    prazoRecebimentoDias?: SortOrder
+    ativa?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type FormaPagamentoAvgOrderByAggregateInput = {
+    parcelas?: SortOrder
+    taxaPct?: SortOrder
+    taxaFixa?: SortOrder
+    prazoRecebimentoDias?: SortOrder
+  }
+
+  export type FormaPagamentoMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    descricao?: SortOrder
+    tipo?: SortOrder
+    bandeira?: SortOrder
+    parcelas?: SortOrder
+    taxaPct?: SortOrder
+    taxaFixa?: SortOrder
+    prazoRecebimentoDias?: SortOrder
+    ativa?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type FormaPagamentoMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    descricao?: SortOrder
+    tipo?: SortOrder
+    bandeira?: SortOrder
+    parcelas?: SortOrder
+    taxaPct?: SortOrder
+    taxaFixa?: SortOrder
+    prazoRecebimentoDias?: SortOrder
+    ativa?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type FormaPagamentoSumOrderByAggregateInput = {
+    parcelas?: SortOrder
+    taxaPct?: SortOrder
+    taxaFixa?: SortOrder
+    prazoRecebimentoDias?: SortOrder
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type EnumStatusSessaoCaixaFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusSessaoCaixa | EnumStatusSessaoCaixaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusSessaoCaixa[] | ListEnumStatusSessaoCaixaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusSessaoCaixa[] | ListEnumStatusSessaoCaixaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusSessaoCaixaFilter<$PrismaModel> | $Enums.StatusSessaoCaixa
+  }
+
+  export type MovimentacaoCaixaListRelationFilter = {
+    every?: MovimentacaoCaixaWhereInput
+    some?: MovimentacaoCaixaWhereInput
+    none?: MovimentacaoCaixaWhereInput
+  }
+
+  export type MovimentacaoCaixaOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type SessaoCaixaTenantIdNumeroCompoundUniqueInput = {
+    tenantId: string
+    numero: string
+  }
+
+  export type SessaoCaixaCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    numero?: SortOrder
+    status?: SortOrder
+    caixa?: SortOrder
+    operador?: SortOrder
+    operadorId?: SortOrder
+    aberturaEm?: SortOrder
+    valorAbertura?: SortOrder
+    observacoesAbertura?: SortOrder
+    fechamentoEm?: SortOrder
+    valorContado?: SortOrder
+    valorEsperado?: SortOrder
+    diferenca?: SortOrder
+    observacoesFechamento?: SortOrder
+    travaCaixaAberto?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type SessaoCaixaAvgOrderByAggregateInput = {
+    valorAbertura?: SortOrder
+    valorContado?: SortOrder
+    valorEsperado?: SortOrder
+    diferenca?: SortOrder
+  }
+
+  export type SessaoCaixaMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    numero?: SortOrder
+    status?: SortOrder
+    caixa?: SortOrder
+    operador?: SortOrder
+    operadorId?: SortOrder
+    aberturaEm?: SortOrder
+    valorAbertura?: SortOrder
+    observacoesAbertura?: SortOrder
+    fechamentoEm?: SortOrder
+    valorContado?: SortOrder
+    valorEsperado?: SortOrder
+    diferenca?: SortOrder
+    observacoesFechamento?: SortOrder
+    travaCaixaAberto?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type SessaoCaixaMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    numero?: SortOrder
+    status?: SortOrder
+    caixa?: SortOrder
+    operador?: SortOrder
+    operadorId?: SortOrder
+    aberturaEm?: SortOrder
+    valorAbertura?: SortOrder
+    observacoesAbertura?: SortOrder
+    fechamentoEm?: SortOrder
+    valorContado?: SortOrder
+    valorEsperado?: SortOrder
+    diferenca?: SortOrder
+    observacoesFechamento?: SortOrder
+    travaCaixaAberto?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type SessaoCaixaSumOrderByAggregateInput = {
+    valorAbertura?: SortOrder
+    valorContado?: SortOrder
+    valorEsperado?: SortOrder
+    diferenca?: SortOrder
+  }
+
+  export type EnumStatusSessaoCaixaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusSessaoCaixa | EnumStatusSessaoCaixaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusSessaoCaixa[] | ListEnumStatusSessaoCaixaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusSessaoCaixa[] | ListEnumStatusSessaoCaixaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusSessaoCaixaWithAggregatesFilter<$PrismaModel> | $Enums.StatusSessaoCaixa
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusSessaoCaixaFilter<$PrismaModel>
+    _max?: NestedEnumStatusSessaoCaixaFilter<$PrismaModel>
+  }
+
+  export type EnumTipoMovimentacaoCaixaFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoMovimentacaoCaixa | EnumTipoMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoMovimentacaoCaixa[] | ListEnumTipoMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoMovimentacaoCaixa[] | ListEnumTipoMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoMovimentacaoCaixaFilter<$PrismaModel> | $Enums.TipoMovimentacaoCaixa
+  }
+
+  export type EnumCategoriaMovimentacaoCaixaFilter<$PrismaModel = never> = {
+    equals?: $Enums.CategoriaMovimentacaoCaixa | EnumCategoriaMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    in?: $Enums.CategoriaMovimentacaoCaixa[] | ListEnumCategoriaMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CategoriaMovimentacaoCaixa[] | ListEnumCategoriaMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    not?: NestedEnumCategoriaMovimentacaoCaixaFilter<$PrismaModel> | $Enums.CategoriaMovimentacaoCaixa
+  }
+
+  export type EnumTipoPagamentoNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoPagamento | EnumTipoPagamentoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumTipoPagamentoNullableFilter<$PrismaModel> | $Enums.TipoPagamento | null
+  }
+
+  export type SessaoCaixaRelationFilter = {
+    is?: SessaoCaixaWhereInput
+    isNot?: SessaoCaixaWhereInput
+  }
+
+  export type MovimentacaoCaixaPagamentoIdCategoriaCompoundUniqueInput = {
+    pagamentoId: string
+    categoria: $Enums.CategoriaMovimentacaoCaixa
+  }
+
+  export type MovimentacaoCaixaCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    sessaoId?: SortOrder
+    tipo?: SortOrder
+    categoria?: SortOrder
+    descricao?: SortOrder
+    valor?: SortOrder
+    formaPagamento?: SortOrder
+    pedidoId?: SortOrder
+    pedidoNumero?: SortOrder
+    pagamentoId?: SortOrder
+    operador?: SortOrder
+    criadoEm?: SortOrder
+  }
+
+  export type MovimentacaoCaixaAvgOrderByAggregateInput = {
+    valor?: SortOrder
+  }
+
+  export type MovimentacaoCaixaMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    sessaoId?: SortOrder
+    tipo?: SortOrder
+    categoria?: SortOrder
+    descricao?: SortOrder
+    valor?: SortOrder
+    formaPagamento?: SortOrder
+    pedidoId?: SortOrder
+    pedidoNumero?: SortOrder
+    pagamentoId?: SortOrder
+    operador?: SortOrder
+    criadoEm?: SortOrder
+  }
+
+  export type MovimentacaoCaixaMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    sessaoId?: SortOrder
+    tipo?: SortOrder
+    categoria?: SortOrder
+    descricao?: SortOrder
+    valor?: SortOrder
+    formaPagamento?: SortOrder
+    pedidoId?: SortOrder
+    pedidoNumero?: SortOrder
+    pagamentoId?: SortOrder
+    operador?: SortOrder
+    criadoEm?: SortOrder
+  }
+
+  export type MovimentacaoCaixaSumOrderByAggregateInput = {
+    valor?: SortOrder
+  }
+
+  export type EnumTipoMovimentacaoCaixaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoMovimentacaoCaixa | EnumTipoMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoMovimentacaoCaixa[] | ListEnumTipoMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoMovimentacaoCaixa[] | ListEnumTipoMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoMovimentacaoCaixaWithAggregatesFilter<$PrismaModel> | $Enums.TipoMovimentacaoCaixa
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTipoMovimentacaoCaixaFilter<$PrismaModel>
+    _max?: NestedEnumTipoMovimentacaoCaixaFilter<$PrismaModel>
+  }
+
+  export type EnumCategoriaMovimentacaoCaixaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CategoriaMovimentacaoCaixa | EnumCategoriaMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    in?: $Enums.CategoriaMovimentacaoCaixa[] | ListEnumCategoriaMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CategoriaMovimentacaoCaixa[] | ListEnumCategoriaMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    not?: NestedEnumCategoriaMovimentacaoCaixaWithAggregatesFilter<$PrismaModel> | $Enums.CategoriaMovimentacaoCaixa
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumCategoriaMovimentacaoCaixaFilter<$PrismaModel>
+    _max?: NestedEnumCategoriaMovimentacaoCaixaFilter<$PrismaModel>
+  }
+
+  export type EnumTipoPagamentoNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoPagamento | EnumTipoPagamentoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumTipoPagamentoNullableWithAggregatesFilter<$PrismaModel> | $Enums.TipoPagamento | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumTipoPagamentoNullableFilter<$PrismaModel>
+    _max?: NestedEnumTipoPagamentoNullableFilter<$PrismaModel>
+  }
+
   export type ItemPedidoCreateNestedManyWithoutPedidoInput = {
     create?: XOR<ItemPedidoCreateWithoutPedidoInput, ItemPedidoUncheckedCreateWithoutPedidoInput> | ItemPedidoCreateWithoutPedidoInput[] | ItemPedidoUncheckedCreateWithoutPedidoInput[]
     connectOrCreate?: ItemPedidoCreateOrConnectWithoutPedidoInput | ItemPedidoCreateOrConnectWithoutPedidoInput[]
@@ -12423,6 +17119,82 @@ export namespace Prisma {
     upsert?: ItemPedidoUpsertWithoutItensDevolvidosInput
     connect?: ItemPedidoWhereUniqueInput
     update?: XOR<XOR<ItemPedidoUpdateToOneWithWhereWithoutItensDevolvidosInput, ItemPedidoUpdateWithoutItensDevolvidosInput>, ItemPedidoUncheckedUpdateWithoutItensDevolvidosInput>
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
+  export type MovimentacaoCaixaCreateNestedManyWithoutSessaoInput = {
+    create?: XOR<MovimentacaoCaixaCreateWithoutSessaoInput, MovimentacaoCaixaUncheckedCreateWithoutSessaoInput> | MovimentacaoCaixaCreateWithoutSessaoInput[] | MovimentacaoCaixaUncheckedCreateWithoutSessaoInput[]
+    connectOrCreate?: MovimentacaoCaixaCreateOrConnectWithoutSessaoInput | MovimentacaoCaixaCreateOrConnectWithoutSessaoInput[]
+    createMany?: MovimentacaoCaixaCreateManySessaoInputEnvelope
+    connect?: MovimentacaoCaixaWhereUniqueInput | MovimentacaoCaixaWhereUniqueInput[]
+  }
+
+  export type MovimentacaoCaixaUncheckedCreateNestedManyWithoutSessaoInput = {
+    create?: XOR<MovimentacaoCaixaCreateWithoutSessaoInput, MovimentacaoCaixaUncheckedCreateWithoutSessaoInput> | MovimentacaoCaixaCreateWithoutSessaoInput[] | MovimentacaoCaixaUncheckedCreateWithoutSessaoInput[]
+    connectOrCreate?: MovimentacaoCaixaCreateOrConnectWithoutSessaoInput | MovimentacaoCaixaCreateOrConnectWithoutSessaoInput[]
+    createMany?: MovimentacaoCaixaCreateManySessaoInputEnvelope
+    connect?: MovimentacaoCaixaWhereUniqueInput | MovimentacaoCaixaWhereUniqueInput[]
+  }
+
+  export type EnumStatusSessaoCaixaFieldUpdateOperationsInput = {
+    set?: $Enums.StatusSessaoCaixa
+  }
+
+  export type MovimentacaoCaixaUpdateManyWithoutSessaoNestedInput = {
+    create?: XOR<MovimentacaoCaixaCreateWithoutSessaoInput, MovimentacaoCaixaUncheckedCreateWithoutSessaoInput> | MovimentacaoCaixaCreateWithoutSessaoInput[] | MovimentacaoCaixaUncheckedCreateWithoutSessaoInput[]
+    connectOrCreate?: MovimentacaoCaixaCreateOrConnectWithoutSessaoInput | MovimentacaoCaixaCreateOrConnectWithoutSessaoInput[]
+    upsert?: MovimentacaoCaixaUpsertWithWhereUniqueWithoutSessaoInput | MovimentacaoCaixaUpsertWithWhereUniqueWithoutSessaoInput[]
+    createMany?: MovimentacaoCaixaCreateManySessaoInputEnvelope
+    set?: MovimentacaoCaixaWhereUniqueInput | MovimentacaoCaixaWhereUniqueInput[]
+    disconnect?: MovimentacaoCaixaWhereUniqueInput | MovimentacaoCaixaWhereUniqueInput[]
+    delete?: MovimentacaoCaixaWhereUniqueInput | MovimentacaoCaixaWhereUniqueInput[]
+    connect?: MovimentacaoCaixaWhereUniqueInput | MovimentacaoCaixaWhereUniqueInput[]
+    update?: MovimentacaoCaixaUpdateWithWhereUniqueWithoutSessaoInput | MovimentacaoCaixaUpdateWithWhereUniqueWithoutSessaoInput[]
+    updateMany?: MovimentacaoCaixaUpdateManyWithWhereWithoutSessaoInput | MovimentacaoCaixaUpdateManyWithWhereWithoutSessaoInput[]
+    deleteMany?: MovimentacaoCaixaScalarWhereInput | MovimentacaoCaixaScalarWhereInput[]
+  }
+
+  export type MovimentacaoCaixaUncheckedUpdateManyWithoutSessaoNestedInput = {
+    create?: XOR<MovimentacaoCaixaCreateWithoutSessaoInput, MovimentacaoCaixaUncheckedCreateWithoutSessaoInput> | MovimentacaoCaixaCreateWithoutSessaoInput[] | MovimentacaoCaixaUncheckedCreateWithoutSessaoInput[]
+    connectOrCreate?: MovimentacaoCaixaCreateOrConnectWithoutSessaoInput | MovimentacaoCaixaCreateOrConnectWithoutSessaoInput[]
+    upsert?: MovimentacaoCaixaUpsertWithWhereUniqueWithoutSessaoInput | MovimentacaoCaixaUpsertWithWhereUniqueWithoutSessaoInput[]
+    createMany?: MovimentacaoCaixaCreateManySessaoInputEnvelope
+    set?: MovimentacaoCaixaWhereUniqueInput | MovimentacaoCaixaWhereUniqueInput[]
+    disconnect?: MovimentacaoCaixaWhereUniqueInput | MovimentacaoCaixaWhereUniqueInput[]
+    delete?: MovimentacaoCaixaWhereUniqueInput | MovimentacaoCaixaWhereUniqueInput[]
+    connect?: MovimentacaoCaixaWhereUniqueInput | MovimentacaoCaixaWhereUniqueInput[]
+    update?: MovimentacaoCaixaUpdateWithWhereUniqueWithoutSessaoInput | MovimentacaoCaixaUpdateWithWhereUniqueWithoutSessaoInput[]
+    updateMany?: MovimentacaoCaixaUpdateManyWithWhereWithoutSessaoInput | MovimentacaoCaixaUpdateManyWithWhereWithoutSessaoInput[]
+    deleteMany?: MovimentacaoCaixaScalarWhereInput | MovimentacaoCaixaScalarWhereInput[]
+  }
+
+  export type SessaoCaixaCreateNestedOneWithoutMovimentacoesInput = {
+    create?: XOR<SessaoCaixaCreateWithoutMovimentacoesInput, SessaoCaixaUncheckedCreateWithoutMovimentacoesInput>
+    connectOrCreate?: SessaoCaixaCreateOrConnectWithoutMovimentacoesInput
+    connect?: SessaoCaixaWhereUniqueInput
+  }
+
+  export type EnumTipoMovimentacaoCaixaFieldUpdateOperationsInput = {
+    set?: $Enums.TipoMovimentacaoCaixa
+  }
+
+  export type EnumCategoriaMovimentacaoCaixaFieldUpdateOperationsInput = {
+    set?: $Enums.CategoriaMovimentacaoCaixa
+  }
+
+  export type NullableEnumTipoPagamentoFieldUpdateOperationsInput = {
+    set?: $Enums.TipoPagamento | null
+  }
+
+  export type SessaoCaixaUpdateOneRequiredWithoutMovimentacoesNestedInput = {
+    create?: XOR<SessaoCaixaCreateWithoutMovimentacoesInput, SessaoCaixaUncheckedCreateWithoutMovimentacoesInput>
+    connectOrCreate?: SessaoCaixaCreateOrConnectWithoutMovimentacoesInput
+    upsert?: SessaoCaixaUpsertWithoutMovimentacoesInput
+    connect?: SessaoCaixaWhereUniqueInput
+    update?: XOR<XOR<SessaoCaixaUpdateToOneWithWhereWithoutMovimentacoesInput, SessaoCaixaUpdateWithoutMovimentacoesInput>, SessaoCaixaUncheckedUpdateWithoutMovimentacoesInput>
   }
 
   export type NestedUuidFilter<$PrismaModel = never> = {
@@ -12873,6 +17645,87 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumStatusDevolucaoFilter<$PrismaModel>
     _max?: NestedEnumStatusDevolucaoFilter<$PrismaModel>
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStatusSessaoCaixaFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusSessaoCaixa | EnumStatusSessaoCaixaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusSessaoCaixa[] | ListEnumStatusSessaoCaixaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusSessaoCaixa[] | ListEnumStatusSessaoCaixaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusSessaoCaixaFilter<$PrismaModel> | $Enums.StatusSessaoCaixa
+  }
+
+  export type NestedEnumStatusSessaoCaixaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusSessaoCaixa | EnumStatusSessaoCaixaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusSessaoCaixa[] | ListEnumStatusSessaoCaixaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusSessaoCaixa[] | ListEnumStatusSessaoCaixaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusSessaoCaixaWithAggregatesFilter<$PrismaModel> | $Enums.StatusSessaoCaixa
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusSessaoCaixaFilter<$PrismaModel>
+    _max?: NestedEnumStatusSessaoCaixaFilter<$PrismaModel>
+  }
+
+  export type NestedEnumTipoMovimentacaoCaixaFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoMovimentacaoCaixa | EnumTipoMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoMovimentacaoCaixa[] | ListEnumTipoMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoMovimentacaoCaixa[] | ListEnumTipoMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoMovimentacaoCaixaFilter<$PrismaModel> | $Enums.TipoMovimentacaoCaixa
+  }
+
+  export type NestedEnumCategoriaMovimentacaoCaixaFilter<$PrismaModel = never> = {
+    equals?: $Enums.CategoriaMovimentacaoCaixa | EnumCategoriaMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    in?: $Enums.CategoriaMovimentacaoCaixa[] | ListEnumCategoriaMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CategoriaMovimentacaoCaixa[] | ListEnumCategoriaMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    not?: NestedEnumCategoriaMovimentacaoCaixaFilter<$PrismaModel> | $Enums.CategoriaMovimentacaoCaixa
+  }
+
+  export type NestedEnumTipoPagamentoNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoPagamento | EnumTipoPagamentoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumTipoPagamentoNullableFilter<$PrismaModel> | $Enums.TipoPagamento | null
+  }
+
+  export type NestedEnumTipoMovimentacaoCaixaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoMovimentacaoCaixa | EnumTipoMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoMovimentacaoCaixa[] | ListEnumTipoMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoMovimentacaoCaixa[] | ListEnumTipoMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoMovimentacaoCaixaWithAggregatesFilter<$PrismaModel> | $Enums.TipoMovimentacaoCaixa
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTipoMovimentacaoCaixaFilter<$PrismaModel>
+    _max?: NestedEnumTipoMovimentacaoCaixaFilter<$PrismaModel>
+  }
+
+  export type NestedEnumCategoriaMovimentacaoCaixaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CategoriaMovimentacaoCaixa | EnumCategoriaMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    in?: $Enums.CategoriaMovimentacaoCaixa[] | ListEnumCategoriaMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CategoriaMovimentacaoCaixa[] | ListEnumCategoriaMovimentacaoCaixaFieldRefInput<$PrismaModel>
+    not?: NestedEnumCategoriaMovimentacaoCaixaWithAggregatesFilter<$PrismaModel> | $Enums.CategoriaMovimentacaoCaixa
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumCategoriaMovimentacaoCaixaFilter<$PrismaModel>
+    _max?: NestedEnumCategoriaMovimentacaoCaixaFilter<$PrismaModel>
+  }
+
+  export type NestedEnumTipoPagamentoNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoPagamento | EnumTipoPagamentoFieldRefInput<$PrismaModel> | null
+    in?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.TipoPagamento[] | ListEnumTipoPagamentoFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumTipoPagamentoNullableWithAggregatesFilter<$PrismaModel> | $Enums.TipoPagamento | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumTipoPagamentoNullableFilter<$PrismaModel>
+    _max?: NestedEnumTipoPagamentoNullableFilter<$PrismaModel>
   }
 
   export type ItemPedidoCreateWithoutPedidoInput = {
@@ -14127,6 +18980,181 @@ export namespace Prisma {
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type MovimentacaoCaixaCreateWithoutSessaoInput = {
+    id?: string
+    tenantId: string
+    tipo: $Enums.TipoMovimentacaoCaixa
+    categoria: $Enums.CategoriaMovimentacaoCaixa
+    descricao: string
+    valor: Decimal | DecimalJsLike | number | string
+    formaPagamento?: $Enums.TipoPagamento | null
+    pedidoId?: string | null
+    pedidoNumero?: string | null
+    pagamentoId?: string | null
+    operador: string
+    criadoEm?: Date | string
+  }
+
+  export type MovimentacaoCaixaUncheckedCreateWithoutSessaoInput = {
+    id?: string
+    tenantId: string
+    tipo: $Enums.TipoMovimentacaoCaixa
+    categoria: $Enums.CategoriaMovimentacaoCaixa
+    descricao: string
+    valor: Decimal | DecimalJsLike | number | string
+    formaPagamento?: $Enums.TipoPagamento | null
+    pedidoId?: string | null
+    pedidoNumero?: string | null
+    pagamentoId?: string | null
+    operador: string
+    criadoEm?: Date | string
+  }
+
+  export type MovimentacaoCaixaCreateOrConnectWithoutSessaoInput = {
+    where: MovimentacaoCaixaWhereUniqueInput
+    create: XOR<MovimentacaoCaixaCreateWithoutSessaoInput, MovimentacaoCaixaUncheckedCreateWithoutSessaoInput>
+  }
+
+  export type MovimentacaoCaixaCreateManySessaoInputEnvelope = {
+    data: MovimentacaoCaixaCreateManySessaoInput | MovimentacaoCaixaCreateManySessaoInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type MovimentacaoCaixaUpsertWithWhereUniqueWithoutSessaoInput = {
+    where: MovimentacaoCaixaWhereUniqueInput
+    update: XOR<MovimentacaoCaixaUpdateWithoutSessaoInput, MovimentacaoCaixaUncheckedUpdateWithoutSessaoInput>
+    create: XOR<MovimentacaoCaixaCreateWithoutSessaoInput, MovimentacaoCaixaUncheckedCreateWithoutSessaoInput>
+  }
+
+  export type MovimentacaoCaixaUpdateWithWhereUniqueWithoutSessaoInput = {
+    where: MovimentacaoCaixaWhereUniqueInput
+    data: XOR<MovimentacaoCaixaUpdateWithoutSessaoInput, MovimentacaoCaixaUncheckedUpdateWithoutSessaoInput>
+  }
+
+  export type MovimentacaoCaixaUpdateManyWithWhereWithoutSessaoInput = {
+    where: MovimentacaoCaixaScalarWhereInput
+    data: XOR<MovimentacaoCaixaUpdateManyMutationInput, MovimentacaoCaixaUncheckedUpdateManyWithoutSessaoInput>
+  }
+
+  export type MovimentacaoCaixaScalarWhereInput = {
+    AND?: MovimentacaoCaixaScalarWhereInput | MovimentacaoCaixaScalarWhereInput[]
+    OR?: MovimentacaoCaixaScalarWhereInput[]
+    NOT?: MovimentacaoCaixaScalarWhereInput | MovimentacaoCaixaScalarWhereInput[]
+    id?: UuidFilter<"MovimentacaoCaixa"> | string
+    tenantId?: UuidFilter<"MovimentacaoCaixa"> | string
+    sessaoId?: UuidFilter<"MovimentacaoCaixa"> | string
+    tipo?: EnumTipoMovimentacaoCaixaFilter<"MovimentacaoCaixa"> | $Enums.TipoMovimentacaoCaixa
+    categoria?: EnumCategoriaMovimentacaoCaixaFilter<"MovimentacaoCaixa"> | $Enums.CategoriaMovimentacaoCaixa
+    descricao?: StringFilter<"MovimentacaoCaixa"> | string
+    valor?: DecimalFilter<"MovimentacaoCaixa"> | Decimal | DecimalJsLike | number | string
+    formaPagamento?: EnumTipoPagamentoNullableFilter<"MovimentacaoCaixa"> | $Enums.TipoPagamento | null
+    pedidoId?: UuidNullableFilter<"MovimentacaoCaixa"> | string | null
+    pedidoNumero?: StringNullableFilter<"MovimentacaoCaixa"> | string | null
+    pagamentoId?: UuidNullableFilter<"MovimentacaoCaixa"> | string | null
+    operador?: StringFilter<"MovimentacaoCaixa"> | string
+    criadoEm?: DateTimeFilter<"MovimentacaoCaixa"> | Date | string
+  }
+
+  export type SessaoCaixaCreateWithoutMovimentacoesInput = {
+    id?: string
+    tenantId: string
+    numero: string
+    status?: $Enums.StatusSessaoCaixa
+    caixa: string
+    operador: string
+    operadorId?: string | null
+    aberturaEm?: Date | string
+    valorAbertura: Decimal | DecimalJsLike | number | string
+    observacoesAbertura?: string | null
+    fechamentoEm?: Date | string | null
+    valorContado?: Decimal | DecimalJsLike | number | string | null
+    valorEsperado?: Decimal | DecimalJsLike | number | string | null
+    diferenca?: Decimal | DecimalJsLike | number | string | null
+    observacoesFechamento?: string | null
+    travaCaixaAberto?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type SessaoCaixaUncheckedCreateWithoutMovimentacoesInput = {
+    id?: string
+    tenantId: string
+    numero: string
+    status?: $Enums.StatusSessaoCaixa
+    caixa: string
+    operador: string
+    operadorId?: string | null
+    aberturaEm?: Date | string
+    valorAbertura: Decimal | DecimalJsLike | number | string
+    observacoesAbertura?: string | null
+    fechamentoEm?: Date | string | null
+    valorContado?: Decimal | DecimalJsLike | number | string | null
+    valorEsperado?: Decimal | DecimalJsLike | number | string | null
+    diferenca?: Decimal | DecimalJsLike | number | string | null
+    observacoesFechamento?: string | null
+    travaCaixaAberto?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type SessaoCaixaCreateOrConnectWithoutMovimentacoesInput = {
+    where: SessaoCaixaWhereUniqueInput
+    create: XOR<SessaoCaixaCreateWithoutMovimentacoesInput, SessaoCaixaUncheckedCreateWithoutMovimentacoesInput>
+  }
+
+  export type SessaoCaixaUpsertWithoutMovimentacoesInput = {
+    update: XOR<SessaoCaixaUpdateWithoutMovimentacoesInput, SessaoCaixaUncheckedUpdateWithoutMovimentacoesInput>
+    create: XOR<SessaoCaixaCreateWithoutMovimentacoesInput, SessaoCaixaUncheckedCreateWithoutMovimentacoesInput>
+    where?: SessaoCaixaWhereInput
+  }
+
+  export type SessaoCaixaUpdateToOneWithWhereWithoutMovimentacoesInput = {
+    where?: SessaoCaixaWhereInput
+    data: XOR<SessaoCaixaUpdateWithoutMovimentacoesInput, SessaoCaixaUncheckedUpdateWithoutMovimentacoesInput>
+  }
+
+  export type SessaoCaixaUpdateWithoutMovimentacoesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    numero?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusSessaoCaixaFieldUpdateOperationsInput | $Enums.StatusSessaoCaixa
+    caixa?: StringFieldUpdateOperationsInput | string
+    operador?: StringFieldUpdateOperationsInput | string
+    operadorId?: NullableStringFieldUpdateOperationsInput | string | null
+    aberturaEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    valorAbertura?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    observacoesAbertura?: NullableStringFieldUpdateOperationsInput | string | null
+    fechamentoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    valorContado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valorEsperado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    diferenca?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    observacoesFechamento?: NullableStringFieldUpdateOperationsInput | string | null
+    travaCaixaAberto?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SessaoCaixaUncheckedUpdateWithoutMovimentacoesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    numero?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusSessaoCaixaFieldUpdateOperationsInput | $Enums.StatusSessaoCaixa
+    caixa?: StringFieldUpdateOperationsInput | string
+    operador?: StringFieldUpdateOperationsInput | string
+    operadorId?: NullableStringFieldUpdateOperationsInput | string | null
+    aberturaEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    valorAbertura?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    observacoesAbertura?: NullableStringFieldUpdateOperationsInput | string | null
+    fechamentoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    valorContado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    valorEsperado?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    diferenca?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    observacoesFechamento?: NullableStringFieldUpdateOperationsInput | string | null
+    travaCaixaAberto?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ItemPedidoCreateManyPedidoInput = {
     id?: string
     produtoId: string
@@ -14419,6 +19447,66 @@ export namespace Prisma {
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type MovimentacaoCaixaCreateManySessaoInput = {
+    id?: string
+    tenantId: string
+    tipo: $Enums.TipoMovimentacaoCaixa
+    categoria: $Enums.CategoriaMovimentacaoCaixa
+    descricao: string
+    valor: Decimal | DecimalJsLike | number | string
+    formaPagamento?: $Enums.TipoPagamento | null
+    pedidoId?: string | null
+    pedidoNumero?: string | null
+    pagamentoId?: string | null
+    operador: string
+    criadoEm?: Date | string
+  }
+
+  export type MovimentacaoCaixaUpdateWithoutSessaoInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoMovimentacaoCaixaFieldUpdateOperationsInput | $Enums.TipoMovimentacaoCaixa
+    categoria?: EnumCategoriaMovimentacaoCaixaFieldUpdateOperationsInput | $Enums.CategoriaMovimentacaoCaixa
+    descricao?: StringFieldUpdateOperationsInput | string
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    formaPagamento?: NullableEnumTipoPagamentoFieldUpdateOperationsInput | $Enums.TipoPagamento | null
+    pedidoId?: NullableStringFieldUpdateOperationsInput | string | null
+    pedidoNumero?: NullableStringFieldUpdateOperationsInput | string | null
+    pagamentoId?: NullableStringFieldUpdateOperationsInput | string | null
+    operador?: StringFieldUpdateOperationsInput | string
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MovimentacaoCaixaUncheckedUpdateWithoutSessaoInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoMovimentacaoCaixaFieldUpdateOperationsInput | $Enums.TipoMovimentacaoCaixa
+    categoria?: EnumCategoriaMovimentacaoCaixaFieldUpdateOperationsInput | $Enums.CategoriaMovimentacaoCaixa
+    descricao?: StringFieldUpdateOperationsInput | string
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    formaPagamento?: NullableEnumTipoPagamentoFieldUpdateOperationsInput | $Enums.TipoPagamento | null
+    pedidoId?: NullableStringFieldUpdateOperationsInput | string | null
+    pedidoNumero?: NullableStringFieldUpdateOperationsInput | string | null
+    pagamentoId?: NullableStringFieldUpdateOperationsInput | string | null
+    operador?: StringFieldUpdateOperationsInput | string
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MovimentacaoCaixaUncheckedUpdateManyWithoutSessaoInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoMovimentacaoCaixaFieldUpdateOperationsInput | $Enums.TipoMovimentacaoCaixa
+    categoria?: EnumCategoriaMovimentacaoCaixaFieldUpdateOperationsInput | $Enums.CategoriaMovimentacaoCaixa
+    descricao?: StringFieldUpdateOperationsInput | string
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    formaPagamento?: NullableEnumTipoPagamentoFieldUpdateOperationsInput | $Enums.TipoPagamento | null
+    pedidoId?: NullableStringFieldUpdateOperationsInput | string | null
+    pedidoNumero?: NullableStringFieldUpdateOperationsInput | string | null
+    pagamentoId?: NullableStringFieldUpdateOperationsInput | string | null
+    operador?: StringFieldUpdateOperationsInput | string
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
 
 
   /**
@@ -14436,6 +19524,10 @@ export namespace Prisma {
      * @deprecated Use DevolucaoCountOutputTypeDefaultArgs instead
      */
     export type DevolucaoCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DevolucaoCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use SessaoCaixaCountOutputTypeDefaultArgs instead
+     */
+    export type SessaoCaixaCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = SessaoCaixaCountOutputTypeDefaultArgs<ExtArgs>
     /**
      * @deprecated Use PedidoDefaultArgs instead
      */
@@ -14464,6 +19556,18 @@ export namespace Prisma {
      * @deprecated Use ItemDevolucaoDefaultArgs instead
      */
     export type ItemDevolucaoArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ItemDevolucaoDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use FormaPagamentoDefaultArgs instead
+     */
+    export type FormaPagamentoArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = FormaPagamentoDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use SessaoCaixaDefaultArgs instead
+     */
+    export type SessaoCaixaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = SessaoCaixaDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use MovimentacaoCaixaDefaultArgs instead
+     */
+    export type MovimentacaoCaixaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = MovimentacaoCaixaDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany
