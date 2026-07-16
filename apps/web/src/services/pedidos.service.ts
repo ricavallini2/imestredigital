@@ -56,20 +56,66 @@ export interface CatalogoPedidoResponse {
   clientes: { id: string; nome: string; email: string; telefone: string; tipo: string }[];
 }
 
+/**
+ * Normaliza um pedido do shape REAL do order-service para o que as telas leem:
+ *   cliente ← clienteNome · valor ← Number(valorTotal) · canal ← canalOrigem ·
+ *   itens (nas listas) ← contagem. Sem isso a lista de pedidos crasha
+ *   (undefined.toLocaleString) ao receber dados reais em produção.
+ */
+function normalizarPedidoLista(p: any): any {
+  const itens =
+    typeof p.itens === 'number'
+      ? p.itens
+      : Array.isArray(p.itens)
+        ? p.itens.length
+        : (p._count?.itens ?? 0);
+  return {
+    ...p,
+    cliente: p.cliente ?? p.clienteNome ?? 'Consumidor',
+    valor: Number(p.valor ?? p.valorTotal) || 0,
+    itens,
+    canal: p.canal ?? p.canalOrigem ?? 'OUTROS',
+    criadoEm: p.criadoEm ?? p.data ?? null,
+  };
+}
+
 export const pedidosService = {
   listar: async (filtros?: FiltrosPedido): Promise<RespostaPaginada<Pedido>> => {
     const { data } = await api.get('/v1/pedidos', { params: filtros });
-    return data;
+    // Envelope canônico { dados, ... } ou array puro (mock legado).
+    if (Array.isArray(data))
+      return {
+        dados: data.map(normalizarPedidoLista),
+        total: data.length,
+        pagina: 1,
+        limite: data.length,
+        totalPaginas: 1,
+      } as any;
+    return { ...data, dados: (data?.dados ?? []).map(normalizarPedidoLista) };
   },
 
   buscarPorId: async (id: string): Promise<Pedido> => {
     const { data } = await api.get(`/v1/pedidos/${id}`);
-    return data;
+    // No detalhe preserva `itens` como ARRAY (a tela itera os itens).
+    return {
+      ...data,
+      cliente: data?.cliente ?? data?.clienteNome ?? 'Consumidor',
+      valor: Number(data?.valor ?? data?.valorTotal) || 0,
+      canal: data?.canal ?? data?.canalOrigem ?? 'OUTROS',
+      itens: Array.isArray(data?.itens) ? data.itens : [],
+    } as any;
   },
 
   obterEstatisticas: async (): Promise<EstatisticasPedidos> => {
     const { data } = await api.get('/v1/pedidos/estatisticas/dashboard');
-    return data;
+    // Tolerante aos dois shapes (mock: pedidos/receita · real: totalPedidos/totalVendas).
+    return {
+      ...data,
+      pedidos: Number(data?.pedidos ?? data?.totalPedidos) || 0,
+      receita: Number(data?.receita ?? data?.totalVendas) || 0,
+      ticketMedio: Number(data?.ticketMedio) || 0,
+      porStatus: data?.porStatus ?? {},
+    } as any;
   },
 
   /**
