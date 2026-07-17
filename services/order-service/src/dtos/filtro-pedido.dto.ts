@@ -21,6 +21,11 @@ export class FiltroPedidoDto {
   @IsString()
   clienteId?: string;
 
+  /** Busca livre: nº do pedido (se numérico), nome ou e-mail do cliente. */
+  @IsOptional()
+  @IsString()
+  busca?: string;
+
   @IsOptional()
   @IsString()
   dataInicio?: string; // ISO 8601

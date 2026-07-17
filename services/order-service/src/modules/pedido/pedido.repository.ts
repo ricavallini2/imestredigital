@@ -170,6 +170,7 @@ export class PedidoRepository {
       statusPagamento,
       canalOrigem,
       clienteId,
+      busca,
       dataInicio,
       dataFim,
       pagina = 1,
@@ -186,6 +187,21 @@ export class PedidoRepository {
     if (statusPagamento) where.statusPagamento = statusPagamento;
     if (canalOrigem) where.canalOrigem = canalOrigem;
     if (clienteId) where.clienteId = clienteId;
+
+    // Busca livre (usada pela busca global): nº do pedido (se numérico),
+    // nome ou e-mail do cliente. OR entre os campos; ANDa com os demais filtros.
+    if (busca) {
+      const termo = String(busca).trim();
+      const or: any[] = [
+        { clienteNome: { contains: termo, mode: 'insensitive' } },
+        { clienteEmail: { contains: termo, mode: 'insensitive' } },
+      ];
+      const numero = Number(termo);
+      if (Number.isInteger(numero) && numero > 0 && String(numero) === termo) {
+        or.push({ numero });
+      }
+      where.OR = or;
+    }
 
     if (dataInicio || dataFim) {
       where.criadoEm = {};
