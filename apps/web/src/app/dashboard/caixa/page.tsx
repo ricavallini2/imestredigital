@@ -39,7 +39,7 @@ import {
   percentualDesconto,
   obterDescontoMaximoPct,
 } from '@/lib/config-vendas';
-import { obterSessao } from '@/lib/sessao';
+import { obterSessao, obterUsuarioLogado } from '@/lib/sessao';
 import { ModalAutorizacao } from '@/components/ui/modal-autorizacao';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -114,11 +114,14 @@ const FORMA_LABEL: Record<string, string> = {
 
 // ─── Modal Abertura ───────────────────────────────────────────────────────────
 function ModalAbertura({
+  operador,
   onClose,
   onConfirm,
   loading,
   erro,
 }: {
+  /** Operador FIXO = usuário logado. Não é editável (regra do negócio). */
+  operador: string;
   onClose: () => void;
   onConfirm: (v: {
     operador: string;
@@ -130,7 +133,6 @@ function ModalAbertura({
   /** Ex.: 409 quando já existe um caixa aberto no tenant. */
   erro?: string;
 }) {
-  const [operador, setOperador] = useState('');
   const [valor, setValor] = useState('200');
   const [caixa, setCaixa] = useState('Caixa 01');
   const [obs, setObs] = useState('');
@@ -155,14 +157,18 @@ function ModalAbertura({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Operador <span className="text-red-500">*</span>
+                Operador
               </label>
-              <input
-                value={operador}
-                onChange={(e) => setOperador(e.target.value)}
-                placeholder="Seu nome"
-                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm dark:text-white"
-              />
+              {/* Travado no usuário logado: quem abre o turno é quem responde por
+                  ele. Não editável — nem por gerente/admin (regra do negócio). */}
+              <div
+                title="Operador do turno é sempre o usuário logado"
+                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-900/40 dark:text-slate-200"
+              >
+                <User className="h-4 w-4 shrink-0 text-slate-400" />
+                <span className="truncate font-medium">{operador || '—'}</span>
+                <Lock className="ml-auto h-3.5 w-3.5 shrink-0 text-slate-400" />
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
@@ -230,7 +236,8 @@ function ModalAbertura({
                 onConfirm({ operador, valorAbertura: Number(valor), caixa, observacoes: obs })
               }
               // Campo vazio abriria o turno com R$ 0,00: `Number('')` é 0 e passa
-              // no `@Min(0)` do backend. Zero digitado continua válido.
+              // no `@Min(0)` do backend. Zero digitado continua válido. Operador
+              // vem travado do usuário logado — se faltar, não há quem responda.
               disabled={!operador || valor.trim() === '' || loading}
               className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-emerald-500 py-2.5 text-sm font-bold text-white hover:bg-emerald-600 disabled:opacity-50"
             >
@@ -747,6 +754,11 @@ export default function CaixaPage() {
   const excedenteReceb = Math.max(0, arredondar(informadoReceb - totalPedidoReceb));
   const trocoReceb = formaReceb === 'DINHEIRO' ? excedenteReceb : 0;
   const excedenteInvalido = formaReceb !== 'DINHEIRO' && excedenteReceb > EPS;
+  // SUB-RECEBIMENTO: o caixa recebe o valor INTEGRAL do pedido. Receber menos
+  // deixaria o pedido PARCIAL — que sai da lista de "Vendas em Aberto" (filtra
+  // statusPagamento=PENDENTE) e vira saldo órfão, invisível e incobrável. Este
+  // modal é de forma ÚNICA; pagamento dividido/parcial não é suportado aqui.
+  const faltaReceber = informadoReceb + EPS < totalPedidoReceb;
 
   const confirmarRecebimento = async () => {
     if (!receber) return;
@@ -755,6 +767,13 @@ export default function CaixaPage() {
         `Valor acima do total do pedido (${fmt(totalPedidoReceb)}). Em ${
           FORMA_LABEL[formaReceb] ?? formaReceb
         } não há troco — corrija o valor recebido.`,
+      );
+      return;
+    }
+    if (faltaReceber) {
+      setErroReceb(
+        `O caixa recebe o valor integral do pedido (${fmt(totalPedidoReceb)}). ` +
+          'Recebimento parcial não é suportado — informe o valor total.',
       );
       return;
     }
@@ -1186,6 +1205,7 @@ export default function CaixaPage() {
       {/* Modais */}
       {showAbertura && (
         <ModalAbertura
+          operador={obterUsuarioLogado()?.nome ?? ''}
           onClose={() => setShowAbertura(false)}
           onConfirm={handleAbrir}
           loading={abrir.isPending}
@@ -1334,6 +1354,12 @@ export default function CaixaPage() {
                     {FORMA_LABEL[formaReceb] ?? formaReceb} não há troco — corrija o valor.
                   </p>
                 )}
+                {faltaReceber && Number(valorReceb) > 0 && (
+                  <p className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-950/20 dark:text-amber-400">
+                    Abaixo do total do pedido ({fmt(totalPedidoReceb)}). O caixa recebe o valor
+                    integral — recebimento parcial não é suportado.
+                  </p>
+                )}
               </div>
               {formaReceb === 'CARTAO_CREDITO' && (
                 <div>
@@ -1367,7 +1393,9 @@ export default function CaixaPage() {
                 </button>
                 <button
                   onClick={confirmarRecebimento}
-                  disabled={recebendo || !(Number(valorReceb) > 0) || excedenteInvalido}
+                  disabled={
+                    recebendo || !(Number(valorReceb) > 0) || excedenteInvalido || faltaReceber
+                  }
                   className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
                 >
                   {recebendo ? (

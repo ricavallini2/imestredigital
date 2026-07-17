@@ -41,7 +41,20 @@ function setTokens(accessToken: string, refreshToken: string) {
 function clearTokens() {
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
+  localStorage.removeItem('usuario');
+  // Ordem do menu é por-tenant; um novo login pode ser outro tenant.
+  localStorage.removeItem('imd-menu-lateral-ordem');
   document.cookie = 'access_token=; path=/; max-age=0';
+}
+
+/**
+ * Encerra a sessão do usuário (logout manual). Fonte única de limpeza — o botão
+ * Sair DEVE chamar isto (antes só removia chaves inexistentes 'token'/'user',
+ * deixando access_token, cookie e 'usuario' vivos: o logout não deslogava e o
+ * operador do caixa ficava preso ao usuário anterior num terminal compartilhado).
+ */
+export function limparSessao() {
+  clearTokens();
 }
 
 // ─── Interceptor de Requisição ─────────────────────────────

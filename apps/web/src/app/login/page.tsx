@@ -39,9 +39,19 @@ function LoginContent() {
     try {
       const { data } = await api.post('/v1/auth/login', { email, senha });
 
+      // Novo login pode ser OUTRO tenant: descarta caches por-tenant do login
+      // anterior (a ordem do menu vazaria para este usuário). Sessões que
+      // expiram sem logout explícito não passam por clearTokens.
+      localStorage.removeItem('imd-menu-lateral-ordem');
+
       // Salvar token no localStorage
       localStorage.setItem('access_token', data.accessToken);
       localStorage.setItem('refresh_token', data.refreshToken);
+
+      // Persistir o usuário logado (nome/cargo/flags) — o JWT só carrega
+      // { sub, tenantId, email, cargo }, sem o nome. O caixa usa isto para
+      // travar o operador no usuário logado.
+      if (data.usuario) localStorage.setItem('usuario', JSON.stringify(data.usuario));
 
       // Salvar token em cookie para o middleware (sem httpOnly para poder escrever no client)
       document.cookie = `access_token=${data.accessToken}; path=/; max-age=3600; SameSite=Strict`;

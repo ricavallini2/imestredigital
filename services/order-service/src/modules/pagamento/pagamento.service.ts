@@ -19,6 +19,7 @@ import { RegistrarPagamentoDto } from '../../dtos/pagamento.dto';
 import {
   OrigemPedido,
   Prisma,
+  StatusPagamento,
   StatusPagamentoDetalhado,
   TipoPagamento,
 } from '../../../generated/client';
@@ -77,6 +78,15 @@ export class PagamentoService {
     const statusNormalizado = normalizarStatusPagamento(dto.status);
 
     const { pagamento, lancadoNoCaixa } = await this.prisma.$transaction(async (tx) => {
+      // SERIALIZA pagamentos concorrentes do MESMO pedido: trava a linha ANTES de
+      // ler a soma. Sem o lock, dois POSTs simultâneos leem Σ=0, ambos passam no
+      // guard e gravam pagamentos acima do total — inflando a gaveta. $queryRaw
+      // porque o Prisma não expõe FOR UPDATE; só vale DENTRO da transação.
+      await tx.$queryRaw`
+        SELECT id FROM pedidos
+         WHERE id = ${pedidoId}::uuid AND tenant_id = ${tenantId}::uuid
+         FOR UPDATE`;
+
       // INVARIANTE DE DINHEIRO: a soma dos pagamentos não pode ultrapassar o
       // total do pedido. `Pagamento.valor` é o valor EFETIVAMENTE pago naquela
       // forma — troco é devolução de excedente, não pagamento. Sem esta guarda a
@@ -91,6 +101,12 @@ export class PagamentoService {
         { ...dto, status: statusNormalizado },
         tx,
       );
+
+      // A verdade do PEDIDO acompanha o dinheiro NA MESMA transação: recebeu →
+      // PAGO. Antes isto dependia do evento `pagamento.capturado`, que NADA
+      // publica no fluxo de caixa — o pedido ficava PENDENTE, reaparecia em
+      // "vendas em aberto" e o operador rerecebia até o guard de soma travar.
+      await this.sincronizarStatusPagamentoPedido(tx, tenantId, pedidoId);
 
       if (statusNormalizado !== StatusPagamentoDetalhado.APROVADO) {
         return { pagamento: pagamentoCriado, lancadoNoCaixa: false };
@@ -211,6 +227,63 @@ export class PagamentoService {
   }
 
   /**
+   * Sincroniza o `statusPagamento` do PEDIDO com a soma dos pagamentos APROVADOS,
+   * na MESMA transação do registro/estorno — a verdade do pedido acompanha o
+   * dinheiro na hora, sem depender de round-trip por Kafka.
+   *
+   * MOTIVO: a transição para PAGO só existia no consumo de `pagamento.capturado`,
+   * evento que NADA publica no fluxo de balcão/caixa (registrarPagamento publica
+   * `pedido.pago`, consumido por inventory/financial). O pedido recebido no caixa
+   * ficava PENDENTE para sempre, reaparecendo em "vendas em aberto".
+   *
+   * PAGO quando Σ aprovados ≥ total (tolerância de 1 centavo). PARCIAL quando há
+   * aprovado que não cobre. Sem aprovado: REEMBOLSADO se houve estorno (o valor
+   * voltou ao cliente), senão PENDENTE. Tudo em Decimal — dinheiro nunca em float.
+   */
+  private async sincronizarStatusPagamentoPedido(
+    cliente: ClientePrisma,
+    tenantId: string,
+    pedidoId: string,
+  ): Promise<void> {
+    const pedido = await cliente.pedido.findFirst({
+      where: { id: pedidoId, tenantId },
+      select: { valorTotal: true, statusPagamento: true },
+    });
+    if (!pedido) return;
+
+    const [aprovado, estornos] = await Promise.all([
+      cliente.pagamento.aggregate({
+        where: { pedidoId, tenantId, status: StatusPagamentoDetalhado.APROVADO },
+        _sum: { valor: true },
+      }),
+      cliente.pagamento.count({
+        where: { pedidoId, tenantId, status: StatusPagamentoDetalhado.ESTORNADO },
+      }),
+    ]);
+
+    const pago = aprovado._sum.valor ?? new Prisma.Decimal(0);
+    const tolerancia = new Prisma.Decimal('0.01');
+
+    let novo: StatusPagamento;
+    if (pago.greaterThan(0) && pago.greaterThanOrEqualTo(pedido.valorTotal.minus(tolerancia))) {
+      novo = StatusPagamento.PAGO;
+    } else if (pago.greaterThan(0)) {
+      novo = StatusPagamento.PARCIAL;
+    } else if (estornos > 0) {
+      novo = StatusPagamento.REEMBOLSADO;
+    } else {
+      novo = StatusPagamento.PENDENTE;
+    }
+
+    if (novo !== pedido.statusPagamento) {
+      await cliente.pedido.updateMany({
+        where: { id: pedidoId, tenantId },
+        data: { statusPagamento: novo, atualizadoEm: new Date() },
+      });
+    }
+  }
+
+  /**
    * Processar webhook de gateway de pagamento.
    * Chamado por POST /pagamentos/webhook
    *
@@ -251,13 +324,29 @@ export class PagamentoService {
       throw new NotFoundException(`Pagamento ${pagamentoId} não encontrado`);
     }
 
+    // Só APROVADO estorna: um PENDENTE/RECUSADO nunca moveu dinheiro, e marcá-lo
+    // ESTORNADO rebaixaria o pedido para REEMBOLSADO sem nada ter entrado/saído.
+    if (pagamento.status !== StatusPagamentoDetalhado.APROVADO) {
+      throw new BadRequestException('Só é possível estornar um pagamento aprovado.');
+    }
+
     const { pagamentoAtualizado, lancadoNoCaixa } = await this.prisma.$transaction(async (tx) => {
+      // Serializa com registrarPagamento/estorno concorrentes do mesmo pedido.
+      await tx.$queryRaw`
+        SELECT id FROM pedidos
+         WHERE id = ${pagamento.pedidoId}::uuid AND tenant_id = ${tenantId}::uuid
+         FOR UPDATE`;
+
       const atualizado = await this.pagamentoRepository.atualizarStatus(
         tenantId,
         pagamentoId,
         'ESTORNADO',
         tx,
       );
+
+      // O estorno rebaixa o pedido: PAGO → PARCIAL (se sobra pagamento aprovado)
+      // ou REEMBOLSADO (se nada mais aprovado resta). Mesma transação do estorno.
+      await this.sincronizarStatusPagamentoPedido(tx, tenantId, pagamento.pedidoId);
 
       // MESMA tolerância do registrarVenda: sem caixa aberto (ou sem VENDA
       // lançada no caixa) devolve null e NÃO derruba o estorno. O estorno é

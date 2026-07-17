@@ -232,7 +232,8 @@ export default function MensagensPage() {
   // Derive current user id from localStorage (set by mock login)
   const currentUid = useMemo(() => {
     try {
-      const u = localStorage.getItem('user');
+      // Chave real gravada no login é 'usuario' (não 'user', que nunca existiu).
+      const u = localStorage.getItem('usuario');
       if (u) return JSON.parse(u).id ?? 'admin';
     } catch { /* ignore */ }
     return 'admin';

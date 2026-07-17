@@ -320,6 +320,24 @@ export class ConsumidorEventosController {
     }
 
     try {
+      // Idempotência: reentrega do MESMO pagamento não duplica o Pagamento (o que
+      // inflaria a gaveta/financeiro). A chave inclui a transação do gateway — um
+      // pedido pode legitimamente ter várias autorizações distintas, então
+      // gatear só por pedidoId bloquearia pagamentos válidos. Sem transação
+      // externa, segue sem dedup (comportamento anterior).
+      if (evento.transacaoExternaId) {
+        const chave = `${evento.pedidoId}:${evento.transacaoExternaId}`;
+        const novo = await this.pedidoService.registrarEvento(
+          evento.tenantId,
+          TOPICOS_CONSUMIDOS.PAGAMENTO_AUTORIZADO,
+          chave,
+        );
+        if (!novo) {
+          this.logger.log(`pagamento.autorizado [${chave}] já processado — ignorado`);
+          return;
+        }
+      }
+
       await this.pagamentoService.registrarPagamento(evento.tenantId, evento.pedidoId, {
         tipo: evento.tipo ?? 'MARKETPLACE',
         status: 'APROVADO',

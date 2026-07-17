@@ -50,3 +50,37 @@ export function podeOperarCaixa(cargo?: string | null): boolean {
   const c = String(cargo ?? '').toUpperCase();
   return c === 'CAIXA' || c === 'ADMIN' || c === 'GERENTE';
 }
+
+export interface UsuarioLogado {
+  id: string;
+  nome: string;
+  email: string;
+  cargo: string;
+  podeLiberarVenda: boolean;
+}
+
+/**
+ * Usuário logado com NOME — o JWT não carrega o nome, então lê o objeto salvo
+ * no login (`localStorage.usuario`). Fallback para o JWT (sessão antiga sem o
+ * objeto): usa o e-mail como rótulo até o próximo login. Usado para travar o
+ * operador do caixa no usuário logado.
+ */
+export function obterUsuarioLogado(): UsuarioLogado | null {
+  if (typeof window === 'undefined') return null;
+  const sessao = obterSessao();
+  let salvo: Record<string, unknown> | null = null;
+  try {
+    const raw = localStorage.getItem('usuario');
+    salvo = raw ? JSON.parse(raw) : null;
+  } catch {
+    salvo = null;
+  }
+  if (!sessao && !salvo) return null;
+  return {
+    id: String(salvo?.id ?? sessao?.id ?? ''),
+    nome: String(salvo?.nome ?? sessao?.email ?? ''),
+    email: String(salvo?.email ?? sessao?.email ?? ''),
+    cargo: String(salvo?.cargo ?? sessao?.cargo ?? '').toUpperCase(),
+    podeLiberarVenda: Boolean(salvo?.podeLiberarVenda ?? false),
+  };
+}

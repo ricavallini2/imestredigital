@@ -18,6 +18,8 @@ import {
 import { useBuscaGlobal } from '@/hooks/useIA';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useNotificacoes, type NotificacaoItem } from '@/hooks/useNotificacoes';
+import { obterUsuarioLogado } from '@/lib/sessao';
+import { limparSessao } from '@/lib/api';
 
 const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -102,12 +104,17 @@ export function Header({ onAbrirMenu }: HeaderProps) {
   const total = (data?.produtos?.length ?? 0) + (data?.pedidos?.length ?? 0) + (data?.clientes?.length ?? 0);
   const naoLidas = naoLidasNotifs.length;
 
-  const currentUser = useMemo(() => {
-    try {
-      const u = localStorage.getItem('user');
-      if (u) return JSON.parse(u);
-    } catch { /* ignore */ }
-    return { nome: 'Administrador', email: 'admin@empresa.com', cargo: 'admin' };
+  // Usuário logado real (nome/email/cargo) — lido após montar para não divergir
+  // no SSR. Antes lia a chave 'user' (nunca gravada) e mostrava sempre
+  // "Administrador" para qualquer usuário. A chave real é 'usuario'.
+  const [currentUser, setCurrentUser] = useState<{
+    nome: string;
+    email: string;
+    cargo: string;
+  } | null>(null);
+  useEffect(() => {
+    const u = obterUsuarioLogado();
+    if (u) setCurrentUser({ nome: u.nome, email: u.email, cargo: u.cargo });
   }, []);
 
   const cargoLabel: Record<string, string> = {
@@ -181,9 +188,13 @@ export function Header({ onAbrirMenu }: HeaderProps) {
   }, []);
 
   const handleLogout = useCallback(() => {
-    try { localStorage.removeItem('token'); localStorage.removeItem('user'); } catch { /* ignore */ }
-    router.push('/login');
-  }, [router]);
+    // Limpeza canônica: access_token, refresh_token, 'usuario', cache do menu e o
+    // cookie. Sem isto o cookie sobrevive (1h) e o middleware reautentica ao
+    // voltar para /dashboard — o "Sair" não deslogava de fato.
+    try { limparSessao(); } catch { /* ignore */ }
+    // Navegação dura força o middleware a reavaliar o cookie (já expirado).
+    window.location.assign('/login');
+  }, []);
 
   return (
     <header className="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center gap-3 px-3 md:px-6 relative z-40 shrink-0">
@@ -470,7 +481,7 @@ export function Header({ onAbrirMenu }: HeaderProps) {
                       {currentUser?.email ?? ''}
                     </p>
                     <span className="inline-block mt-0.5 text-[10px] bg-marca-100 dark:bg-marca-900/40 text-marca-600 dark:text-marca-400 px-1.5 py-0.5 rounded-full font-medium">
-                      {cargoLabel[currentUser?.cargo] ?? 'Usuário'}
+                      {cargoLabel[String(currentUser?.cargo ?? '').toLowerCase()] ?? 'Usuário'}
                     </span>
                   </div>
                 </div>
