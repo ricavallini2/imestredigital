@@ -18,6 +18,7 @@ import {
   CreditCard,
   Percent,
   Loader2,
+  ListOrdered,
 } from 'lucide-react';
 import { FormField } from '@/components/ui/form-field';
 import { Tabs } from '@/components/ui/tabs';
@@ -30,6 +31,8 @@ import {
 } from '@/hooks/useFormasPagamento';
 import { TIPO_FORMA_LABELS, type TipoFormaPagamento } from '@/services/formas-pagamento.service';
 import { obterDescontoMaximoPct, salvarDescontoMaximoPct } from '@/lib/config-vendas';
+import { obterSessao } from '@/lib/sessao';
+import { EditorMenuLateral } from '@/components/configuracoes/editor-menu-lateral';
 
 // Dados mock
 const usuariosMock = [
@@ -60,6 +63,14 @@ export default function ConfiguracoesPage() {
   const [salvando, setSalvando] = useState(false);
   const [usuarios, setUsuarios] = useState(usuariosMock);
   const [modalNovoUsuario, setModalNovoUsuario] = useState(false);
+
+  // Reordenar o menu é restrito a admin/gerente (a aba só aparece para eles; o
+  // backend também barra o PUT). Lê no cliente para não divergir no SSR.
+  const [podeEditarMenu, setPodeEditarMenu] = useState(false);
+  useEffect(() => {
+    const cargo = String(obterSessao()?.cargo ?? '').toUpperCase();
+    setPodeEditarMenu(cargo === 'ADMIN' || cargo === 'GERENTE');
+  }, []);
 
   const [formEmpresa, setFormEmpresa] = useState({
     nome: 'iMestreDigital LTDA',
@@ -560,6 +571,16 @@ export default function ConfiguracoesPage() {
       ),
     },
   ];
+
+  // Aba de reordenação do menu — só admin/gerente.
+  if (podeEditarMenu) {
+    abasConteudo.push({
+      id: 'menu',
+      label: 'Menu lateral',
+      icon: <ListOrdered className="h-4 w-4" />,
+      content: <EditorMenuLateral />,
+    });
+  }
 
   return (
     <div className="space-y-6">

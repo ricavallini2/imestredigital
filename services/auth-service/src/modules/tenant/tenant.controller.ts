@@ -20,6 +20,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { TenantId } from '../auth/decorators/tenant-id.decorator';
 import { AtualizarTenantDto } from '../../dtos/tenant/atualizar-tenant.dto';
+import { SalvarMenuDto } from '../../dtos/tenant/salvar-menu.dto';
 
 @ApiTags('tenants')
 @ApiBearerAuth()
@@ -45,5 +46,21 @@ export class TenantController {
     @Body() dto: AtualizarTenantDto,
   ) {
     return this.tenantService.atualizar(tenantId, dto);
+  }
+
+  /** Ordem do menu lateral do tenant. Qualquer usuário logado lê (para renderizar). */
+  @Get('menu')
+  @ApiOperation({ summary: 'Obter a ordem do menu lateral da empresa' })
+  async obterMenu(@TenantId() tenantId: string) {
+    return this.tenantService.obterMenu(tenantId);
+  }
+
+  /** Define a ordem do menu lateral para toda a empresa (admin/gerente). */
+  @Put('menu')
+  @UseGuards(RolesGuard)
+  @Roles('admin', 'gerente')
+  @ApiOperation({ summary: 'Salvar a ordem do menu lateral da empresa' })
+  async salvarMenu(@TenantId() tenantId: string, @Body() dto: SalvarMenuDto) {
+    return this.tenantService.salvarMenu(tenantId, dto.ordem);
   }
 }

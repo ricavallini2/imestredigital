@@ -14,164 +14,23 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useMemo } from 'react';
 import {
-  LayoutDashboard,
-  Package,
-  Warehouse,
-  ShoppingCart,
-  Landmark,
-  Store,
-  FileText,
-  DollarSign,
-  Users,
-  Bot,
   Settings,
   X,
-  ShoppingBag,
-  Megaphone,
-  MessageCircle,
-  BarChart2,
-  BadgeDollarSign,
-  Settings2,
-  FileCheck2,
-  History,
-  Tag,
-  Tags,
-  FolderTree,
-  MessagesSquare,
-  Grid3x3,
-  BookUser,
-  Hash,
-  Truck,
-  ClipboardList,
-  UserCog,
   ChevronDown,
   PanelLeftClose,
   PanelLeftOpen,
-  type LucideIcon,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { LogoSidebar } from '@/components/ui/logo';
-
-// ─── Modelo de menu (árvore) ─────────────────────────────────────────────────
-
-interface ItemLink {
-  tipo: 'link';
-  href: string;
-  label: string;
-  icone: LucideIcon;
-  destaque?: boolean;
-  badge?: 'mensagens';
-}
-
-interface ItemGrupo {
-  tipo: 'grupo';
-  id: string;
-  label: string;
-  icone: LucideIcon;
-  filhos: MenuItem[];
-}
-
-type MenuItem = ItemLink | ItemGrupo;
-
-const MENU: MenuItem[] = [
-  { tipo: 'link', href: '/dashboard', label: 'Dashboard', icone: LayoutDashboard },
-  { tipo: 'link', href: '/dashboard/ia', label: 'iMestreAI', icone: Bot, destaque: true },
-  {
-    tipo: 'grupo',
-    id: 'cadastros',
-    label: 'Cadastros',
-    icone: BookUser,
-    filhos: [
-      { tipo: 'link', href: '/dashboard/clientes', label: 'Clientes', icone: Users },
-      { tipo: 'link', href: '/dashboard/cadastros/usuarios', label: 'Usuários', icone: UserCog },
-      { tipo: 'link', href: '/dashboard/cadastros/cfop', label: 'CFOP', icone: Hash },
-      {
-        tipo: 'link',
-        href: '/dashboard/compras/fornecedores',
-        label: 'Fornecedores',
-        icone: Truck,
-      },
-      {
-        tipo: 'grupo',
-        id: 'produtos',
-        label: 'Produtos',
-        icone: Package,
-        filhos: [
-          { tipo: 'link', href: '/dashboard/produtos', label: 'Todos os Produtos', icone: Package },
-          {
-            tipo: 'link',
-            href: '/dashboard/produtos/categorias',
-            label: 'Categorias',
-            icone: FolderTree,
-          },
-          { tipo: 'link', href: '/dashboard/produtos/marcas', label: 'Marcas', icone: Tags },
-          { tipo: 'link', href: '/dashboard/produtos/grades', label: 'Grades', icone: Grid3x3 },
-          { tipo: 'link', href: '/dashboard/produtos/etiquetas', label: 'Etiquetas', icone: Tag },
-        ],
-      },
-    ],
-  },
-  { tipo: 'link', href: '/dashboard/estoque', label: 'Estoque', icone: Warehouse },
-  {
-    tipo: 'grupo',
-    id: 'vendas',
-    label: 'Vendas',
-    icone: ShoppingCart,
-    filhos: [
-      { tipo: 'link', href: '/dashboard/caixa', label: 'Caixa', icone: Landmark },
-      { tipo: 'link', href: '/dashboard/pedidos', label: 'Pedidos', icone: ClipboardList },
-    ],
-  },
-  { tipo: 'link', href: '/dashboard/compras', label: 'Compras', icone: ShoppingBag },
-  {
-    tipo: 'grupo',
-    id: 'marketplace',
-    label: 'Marketplace',
-    icone: Store,
-    filhos: [
-      { tipo: 'link', href: '/dashboard/marketplaces', label: 'Visão Geral', icone: Store },
-      {
-        tipo: 'link',
-        href: '/dashboard/marketplaces/anuncios',
-        label: 'Anúncios',
-        icone: Megaphone,
-      },
-      {
-        tipo: 'link',
-        href: '/dashboard/marketplaces/perguntas',
-        label: 'Perguntas',
-        icone: MessageCircle,
-      },
-      { tipo: 'link', href: '/dashboard/marketplaces/vendas', label: 'Vendas', icone: BarChart2 },
-    ],
-  },
-  { tipo: 'link', href: '/dashboard/fiscal', label: 'Fiscal', icone: FileText },
-  { tipo: 'link', href: '/dashboard/financeiro', label: 'Financeiro', icone: DollarSign },
-  {
-    tipo: 'grupo',
-    id: 'cobranca',
-    label: 'Cobrança',
-    icone: BadgeDollarSign,
-    filhos: [
-      { tipo: 'link', href: '/dashboard/cobranca', label: 'Visão Geral', icone: BadgeDollarSign },
-      {
-        tipo: 'link',
-        href: '/dashboard/cobranca/configuracoes',
-        label: 'Configurações',
-        icone: Settings2,
-      },
-      { tipo: 'link', href: '/dashboard/cobranca/acordos', label: 'Acordos', icone: FileCheck2 },
-      { tipo: 'link', href: '/dashboard/cobranca/historico', label: 'Histórico', icone: History },
-    ],
-  },
-  {
-    tipo: 'link',
-    href: '/dashboard/mensagens',
-    label: 'Mensagens',
-    icone: MessagesSquare,
-    badge: 'mensagens',
-  },
-];
+import {
+  MENU,
+  aplicarOrdem,
+  type MenuItem,
+  type ItemLink,
+  type ItemGrupo,
+  type OrdemNo,
+} from '@/lib/menu-lateral';
+import { useOrdemMenu, lerOrdemCache } from '@/hooks/useMenuLateral';
 
 const ITEM_RODAPE = { href: '/dashboard/configuracoes', label: 'Configurações', icone: Settings };
 
@@ -195,6 +54,21 @@ export function Sidebar({ aberta = false, onFechar }: SidebarProps) {
   const [msgNaoLidas, setMsgNaoLidas] = useState(0);
   const [recolhido, setRecolhido] = useState(false);
   const [abertos, setAbertos] = useState<Record<string, boolean>>({});
+
+  // Ordem do menu (por-tenant).
+  const { data: ordemMenu, isSuccess } = useOrdemMenu();
+  // Cache lido SÓ após montar: no 1º render (servidor E cliente) o menu sai
+  // canônico, então o HTML hidrata sem mismatch. O cache entra num render
+  // pós-montagem, sem "pulo" perceptível.
+  const [ordemCache, setOrdemCache] = useState<OrdemNo[] | null>(null);
+  useEffect(() => setOrdemCache(lerOrdemCache()), []);
+  const menuEfetivo = useMemo(
+    // Servidor resolvido MANDA — inclusive `null` (tenant sem customização)
+    // força a ordem canônica, em vez de o `??` cair no cache de outro tenant.
+    // Antes de resolver, usa o cache (já pós-montagem).
+    () => aplicarOrdem(MENU, isSuccess ? ordemMenu : ordemCache),
+    [isSuccess, ordemMenu, ordemCache],
+  );
 
   // Estado de recolhido persistido por dispositivo.
   useEffect(() => {
@@ -419,7 +293,7 @@ export function Sidebar({ aberta = false, onFechar }: SidebarProps) {
 
       {/* Menu principal */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        {MENU.map((item) => renderItem(item, 0, recolhidoEfetivo))}
+        {menuEfetivo.map((item) => renderItem(item, 0, recolhidoEfetivo))}
       </nav>
 
       {/* Rodapé: Configurações + recolher (desktop) */}
