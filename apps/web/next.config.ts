@@ -167,6 +167,12 @@ const nextConfig: NextConfig = {
           source: '/api/v1/financeiro/resumo',
           destination: `${FINANCIAL_SERVICE}/api/v1/financeiro/resumo`,
         },
+        // Cobrança: títulos derivados de recebíveis vencidos + ações/acordos/régua.
+        {
+          source: '/api/v1/cobranca/:path*',
+          destination: `${FINANCIAL_SERVICE}/api/v1/cobranca/:path*`,
+        },
+        { source: '/api/v1/cobranca', destination: `${FINANCIAL_SERVICE}/api/v1/cobranca` },
 
         // ── Fiscal Service (3004) ───────────────────────────────────
         // Controllers usam 'v1/notas-fiscais' com globalPrefix 'api'

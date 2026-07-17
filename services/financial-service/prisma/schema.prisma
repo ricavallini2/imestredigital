@@ -62,31 +62,31 @@ enum TipoConta {
 /// Representação de uma conta bancária ou financeira da empresa.
 /// Tipos: corrente, poupança, caixa, cartão, digital, etc.
 model ContaFinanceira {
-  id              String      @id @default(uuid()) @db.Uuid
-  tenantId        String      @map("tenant_id") @db.Uuid
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @map("tenant_id") @db.Uuid
 
-  nome            String
-  tipo            TipoConta   // CORRENTE, POUPANCA, INVESTIMENTO, CAIXA, CARTAO
-  banco           String?
-  agencia         String?
-  conta           String?
+  nome    String
+  tipo    TipoConta // CORRENTE, POUPANCA, INVESTIMENTO, CAIXA, CARTAO
+  banco   String?
+  agencia String?
+  conta   String?
 
-  saldoAtual      Decimal  @default(0) @db.Decimal(19, 2) @map("saldo_atual")
-  saldoInicial    Decimal  @default(0) @db.Decimal(19, 2) @map("saldo_inicial")
+  saldoAtual   Decimal @default(0) @map("saldo_atual") @db.Decimal(19, 2)
+  saldoInicial Decimal @default(0) @map("saldo_inicial") @db.Decimal(19, 2)
 
-  ativa           Boolean  @default(true)
-  cor             String?  @default("#3B82F6")
-  icone           String?  @default("bank")
+  ativa Boolean @default(true)
+  cor   String? @default("#3B82F6")
+  icone String? @default("bank")
 
-  criadoEm        DateTime @default(now()) @map("criado_em")
-  atualizadoEm    DateTime @updatedAt @map("atualizado_em")
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
 
   // Relacionamentos
-  lancamentos     Lancamento[]
-  transferenciasOrigem      Lancamento[] @relation("TransferenciaOrigem")
-  transferenciasDestino     Lancamento[] @relation("TransferenciaDestino")
-  recorrencias    Recorrencia[]
-  conciliacoes    ConciliacaoBancaria[]
+  lancamentos           Lancamento[]
+  transferenciasOrigem  Lancamento[]          @relation("TransferenciaOrigem")
+  transferenciasDestino Lancamento[]          @relation("TransferenciaDestino")
+  recorrencias          Recorrencia[]
+  conciliacoes          ConciliacaoBancaria[]
 
   @@index([tenantId])
   @@index([ativa])
@@ -97,55 +97,55 @@ model ContaFinanceira {
 /// Transação financeira: receita, despesa ou transferência.
 /// Pode ser pago/recebido ou permanecer em aberto.
 model Lancamento {
-  id                String              @id @default(uuid()) @db.Uuid
-  tenantId          String              @map("tenant_id") @db.Uuid
-  contaId           String?             @map("conta_id") @db.Uuid
-  conta             ContaFinanceira?    @relation(fields: [contaId], references: [id], onDelete: SetNull)
-  usuarioId         String?             @map("usuario_id") @db.Uuid
+  id        String           @id @default(uuid()) @db.Uuid
+  tenantId  String           @map("tenant_id") @db.Uuid
+  contaId   String?          @map("conta_id") @db.Uuid
+  conta     ContaFinanceira? @relation(fields: [contaId], references: [id], onDelete: SetNull)
+  usuarioId String?          @map("usuario_id") @db.Uuid
 
-  tipo              TipoLancamento
-  categoria         String?
-  subcategoria      String?
-  descricao         String              @db.Text
-  valor             Decimal             @db.Decimal(19, 2)
+  tipo         TipoLancamento
+  categoria    String?
+  subcategoria String?
+  descricao    String         @db.Text
+  valor        Decimal        @db.Decimal(19, 2)
 
-  dataVencimento    DateTime            @map("data_vencimento")
-  dataPagamento     DateTime?           @map("data_pagamento")
-  dataCompetencia   DateTime?           @map("data_competencia")
+  dataVencimento  DateTime  @map("data_vencimento")
+  dataPagamento   DateTime? @map("data_pagamento")
+  dataCompetencia DateTime? @map("data_competencia")
 
-  status            StatusLancamento    @default(PENDENTE)
-  formaPagamento    FormaPagamento?     @map("forma_pagamento")
+  status         StatusLancamento @default(PENDENTE)
+  formaPagamento FormaPagamento?  @map("forma_pagamento")
 
   // Parcelamento
-  numeroParcela     Int?     @map("numero_parcela")
-  totalParcelas     Int?     @map("total_parcelas")
-  parcelaOrigemId   String?  @map("parcela_origem_id") @db.Uuid
+  numeroParcela   Int?    @map("numero_parcela")
+  totalParcelas   Int?    @map("total_parcelas")
+  parcelaOrigemId String? @map("parcela_origem_id") @db.Uuid
 
   // Integrações
-  pedidoId          String?  @map("pedido_id") @db.Uuid
-  notaFiscalId      String?  @map("nota_fiscal_id") @db.Uuid
+  pedidoId     String? @map("pedido_id") @db.Uuid
+  notaFiscalId String? @map("nota_fiscal_id") @db.Uuid
 
-  fornecedor        String?
-  cliente           String?
-  observacao        String?  @db.Text
-  tags              String[] @default([])
+  fornecedor String?
+  cliente    String?
+  observacao String?  @db.Text
+  tags       String[] @default([])
 
   // Recorrência
-  recorrente        Boolean  @default(false)
-  recorrenciaId     String?  @map("recorrencia_id") @db.Uuid
-  recorrencia       Recorrencia? @relation(fields: [recorrenciaId], references: [id], onDelete: SetNull)
+  recorrente    Boolean      @default(false)
+  recorrenciaId String?      @map("recorrencia_id") @db.Uuid
+  recorrencia   Recorrencia? @relation(fields: [recorrenciaId], references: [id], onDelete: SetNull)
 
-  anexoUrl          String?  @map("anexo_url")
+  anexoUrl String? @map("anexo_url")
 
-  criadoEm          DateTime @default(now()) @map("criado_em")
-  atualizadoEm      DateTime @updatedAt @map("atualizado_em")
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
 
   // Relacionamentos para transferências
-  contaOrigemId     String?  @map("conta_origem_id") @db.Uuid
-  contaOrigem       ContaFinanceira? @relation("TransferenciaOrigem", fields: [contaOrigemId], references: [id], onDelete: SetNull)
+  contaOrigemId String?          @map("conta_origem_id") @db.Uuid
+  contaOrigem   ContaFinanceira? @relation("TransferenciaOrigem", fields: [contaOrigemId], references: [id], onDelete: SetNull)
 
-  contaDestinoId    String?  @map("conta_destino_id") @db.Uuid
-  contaDestino      ContaFinanceira? @relation("TransferenciaDestino", fields: [contaDestinoId], references: [id], onDelete: SetNull)
+  contaDestinoId String?          @map("conta_destino_id") @db.Uuid
+  contaDestino   ContaFinanceira? @relation("TransferenciaDestino", fields: [contaDestinoId], references: [id], onDelete: SetNull)
 
   @@index([tenantId])
   @@index([tipo])
@@ -165,22 +165,22 @@ enum TipoCategoriaFinanceira {
 }
 
 model CategoriaFinanceira {
-  id              String                    @id @default(uuid()) @db.Uuid
-  tenantId        String                    @map("tenant_id") @db.Uuid
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @map("tenant_id") @db.Uuid
 
-  nome            String
-  tipo            TipoCategoriaFinanceira
-  icone           String?                   @default("tag")
-  cor             String?                   @default("#6B7280")
+  nome  String
+  tipo  TipoCategoriaFinanceira
+  icone String?                 @default("tag")
+  cor   String?                 @default("#6B7280")
 
-  paiId           String?  @map("pai_id") @db.Uuid
-  pai             CategoriaFinanceira? @relation("CategoriaPai", fields: [paiId], references: [id], onDelete: SetNull)
-  filhos          CategoriaFinanceira[] @relation("CategoriaPai")
+  paiId  String?               @map("pai_id") @db.Uuid
+  pai    CategoriaFinanceira?  @relation("CategoriaPai", fields: [paiId], references: [id], onDelete: SetNull)
+  filhos CategoriaFinanceira[] @relation("CategoriaPai")
 
-  ativa           Boolean  @default(true)
+  ativa Boolean @default(true)
 
-  criadoEm        DateTime @default(now()) @map("criado_em")
-  atualizadoEm    DateTime @updatedAt @map("atualizado_em")
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
 
   @@index([tenantId])
   @@index([tipo])
@@ -203,27 +203,27 @@ enum FrequenciaRecorrencia {
 /// Configuração para gerar lançamentos automaticamente.
 /// Exemplo: aluguel todo mês, no dia 5.
 model Recorrencia {
-  id              String                  @id @default(uuid()) @db.Uuid
-  tenantId        String                  @map("tenant_id") @db.Uuid
-  contaId         String?                 @map("conta_id") @db.Uuid
-  conta           ContaFinanceira?        @relation(fields: [contaId], references: [id], onDelete: SetNull)
+  id       String           @id @default(uuid()) @db.Uuid
+  tenantId String           @map("tenant_id") @db.Uuid
+  contaId  String?          @map("conta_id") @db.Uuid
+  conta    ContaFinanceira? @relation(fields: [contaId], references: [id], onDelete: SetNull)
 
-  descricao       String
-  tipo            TipoLancamento
-  categoria       String?
-  valor           Decimal                 @db.Decimal(19, 2)
+  descricao String
+  tipo      TipoLancamento
+  categoria String?
+  valor     Decimal        @db.Decimal(19, 2)
 
-  frequencia      FrequenciaRecorrencia
-  diaVencimento   Int?                    @map("dia_vencimento") // 1-31, ou null se semanal
+  frequencia    FrequenciaRecorrencia
+  diaVencimento Int?                  @map("dia_vencimento") // 1-31, ou null se semanal
 
-  proximaGeracao  DateTime @map("proxima_geracao")
-  ativa           Boolean  @default(true)
+  proximaGeracao DateTime @map("proxima_geracao")
+  ativa          Boolean  @default(true)
 
-  criadoEm        DateTime @default(now()) @map("criado_em")
-  atualizadoEm    DateTime @updatedAt @map("atualizado_em")
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
 
   // Relacionamentos
-  lancamentos     Lancamento[]
+  lancamentos Lancamento[]
 
   @@index([tenantId])
   @@index([frequencia])
@@ -240,22 +240,22 @@ enum StatusConciliacao {
 
 /// Processo de reconciliar saldo do sistema com extrato bancário.
 model ConciliacaoBancaria {
-  id              String              @id @default(uuid()) @db.Uuid
-  tenantId        String              @map("tenant_id") @db.Uuid
-  contaId         String              @map("conta_id") @db.Uuid
-  conta           ContaFinanceira     @relation(fields: [contaId], references: [id], onDelete: Cascade)
+  id       String          @id @default(uuid()) @db.Uuid
+  tenantId String          @map("tenant_id") @db.Uuid
+  contaId  String          @map("conta_id") @db.Uuid
+  conta    ContaFinanceira @relation(fields: [contaId], references: [id], onDelete: Cascade)
 
-  dataInicio      DateTime            @map("data_inicio")
-  dataFim         DateTime            @map("data_fim")
+  dataInicio DateTime @map("data_inicio")
+  dataFim    DateTime @map("data_fim")
 
-  saldoInicial    Decimal             @db.Decimal(19, 2) @map("saldo_inicial")
-  saldoFinal      Decimal             @db.Decimal(19, 2) @map("saldo_final")
+  saldoInicial Decimal @map("saldo_inicial") @db.Decimal(19, 2)
+  saldoFinal   Decimal @map("saldo_final") @db.Decimal(19, 2)
 
-  status          StatusConciliacao   @default(EM_ANDAMENTO)
-  divergencias    Json?               @default("[]")
+  status       StatusConciliacao @default(EM_ANDAMENTO)
+  divergencias Json?             @default("[]")
 
-  criadoEm        DateTime @default(now()) @map("criado_em")
-  atualizadoEm    DateTime @updatedAt @map("atualizado_em")
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
 
   @@index([tenantId])
   @@index([contaId])
@@ -268,12 +268,12 @@ model ConciliacaoBancaria {
 /// da SAGA (reentregas do broker não reaplicam o efeito colateral).
 /// Dedup por (evento, referenciaId) — ex. ("pedido.faturado", pedidoId).
 model EventoProcessado {
-  id           String   @id @default(uuid()) @db.Uuid
-  tenantId     String   @map("tenant_id") @db.Uuid
+  id           String @id @default(uuid()) @db.Uuid
+  tenantId     String @map("tenant_id") @db.Uuid
   /// Nome lógico do evento consumido (ex. "pedido.faturado", "pedido.pago").
   evento       String
   /// Identificador do agregado de referência (ex. pedidoId).
-  referenciaId String   @map("referencia_id")
+  referenciaId String @map("referencia_id")
 
   processadoEm DateTime @default(now()) @map("processado_em")
 
@@ -285,36 +285,183 @@ model EventoProcessado {
 // ─── DRE (Demonstração de Resultado do Exercício) ─────────────
 /// Relatório financeiro mensal/anual.
 model DRE {
-  id                    String   @id @default(uuid()) @db.Uuid
-  tenantId              String   @map("tenant_id") @db.Uuid
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @map("tenant_id") @db.Uuid
 
-  periodo               String   // MENSAL, TRIMESTRAL, ANUAL
-  ano                   Int
-  mes                   Int?
+  periodo String // MENSAL, TRIMESTRAL, ANUAL
+  ano     Int
+  mes     Int?
 
-  receitaBruta          Decimal  @db.Decimal(19, 2) @map("receita_bruta")
-  deducoes              Decimal  @db.Decimal(19, 2) @default(0)
-  receitaLiquida        Decimal  @db.Decimal(19, 2) @map("receita_liquida")
+  receitaBruta   Decimal @map("receita_bruta") @db.Decimal(19, 2)
+  deducoes       Decimal @default(0) @db.Decimal(19, 2)
+  receitaLiquida Decimal @map("receita_liquida") @db.Decimal(19, 2)
 
-  custosMercadorias     Decimal  @db.Decimal(19, 2) @default(0) @map("custos_mercadorias")
-  lucroBruto            Decimal  @db.Decimal(19, 2) @map("lucro_bruto")
+  custosMercadorias Decimal @default(0) @map("custos_mercadorias") @db.Decimal(19, 2)
+  lucroBruto        Decimal @map("lucro_bruto") @db.Decimal(19, 2)
 
-  despesasOperacionais  Decimal  @db.Decimal(19, 2) @default(0) @map("despesas_operacionais")
-  despesasAdministrativas Decimal @db.Decimal(19, 2) @default(0) @map("despesas_administrativas")
-  despesasComerciais    Decimal  @db.Decimal(19, 2) @default(0) @map("despesas_comerciais")
+  despesasOperacionais    Decimal @default(0) @map("despesas_operacionais") @db.Decimal(19, 2)
+  despesasAdministrativas Decimal @default(0) @map("despesas_administrativas") @db.Decimal(19, 2)
+  despesasComerciais      Decimal @default(0) @map("despesas_comerciais") @db.Decimal(19, 2)
 
-  resultadoOperacional  Decimal  @db.Decimal(19, 2) @map("resultado_operacional")
+  resultadoOperacional Decimal @map("resultado_operacional") @db.Decimal(19, 2)
 
-  despesasFinanceiras   Decimal  @db.Decimal(19, 2) @default(0) @map("despesas_financeiras")
-  receitasFinanceiras   Decimal  @db.Decimal(19, 2) @default(0) @map("receitas_financeiras")
+  despesasFinanceiras Decimal @default(0) @map("despesas_financeiras") @db.Decimal(19, 2)
+  receitasFinanceiras Decimal @default(0) @map("receitas_financeiras") @db.Decimal(19, 2)
 
-  lucroLiquido          Decimal  @db.Decimal(19, 2) @map("lucro_liquido")
+  lucroLiquido Decimal @map("lucro_liquido") @db.Decimal(19, 2)
 
-  criadoEm              DateTime @default(now()) @map("criado_em")
+  criadoEm DateTime @default(now()) @map("criado_em")
 
+  @@unique([tenantId, ano, mes], name: "tenantId_ano_mes")
   @@index([tenantId])
   @@index([ano])
   @@index([mes])
-  @@unique([tenantId, ano, mes], name: "tenantId_ano_mes")
   @@map("dres")
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COBRANÇA — régua de cobrança sobre recebíveis vencidos
+// Os títulos DERIVAM de Lancamento (tipo RECEITA, vencido e não pago);
+// a sincronização é idempotente por [tenantId, lancamentoId].
+// ═══════════════════════════════════════════════════════════════
+
+enum StatusTituloCobranca {
+  EM_ABERTO
+  EM_COBRANCA
+  NEGOCIANDO
+  ACORDO
+  PAGO
+  PERDIDO
+}
+
+enum PrioridadeCobranca {
+  BAIXA
+  MEDIA
+  ALTA
+  CRITICA
+}
+
+enum TipoAcaoCobranca {
+  WHATSAPP
+  EMAIL
+  SMS
+  LIGACAO
+}
+
+enum StatusAcaoCobranca {
+  ENVIADO
+  ENTREGUE
+  LIDO
+  RESPONDIDO
+  FALHOU
+}
+
+enum StatusAcordoCobranca {
+  ATIVO
+  CUMPRIDO
+  QUEBRADO
+}
+
+model TituloCobranca {
+  id              String               @id @default(uuid()) @db.Uuid
+  tenantId        String               @map("tenant_id") @db.Uuid
+  lancamentoId    String?              @map("lancamento_id") @db.Uuid
+  pedidoId        String?              @map("pedido_id") @db.Uuid
+  clienteId       String?              @map("cliente_id") @db.Uuid
+  clienteNome     String               @map("cliente_nome")
+  clienteTelefone String?              @map("cliente_telefone")
+  clienteEmail    String?              @map("cliente_email")
+  descricao       String
+  valor           Decimal              @db.Decimal(19, 2)
+  dataVencimento  DateTime             @map("data_vencimento")
+  status          StatusTituloCobranca @default(EM_ABERTO)
+  prioridade      PrioridadeCobranca   @default(MEDIA)
+  tentativas      Int                  @default(0)
+  ultimaAcaoEm    DateTime?            @map("ultima_acao_em")
+  canalUltimaAcao String?              @map("canal_ultima_acao")
+  observacao      String?              @db.Text
+  criadoEm        DateTime             @default(now()) @map("criado_em")
+  atualizadoEm    DateTime             @updatedAt @map("atualizado_em")
+
+  acoes   AcaoCobranca[]
+  acordos AcordoCobranca[]
+
+  @@unique([tenantId, lancamentoId])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("titulos_cobranca")
+}
+
+model AcaoCobranca {
+  id          String             @id @default(uuid()) @db.Uuid
+  tenantId    String             @map("tenant_id") @db.Uuid
+  tituloId    String             @map("titulo_id") @db.Uuid
+  titulo      TituloCobranca     @relation(fields: [tituloId], references: [id], onDelete: Cascade)
+  clienteNome String             @map("cliente_nome")
+  tipo        TipoAcaoCobranca
+  mensagem    String             @db.Text
+  status      StatusAcaoCobranca @default(ENVIADO)
+  automatica  Boolean            @default(false)
+  detalhe     String?            @db.Text
+  criadoEm    DateTime           @default(now()) @map("criado_em")
+
+  @@index([tenantId])
+  @@index([tituloId])
+  @@map("acoes_cobranca")
+}
+
+model AcordoCobranca {
+  id               String               @id @default(uuid()) @db.Uuid
+  tenantId         String               @map("tenant_id") @db.Uuid
+  tituloId         String               @map("titulo_id") @db.Uuid
+  titulo           TituloCobranca       @relation(fields: [tituloId], references: [id], onDelete: Cascade)
+  clienteId        String?              @map("cliente_id") @db.Uuid
+  clienteNome      String               @map("cliente_nome")
+  valorOriginal    Decimal              @map("valor_original") @db.Decimal(19, 2)
+  descontoAplicado Decimal              @map("desconto_aplicado") @db.Decimal(5, 2)
+  valorFinal       Decimal              @map("valor_final") @db.Decimal(19, 2)
+  numeroParcelas   Int                  @map("numero_parcelas")
+  status           StatusAcordoCobranca @default(ATIVO)
+  observacao       String?              @db.Text
+  criadoEm         DateTime             @default(now()) @map("criado_em")
+  atualizadoEm     DateTime             @updatedAt @map("atualizado_em")
+
+  parcelas ParcelaAcordo[]
+
+  @@index([tenantId])
+  @@index([tituloId])
+  @@map("acordos_cobranca")
+}
+
+model ParcelaAcordo {
+  id         String         @id @default(uuid()) @db.Uuid
+  tenantId   String         @map("tenant_id") @db.Uuid
+  acordoId   String         @map("acordo_id") @db.Uuid
+  acordo     AcordoCobranca @relation(fields: [acordoId], references: [id], onDelete: Cascade)
+  numero     Int
+  valor      Decimal        @db.Decimal(19, 2)
+  vencimento DateTime
+  pago       Boolean        @default(false)
+  pagoEm     DateTime?      @map("pago_em")
+
+  @@index([acordoId])
+  @@map("parcelas_acordo")
+}
+
+model ConfiguracaoCobranca {
+  id                String   @id @default(uuid()) @db.Uuid
+  tenantId          String   @unique @map("tenant_id") @db.Uuid
+  ativo             Boolean  @default(false)
+  webhookN8n        String?  @map("webhook_n8n")
+  callbackUrl       String?  @map("callback_url")
+  regras            Json     @default("[]")
+  descontoMaximo    Decimal  @default(0) @map("desconto_maximo") @db.Decimal(5, 2)
+  parcelasMaximas   Int      @default(1) @map("parcelas_maximas")
+  horarioInicio     String   @default("08:00") @map("horario_inicio")
+  horarioFim        String   @default("18:00") @map("horario_fim")
+  pausarFimDeSemana Boolean  @default(true) @map("pausar_fim_de_semana")
+  criadoEm          DateTime @default(now()) @map("criado_em")
+  atualizadoEm      DateTime @updatedAt @map("atualizado_em")
+
+  @@map("configuracoes_cobranca")
 }

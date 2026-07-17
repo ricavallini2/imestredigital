@@ -30,6 +30,7 @@ import { DreModule } from './modules/dre/dre.module';
 import { ConciliacaoModule } from './modules/conciliacao/conciliacao.module';
 import { EventosModule } from './modules/eventos/eventos.module';
 import { RelatoriosModule } from './modules/relatorios/relatorios.module';
+import { CobrancaModule } from './modules/cobranca/cobranca.module';
 import { HealthController } from './controllers/health.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { TenantMiddleware } from './middlewares/tenant.middleware';
@@ -110,6 +111,7 @@ function resolverJwtSecret(config: ConfigService): string {
     ConciliacaoModule,
     EventosModule,
     RelatoriosModule,
+    CobrancaModule,
   ],
   controllers: [HealthController],
   providers: [JwtStrategy],
