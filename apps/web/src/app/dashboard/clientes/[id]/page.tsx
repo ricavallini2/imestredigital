@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { KPICard } from '@/components/ui/kpi-card';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { Abas } from '@/components/ui/abas';
 import {
   useCliente, useClienteResumo, useClienteTimeline,
   useClienteEnderecos, useClienteContatos,
@@ -112,7 +113,16 @@ function GaugeRing({ value, max = 100, color, size = 64 }: { value: number; max?
 
 // ─── Modal de interação ────────────────────────────────────────────────────
 function ModalInteracao({ clienteId, onClose }: { clienteId: string; onClose: () => void }) {
-  const [form, setForm] = useState<RegistrarInteracaoDto>({ tipo: 'ATENDIMENTO', titulo: '', descricao: '' });
+  // `canal` é OBRIGATÓRIO no backend (RegistrarInteracaoDto do customer-service).
+  // Sem ele o POST voltava 400 ("canal should not be empty") e a interação nunca
+  // era criada — a falha era silenciosa porque o modal não mostrava o erro.
+  const [form, setForm] = useState<RegistrarInteracaoDto>({
+    tipo: 'ATENDIMENTO',
+    canal: 'TELEFONE',
+    titulo: '',
+    descricao: '',
+  });
+  const [erro, setErro] = useState('');
   const registrar = useRegistrarInteracao();
 
   // Conjunto COMPLETO idêntico ao enum Prisma `TipoInteracao` (customer-service).
@@ -121,10 +131,25 @@ function ModalInteracao({ clienteId, onClose }: { clienteId: string; onClose: ()
     'ORCAMENTO', 'REUNIAO', 'VISITA', 'ELOGIO', 'RECLAMACAO',
     'VENDA', 'COMPRA', 'DEVOLUCAO', 'MARKETPLACE', 'NOTA',
   ];
+  /** Idêntico ao enum Prisma `CanalInteracao`. */
+  const CANAIS = ['TELEFONE', 'EMAIL', 'WHATSAPP', 'CHAT', 'PRESENCIAL', 'MARKETPLACE'];
+
+  const rotular = (v: string) => v.charAt(0) + v.slice(1).toLowerCase().replace('_', ' ');
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    registrar.mutate({ clienteId, dto: form }, { onSuccess: onClose });
+    setErro('');
+    registrar.mutate(
+      { clienteId, dto: form },
+      {
+        onSuccess: onClose,
+        onError: (err: unknown) => {
+          const m = (err as { response?: { data?: { message?: string | string[] } } })?.response
+            ?.data?.message;
+          setErro(Array.isArray(m) ? m[0] : (m ?? 'Não foi possível registrar a interação.'));
+        },
+      },
+    );
   };
 
   return (
@@ -132,12 +157,21 @@ function ModalInteracao({ clienteId, onClose }: { clienteId: string; onClose: ()
       <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
         <h3 className="mb-4 text-lg font-semibold text-slate-900 dark:text-slate-100">Registrar Interação</h3>
         <form onSubmit={submit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Tipo</label>
-            <select value={form.tipo} onChange={(e) => setForm((p) => ({ ...p, tipo: e.target.value as TipoInteracao }))}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
-              {TIPOS.map((t) => <option key={t} value={t}>{t.charAt(0) + t.slice(1).toLowerCase().replace('_', ' ')}</option>)}
-            </select>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Tipo</label>
+              <select value={form.tipo} onChange={(e) => setForm((p) => ({ ...p, tipo: e.target.value as TipoInteracao }))}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+                {TIPOS.map((t) => <option key={t} value={t}>{rotular(t)}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Canal *</label>
+              <select value={form.canal} onChange={(e) => setForm((p) => ({ ...p, canal: e.target.value }))}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100">
+                {CANAIS.map((c) => <option key={c} value={c}>{rotular(c)}</option>)}
+              </select>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Título *</label>
@@ -151,6 +185,11 @@ function ModalInteracao({ clienteId, onClose }: { clienteId: string; onClose: ()
               rows={3} placeholder="Detalhes da interação..."
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" />
           </div>
+          {erro && (
+            <p className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700 dark:border-red-800 dark:bg-red-950/20 dark:text-red-400">
+              {erro}
+            </p>
+          )}
           <div className="flex justify-end gap-3">
             <button type="button" onClick={onClose}
               className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700">
@@ -489,12 +528,13 @@ export default function ClienteDetailPage() {
   const isFornecedor = papeis.includes('FORNECEDOR')
   const isPJ = cliente.tipo === 'PJ'
 
-  const TABS: { id: TabType; label: string; count?: number }[] = [
-    { id: 'resumo', label: 'Resumo' },
-    { id: 'ia', label: '✦ IA' },
-    { id: 'historico', label: 'Histórico', count: timeline.length || undefined },
-    { id: 'enderecos', label: 'Endereços', count: enderecos.length || undefined },
-    { id: 'contatos', label: 'Contatos', count: contatos.length || undefined },
+  // Mesmo padrão da tela de Produto: abas em pílula com ícone, IA sempre por ÚLTIMO.
+  const TABS: { id: TabType; label: string; Icone: typeof FileText; count?: number }[] = [
+    { id: 'resumo', label: 'Resumo', Icone: FileText },
+    { id: 'historico', label: 'Histórico', Icone: Clock, count: timeline.length || undefined },
+    { id: 'enderecos', label: 'Endereços', Icone: MapPin, count: enderecos.length || undefined },
+    { id: 'contatos', label: 'Contatos', Icone: Users, count: contatos.length || undefined },
+    { id: 'ia', label: 'IA', Icone: Brain },
   ];
 
   return (
@@ -543,20 +583,6 @@ export default function ClienteDetailPage() {
           </div>
         </div>
 
-        <div className="flex shrink-0 gap-2">
-          <button onClick={() => setModalInteracao(true)}
-            className="flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-marca-600 transition-colors">
-            <Plus className="h-4 w-4" /> Interação
-          </button>
-          <button onClick={() => router.push(`/dashboard/clientes/${clienteId}/editar`)}
-            className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700">
-            <Edit className="h-4 w-4" /> Editar
-          </button>
-          <button onClick={() => { if (confirm(`Inativar "${cliente.nome}"?`)) { inativar.mutate(clienteId, { onSuccess: () => router.push('/dashboard/clientes') }); } }}
-            className="flex items-center gap-2 rounded-lg border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 transition-colors dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900/20">
-            <Archive className="h-4 w-4" /> Inativar
-          </button>
-        </div>
       </div>
 
       {/* Tags */}
@@ -578,26 +604,24 @@ export default function ClienteDetailPage() {
         <KPICard label="Última Compra" valor={dataFmt(ultimaCompra)} icone={<Calendar className="h-6 w-6" />} />
       </div>
 
-      {/* Abas */}
-      <div className="border-b border-slate-200 dark:border-slate-700">
-        <div className="flex gap-1 overflow-x-auto px-1">
-          {TABS.map((tab) => (
-            <button key={tab.id} onClick={() => setTabAtiva(tab.id)}
-              className={`flex shrink-0 items-center gap-1.5 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
-                tabAtiva === tab.id
-                  ? 'border-marca-500 text-marca-600 dark:text-marca-400'
-                  : 'border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
-              } ${tab.id === 'ia' ? 'text-purple-600 dark:text-purple-400' : ''}`}>
-              {tab.label}
-              {tab.count !== undefined && (
-                <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-xs font-bold text-slate-600 dark:bg-slate-700 dark:text-slate-400">
-                  {tab.count}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+      {/* Ações — acima das abas (padrão do ERP) */}
+      <div className="flex flex-wrap gap-2">
+        <button onClick={() => setModalInteracao(true)}
+          className="flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-marca-600 transition-colors">
+          <Plus className="h-4 w-4" /> Interação
+        </button>
+        <button onClick={() => router.push(`/dashboard/clientes/${clienteId}/editar`)}
+          className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700">
+          <Edit className="h-4 w-4" /> Editar
+        </button>
+        <button onClick={() => { if (confirm(`Inativar "${cliente.nome}"?`)) { inativar.mutate(clienteId, { onSuccess: () => router.push('/dashboard/clientes') }); } }}
+          className="flex items-center gap-2 rounded-lg border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 transition-colors dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900/20">
+          <Archive className="h-4 w-4" /> Inativar
+        </button>
       </div>
+
+      {/* Abas — componente padrão do ERP */}
+      <Abas abas={TABS} ativa={tabAtiva} onChange={setTabAtiva} />
 
       {/* Conteúdo das abas */}
 

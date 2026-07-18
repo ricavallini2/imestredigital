@@ -1,11 +1,15 @@
 'use client';
 
 /**
- * Componente Abas Reutilizável
- * Navegação entre abas com conteúdo condicional
+ * Abas com CONTEÚDO embutido (variante do padrão que também gerencia o corpo).
+ *
+ * A navegação é delegada ao componente `Abas` para que o visual seja EXATAMENTE
+ * o mesmo das telas que controlam o conteúdo por fora (Produto, Cliente, etc.) —
+ * uma única fonte da verdade do estilo de abas do ERP.
  */
 
 import { ReactNode, useState } from 'react';
+import { Abas } from './abas';
 
 interface Tab {
   id: string;
@@ -32,25 +36,11 @@ export function Tabs({ tabs, defaultTab, onChange }: TabsProps) {
 
   return (
     <div className="space-y-4">
-      {/* Tab Navigation */}
-      <div className="flex gap-1 border-b border-slate-200 dark:border-slate-700">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => handleTabChange(tab.id)}
-            className={`flex items-center gap-2 border-b-2 px-4 py-3 font-medium transition-colors ${
-              activeTab === tab.id
-                ? 'border-marca-500 text-marca-600 dark:border-marca-400 dark:text-marca-400'
-                : 'border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
-            }`}
-          >
-            {tab.icon && <span>{tab.icon}</span>}
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Content */}
+      <Abas
+        abas={tabs.map((t) => ({ id: t.id, label: t.label, icone: t.icon }))}
+        ativa={activeTab}
+        onChange={handleTabChange}
+      />
       <div className="animate-fade-in">{activeTabContent?.content}</div>
     </div>
   );

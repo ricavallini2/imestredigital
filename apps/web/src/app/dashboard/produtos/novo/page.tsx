@@ -21,6 +21,7 @@ import { useCategorias } from '@/hooks/useCategorias';
 import { useMarcas } from '@/hooks/useMarcas';
 import { useGrades } from '@/hooks/useGrades';
 import { GaleriaImagens } from '@/components/ui/galeria-imagens';
+import { Abas } from '@/components/ui/abas';
 import { slugSku } from '@/lib/utils';
 
 const TIPOS_VARIACAO = ['Única', 'Cor', 'Tamanho', 'Capacidade', 'Versão', 'Material', 'Voltagem'];
@@ -321,53 +322,41 @@ export default function NovoProdutoPage() {
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleSubmit('RASCUNHO')}
-            disabled={criar.isPending}
-            className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700 disabled:opacity-60"
-          >
-            {criar.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            Salvar Rascunho
-          </button>
-          <button
-            onClick={() => handleSubmit('ATIVO')}
-            disabled={criar.isPending}
-            className="flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2 text-sm font-semibold text-white hover:bg-marca-600 disabled:opacity-60"
-          >
-            {criar.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <CheckCircle className="h-4 w-4" />
-            )}
-            Publicar Produto
-          </button>
-        </div>
+      </div>
+
+      {/* Ações — acima das abas (padrão do ERP) */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => handleSubmit('ATIVO')}
+          disabled={criar.isPending}
+          className="flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-marca-600 disabled:opacity-60"
+        >
+          {criar.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <CheckCircle className="h-4 w-4" />
+          )}
+          Publicar Produto
+        </button>
+        <button
+          onClick={() => handleSubmit('RASCUNHO')}
+          disabled={criar.isPending}
+          className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700 disabled:opacity-60"
+        >
+          {criar.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4" />
+          )}
+          Salvar Rascunho
+        </button>
       </div>
 
       {/* Abas */}
+      <Abas abas={ABAS} ativa={abaAtiva} onChange={setAbaAtiva} />
+
+      {/* Conteúdo */}
       <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
-        <div className="border-b border-slate-200 dark:border-slate-700">
-          <div className="flex gap-1 overflow-x-auto px-4">
-            {ABAS.map((aba) => (
-              <button
-                key={aba.id}
-                onClick={() => setAbaAtiva(aba.id)}
-                className={`shrink-0 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
-                  abaAtiva === aba.id
-                    ? 'border-marca-500 text-marca-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400'
-                }`}
-              >
-                {aba.label}
-              </button>
-            ))}
-          </div>
-        </div>
 
         <div className="p-6">
           {/* ── Dados Básicos ── */}

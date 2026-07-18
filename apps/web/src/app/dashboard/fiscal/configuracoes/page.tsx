@@ -7,6 +7,7 @@ import {
   ChevronDown, Loader2, CheckCircle2, AlertTriangle, Info,
 } from 'lucide-react'
 import { useConfiguracaoFiscalReal, useSalvarConfiguracaoFiscalReal } from '@/hooks/useFiscal'
+import { Abas } from '@/components/ui/abas'
 import type {
   ConfiguracaoFiscalReal,
   AtualizarConfiguracaoFiscalReal,
@@ -324,14 +325,6 @@ export default function ConfiguracoesFiscaisPage() {
             <p className="text-sm text-slate-500 mt-0.5">Emitente, endereço, ambiente SEFAZ e numeração</p>
           </div>
         </div>
-        <button
-          onClick={handleSalvar}
-          disabled={!dirty || salvar.isPending || erros.length > 0}
-          className="flex items-center gap-2 rounded-xl bg-marca-600 px-4 py-2 text-sm font-semibold text-white hover:bg-marca-700 disabled:opacity-50 transition-colors shadow-sm"
-        >
-          {salvar.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          Salvar
-        </button>
       </div>
 
       {/* Banner ambiente */}
@@ -363,23 +356,24 @@ export default function ConfiguracoesFiscaisPage() {
         </span>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 rounded-2xl p-1 border border-slate-200 dark:border-slate-700">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold transition-colors ${
-              tab === t.id
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-            }`}
-          >
-            {t.icon}
-            {t.label}
-          </button>
-        ))}
+      {/* Ações — acima das abas (padrão do ERP) */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={handleSalvar}
+          disabled={!dirty || salvar.isPending || erros.length > 0}
+          className="flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-marca-600 disabled:opacity-50 transition-colors shadow-sm"
+        >
+          {salvar.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          Salvar
+        </button>
       </div>
+
+      {/* Abas */}
+      <Abas
+        abas={TABS.map((t) => ({ id: t.id, label: t.label, icone: t.icon }))}
+        ativa={tab}
+        onChange={setTab}
+      />
 
       {/* ── Tab: Empresa ── */}
       {tab === 'empresa' && (

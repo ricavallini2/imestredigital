@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ChevronDown, CheckCircle2, Clock, XCircle, RefreshCw, DollarSign, FileCheck } from 'lucide-react';
 import { useAcordosCobranca, usePagarParcela } from '@/hooks/useCobranca';
+import { Abas } from '@/components/ui/abas';
 import type { Acordo } from '@/hooks/useCobranca';
 import clsx from 'clsx';
 
@@ -190,25 +191,12 @@ export default function AcordosPage() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="overflow-x-auto">
-        <div className="flex border-b border-slate-200 dark:border-slate-700 min-w-max">
-          {TABS_FILTRO.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setFiltroStatus(tab.key)}
-              className={clsx(
-                'px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
-                filtroStatus === tab.key
-                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200',
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* Abas (filtro por status) — padrão do ERP */}
+      <Abas
+        abas={TABS_FILTRO.map((tab) => ({ id: tab.key, label: tab.label }))}
+        ativa={filtroStatus}
+        onChange={setFiltroStatus}
+      />
 
       {/* List */}
       {isLoading ? (

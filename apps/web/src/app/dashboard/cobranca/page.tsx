@@ -9,6 +9,7 @@ import {
   Users, Bot, X,
 } from 'lucide-react';
 import { KPICard } from '@/components/ui/kpi-card';
+import { Abas } from '@/components/ui/abas';
 import {
   useTitulosCobranca, useStatsCobranca, useDisparar,
   useRegistrarAcao, useNegociar, TituloCobranca,
@@ -264,37 +265,19 @@ export default function CobrancaPage() {
         )}
       </div>
 
+      {/* Abas (filtro por status) — padrão do ERP */}
+      <Abas
+        abas={TABS.map((tab) => ({
+          id: tab.key,
+          label: tab.label,
+          count: tabAtiva === tab.key ? titulosData?.total : undefined,
+        }))}
+        ativa={tabAtiva}
+        onChange={setTabAtiva}
+      />
+
       {/* ── Filtros e Busca ── */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-        {/* Tabs */}
-        <div className="overflow-x-auto border-b border-slate-200 dark:border-slate-700">
-          <div className="flex px-4 min-w-max">
-            {TABS.map(tab => {
-              const count = tab.key === 'TODOS'
-                ? (stats?.totalTitulos ?? titulosData?.total ?? 0)
-                : titulosData?.total;
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => setTabAtiva(tab.key)}
-                  className={clsx(
-                    'flex items-center gap-1.5 px-3 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
-                    tabAtiva === tab.key
-                      ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                      : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200',
-                  )}
-                >
-                  {tab.label}
-                  {tab.key === tabAtiva && titulosData?.total !== undefined && (
-                    <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-1.5 rounded-full">
-                      {titulosData.total}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
         {/* Search */}
         <div className="p-4 border-b border-slate-200 dark:border-slate-700">

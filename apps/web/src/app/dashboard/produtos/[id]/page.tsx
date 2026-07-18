@@ -36,6 +36,7 @@ import {
 import { StatusBadge } from '@/components/ui/status-badge';
 import { KPICard } from '@/components/ui/kpi-card';
 import { GaleriaImagens } from '@/components/ui/galeria-imagens';
+import { Abas } from '@/components/ui/abas';
 import { useProduto, useAtualizarProduto, useAnaliseIAProduto } from '@/hooks/useProdutos';
 import { useSaldoPorProduto } from '@/hooks/useEstoque';
 import { useCategorias } from '@/hooks/useCategorias';
@@ -648,37 +649,6 @@ export default function ProdutoDetailPage() {
             </p>
           </div>
         </div>
-        <div className="flex shrink-0 gap-2">
-          {editando ? (
-            <>
-              <button
-                onClick={() => setEditando(false)}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleSalvar}
-                disabled={salvando}
-                className="flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2 text-sm font-semibold text-white hover:bg-marca-600 disabled:opacity-60"
-              >
-                {salvando ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-                Salvar
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => setEditando(true)}
-              className="flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-marca-600"
-            >
-              <Edit className="h-4 w-4" /> Editar
-            </button>
-          )}
-        </div>
       </div>
 
       {/* KPIs rápidos */}
@@ -725,31 +695,37 @@ export default function ProdutoDetailPage() {
         </div>
       )}
 
-      {/* Abas */}
-      <div className="rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <div className="flex gap-1 overflow-x-auto">
-          {TABS.map((tab) => {
-            const ativa = tabAtiva === tab.id;
-            const ehIA = tab.id === 'ia';
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setTabAtiva(tab.id)}
-                className={`flex shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all ${
-                  ativa
-                    ? ehIA
-                      ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-sm'
-                      : 'bg-marca-500 text-white shadow-sm'
-                    : `text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-700/60 dark:hover:text-slate-100 ${ehIA ? 'text-purple-600 dark:text-purple-400' : ''}`
-                }`}
-              >
-                <tab.Icone className="h-4 w-4" />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
+      {/* Ações — acima das abas (padrão do ERP) */}
+      <div className="flex flex-wrap gap-2">
+        {editando ? (
+          <>
+            <button
+              onClick={handleSalvar}
+              disabled={salvando}
+              className="flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-marca-600 disabled:opacity-60"
+            >
+              {salvando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Salvar
+            </button>
+            <button
+              onClick={() => setEditando(false)}
+              className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+            >
+              Cancelar
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => setEditando(true)}
+            className="flex items-center gap-2 rounded-lg bg-marca-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-marca-600"
+          >
+            <Edit className="h-4 w-4" /> Editar
+          </button>
+        )}
       </div>
+
+      {/* Abas */}
+      <Abas abas={TABS} ativa={tabAtiva} onChange={setTabAtiva} />
 
       {/* ── Detalhes ── */}
       {tabAtiva === 'detalhes' && (
