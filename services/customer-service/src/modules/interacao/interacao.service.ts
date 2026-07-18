@@ -69,7 +69,14 @@ export class InteracaoService {
       limite?: number;
     },
   ) {
-    const { tipo, canal, dataInicio, dataFim, pagina = 1, limite = 20 } = filtros || {};
+    const { tipo, canal, dataInicio, dataFim } = filtros || {};
+
+    // Coerção defensiva: o ValidationPipe transforma o query param AUSENTE em
+    // NaN (Number(undefined)), o que anula o default do destructuring e mandava
+    // `take: NaN` para o Prisma → PrismaClientValidationError → 500. `|| padrão`
+    // cobre NaN, undefined, string vazia e valores inválidos.
+    const pagina = Math.max(1, Number(filtros?.pagina) || 1);
+    const limite = Math.min(200, Math.max(1, Number(filtros?.limite) || 20));
 
     const skip = (pagina - 1) * limite;
 
@@ -121,10 +128,13 @@ export class InteracaoService {
    * Obtém timeline (histórico cronológico) do cliente
    */
   async obterTimeline(tenantId: string, clienteId: string, limite: number = 50): Promise<InteracaoCliente[]> {
+    // Mesma coerção defensiva do listarPorCliente: param ausente vira NaN no
+    // ValidationPipe e `take: NaN` derruba a query com 500.
+    const take = Math.min(200, Math.max(1, Number(limite) || 50));
     return this.prisma.interacaoCliente.findMany({
       where: { clienteId, tenantId },
       orderBy: { data: 'desc' },
-      take: limite,
+      take,
     });
   }
 }
