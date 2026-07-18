@@ -54,7 +54,12 @@ export class ImportacaoService {
   /**
    * Lista importações do tenant
    */
-  async listarImportacoes(tenantId: string, pagina: number = 1, limite: number = 20) {
+  async listarImportacoes(tenantId: string, paginaRaw?: number, limiteRaw?: number) {
+    // Coerção defensiva: o ValidationPipe transforma query param AUSENTE em NaN
+    // (Number(undefined)), anulando o default do parâmetro (só vale p/ undefined)
+    // e mandando skip/take NaN ao Prisma → 500. `|| padrão` cobre NaN e inválidos.
+    const pagina = Math.max(1, Number(paginaRaw) || 1);
+    const limite = Math.min(200, Math.max(1, Number(limiteRaw) || 20));
     const skip = (pagina - 1) * limite;
 
     const [importacoes, total] = await Promise.all([

@@ -37,7 +37,12 @@ export class RegraFiscalRepository {
   /**
    * Lista regras fiscais.
    */
-  async listar(tenantId: string, pagina: number = 1, limite: number = 20) {
+  async listar(tenantId: string, paginaRaw?: number, limiteRaw?: number) {
+    // Coerção defensiva: o ValidationPipe transforma query param AUSENTE em NaN
+    // (Number(undefined)), anulando o default do parâmetro e mandando skip/take
+    // NaN ao Prisma → 500. `|| padrão` cobre NaN, string e inválidos.
+    const pagina = Math.max(1, Number(paginaRaw) || 1);
+    const limite = Math.min(200, Math.max(1, Number(limiteRaw) || 20));
     const skip = (pagina - 1) * limite;
 
     const [regras, total] = await Promise.all([

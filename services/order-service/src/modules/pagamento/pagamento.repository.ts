@@ -88,7 +88,14 @@ export class PagamentoRepository {
    * Listar pagamentos do tenant.
    */
   async listar(tenantId: string, filtros: any) {
-    const { status, dataInicio, dataFim, pagina = 1, limite = 20 } = filtros;
+    const { status, dataInicio, dataFim } = filtros;
+
+    // O controller usa `@Query() filtros: any`: com metatype Object o
+    // ValidationPipe NÃO transforma nada, então pagina/limite chegam como
+    // STRING quando enviados (e o default do destructuring não dispara, pois a
+    // chave existe). `take: '10'` derruba o Prisma com ValidationError → 500.
+    const pagina = Math.max(1, Number(filtros?.pagina) || 1);
+    const limite = Math.min(200, Math.max(1, Number(filtros?.limite) || 20));
 
     const skip = (pagina - 1) * limite;
 

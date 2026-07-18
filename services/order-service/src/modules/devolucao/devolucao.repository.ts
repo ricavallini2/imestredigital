@@ -115,7 +115,13 @@ export class DevolucaoRepository {
    * Listar devoluções do tenant.
    */
   async listar(tenantId: string, filtros: any) {
-    const { status, dataInicio, dataFim, pagina = 1, limite = 20 } = filtros;
+    const { status, dataInicio, dataFim } = filtros;
+
+    // Mesma armadilha do pagamento.repository: `@Query() filtros: any` faz o
+    // ValidationPipe pular a conversão, então pagina/limite chegam como STRING
+    // e `take: '10'` derruba o Prisma (ValidationError → 500).
+    const pagina = Math.max(1, Number(filtros?.pagina) || 1);
+    const limite = Math.min(200, Math.max(1, Number(filtros?.limite) || 20));
 
     const skip = (pagina - 1) * limite;
 
