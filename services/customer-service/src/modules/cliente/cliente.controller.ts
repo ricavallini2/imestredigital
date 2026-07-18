@@ -4,7 +4,7 @@
  * Expõe endpoints REST para operações CRUD de clientes.
  */
 
-import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseGuards, Req, Logger, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseGuards, Req, Logger, HttpCode, NotFoundException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ClienteService } from './cliente.service';
 import { AuthGuard } from '@/guards/auth.guard';
@@ -86,10 +86,21 @@ export class ClienteController {
   @ApiResponse({ status: 404, description: 'Cliente não encontrado' })
   async buscarPorId(@Req() req: RequestComTenant, @Param('id') clienteId: string) {
     this.logger.debug(`Buscando cliente ${clienteId} para tenant ${req.tenantId}`);
+
+    // Só o FORMATO de UUID (não a versão: os ids do seed são sintéticos). Sem
+    // esta guarda, um path que caia aqui por engano — ex.: a rota estática
+    // `clientes/importacoes` de outro módulo — chega ao Prisma como UUID
+    // inválido e vira 500 em vez de 404.
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clienteId)) {
+      throw new NotFoundException('Cliente não encontrado');
+    }
+
     const cliente = await this.clienteService.buscarPorId(req.tenantId, clienteId);
 
+    // Era `new Error(...)`, que o Nest converte em 500 — cliente inexistente
+    // tem que responder 404.
     if (!cliente) {
-      throw new Error('Cliente não encontrado');
+      throw new NotFoundException('Cliente não encontrado');
     }
 
     return cliente;

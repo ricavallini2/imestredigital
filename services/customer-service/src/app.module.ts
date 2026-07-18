@@ -64,12 +64,16 @@ import { KafkaModule } from './modules/kafka/kafka.module';
     KafkaModule,
 
     // ─── Módulos de domínio (CRM) ───────────────────────────
+    // ImportacaoModule ANTES de ClienteModule: ele registra a rota ESTÁTICA
+    // `clientes/importacoes`, que seria engolida pelo `clientes/:id` do
+    // ClienteController se este fosse registrado primeiro (o Nest resolve por
+    // ordem de registro). Sem isto, /clientes/importacoes caía no :id.
+    ImportacaoModule,
     ClienteModule,
     EnderecoModule,
     ContatoModule,
     InteracaoModule,
     SegmentoModule,
-    ImportacaoModule,
   ],
   controllers: [HealthController],
 })
