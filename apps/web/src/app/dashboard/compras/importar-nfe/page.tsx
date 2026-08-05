@@ -23,7 +23,14 @@ import {
   Sparkles,
   FileX,
 } from 'lucide-react';
-import { useImportarNFe, type ResultadoImportacao } from '@/hooks/useCompras';
+import {
+  useAnalisarNFe,
+  useImportarNFe,
+  type AnaliseNFe,
+  type ConfirmacaoImportacao,
+  type ResultadoImportacao,
+} from '@/hooks/useCompras';
+import { ConferenciaNFe } from '@/components/compras/conferencia-nfe';
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
@@ -35,7 +42,11 @@ const dtfmt = (iso: string) =>
     year: 'numeric',
   });
 
-type Step = 'upload' | 'processing' | 'success' | 'error';
+/**
+ * A importação passa por uma CONFERÊNCIA: o XML é analisado (sem gravar nada),
+ * o usuário resolve fornecedor e produtos, e só então confirma.
+ */
+type Step = 'upload' | 'processing' | 'conferencia' | 'success' | 'error';
 
 // ─── XML de Exemplo ───────────────────────────────────────────────────────────
 
@@ -118,14 +129,20 @@ export default function ImportarNFePage() {
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [errorDicas, setErrorDicas] = useState<string[]>([]);
 
+  const [analise, setAnalise] = useState<AnaliseNFe | null>(null);
+  const [erroConfirmacao, setErroConfirmacao] = useState('');
+
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { mutate: importar } = useImportarNFe();
+  const { mutate: analisar } = useAnalisarNFe();
+  const { mutate: importar, isPending: confirmando } = useImportarNFe();
 
   const resetar = () => {
     setStep('upload');
     setFile(null);
     setXmlContent('');
     setResult(null);
+    setAnalise(null);
+    setErroConfirmacao('');
     setErrorMsg('');
     setErrorDicas([]);
     setIsDragOver(false);
@@ -163,16 +180,17 @@ export default function ImportarNFePage() {
     if (f) processarArquivo(f);
   };
 
+  /** ETAPA 1: analisa (não grava nada) e leva à tela de conferência. */
   const processarXML = () => {
     if (!xmlContent) return;
     setStep('processing');
 
-    importar(
+    analisar(
       { xml: xmlContent },
       {
         onSuccess: (data) => {
-          setResult(data);
-          setStep('success');
+          setAnalise(data);
+          setStep('conferencia');
         },
         onError: (err: any) => {
           const msg = err?.response?.data?.message ?? 'Erro ao processar a NF-e. Tente novamente.';
@@ -185,6 +203,26 @@ export default function ImportarNFePage() {
           setErrorMsg(msg);
           setErrorDicas(dicas);
           setStep('error');
+        },
+      },
+    );
+  };
+
+  /** ETAPA 2: confirma com as decisões conferidas na tela. */
+  const confirmarImportacao = (decisoes: Omit<ConfirmacaoImportacao, 'xml'>) => {
+    setErroConfirmacao('');
+    importar(
+      { xml: xmlContent, ...decisoes },
+      {
+        onSuccess: (data) => {
+          setResult(data);
+          setStep('success');
+        },
+        onError: (err: any) => {
+          const m = err?.response?.data?.message;
+          setErroConfirmacao(
+            Array.isArray(m) ? m[0] : (m ?? 'Não foi possível concluir a importação.'),
+          );
         },
       },
     );
@@ -234,6 +272,39 @@ export default function ImportarNFePage() {
             </div>
           ))}
         </div>
+      </div>
+    );
+  }
+
+  // ─── Conferência (antes de confirmar) ──────────────────────────────────────
+
+  if (step === 'conferencia' && analise) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/dashboard/compras"
+            className="flex items-center justify-center rounded-lg border border-slate-200 p-2 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+              Conferir importação
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Revise fornecedor e produtos. Nada é gravado até você confirmar.
+            </p>
+          </div>
+        </div>
+
+        <ConferenciaNFe
+          analise={analise}
+          confirmando={confirmando}
+          erro={erroConfirmacao}
+          onConfirmar={confirmarImportacao}
+          onCancelar={resetar}
+        />
       </div>
     );
   }
@@ -337,10 +408,16 @@ export default function ImportarNFePage() {
                   {result.nfe.fornecedor.cnpj}
                 </span>
               </div>
-              <div className="rounded-lg bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 px-3 py-2 mt-2">
+              {/* O que REALMENTE aconteceu com o cadastro, conforme a conferência. */}
+              <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-700/40">
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  A importação não cria o cadastro do fornecedor — se ele ainda não existir,
-                  cadastre em Cadastros → Fornecedores.
+                  {result.fornecedor?.criado
+                    ? `Fornecedor cadastrado nesta importação: ${result.fornecedor.nome}.`
+                    : result.fornecedor?.atualizado
+                      ? `Cadastro atualizado com os dados da NF-e: ${result.fornecedor.nome}.`
+                      : result.fornecedor?.id
+                        ? `Pedido vinculado ao fornecedor ${result.fornecedor.nome}.`
+                        : 'Pedido sem fornecedor vinculado no cadastro.'}
                 </p>
               </div>
             </div>
@@ -538,17 +615,19 @@ export default function ImportarNFePage() {
             color: 'text-purple-600',
             bg: 'bg-purple-50 dark:bg-purple-900/20',
           },
+          // Passos REAIS do fluxo: a importação gera o PEDIDO de compra; o
+          // estoque só entra no recebimento, e conta a pagar não é criada aqui.
           {
-            icon: Warehouse,
-            label: '3. Estoque atualizado',
-            color: 'text-emerald-600',
-            bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+            icon: FileCheck,
+            label: '3. Conferência',
+            color: 'text-amber-600',
+            bg: 'bg-amber-50 dark:bg-amber-900/20',
           },
           {
-            icon: DollarSign,
-            label: '4. Conta a pagar criada',
-            color: 'text-rose-600',
-            bg: 'bg-rose-50 dark:bg-rose-900/20',
+            icon: ShoppingBag,
+            label: '4. Pedido de compra',
+            color: 'text-emerald-600',
+            bg: 'bg-emerald-50 dark:bg-emerald-900/20',
           },
         ].map(({ icon: Icon, label, color, bg }) => (
           <div

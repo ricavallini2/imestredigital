@@ -15,6 +15,19 @@ export interface NFeParseada {
     cnpj: string;
     razaoSocial: string;
     nomeFantasia: string;
+    /** Campos usados na CONFERÊNCIA contra o cadastro (diferenças a atualizar). */
+    inscricaoEstadual: string;
+    telefone: string;
+    email: string;
+    endereco: {
+      logradouro: string;
+      numero: string;
+      complemento: string;
+      bairro: string;
+      cidade: string;
+      uf: string;
+      cep: string;
+    };
   };
   itens: Array<{
     codigo: string;
@@ -76,6 +89,7 @@ export function parseNFe(xmlString: string): NFeParseada | null {
 
     const ideBlock = tag(infNFe, 'ide');
     const emitBlock = tag(infNFe, 'emit');
+    const enderEmit = tag(emitBlock, 'enderEmit');
 
     // Itens (blocos <det>)
     const detMatches = infNFe.match(/<det\s[^>]*>[\s\S]*?<\/det>/gi) ?? [];
@@ -140,7 +154,23 @@ export function parseNFe(xmlString: string): NFeParseada | null {
       fornecedor: {
         cnpj: tag(emitBlock, 'CNPJ'),
         razaoSocial: tag(emitBlock, 'xNome'),
-        nomeFantasia: tag(emitBlock, 'xFant') || tag(emitBlock, 'xNome'),
+        // SEM fallback para xNome: emitente sem xFant não tem nome fantasia, e
+        // copiar a razão social aqui faria a conferência sugerir "atualizar o
+        // nome fantasia" com um valor que a nota nunca informou.
+        nomeFantasia: tag(emitBlock, 'xFant'),
+        inscricaoEstadual: tag(emitBlock, 'IE'),
+        // `fone` pode estar no emit ou dentro do enderEmit, conforme o emissor.
+        telefone: tag(emitBlock, 'fone') || tag(enderEmit, 'fone'),
+        email: tag(emitBlock, 'email'),
+        endereco: {
+          logradouro: tag(enderEmit, 'xLgr'),
+          numero: tag(enderEmit, 'nro'),
+          complemento: tag(enderEmit, 'xCpl'),
+          bairro: tag(enderEmit, 'xBairro'),
+          cidade: tag(enderEmit, 'xMun'),
+          uf: tag(enderEmit, 'UF'),
+          cep: tag(enderEmit, 'CEP'),
+        },
       },
       itens,
       totais,

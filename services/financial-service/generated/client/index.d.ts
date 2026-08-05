@@ -53,6 +53,31 @@ export type EventoProcessado = $Result.DefaultSelection<Prisma.$EventoProcessado
  * Relatório financeiro mensal/anual.
  */
 export type DRE = $Result.DefaultSelection<Prisma.$DREPayload>
+/**
+ * Model TituloCobranca
+ * 
+ */
+export type TituloCobranca = $Result.DefaultSelection<Prisma.$TituloCobrancaPayload>
+/**
+ * Model AcaoCobranca
+ * 
+ */
+export type AcaoCobranca = $Result.DefaultSelection<Prisma.$AcaoCobrancaPayload>
+/**
+ * Model AcordoCobranca
+ * 
+ */
+export type AcordoCobranca = $Result.DefaultSelection<Prisma.$AcordoCobrancaPayload>
+/**
+ * Model ParcelaAcordo
+ * 
+ */
+export type ParcelaAcordo = $Result.DefaultSelection<Prisma.$ParcelaAcordoPayload>
+/**
+ * Model ConfiguracaoCobranca
+ * 
+ */
+export type ConfiguracaoCobranca = $Result.DefaultSelection<Prisma.$ConfiguracaoCobrancaPayload>
 
 /**
  * Enums
@@ -136,6 +161,58 @@ export const StatusConciliacao: {
 
 export type StatusConciliacao = (typeof StatusConciliacao)[keyof typeof StatusConciliacao]
 
+
+export const StatusTituloCobranca: {
+  EM_ABERTO: 'EM_ABERTO',
+  EM_COBRANCA: 'EM_COBRANCA',
+  NEGOCIANDO: 'NEGOCIANDO',
+  ACORDO: 'ACORDO',
+  PAGO: 'PAGO',
+  PERDIDO: 'PERDIDO'
+};
+
+export type StatusTituloCobranca = (typeof StatusTituloCobranca)[keyof typeof StatusTituloCobranca]
+
+
+export const PrioridadeCobranca: {
+  BAIXA: 'BAIXA',
+  MEDIA: 'MEDIA',
+  ALTA: 'ALTA',
+  CRITICA: 'CRITICA'
+};
+
+export type PrioridadeCobranca = (typeof PrioridadeCobranca)[keyof typeof PrioridadeCobranca]
+
+
+export const TipoAcaoCobranca: {
+  WHATSAPP: 'WHATSAPP',
+  EMAIL: 'EMAIL',
+  SMS: 'SMS',
+  LIGACAO: 'LIGACAO'
+};
+
+export type TipoAcaoCobranca = (typeof TipoAcaoCobranca)[keyof typeof TipoAcaoCobranca]
+
+
+export const StatusAcaoCobranca: {
+  ENVIADO: 'ENVIADO',
+  ENTREGUE: 'ENTREGUE',
+  LIDO: 'LIDO',
+  RESPONDIDO: 'RESPONDIDO',
+  FALHOU: 'FALHOU'
+};
+
+export type StatusAcaoCobranca = (typeof StatusAcaoCobranca)[keyof typeof StatusAcaoCobranca]
+
+
+export const StatusAcordoCobranca: {
+  ATIVO: 'ATIVO',
+  CUMPRIDO: 'CUMPRIDO',
+  QUEBRADO: 'QUEBRADO'
+};
+
+export type StatusAcordoCobranca = (typeof StatusAcordoCobranca)[keyof typeof StatusAcordoCobranca]
+
 }
 
 export type TipoConta = $Enums.TipoConta
@@ -165,6 +242,26 @@ export const FrequenciaRecorrencia: typeof $Enums.FrequenciaRecorrencia
 export type StatusConciliacao = $Enums.StatusConciliacao
 
 export const StatusConciliacao: typeof $Enums.StatusConciliacao
+
+export type StatusTituloCobranca = $Enums.StatusTituloCobranca
+
+export const StatusTituloCobranca: typeof $Enums.StatusTituloCobranca
+
+export type PrioridadeCobranca = $Enums.PrioridadeCobranca
+
+export const PrioridadeCobranca: typeof $Enums.PrioridadeCobranca
+
+export type TipoAcaoCobranca = $Enums.TipoAcaoCobranca
+
+export const TipoAcaoCobranca: typeof $Enums.TipoAcaoCobranca
+
+export type StatusAcaoCobranca = $Enums.StatusAcaoCobranca
+
+export const StatusAcaoCobranca: typeof $Enums.StatusAcaoCobranca
+
+export type StatusAcordoCobranca = $Enums.StatusAcordoCobranca
+
+export const StatusAcordoCobranca: typeof $Enums.StatusAcordoCobranca
 
 /**
  * ##  Prisma Client ʲˢ
@@ -358,6 +455,56 @@ export class PrismaClient<
     * ```
     */
   get dRE(): Prisma.DREDelegate<ExtArgs>;
+
+  /**
+   * `prisma.tituloCobranca`: Exposes CRUD operations for the **TituloCobranca** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TituloCobrancas
+    * const tituloCobrancas = await prisma.tituloCobranca.findMany()
+    * ```
+    */
+  get tituloCobranca(): Prisma.TituloCobrancaDelegate<ExtArgs>;
+
+  /**
+   * `prisma.acaoCobranca`: Exposes CRUD operations for the **AcaoCobranca** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AcaoCobrancas
+    * const acaoCobrancas = await prisma.acaoCobranca.findMany()
+    * ```
+    */
+  get acaoCobranca(): Prisma.AcaoCobrancaDelegate<ExtArgs>;
+
+  /**
+   * `prisma.acordoCobranca`: Exposes CRUD operations for the **AcordoCobranca** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AcordoCobrancas
+    * const acordoCobrancas = await prisma.acordoCobranca.findMany()
+    * ```
+    */
+  get acordoCobranca(): Prisma.AcordoCobrancaDelegate<ExtArgs>;
+
+  /**
+   * `prisma.parcelaAcordo`: Exposes CRUD operations for the **ParcelaAcordo** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ParcelaAcordos
+    * const parcelaAcordos = await prisma.parcelaAcordo.findMany()
+    * ```
+    */
+  get parcelaAcordo(): Prisma.ParcelaAcordoDelegate<ExtArgs>;
+
+  /**
+   * `prisma.configuracaoCobranca`: Exposes CRUD operations for the **ConfiguracaoCobranca** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ConfiguracaoCobrancas
+    * const configuracaoCobrancas = await prisma.configuracaoCobranca.findMany()
+    * ```
+    */
+  get configuracaoCobranca(): Prisma.ConfiguracaoCobrancaDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -805,7 +952,12 @@ export namespace Prisma {
     Recorrencia: 'Recorrencia',
     ConciliacaoBancaria: 'ConciliacaoBancaria',
     EventoProcessado: 'EventoProcessado',
-    DRE: 'DRE'
+    DRE: 'DRE',
+    TituloCobranca: 'TituloCobranca',
+    AcaoCobranca: 'AcaoCobranca',
+    AcordoCobranca: 'AcordoCobranca',
+    ParcelaAcordo: 'ParcelaAcordo',
+    ConfiguracaoCobranca: 'ConfiguracaoCobranca'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -821,7 +973,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "contaFinanceira" | "lancamento" | "categoriaFinanceira" | "recorrencia" | "conciliacaoBancaria" | "eventoProcessado" | "dRE"
+      modelProps: "contaFinanceira" | "lancamento" | "categoriaFinanceira" | "recorrencia" | "conciliacaoBancaria" | "eventoProcessado" | "dRE" | "tituloCobranca" | "acaoCobranca" | "acordoCobranca" | "parcelaAcordo" | "configuracaoCobranca"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1315,6 +1467,356 @@ export namespace Prisma {
           }
         }
       }
+      TituloCobranca: {
+        payload: Prisma.$TituloCobrancaPayload<ExtArgs>
+        fields: Prisma.TituloCobrancaFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TituloCobrancaFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TituloCobrancaPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TituloCobrancaFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TituloCobrancaPayload>
+          }
+          findFirst: {
+            args: Prisma.TituloCobrancaFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TituloCobrancaPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TituloCobrancaFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TituloCobrancaPayload>
+          }
+          findMany: {
+            args: Prisma.TituloCobrancaFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TituloCobrancaPayload>[]
+          }
+          create: {
+            args: Prisma.TituloCobrancaCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TituloCobrancaPayload>
+          }
+          createMany: {
+            args: Prisma.TituloCobrancaCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TituloCobrancaCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TituloCobrancaPayload>[]
+          }
+          delete: {
+            args: Prisma.TituloCobrancaDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TituloCobrancaPayload>
+          }
+          update: {
+            args: Prisma.TituloCobrancaUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TituloCobrancaPayload>
+          }
+          deleteMany: {
+            args: Prisma.TituloCobrancaDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TituloCobrancaUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.TituloCobrancaUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TituloCobrancaPayload>
+          }
+          aggregate: {
+            args: Prisma.TituloCobrancaAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTituloCobranca>
+          }
+          groupBy: {
+            args: Prisma.TituloCobrancaGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TituloCobrancaGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TituloCobrancaCountArgs<ExtArgs>
+            result: $Utils.Optional<TituloCobrancaCountAggregateOutputType> | number
+          }
+        }
+      }
+      AcaoCobranca: {
+        payload: Prisma.$AcaoCobrancaPayload<ExtArgs>
+        fields: Prisma.AcaoCobrancaFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AcaoCobrancaFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcaoCobrancaPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AcaoCobrancaFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcaoCobrancaPayload>
+          }
+          findFirst: {
+            args: Prisma.AcaoCobrancaFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcaoCobrancaPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AcaoCobrancaFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcaoCobrancaPayload>
+          }
+          findMany: {
+            args: Prisma.AcaoCobrancaFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcaoCobrancaPayload>[]
+          }
+          create: {
+            args: Prisma.AcaoCobrancaCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcaoCobrancaPayload>
+          }
+          createMany: {
+            args: Prisma.AcaoCobrancaCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AcaoCobrancaCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcaoCobrancaPayload>[]
+          }
+          delete: {
+            args: Prisma.AcaoCobrancaDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcaoCobrancaPayload>
+          }
+          update: {
+            args: Prisma.AcaoCobrancaUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcaoCobrancaPayload>
+          }
+          deleteMany: {
+            args: Prisma.AcaoCobrancaDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AcaoCobrancaUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.AcaoCobrancaUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcaoCobrancaPayload>
+          }
+          aggregate: {
+            args: Prisma.AcaoCobrancaAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAcaoCobranca>
+          }
+          groupBy: {
+            args: Prisma.AcaoCobrancaGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AcaoCobrancaGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AcaoCobrancaCountArgs<ExtArgs>
+            result: $Utils.Optional<AcaoCobrancaCountAggregateOutputType> | number
+          }
+        }
+      }
+      AcordoCobranca: {
+        payload: Prisma.$AcordoCobrancaPayload<ExtArgs>
+        fields: Prisma.AcordoCobrancaFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AcordoCobrancaFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcordoCobrancaPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AcordoCobrancaFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcordoCobrancaPayload>
+          }
+          findFirst: {
+            args: Prisma.AcordoCobrancaFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcordoCobrancaPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AcordoCobrancaFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcordoCobrancaPayload>
+          }
+          findMany: {
+            args: Prisma.AcordoCobrancaFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcordoCobrancaPayload>[]
+          }
+          create: {
+            args: Prisma.AcordoCobrancaCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcordoCobrancaPayload>
+          }
+          createMany: {
+            args: Prisma.AcordoCobrancaCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AcordoCobrancaCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcordoCobrancaPayload>[]
+          }
+          delete: {
+            args: Prisma.AcordoCobrancaDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcordoCobrancaPayload>
+          }
+          update: {
+            args: Prisma.AcordoCobrancaUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcordoCobrancaPayload>
+          }
+          deleteMany: {
+            args: Prisma.AcordoCobrancaDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AcordoCobrancaUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.AcordoCobrancaUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AcordoCobrancaPayload>
+          }
+          aggregate: {
+            args: Prisma.AcordoCobrancaAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAcordoCobranca>
+          }
+          groupBy: {
+            args: Prisma.AcordoCobrancaGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AcordoCobrancaGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AcordoCobrancaCountArgs<ExtArgs>
+            result: $Utils.Optional<AcordoCobrancaCountAggregateOutputType> | number
+          }
+        }
+      }
+      ParcelaAcordo: {
+        payload: Prisma.$ParcelaAcordoPayload<ExtArgs>
+        fields: Prisma.ParcelaAcordoFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ParcelaAcordoFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ParcelaAcordoPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ParcelaAcordoFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ParcelaAcordoPayload>
+          }
+          findFirst: {
+            args: Prisma.ParcelaAcordoFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ParcelaAcordoPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ParcelaAcordoFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ParcelaAcordoPayload>
+          }
+          findMany: {
+            args: Prisma.ParcelaAcordoFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ParcelaAcordoPayload>[]
+          }
+          create: {
+            args: Prisma.ParcelaAcordoCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ParcelaAcordoPayload>
+          }
+          createMany: {
+            args: Prisma.ParcelaAcordoCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ParcelaAcordoCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ParcelaAcordoPayload>[]
+          }
+          delete: {
+            args: Prisma.ParcelaAcordoDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ParcelaAcordoPayload>
+          }
+          update: {
+            args: Prisma.ParcelaAcordoUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ParcelaAcordoPayload>
+          }
+          deleteMany: {
+            args: Prisma.ParcelaAcordoDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ParcelaAcordoUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.ParcelaAcordoUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ParcelaAcordoPayload>
+          }
+          aggregate: {
+            args: Prisma.ParcelaAcordoAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateParcelaAcordo>
+          }
+          groupBy: {
+            args: Prisma.ParcelaAcordoGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ParcelaAcordoGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ParcelaAcordoCountArgs<ExtArgs>
+            result: $Utils.Optional<ParcelaAcordoCountAggregateOutputType> | number
+          }
+        }
+      }
+      ConfiguracaoCobranca: {
+        payload: Prisma.$ConfiguracaoCobrancaPayload<ExtArgs>
+        fields: Prisma.ConfiguracaoCobrancaFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ConfiguracaoCobrancaFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfiguracaoCobrancaPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ConfiguracaoCobrancaFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfiguracaoCobrancaPayload>
+          }
+          findFirst: {
+            args: Prisma.ConfiguracaoCobrancaFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfiguracaoCobrancaPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ConfiguracaoCobrancaFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfiguracaoCobrancaPayload>
+          }
+          findMany: {
+            args: Prisma.ConfiguracaoCobrancaFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfiguracaoCobrancaPayload>[]
+          }
+          create: {
+            args: Prisma.ConfiguracaoCobrancaCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfiguracaoCobrancaPayload>
+          }
+          createMany: {
+            args: Prisma.ConfiguracaoCobrancaCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ConfiguracaoCobrancaCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfiguracaoCobrancaPayload>[]
+          }
+          delete: {
+            args: Prisma.ConfiguracaoCobrancaDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfiguracaoCobrancaPayload>
+          }
+          update: {
+            args: Prisma.ConfiguracaoCobrancaUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfiguracaoCobrancaPayload>
+          }
+          deleteMany: {
+            args: Prisma.ConfiguracaoCobrancaDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ConfiguracaoCobrancaUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.ConfiguracaoCobrancaUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ConfiguracaoCobrancaPayload>
+          }
+          aggregate: {
+            args: Prisma.ConfiguracaoCobrancaAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateConfiguracaoCobranca>
+          }
+          groupBy: {
+            args: Prisma.ConfiguracaoCobrancaGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ConfiguracaoCobrancaGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ConfiguracaoCobrancaCountArgs<ExtArgs>
+            result: $Utils.Optional<ConfiguracaoCobrancaCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1597,6 +2099,77 @@ export namespace Prisma {
    */
   export type RecorrenciaCountOutputTypeCountLancamentosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: LancamentoWhereInput
+  }
+
+
+  /**
+   * Count Type TituloCobrancaCountOutputType
+   */
+
+  export type TituloCobrancaCountOutputType = {
+    acoes: number
+    acordos: number
+  }
+
+  export type TituloCobrancaCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    acoes?: boolean | TituloCobrancaCountOutputTypeCountAcoesArgs
+    acordos?: boolean | TituloCobrancaCountOutputTypeCountAcordosArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * TituloCobrancaCountOutputType without action
+   */
+  export type TituloCobrancaCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TituloCobrancaCountOutputType
+     */
+    select?: TituloCobrancaCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * TituloCobrancaCountOutputType without action
+   */
+  export type TituloCobrancaCountOutputTypeCountAcoesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AcaoCobrancaWhereInput
+  }
+
+  /**
+   * TituloCobrancaCountOutputType without action
+   */
+  export type TituloCobrancaCountOutputTypeCountAcordosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AcordoCobrancaWhereInput
+  }
+
+
+  /**
+   * Count Type AcordoCobrancaCountOutputType
+   */
+
+  export type AcordoCobrancaCountOutputType = {
+    parcelas: number
+  }
+
+  export type AcordoCobrancaCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    parcelas?: boolean | AcordoCobrancaCountOutputTypeCountParcelasArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * AcordoCobrancaCountOutputType without action
+   */
+  export type AcordoCobrancaCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcordoCobrancaCountOutputType
+     */
+    select?: AcordoCobrancaCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * AcordoCobrancaCountOutputType without action
+   */
+  export type AcordoCobrancaCountOutputTypeCountParcelasArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ParcelaAcordoWhereInput
   }
 
 
@@ -9329,6 +9902,5293 @@ export namespace Prisma {
 
 
   /**
+   * Model TituloCobranca
+   */
+
+  export type AggregateTituloCobranca = {
+    _count: TituloCobrancaCountAggregateOutputType | null
+    _avg: TituloCobrancaAvgAggregateOutputType | null
+    _sum: TituloCobrancaSumAggregateOutputType | null
+    _min: TituloCobrancaMinAggregateOutputType | null
+    _max: TituloCobrancaMaxAggregateOutputType | null
+  }
+
+  export type TituloCobrancaAvgAggregateOutputType = {
+    valor: Decimal | null
+    tentativas: number | null
+  }
+
+  export type TituloCobrancaSumAggregateOutputType = {
+    valor: Decimal | null
+    tentativas: number | null
+  }
+
+  export type TituloCobrancaMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    lancamentoId: string | null
+    pedidoId: string | null
+    clienteId: string | null
+    clienteNome: string | null
+    clienteTelefone: string | null
+    clienteEmail: string | null
+    descricao: string | null
+    valor: Decimal | null
+    dataVencimento: Date | null
+    status: $Enums.StatusTituloCobranca | null
+    prioridade: $Enums.PrioridadeCobranca | null
+    tentativas: number | null
+    ultimaAcaoEm: Date | null
+    canalUltimaAcao: string | null
+    observacao: string | null
+    criadoEm: Date | null
+    atualizadoEm: Date | null
+  }
+
+  export type TituloCobrancaMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    lancamentoId: string | null
+    pedidoId: string | null
+    clienteId: string | null
+    clienteNome: string | null
+    clienteTelefone: string | null
+    clienteEmail: string | null
+    descricao: string | null
+    valor: Decimal | null
+    dataVencimento: Date | null
+    status: $Enums.StatusTituloCobranca | null
+    prioridade: $Enums.PrioridadeCobranca | null
+    tentativas: number | null
+    ultimaAcaoEm: Date | null
+    canalUltimaAcao: string | null
+    observacao: string | null
+    criadoEm: Date | null
+    atualizadoEm: Date | null
+  }
+
+  export type TituloCobrancaCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    lancamentoId: number
+    pedidoId: number
+    clienteId: number
+    clienteNome: number
+    clienteTelefone: number
+    clienteEmail: number
+    descricao: number
+    valor: number
+    dataVencimento: number
+    status: number
+    prioridade: number
+    tentativas: number
+    ultimaAcaoEm: number
+    canalUltimaAcao: number
+    observacao: number
+    criadoEm: number
+    atualizadoEm: number
+    _all: number
+  }
+
+
+  export type TituloCobrancaAvgAggregateInputType = {
+    valor?: true
+    tentativas?: true
+  }
+
+  export type TituloCobrancaSumAggregateInputType = {
+    valor?: true
+    tentativas?: true
+  }
+
+  export type TituloCobrancaMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    lancamentoId?: true
+    pedidoId?: true
+    clienteId?: true
+    clienteNome?: true
+    clienteTelefone?: true
+    clienteEmail?: true
+    descricao?: true
+    valor?: true
+    dataVencimento?: true
+    status?: true
+    prioridade?: true
+    tentativas?: true
+    ultimaAcaoEm?: true
+    canalUltimaAcao?: true
+    observacao?: true
+    criadoEm?: true
+    atualizadoEm?: true
+  }
+
+  export type TituloCobrancaMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    lancamentoId?: true
+    pedidoId?: true
+    clienteId?: true
+    clienteNome?: true
+    clienteTelefone?: true
+    clienteEmail?: true
+    descricao?: true
+    valor?: true
+    dataVencimento?: true
+    status?: true
+    prioridade?: true
+    tentativas?: true
+    ultimaAcaoEm?: true
+    canalUltimaAcao?: true
+    observacao?: true
+    criadoEm?: true
+    atualizadoEm?: true
+  }
+
+  export type TituloCobrancaCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    lancamentoId?: true
+    pedidoId?: true
+    clienteId?: true
+    clienteNome?: true
+    clienteTelefone?: true
+    clienteEmail?: true
+    descricao?: true
+    valor?: true
+    dataVencimento?: true
+    status?: true
+    prioridade?: true
+    tentativas?: true
+    ultimaAcaoEm?: true
+    canalUltimaAcao?: true
+    observacao?: true
+    criadoEm?: true
+    atualizadoEm?: true
+    _all?: true
+  }
+
+  export type TituloCobrancaAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TituloCobranca to aggregate.
+     */
+    where?: TituloCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TituloCobrancas to fetch.
+     */
+    orderBy?: TituloCobrancaOrderByWithRelationInput | TituloCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TituloCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TituloCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TituloCobrancas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TituloCobrancas
+    **/
+    _count?: true | TituloCobrancaCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: TituloCobrancaAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TituloCobrancaSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TituloCobrancaMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TituloCobrancaMaxAggregateInputType
+  }
+
+  export type GetTituloCobrancaAggregateType<T extends TituloCobrancaAggregateArgs> = {
+        [P in keyof T & keyof AggregateTituloCobranca]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTituloCobranca[P]>
+      : GetScalarType<T[P], AggregateTituloCobranca[P]>
+  }
+
+
+
+
+  export type TituloCobrancaGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TituloCobrancaWhereInput
+    orderBy?: TituloCobrancaOrderByWithAggregationInput | TituloCobrancaOrderByWithAggregationInput[]
+    by: TituloCobrancaScalarFieldEnum[] | TituloCobrancaScalarFieldEnum
+    having?: TituloCobrancaScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TituloCobrancaCountAggregateInputType | true
+    _avg?: TituloCobrancaAvgAggregateInputType
+    _sum?: TituloCobrancaSumAggregateInputType
+    _min?: TituloCobrancaMinAggregateInputType
+    _max?: TituloCobrancaMaxAggregateInputType
+  }
+
+  export type TituloCobrancaGroupByOutputType = {
+    id: string
+    tenantId: string
+    lancamentoId: string | null
+    pedidoId: string | null
+    clienteId: string | null
+    clienteNome: string
+    clienteTelefone: string | null
+    clienteEmail: string | null
+    descricao: string
+    valor: Decimal
+    dataVencimento: Date
+    status: $Enums.StatusTituloCobranca
+    prioridade: $Enums.PrioridadeCobranca
+    tentativas: number
+    ultimaAcaoEm: Date | null
+    canalUltimaAcao: string | null
+    observacao: string | null
+    criadoEm: Date
+    atualizadoEm: Date
+    _count: TituloCobrancaCountAggregateOutputType | null
+    _avg: TituloCobrancaAvgAggregateOutputType | null
+    _sum: TituloCobrancaSumAggregateOutputType | null
+    _min: TituloCobrancaMinAggregateOutputType | null
+    _max: TituloCobrancaMaxAggregateOutputType | null
+  }
+
+  type GetTituloCobrancaGroupByPayload<T extends TituloCobrancaGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TituloCobrancaGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TituloCobrancaGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TituloCobrancaGroupByOutputType[P]>
+            : GetScalarType<T[P], TituloCobrancaGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TituloCobrancaSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    lancamentoId?: boolean
+    pedidoId?: boolean
+    clienteId?: boolean
+    clienteNome?: boolean
+    clienteTelefone?: boolean
+    clienteEmail?: boolean
+    descricao?: boolean
+    valor?: boolean
+    dataVencimento?: boolean
+    status?: boolean
+    prioridade?: boolean
+    tentativas?: boolean
+    ultimaAcaoEm?: boolean
+    canalUltimaAcao?: boolean
+    observacao?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+    acoes?: boolean | TituloCobranca$acoesArgs<ExtArgs>
+    acordos?: boolean | TituloCobranca$acordosArgs<ExtArgs>
+    _count?: boolean | TituloCobrancaCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["tituloCobranca"]>
+
+  export type TituloCobrancaSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    lancamentoId?: boolean
+    pedidoId?: boolean
+    clienteId?: boolean
+    clienteNome?: boolean
+    clienteTelefone?: boolean
+    clienteEmail?: boolean
+    descricao?: boolean
+    valor?: boolean
+    dataVencimento?: boolean
+    status?: boolean
+    prioridade?: boolean
+    tentativas?: boolean
+    ultimaAcaoEm?: boolean
+    canalUltimaAcao?: boolean
+    observacao?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }, ExtArgs["result"]["tituloCobranca"]>
+
+  export type TituloCobrancaSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    lancamentoId?: boolean
+    pedidoId?: boolean
+    clienteId?: boolean
+    clienteNome?: boolean
+    clienteTelefone?: boolean
+    clienteEmail?: boolean
+    descricao?: boolean
+    valor?: boolean
+    dataVencimento?: boolean
+    status?: boolean
+    prioridade?: boolean
+    tentativas?: boolean
+    ultimaAcaoEm?: boolean
+    canalUltimaAcao?: boolean
+    observacao?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }
+
+  export type TituloCobrancaInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    acoes?: boolean | TituloCobranca$acoesArgs<ExtArgs>
+    acordos?: boolean | TituloCobranca$acordosArgs<ExtArgs>
+    _count?: boolean | TituloCobrancaCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type TituloCobrancaIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $TituloCobrancaPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TituloCobranca"
+    objects: {
+      acoes: Prisma.$AcaoCobrancaPayload<ExtArgs>[]
+      acordos: Prisma.$AcordoCobrancaPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      lancamentoId: string | null
+      pedidoId: string | null
+      clienteId: string | null
+      clienteNome: string
+      clienteTelefone: string | null
+      clienteEmail: string | null
+      descricao: string
+      valor: Prisma.Decimal
+      dataVencimento: Date
+      status: $Enums.StatusTituloCobranca
+      prioridade: $Enums.PrioridadeCobranca
+      tentativas: number
+      ultimaAcaoEm: Date | null
+      canalUltimaAcao: string | null
+      observacao: string | null
+      criadoEm: Date
+      atualizadoEm: Date
+    }, ExtArgs["result"]["tituloCobranca"]>
+    composites: {}
+  }
+
+  type TituloCobrancaGetPayload<S extends boolean | null | undefined | TituloCobrancaDefaultArgs> = $Result.GetResult<Prisma.$TituloCobrancaPayload, S>
+
+  type TituloCobrancaCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<TituloCobrancaFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: TituloCobrancaCountAggregateInputType | true
+    }
+
+  export interface TituloCobrancaDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TituloCobranca'], meta: { name: 'TituloCobranca' } }
+    /**
+     * Find zero or one TituloCobranca that matches the filter.
+     * @param {TituloCobrancaFindUniqueArgs} args - Arguments to find a TituloCobranca
+     * @example
+     * // Get one TituloCobranca
+     * const tituloCobranca = await prisma.tituloCobranca.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TituloCobrancaFindUniqueArgs>(args: SelectSubset<T, TituloCobrancaFindUniqueArgs<ExtArgs>>): Prisma__TituloCobrancaClient<$Result.GetResult<Prisma.$TituloCobrancaPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one TituloCobranca that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {TituloCobrancaFindUniqueOrThrowArgs} args - Arguments to find a TituloCobranca
+     * @example
+     * // Get one TituloCobranca
+     * const tituloCobranca = await prisma.tituloCobranca.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TituloCobrancaFindUniqueOrThrowArgs>(args: SelectSubset<T, TituloCobrancaFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TituloCobrancaClient<$Result.GetResult<Prisma.$TituloCobrancaPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first TituloCobranca that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TituloCobrancaFindFirstArgs} args - Arguments to find a TituloCobranca
+     * @example
+     * // Get one TituloCobranca
+     * const tituloCobranca = await prisma.tituloCobranca.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TituloCobrancaFindFirstArgs>(args?: SelectSubset<T, TituloCobrancaFindFirstArgs<ExtArgs>>): Prisma__TituloCobrancaClient<$Result.GetResult<Prisma.$TituloCobrancaPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first TituloCobranca that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TituloCobrancaFindFirstOrThrowArgs} args - Arguments to find a TituloCobranca
+     * @example
+     * // Get one TituloCobranca
+     * const tituloCobranca = await prisma.tituloCobranca.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TituloCobrancaFindFirstOrThrowArgs>(args?: SelectSubset<T, TituloCobrancaFindFirstOrThrowArgs<ExtArgs>>): Prisma__TituloCobrancaClient<$Result.GetResult<Prisma.$TituloCobrancaPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more TituloCobrancas that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TituloCobrancaFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TituloCobrancas
+     * const tituloCobrancas = await prisma.tituloCobranca.findMany()
+     * 
+     * // Get first 10 TituloCobrancas
+     * const tituloCobrancas = await prisma.tituloCobranca.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const tituloCobrancaWithIdOnly = await prisma.tituloCobranca.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TituloCobrancaFindManyArgs>(args?: SelectSubset<T, TituloCobrancaFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TituloCobrancaPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a TituloCobranca.
+     * @param {TituloCobrancaCreateArgs} args - Arguments to create a TituloCobranca.
+     * @example
+     * // Create one TituloCobranca
+     * const TituloCobranca = await prisma.tituloCobranca.create({
+     *   data: {
+     *     // ... data to create a TituloCobranca
+     *   }
+     * })
+     * 
+     */
+    create<T extends TituloCobrancaCreateArgs>(args: SelectSubset<T, TituloCobrancaCreateArgs<ExtArgs>>): Prisma__TituloCobrancaClient<$Result.GetResult<Prisma.$TituloCobrancaPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many TituloCobrancas.
+     * @param {TituloCobrancaCreateManyArgs} args - Arguments to create many TituloCobrancas.
+     * @example
+     * // Create many TituloCobrancas
+     * const tituloCobranca = await prisma.tituloCobranca.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TituloCobrancaCreateManyArgs>(args?: SelectSubset<T, TituloCobrancaCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TituloCobrancas and returns the data saved in the database.
+     * @param {TituloCobrancaCreateManyAndReturnArgs} args - Arguments to create many TituloCobrancas.
+     * @example
+     * // Create many TituloCobrancas
+     * const tituloCobranca = await prisma.tituloCobranca.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TituloCobrancas and only return the `id`
+     * const tituloCobrancaWithIdOnly = await prisma.tituloCobranca.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TituloCobrancaCreateManyAndReturnArgs>(args?: SelectSubset<T, TituloCobrancaCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TituloCobrancaPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a TituloCobranca.
+     * @param {TituloCobrancaDeleteArgs} args - Arguments to delete one TituloCobranca.
+     * @example
+     * // Delete one TituloCobranca
+     * const TituloCobranca = await prisma.tituloCobranca.delete({
+     *   where: {
+     *     // ... filter to delete one TituloCobranca
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TituloCobrancaDeleteArgs>(args: SelectSubset<T, TituloCobrancaDeleteArgs<ExtArgs>>): Prisma__TituloCobrancaClient<$Result.GetResult<Prisma.$TituloCobrancaPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one TituloCobranca.
+     * @param {TituloCobrancaUpdateArgs} args - Arguments to update one TituloCobranca.
+     * @example
+     * // Update one TituloCobranca
+     * const tituloCobranca = await prisma.tituloCobranca.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TituloCobrancaUpdateArgs>(args: SelectSubset<T, TituloCobrancaUpdateArgs<ExtArgs>>): Prisma__TituloCobrancaClient<$Result.GetResult<Prisma.$TituloCobrancaPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more TituloCobrancas.
+     * @param {TituloCobrancaDeleteManyArgs} args - Arguments to filter TituloCobrancas to delete.
+     * @example
+     * // Delete a few TituloCobrancas
+     * const { count } = await prisma.tituloCobranca.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TituloCobrancaDeleteManyArgs>(args?: SelectSubset<T, TituloCobrancaDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TituloCobrancas.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TituloCobrancaUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TituloCobrancas
+     * const tituloCobranca = await prisma.tituloCobranca.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TituloCobrancaUpdateManyArgs>(args: SelectSubset<T, TituloCobrancaUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one TituloCobranca.
+     * @param {TituloCobrancaUpsertArgs} args - Arguments to update or create a TituloCobranca.
+     * @example
+     * // Update or create a TituloCobranca
+     * const tituloCobranca = await prisma.tituloCobranca.upsert({
+     *   create: {
+     *     // ... data to create a TituloCobranca
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TituloCobranca we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TituloCobrancaUpsertArgs>(args: SelectSubset<T, TituloCobrancaUpsertArgs<ExtArgs>>): Prisma__TituloCobrancaClient<$Result.GetResult<Prisma.$TituloCobrancaPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of TituloCobrancas.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TituloCobrancaCountArgs} args - Arguments to filter TituloCobrancas to count.
+     * @example
+     * // Count the number of TituloCobrancas
+     * const count = await prisma.tituloCobranca.count({
+     *   where: {
+     *     // ... the filter for the TituloCobrancas we want to count
+     *   }
+     * })
+    **/
+    count<T extends TituloCobrancaCountArgs>(
+      args?: Subset<T, TituloCobrancaCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TituloCobrancaCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TituloCobranca.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TituloCobrancaAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TituloCobrancaAggregateArgs>(args: Subset<T, TituloCobrancaAggregateArgs>): Prisma.PrismaPromise<GetTituloCobrancaAggregateType<T>>
+
+    /**
+     * Group by TituloCobranca.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TituloCobrancaGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TituloCobrancaGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TituloCobrancaGroupByArgs['orderBy'] }
+        : { orderBy?: TituloCobrancaGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TituloCobrancaGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTituloCobrancaGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TituloCobranca model
+   */
+  readonly fields: TituloCobrancaFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TituloCobranca.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TituloCobrancaClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    acoes<T extends TituloCobranca$acoesArgs<ExtArgs> = {}>(args?: Subset<T, TituloCobranca$acoesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AcaoCobrancaPayload<ExtArgs>, T, "findMany"> | Null>
+    acordos<T extends TituloCobranca$acordosArgs<ExtArgs> = {}>(args?: Subset<T, TituloCobranca$acordosArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AcordoCobrancaPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TituloCobranca model
+   */ 
+  interface TituloCobrancaFieldRefs {
+    readonly id: FieldRef<"TituloCobranca", 'String'>
+    readonly tenantId: FieldRef<"TituloCobranca", 'String'>
+    readonly lancamentoId: FieldRef<"TituloCobranca", 'String'>
+    readonly pedidoId: FieldRef<"TituloCobranca", 'String'>
+    readonly clienteId: FieldRef<"TituloCobranca", 'String'>
+    readonly clienteNome: FieldRef<"TituloCobranca", 'String'>
+    readonly clienteTelefone: FieldRef<"TituloCobranca", 'String'>
+    readonly clienteEmail: FieldRef<"TituloCobranca", 'String'>
+    readonly descricao: FieldRef<"TituloCobranca", 'String'>
+    readonly valor: FieldRef<"TituloCobranca", 'Decimal'>
+    readonly dataVencimento: FieldRef<"TituloCobranca", 'DateTime'>
+    readonly status: FieldRef<"TituloCobranca", 'StatusTituloCobranca'>
+    readonly prioridade: FieldRef<"TituloCobranca", 'PrioridadeCobranca'>
+    readonly tentativas: FieldRef<"TituloCobranca", 'Int'>
+    readonly ultimaAcaoEm: FieldRef<"TituloCobranca", 'DateTime'>
+    readonly canalUltimaAcao: FieldRef<"TituloCobranca", 'String'>
+    readonly observacao: FieldRef<"TituloCobranca", 'String'>
+    readonly criadoEm: FieldRef<"TituloCobranca", 'DateTime'>
+    readonly atualizadoEm: FieldRef<"TituloCobranca", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TituloCobranca findUnique
+   */
+  export type TituloCobrancaFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TituloCobranca
+     */
+    select?: TituloCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TituloCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter, which TituloCobranca to fetch.
+     */
+    where: TituloCobrancaWhereUniqueInput
+  }
+
+  /**
+   * TituloCobranca findUniqueOrThrow
+   */
+  export type TituloCobrancaFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TituloCobranca
+     */
+    select?: TituloCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TituloCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter, which TituloCobranca to fetch.
+     */
+    where: TituloCobrancaWhereUniqueInput
+  }
+
+  /**
+   * TituloCobranca findFirst
+   */
+  export type TituloCobrancaFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TituloCobranca
+     */
+    select?: TituloCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TituloCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter, which TituloCobranca to fetch.
+     */
+    where?: TituloCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TituloCobrancas to fetch.
+     */
+    orderBy?: TituloCobrancaOrderByWithRelationInput | TituloCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TituloCobrancas.
+     */
+    cursor?: TituloCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TituloCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TituloCobrancas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TituloCobrancas.
+     */
+    distinct?: TituloCobrancaScalarFieldEnum | TituloCobrancaScalarFieldEnum[]
+  }
+
+  /**
+   * TituloCobranca findFirstOrThrow
+   */
+  export type TituloCobrancaFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TituloCobranca
+     */
+    select?: TituloCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TituloCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter, which TituloCobranca to fetch.
+     */
+    where?: TituloCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TituloCobrancas to fetch.
+     */
+    orderBy?: TituloCobrancaOrderByWithRelationInput | TituloCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TituloCobrancas.
+     */
+    cursor?: TituloCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TituloCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TituloCobrancas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TituloCobrancas.
+     */
+    distinct?: TituloCobrancaScalarFieldEnum | TituloCobrancaScalarFieldEnum[]
+  }
+
+  /**
+   * TituloCobranca findMany
+   */
+  export type TituloCobrancaFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TituloCobranca
+     */
+    select?: TituloCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TituloCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter, which TituloCobrancas to fetch.
+     */
+    where?: TituloCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TituloCobrancas to fetch.
+     */
+    orderBy?: TituloCobrancaOrderByWithRelationInput | TituloCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TituloCobrancas.
+     */
+    cursor?: TituloCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TituloCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TituloCobrancas.
+     */
+    skip?: number
+    distinct?: TituloCobrancaScalarFieldEnum | TituloCobrancaScalarFieldEnum[]
+  }
+
+  /**
+   * TituloCobranca create
+   */
+  export type TituloCobrancaCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TituloCobranca
+     */
+    select?: TituloCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TituloCobrancaInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TituloCobranca.
+     */
+    data: XOR<TituloCobrancaCreateInput, TituloCobrancaUncheckedCreateInput>
+  }
+
+  /**
+   * TituloCobranca createMany
+   */
+  export type TituloCobrancaCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TituloCobrancas.
+     */
+    data: TituloCobrancaCreateManyInput | TituloCobrancaCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TituloCobranca createManyAndReturn
+   */
+  export type TituloCobrancaCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TituloCobranca
+     */
+    select?: TituloCobrancaSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many TituloCobrancas.
+     */
+    data: TituloCobrancaCreateManyInput | TituloCobrancaCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TituloCobranca update
+   */
+  export type TituloCobrancaUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TituloCobranca
+     */
+    select?: TituloCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TituloCobrancaInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TituloCobranca.
+     */
+    data: XOR<TituloCobrancaUpdateInput, TituloCobrancaUncheckedUpdateInput>
+    /**
+     * Choose, which TituloCobranca to update.
+     */
+    where: TituloCobrancaWhereUniqueInput
+  }
+
+  /**
+   * TituloCobranca updateMany
+   */
+  export type TituloCobrancaUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TituloCobrancas.
+     */
+    data: XOR<TituloCobrancaUpdateManyMutationInput, TituloCobrancaUncheckedUpdateManyInput>
+    /**
+     * Filter which TituloCobrancas to update
+     */
+    where?: TituloCobrancaWhereInput
+  }
+
+  /**
+   * TituloCobranca upsert
+   */
+  export type TituloCobrancaUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TituloCobranca
+     */
+    select?: TituloCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TituloCobrancaInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TituloCobranca to update in case it exists.
+     */
+    where: TituloCobrancaWhereUniqueInput
+    /**
+     * In case the TituloCobranca found by the `where` argument doesn't exist, create a new TituloCobranca with this data.
+     */
+    create: XOR<TituloCobrancaCreateInput, TituloCobrancaUncheckedCreateInput>
+    /**
+     * In case the TituloCobranca was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TituloCobrancaUpdateInput, TituloCobrancaUncheckedUpdateInput>
+  }
+
+  /**
+   * TituloCobranca delete
+   */
+  export type TituloCobrancaDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TituloCobranca
+     */
+    select?: TituloCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TituloCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter which TituloCobranca to delete.
+     */
+    where: TituloCobrancaWhereUniqueInput
+  }
+
+  /**
+   * TituloCobranca deleteMany
+   */
+  export type TituloCobrancaDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TituloCobrancas to delete
+     */
+    where?: TituloCobrancaWhereInput
+  }
+
+  /**
+   * TituloCobranca.acoes
+   */
+  export type TituloCobranca$acoesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcaoCobranca
+     */
+    select?: AcaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcaoCobrancaInclude<ExtArgs> | null
+    where?: AcaoCobrancaWhereInput
+    orderBy?: AcaoCobrancaOrderByWithRelationInput | AcaoCobrancaOrderByWithRelationInput[]
+    cursor?: AcaoCobrancaWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AcaoCobrancaScalarFieldEnum | AcaoCobrancaScalarFieldEnum[]
+  }
+
+  /**
+   * TituloCobranca.acordos
+   */
+  export type TituloCobranca$acordosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcordoCobranca
+     */
+    select?: AcordoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcordoCobrancaInclude<ExtArgs> | null
+    where?: AcordoCobrancaWhereInput
+    orderBy?: AcordoCobrancaOrderByWithRelationInput | AcordoCobrancaOrderByWithRelationInput[]
+    cursor?: AcordoCobrancaWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AcordoCobrancaScalarFieldEnum | AcordoCobrancaScalarFieldEnum[]
+  }
+
+  /**
+   * TituloCobranca without action
+   */
+  export type TituloCobrancaDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TituloCobranca
+     */
+    select?: TituloCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TituloCobrancaInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AcaoCobranca
+   */
+
+  export type AggregateAcaoCobranca = {
+    _count: AcaoCobrancaCountAggregateOutputType | null
+    _min: AcaoCobrancaMinAggregateOutputType | null
+    _max: AcaoCobrancaMaxAggregateOutputType | null
+  }
+
+  export type AcaoCobrancaMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    tituloId: string | null
+    clienteNome: string | null
+    tipo: $Enums.TipoAcaoCobranca | null
+    mensagem: string | null
+    status: $Enums.StatusAcaoCobranca | null
+    automatica: boolean | null
+    detalhe: string | null
+    criadoEm: Date | null
+  }
+
+  export type AcaoCobrancaMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    tituloId: string | null
+    clienteNome: string | null
+    tipo: $Enums.TipoAcaoCobranca | null
+    mensagem: string | null
+    status: $Enums.StatusAcaoCobranca | null
+    automatica: boolean | null
+    detalhe: string | null
+    criadoEm: Date | null
+  }
+
+  export type AcaoCobrancaCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    tituloId: number
+    clienteNome: number
+    tipo: number
+    mensagem: number
+    status: number
+    automatica: number
+    detalhe: number
+    criadoEm: number
+    _all: number
+  }
+
+
+  export type AcaoCobrancaMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    tituloId?: true
+    clienteNome?: true
+    tipo?: true
+    mensagem?: true
+    status?: true
+    automatica?: true
+    detalhe?: true
+    criadoEm?: true
+  }
+
+  export type AcaoCobrancaMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    tituloId?: true
+    clienteNome?: true
+    tipo?: true
+    mensagem?: true
+    status?: true
+    automatica?: true
+    detalhe?: true
+    criadoEm?: true
+  }
+
+  export type AcaoCobrancaCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    tituloId?: true
+    clienteNome?: true
+    tipo?: true
+    mensagem?: true
+    status?: true
+    automatica?: true
+    detalhe?: true
+    criadoEm?: true
+    _all?: true
+  }
+
+  export type AcaoCobrancaAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AcaoCobranca to aggregate.
+     */
+    where?: AcaoCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AcaoCobrancas to fetch.
+     */
+    orderBy?: AcaoCobrancaOrderByWithRelationInput | AcaoCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AcaoCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AcaoCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AcaoCobrancas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AcaoCobrancas
+    **/
+    _count?: true | AcaoCobrancaCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AcaoCobrancaMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AcaoCobrancaMaxAggregateInputType
+  }
+
+  export type GetAcaoCobrancaAggregateType<T extends AcaoCobrancaAggregateArgs> = {
+        [P in keyof T & keyof AggregateAcaoCobranca]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAcaoCobranca[P]>
+      : GetScalarType<T[P], AggregateAcaoCobranca[P]>
+  }
+
+
+
+
+  export type AcaoCobrancaGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AcaoCobrancaWhereInput
+    orderBy?: AcaoCobrancaOrderByWithAggregationInput | AcaoCobrancaOrderByWithAggregationInput[]
+    by: AcaoCobrancaScalarFieldEnum[] | AcaoCobrancaScalarFieldEnum
+    having?: AcaoCobrancaScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AcaoCobrancaCountAggregateInputType | true
+    _min?: AcaoCobrancaMinAggregateInputType
+    _max?: AcaoCobrancaMaxAggregateInputType
+  }
+
+  export type AcaoCobrancaGroupByOutputType = {
+    id: string
+    tenantId: string
+    tituloId: string
+    clienteNome: string
+    tipo: $Enums.TipoAcaoCobranca
+    mensagem: string
+    status: $Enums.StatusAcaoCobranca
+    automatica: boolean
+    detalhe: string | null
+    criadoEm: Date
+    _count: AcaoCobrancaCountAggregateOutputType | null
+    _min: AcaoCobrancaMinAggregateOutputType | null
+    _max: AcaoCobrancaMaxAggregateOutputType | null
+  }
+
+  type GetAcaoCobrancaGroupByPayload<T extends AcaoCobrancaGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AcaoCobrancaGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AcaoCobrancaGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AcaoCobrancaGroupByOutputType[P]>
+            : GetScalarType<T[P], AcaoCobrancaGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AcaoCobrancaSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    tituloId?: boolean
+    clienteNome?: boolean
+    tipo?: boolean
+    mensagem?: boolean
+    status?: boolean
+    automatica?: boolean
+    detalhe?: boolean
+    criadoEm?: boolean
+    titulo?: boolean | TituloCobrancaDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["acaoCobranca"]>
+
+  export type AcaoCobrancaSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    tituloId?: boolean
+    clienteNome?: boolean
+    tipo?: boolean
+    mensagem?: boolean
+    status?: boolean
+    automatica?: boolean
+    detalhe?: boolean
+    criadoEm?: boolean
+    titulo?: boolean | TituloCobrancaDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["acaoCobranca"]>
+
+  export type AcaoCobrancaSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    tituloId?: boolean
+    clienteNome?: boolean
+    tipo?: boolean
+    mensagem?: boolean
+    status?: boolean
+    automatica?: boolean
+    detalhe?: boolean
+    criadoEm?: boolean
+  }
+
+  export type AcaoCobrancaInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    titulo?: boolean | TituloCobrancaDefaultArgs<ExtArgs>
+  }
+  export type AcaoCobrancaIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    titulo?: boolean | TituloCobrancaDefaultArgs<ExtArgs>
+  }
+
+  export type $AcaoCobrancaPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AcaoCobranca"
+    objects: {
+      titulo: Prisma.$TituloCobrancaPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      tituloId: string
+      clienteNome: string
+      tipo: $Enums.TipoAcaoCobranca
+      mensagem: string
+      status: $Enums.StatusAcaoCobranca
+      automatica: boolean
+      detalhe: string | null
+      criadoEm: Date
+    }, ExtArgs["result"]["acaoCobranca"]>
+    composites: {}
+  }
+
+  type AcaoCobrancaGetPayload<S extends boolean | null | undefined | AcaoCobrancaDefaultArgs> = $Result.GetResult<Prisma.$AcaoCobrancaPayload, S>
+
+  type AcaoCobrancaCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<AcaoCobrancaFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: AcaoCobrancaCountAggregateInputType | true
+    }
+
+  export interface AcaoCobrancaDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AcaoCobranca'], meta: { name: 'AcaoCobranca' } }
+    /**
+     * Find zero or one AcaoCobranca that matches the filter.
+     * @param {AcaoCobrancaFindUniqueArgs} args - Arguments to find a AcaoCobranca
+     * @example
+     * // Get one AcaoCobranca
+     * const acaoCobranca = await prisma.acaoCobranca.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AcaoCobrancaFindUniqueArgs>(args: SelectSubset<T, AcaoCobrancaFindUniqueArgs<ExtArgs>>): Prisma__AcaoCobrancaClient<$Result.GetResult<Prisma.$AcaoCobrancaPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one AcaoCobranca that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {AcaoCobrancaFindUniqueOrThrowArgs} args - Arguments to find a AcaoCobranca
+     * @example
+     * // Get one AcaoCobranca
+     * const acaoCobranca = await prisma.acaoCobranca.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AcaoCobrancaFindUniqueOrThrowArgs>(args: SelectSubset<T, AcaoCobrancaFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AcaoCobrancaClient<$Result.GetResult<Prisma.$AcaoCobrancaPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first AcaoCobranca that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AcaoCobrancaFindFirstArgs} args - Arguments to find a AcaoCobranca
+     * @example
+     * // Get one AcaoCobranca
+     * const acaoCobranca = await prisma.acaoCobranca.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AcaoCobrancaFindFirstArgs>(args?: SelectSubset<T, AcaoCobrancaFindFirstArgs<ExtArgs>>): Prisma__AcaoCobrancaClient<$Result.GetResult<Prisma.$AcaoCobrancaPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first AcaoCobranca that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AcaoCobrancaFindFirstOrThrowArgs} args - Arguments to find a AcaoCobranca
+     * @example
+     * // Get one AcaoCobranca
+     * const acaoCobranca = await prisma.acaoCobranca.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AcaoCobrancaFindFirstOrThrowArgs>(args?: SelectSubset<T, AcaoCobrancaFindFirstOrThrowArgs<ExtArgs>>): Prisma__AcaoCobrancaClient<$Result.GetResult<Prisma.$AcaoCobrancaPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more AcaoCobrancas that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AcaoCobrancaFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AcaoCobrancas
+     * const acaoCobrancas = await prisma.acaoCobranca.findMany()
+     * 
+     * // Get first 10 AcaoCobrancas
+     * const acaoCobrancas = await prisma.acaoCobranca.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const acaoCobrancaWithIdOnly = await prisma.acaoCobranca.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AcaoCobrancaFindManyArgs>(args?: SelectSubset<T, AcaoCobrancaFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AcaoCobrancaPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a AcaoCobranca.
+     * @param {AcaoCobrancaCreateArgs} args - Arguments to create a AcaoCobranca.
+     * @example
+     * // Create one AcaoCobranca
+     * const AcaoCobranca = await prisma.acaoCobranca.create({
+     *   data: {
+     *     // ... data to create a AcaoCobranca
+     *   }
+     * })
+     * 
+     */
+    create<T extends AcaoCobrancaCreateArgs>(args: SelectSubset<T, AcaoCobrancaCreateArgs<ExtArgs>>): Prisma__AcaoCobrancaClient<$Result.GetResult<Prisma.$AcaoCobrancaPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many AcaoCobrancas.
+     * @param {AcaoCobrancaCreateManyArgs} args - Arguments to create many AcaoCobrancas.
+     * @example
+     * // Create many AcaoCobrancas
+     * const acaoCobranca = await prisma.acaoCobranca.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AcaoCobrancaCreateManyArgs>(args?: SelectSubset<T, AcaoCobrancaCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AcaoCobrancas and returns the data saved in the database.
+     * @param {AcaoCobrancaCreateManyAndReturnArgs} args - Arguments to create many AcaoCobrancas.
+     * @example
+     * // Create many AcaoCobrancas
+     * const acaoCobranca = await prisma.acaoCobranca.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AcaoCobrancas and only return the `id`
+     * const acaoCobrancaWithIdOnly = await prisma.acaoCobranca.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AcaoCobrancaCreateManyAndReturnArgs>(args?: SelectSubset<T, AcaoCobrancaCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AcaoCobrancaPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a AcaoCobranca.
+     * @param {AcaoCobrancaDeleteArgs} args - Arguments to delete one AcaoCobranca.
+     * @example
+     * // Delete one AcaoCobranca
+     * const AcaoCobranca = await prisma.acaoCobranca.delete({
+     *   where: {
+     *     // ... filter to delete one AcaoCobranca
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AcaoCobrancaDeleteArgs>(args: SelectSubset<T, AcaoCobrancaDeleteArgs<ExtArgs>>): Prisma__AcaoCobrancaClient<$Result.GetResult<Prisma.$AcaoCobrancaPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one AcaoCobranca.
+     * @param {AcaoCobrancaUpdateArgs} args - Arguments to update one AcaoCobranca.
+     * @example
+     * // Update one AcaoCobranca
+     * const acaoCobranca = await prisma.acaoCobranca.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AcaoCobrancaUpdateArgs>(args: SelectSubset<T, AcaoCobrancaUpdateArgs<ExtArgs>>): Prisma__AcaoCobrancaClient<$Result.GetResult<Prisma.$AcaoCobrancaPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more AcaoCobrancas.
+     * @param {AcaoCobrancaDeleteManyArgs} args - Arguments to filter AcaoCobrancas to delete.
+     * @example
+     * // Delete a few AcaoCobrancas
+     * const { count } = await prisma.acaoCobranca.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AcaoCobrancaDeleteManyArgs>(args?: SelectSubset<T, AcaoCobrancaDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AcaoCobrancas.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AcaoCobrancaUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AcaoCobrancas
+     * const acaoCobranca = await prisma.acaoCobranca.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AcaoCobrancaUpdateManyArgs>(args: SelectSubset<T, AcaoCobrancaUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one AcaoCobranca.
+     * @param {AcaoCobrancaUpsertArgs} args - Arguments to update or create a AcaoCobranca.
+     * @example
+     * // Update or create a AcaoCobranca
+     * const acaoCobranca = await prisma.acaoCobranca.upsert({
+     *   create: {
+     *     // ... data to create a AcaoCobranca
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AcaoCobranca we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AcaoCobrancaUpsertArgs>(args: SelectSubset<T, AcaoCobrancaUpsertArgs<ExtArgs>>): Prisma__AcaoCobrancaClient<$Result.GetResult<Prisma.$AcaoCobrancaPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of AcaoCobrancas.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AcaoCobrancaCountArgs} args - Arguments to filter AcaoCobrancas to count.
+     * @example
+     * // Count the number of AcaoCobrancas
+     * const count = await prisma.acaoCobranca.count({
+     *   where: {
+     *     // ... the filter for the AcaoCobrancas we want to count
+     *   }
+     * })
+    **/
+    count<T extends AcaoCobrancaCountArgs>(
+      args?: Subset<T, AcaoCobrancaCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AcaoCobrancaCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AcaoCobranca.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AcaoCobrancaAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AcaoCobrancaAggregateArgs>(args: Subset<T, AcaoCobrancaAggregateArgs>): Prisma.PrismaPromise<GetAcaoCobrancaAggregateType<T>>
+
+    /**
+     * Group by AcaoCobranca.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AcaoCobrancaGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AcaoCobrancaGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AcaoCobrancaGroupByArgs['orderBy'] }
+        : { orderBy?: AcaoCobrancaGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AcaoCobrancaGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAcaoCobrancaGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AcaoCobranca model
+   */
+  readonly fields: AcaoCobrancaFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AcaoCobranca.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AcaoCobrancaClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    titulo<T extends TituloCobrancaDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TituloCobrancaDefaultArgs<ExtArgs>>): Prisma__TituloCobrancaClient<$Result.GetResult<Prisma.$TituloCobrancaPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AcaoCobranca model
+   */ 
+  interface AcaoCobrancaFieldRefs {
+    readonly id: FieldRef<"AcaoCobranca", 'String'>
+    readonly tenantId: FieldRef<"AcaoCobranca", 'String'>
+    readonly tituloId: FieldRef<"AcaoCobranca", 'String'>
+    readonly clienteNome: FieldRef<"AcaoCobranca", 'String'>
+    readonly tipo: FieldRef<"AcaoCobranca", 'TipoAcaoCobranca'>
+    readonly mensagem: FieldRef<"AcaoCobranca", 'String'>
+    readonly status: FieldRef<"AcaoCobranca", 'StatusAcaoCobranca'>
+    readonly automatica: FieldRef<"AcaoCobranca", 'Boolean'>
+    readonly detalhe: FieldRef<"AcaoCobranca", 'String'>
+    readonly criadoEm: FieldRef<"AcaoCobranca", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AcaoCobranca findUnique
+   */
+  export type AcaoCobrancaFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcaoCobranca
+     */
+    select?: AcaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcaoCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter, which AcaoCobranca to fetch.
+     */
+    where: AcaoCobrancaWhereUniqueInput
+  }
+
+  /**
+   * AcaoCobranca findUniqueOrThrow
+   */
+  export type AcaoCobrancaFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcaoCobranca
+     */
+    select?: AcaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcaoCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter, which AcaoCobranca to fetch.
+     */
+    where: AcaoCobrancaWhereUniqueInput
+  }
+
+  /**
+   * AcaoCobranca findFirst
+   */
+  export type AcaoCobrancaFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcaoCobranca
+     */
+    select?: AcaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcaoCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter, which AcaoCobranca to fetch.
+     */
+    where?: AcaoCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AcaoCobrancas to fetch.
+     */
+    orderBy?: AcaoCobrancaOrderByWithRelationInput | AcaoCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AcaoCobrancas.
+     */
+    cursor?: AcaoCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AcaoCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AcaoCobrancas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AcaoCobrancas.
+     */
+    distinct?: AcaoCobrancaScalarFieldEnum | AcaoCobrancaScalarFieldEnum[]
+  }
+
+  /**
+   * AcaoCobranca findFirstOrThrow
+   */
+  export type AcaoCobrancaFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcaoCobranca
+     */
+    select?: AcaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcaoCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter, which AcaoCobranca to fetch.
+     */
+    where?: AcaoCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AcaoCobrancas to fetch.
+     */
+    orderBy?: AcaoCobrancaOrderByWithRelationInput | AcaoCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AcaoCobrancas.
+     */
+    cursor?: AcaoCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AcaoCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AcaoCobrancas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AcaoCobrancas.
+     */
+    distinct?: AcaoCobrancaScalarFieldEnum | AcaoCobrancaScalarFieldEnum[]
+  }
+
+  /**
+   * AcaoCobranca findMany
+   */
+  export type AcaoCobrancaFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcaoCobranca
+     */
+    select?: AcaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcaoCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter, which AcaoCobrancas to fetch.
+     */
+    where?: AcaoCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AcaoCobrancas to fetch.
+     */
+    orderBy?: AcaoCobrancaOrderByWithRelationInput | AcaoCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AcaoCobrancas.
+     */
+    cursor?: AcaoCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AcaoCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AcaoCobrancas.
+     */
+    skip?: number
+    distinct?: AcaoCobrancaScalarFieldEnum | AcaoCobrancaScalarFieldEnum[]
+  }
+
+  /**
+   * AcaoCobranca create
+   */
+  export type AcaoCobrancaCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcaoCobranca
+     */
+    select?: AcaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcaoCobrancaInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AcaoCobranca.
+     */
+    data: XOR<AcaoCobrancaCreateInput, AcaoCobrancaUncheckedCreateInput>
+  }
+
+  /**
+   * AcaoCobranca createMany
+   */
+  export type AcaoCobrancaCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AcaoCobrancas.
+     */
+    data: AcaoCobrancaCreateManyInput | AcaoCobrancaCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AcaoCobranca createManyAndReturn
+   */
+  export type AcaoCobrancaCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcaoCobranca
+     */
+    select?: AcaoCobrancaSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many AcaoCobrancas.
+     */
+    data: AcaoCobrancaCreateManyInput | AcaoCobrancaCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcaoCobrancaIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AcaoCobranca update
+   */
+  export type AcaoCobrancaUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcaoCobranca
+     */
+    select?: AcaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcaoCobrancaInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AcaoCobranca.
+     */
+    data: XOR<AcaoCobrancaUpdateInput, AcaoCobrancaUncheckedUpdateInput>
+    /**
+     * Choose, which AcaoCobranca to update.
+     */
+    where: AcaoCobrancaWhereUniqueInput
+  }
+
+  /**
+   * AcaoCobranca updateMany
+   */
+  export type AcaoCobrancaUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AcaoCobrancas.
+     */
+    data: XOR<AcaoCobrancaUpdateManyMutationInput, AcaoCobrancaUncheckedUpdateManyInput>
+    /**
+     * Filter which AcaoCobrancas to update
+     */
+    where?: AcaoCobrancaWhereInput
+  }
+
+  /**
+   * AcaoCobranca upsert
+   */
+  export type AcaoCobrancaUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcaoCobranca
+     */
+    select?: AcaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcaoCobrancaInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AcaoCobranca to update in case it exists.
+     */
+    where: AcaoCobrancaWhereUniqueInput
+    /**
+     * In case the AcaoCobranca found by the `where` argument doesn't exist, create a new AcaoCobranca with this data.
+     */
+    create: XOR<AcaoCobrancaCreateInput, AcaoCobrancaUncheckedCreateInput>
+    /**
+     * In case the AcaoCobranca was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AcaoCobrancaUpdateInput, AcaoCobrancaUncheckedUpdateInput>
+  }
+
+  /**
+   * AcaoCobranca delete
+   */
+  export type AcaoCobrancaDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcaoCobranca
+     */
+    select?: AcaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcaoCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter which AcaoCobranca to delete.
+     */
+    where: AcaoCobrancaWhereUniqueInput
+  }
+
+  /**
+   * AcaoCobranca deleteMany
+   */
+  export type AcaoCobrancaDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AcaoCobrancas to delete
+     */
+    where?: AcaoCobrancaWhereInput
+  }
+
+  /**
+   * AcaoCobranca without action
+   */
+  export type AcaoCobrancaDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcaoCobranca
+     */
+    select?: AcaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcaoCobrancaInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AcordoCobranca
+   */
+
+  export type AggregateAcordoCobranca = {
+    _count: AcordoCobrancaCountAggregateOutputType | null
+    _avg: AcordoCobrancaAvgAggregateOutputType | null
+    _sum: AcordoCobrancaSumAggregateOutputType | null
+    _min: AcordoCobrancaMinAggregateOutputType | null
+    _max: AcordoCobrancaMaxAggregateOutputType | null
+  }
+
+  export type AcordoCobrancaAvgAggregateOutputType = {
+    valorOriginal: Decimal | null
+    descontoAplicado: Decimal | null
+    valorFinal: Decimal | null
+    numeroParcelas: number | null
+  }
+
+  export type AcordoCobrancaSumAggregateOutputType = {
+    valorOriginal: Decimal | null
+    descontoAplicado: Decimal | null
+    valorFinal: Decimal | null
+    numeroParcelas: number | null
+  }
+
+  export type AcordoCobrancaMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    tituloId: string | null
+    clienteId: string | null
+    clienteNome: string | null
+    valorOriginal: Decimal | null
+    descontoAplicado: Decimal | null
+    valorFinal: Decimal | null
+    numeroParcelas: number | null
+    status: $Enums.StatusAcordoCobranca | null
+    observacao: string | null
+    criadoEm: Date | null
+    atualizadoEm: Date | null
+  }
+
+  export type AcordoCobrancaMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    tituloId: string | null
+    clienteId: string | null
+    clienteNome: string | null
+    valorOriginal: Decimal | null
+    descontoAplicado: Decimal | null
+    valorFinal: Decimal | null
+    numeroParcelas: number | null
+    status: $Enums.StatusAcordoCobranca | null
+    observacao: string | null
+    criadoEm: Date | null
+    atualizadoEm: Date | null
+  }
+
+  export type AcordoCobrancaCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    tituloId: number
+    clienteId: number
+    clienteNome: number
+    valorOriginal: number
+    descontoAplicado: number
+    valorFinal: number
+    numeroParcelas: number
+    status: number
+    observacao: number
+    criadoEm: number
+    atualizadoEm: number
+    _all: number
+  }
+
+
+  export type AcordoCobrancaAvgAggregateInputType = {
+    valorOriginal?: true
+    descontoAplicado?: true
+    valorFinal?: true
+    numeroParcelas?: true
+  }
+
+  export type AcordoCobrancaSumAggregateInputType = {
+    valorOriginal?: true
+    descontoAplicado?: true
+    valorFinal?: true
+    numeroParcelas?: true
+  }
+
+  export type AcordoCobrancaMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    tituloId?: true
+    clienteId?: true
+    clienteNome?: true
+    valorOriginal?: true
+    descontoAplicado?: true
+    valorFinal?: true
+    numeroParcelas?: true
+    status?: true
+    observacao?: true
+    criadoEm?: true
+    atualizadoEm?: true
+  }
+
+  export type AcordoCobrancaMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    tituloId?: true
+    clienteId?: true
+    clienteNome?: true
+    valorOriginal?: true
+    descontoAplicado?: true
+    valorFinal?: true
+    numeroParcelas?: true
+    status?: true
+    observacao?: true
+    criadoEm?: true
+    atualizadoEm?: true
+  }
+
+  export type AcordoCobrancaCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    tituloId?: true
+    clienteId?: true
+    clienteNome?: true
+    valorOriginal?: true
+    descontoAplicado?: true
+    valorFinal?: true
+    numeroParcelas?: true
+    status?: true
+    observacao?: true
+    criadoEm?: true
+    atualizadoEm?: true
+    _all?: true
+  }
+
+  export type AcordoCobrancaAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AcordoCobranca to aggregate.
+     */
+    where?: AcordoCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AcordoCobrancas to fetch.
+     */
+    orderBy?: AcordoCobrancaOrderByWithRelationInput | AcordoCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AcordoCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AcordoCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AcordoCobrancas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AcordoCobrancas
+    **/
+    _count?: true | AcordoCobrancaCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AcordoCobrancaAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AcordoCobrancaSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AcordoCobrancaMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AcordoCobrancaMaxAggregateInputType
+  }
+
+  export type GetAcordoCobrancaAggregateType<T extends AcordoCobrancaAggregateArgs> = {
+        [P in keyof T & keyof AggregateAcordoCobranca]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAcordoCobranca[P]>
+      : GetScalarType<T[P], AggregateAcordoCobranca[P]>
+  }
+
+
+
+
+  export type AcordoCobrancaGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AcordoCobrancaWhereInput
+    orderBy?: AcordoCobrancaOrderByWithAggregationInput | AcordoCobrancaOrderByWithAggregationInput[]
+    by: AcordoCobrancaScalarFieldEnum[] | AcordoCobrancaScalarFieldEnum
+    having?: AcordoCobrancaScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AcordoCobrancaCountAggregateInputType | true
+    _avg?: AcordoCobrancaAvgAggregateInputType
+    _sum?: AcordoCobrancaSumAggregateInputType
+    _min?: AcordoCobrancaMinAggregateInputType
+    _max?: AcordoCobrancaMaxAggregateInputType
+  }
+
+  export type AcordoCobrancaGroupByOutputType = {
+    id: string
+    tenantId: string
+    tituloId: string
+    clienteId: string | null
+    clienteNome: string
+    valorOriginal: Decimal
+    descontoAplicado: Decimal
+    valorFinal: Decimal
+    numeroParcelas: number
+    status: $Enums.StatusAcordoCobranca
+    observacao: string | null
+    criadoEm: Date
+    atualizadoEm: Date
+    _count: AcordoCobrancaCountAggregateOutputType | null
+    _avg: AcordoCobrancaAvgAggregateOutputType | null
+    _sum: AcordoCobrancaSumAggregateOutputType | null
+    _min: AcordoCobrancaMinAggregateOutputType | null
+    _max: AcordoCobrancaMaxAggregateOutputType | null
+  }
+
+  type GetAcordoCobrancaGroupByPayload<T extends AcordoCobrancaGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AcordoCobrancaGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AcordoCobrancaGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AcordoCobrancaGroupByOutputType[P]>
+            : GetScalarType<T[P], AcordoCobrancaGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AcordoCobrancaSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    tituloId?: boolean
+    clienteId?: boolean
+    clienteNome?: boolean
+    valorOriginal?: boolean
+    descontoAplicado?: boolean
+    valorFinal?: boolean
+    numeroParcelas?: boolean
+    status?: boolean
+    observacao?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+    titulo?: boolean | TituloCobrancaDefaultArgs<ExtArgs>
+    parcelas?: boolean | AcordoCobranca$parcelasArgs<ExtArgs>
+    _count?: boolean | AcordoCobrancaCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["acordoCobranca"]>
+
+  export type AcordoCobrancaSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    tituloId?: boolean
+    clienteId?: boolean
+    clienteNome?: boolean
+    valorOriginal?: boolean
+    descontoAplicado?: boolean
+    valorFinal?: boolean
+    numeroParcelas?: boolean
+    status?: boolean
+    observacao?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+    titulo?: boolean | TituloCobrancaDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["acordoCobranca"]>
+
+  export type AcordoCobrancaSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    tituloId?: boolean
+    clienteId?: boolean
+    clienteNome?: boolean
+    valorOriginal?: boolean
+    descontoAplicado?: boolean
+    valorFinal?: boolean
+    numeroParcelas?: boolean
+    status?: boolean
+    observacao?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }
+
+  export type AcordoCobrancaInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    titulo?: boolean | TituloCobrancaDefaultArgs<ExtArgs>
+    parcelas?: boolean | AcordoCobranca$parcelasArgs<ExtArgs>
+    _count?: boolean | AcordoCobrancaCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type AcordoCobrancaIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    titulo?: boolean | TituloCobrancaDefaultArgs<ExtArgs>
+  }
+
+  export type $AcordoCobrancaPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AcordoCobranca"
+    objects: {
+      titulo: Prisma.$TituloCobrancaPayload<ExtArgs>
+      parcelas: Prisma.$ParcelaAcordoPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      tituloId: string
+      clienteId: string | null
+      clienteNome: string
+      valorOriginal: Prisma.Decimal
+      descontoAplicado: Prisma.Decimal
+      valorFinal: Prisma.Decimal
+      numeroParcelas: number
+      status: $Enums.StatusAcordoCobranca
+      observacao: string | null
+      criadoEm: Date
+      atualizadoEm: Date
+    }, ExtArgs["result"]["acordoCobranca"]>
+    composites: {}
+  }
+
+  type AcordoCobrancaGetPayload<S extends boolean | null | undefined | AcordoCobrancaDefaultArgs> = $Result.GetResult<Prisma.$AcordoCobrancaPayload, S>
+
+  type AcordoCobrancaCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<AcordoCobrancaFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: AcordoCobrancaCountAggregateInputType | true
+    }
+
+  export interface AcordoCobrancaDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AcordoCobranca'], meta: { name: 'AcordoCobranca' } }
+    /**
+     * Find zero or one AcordoCobranca that matches the filter.
+     * @param {AcordoCobrancaFindUniqueArgs} args - Arguments to find a AcordoCobranca
+     * @example
+     * // Get one AcordoCobranca
+     * const acordoCobranca = await prisma.acordoCobranca.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AcordoCobrancaFindUniqueArgs>(args: SelectSubset<T, AcordoCobrancaFindUniqueArgs<ExtArgs>>): Prisma__AcordoCobrancaClient<$Result.GetResult<Prisma.$AcordoCobrancaPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one AcordoCobranca that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {AcordoCobrancaFindUniqueOrThrowArgs} args - Arguments to find a AcordoCobranca
+     * @example
+     * // Get one AcordoCobranca
+     * const acordoCobranca = await prisma.acordoCobranca.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AcordoCobrancaFindUniqueOrThrowArgs>(args: SelectSubset<T, AcordoCobrancaFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AcordoCobrancaClient<$Result.GetResult<Prisma.$AcordoCobrancaPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first AcordoCobranca that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AcordoCobrancaFindFirstArgs} args - Arguments to find a AcordoCobranca
+     * @example
+     * // Get one AcordoCobranca
+     * const acordoCobranca = await prisma.acordoCobranca.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AcordoCobrancaFindFirstArgs>(args?: SelectSubset<T, AcordoCobrancaFindFirstArgs<ExtArgs>>): Prisma__AcordoCobrancaClient<$Result.GetResult<Prisma.$AcordoCobrancaPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first AcordoCobranca that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AcordoCobrancaFindFirstOrThrowArgs} args - Arguments to find a AcordoCobranca
+     * @example
+     * // Get one AcordoCobranca
+     * const acordoCobranca = await prisma.acordoCobranca.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AcordoCobrancaFindFirstOrThrowArgs>(args?: SelectSubset<T, AcordoCobrancaFindFirstOrThrowArgs<ExtArgs>>): Prisma__AcordoCobrancaClient<$Result.GetResult<Prisma.$AcordoCobrancaPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more AcordoCobrancas that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AcordoCobrancaFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AcordoCobrancas
+     * const acordoCobrancas = await prisma.acordoCobranca.findMany()
+     * 
+     * // Get first 10 AcordoCobrancas
+     * const acordoCobrancas = await prisma.acordoCobranca.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const acordoCobrancaWithIdOnly = await prisma.acordoCobranca.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AcordoCobrancaFindManyArgs>(args?: SelectSubset<T, AcordoCobrancaFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AcordoCobrancaPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a AcordoCobranca.
+     * @param {AcordoCobrancaCreateArgs} args - Arguments to create a AcordoCobranca.
+     * @example
+     * // Create one AcordoCobranca
+     * const AcordoCobranca = await prisma.acordoCobranca.create({
+     *   data: {
+     *     // ... data to create a AcordoCobranca
+     *   }
+     * })
+     * 
+     */
+    create<T extends AcordoCobrancaCreateArgs>(args: SelectSubset<T, AcordoCobrancaCreateArgs<ExtArgs>>): Prisma__AcordoCobrancaClient<$Result.GetResult<Prisma.$AcordoCobrancaPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many AcordoCobrancas.
+     * @param {AcordoCobrancaCreateManyArgs} args - Arguments to create many AcordoCobrancas.
+     * @example
+     * // Create many AcordoCobrancas
+     * const acordoCobranca = await prisma.acordoCobranca.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AcordoCobrancaCreateManyArgs>(args?: SelectSubset<T, AcordoCobrancaCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AcordoCobrancas and returns the data saved in the database.
+     * @param {AcordoCobrancaCreateManyAndReturnArgs} args - Arguments to create many AcordoCobrancas.
+     * @example
+     * // Create many AcordoCobrancas
+     * const acordoCobranca = await prisma.acordoCobranca.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AcordoCobrancas and only return the `id`
+     * const acordoCobrancaWithIdOnly = await prisma.acordoCobranca.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AcordoCobrancaCreateManyAndReturnArgs>(args?: SelectSubset<T, AcordoCobrancaCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AcordoCobrancaPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a AcordoCobranca.
+     * @param {AcordoCobrancaDeleteArgs} args - Arguments to delete one AcordoCobranca.
+     * @example
+     * // Delete one AcordoCobranca
+     * const AcordoCobranca = await prisma.acordoCobranca.delete({
+     *   where: {
+     *     // ... filter to delete one AcordoCobranca
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AcordoCobrancaDeleteArgs>(args: SelectSubset<T, AcordoCobrancaDeleteArgs<ExtArgs>>): Prisma__AcordoCobrancaClient<$Result.GetResult<Prisma.$AcordoCobrancaPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one AcordoCobranca.
+     * @param {AcordoCobrancaUpdateArgs} args - Arguments to update one AcordoCobranca.
+     * @example
+     * // Update one AcordoCobranca
+     * const acordoCobranca = await prisma.acordoCobranca.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AcordoCobrancaUpdateArgs>(args: SelectSubset<T, AcordoCobrancaUpdateArgs<ExtArgs>>): Prisma__AcordoCobrancaClient<$Result.GetResult<Prisma.$AcordoCobrancaPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more AcordoCobrancas.
+     * @param {AcordoCobrancaDeleteManyArgs} args - Arguments to filter AcordoCobrancas to delete.
+     * @example
+     * // Delete a few AcordoCobrancas
+     * const { count } = await prisma.acordoCobranca.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AcordoCobrancaDeleteManyArgs>(args?: SelectSubset<T, AcordoCobrancaDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AcordoCobrancas.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AcordoCobrancaUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AcordoCobrancas
+     * const acordoCobranca = await prisma.acordoCobranca.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AcordoCobrancaUpdateManyArgs>(args: SelectSubset<T, AcordoCobrancaUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one AcordoCobranca.
+     * @param {AcordoCobrancaUpsertArgs} args - Arguments to update or create a AcordoCobranca.
+     * @example
+     * // Update or create a AcordoCobranca
+     * const acordoCobranca = await prisma.acordoCobranca.upsert({
+     *   create: {
+     *     // ... data to create a AcordoCobranca
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AcordoCobranca we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AcordoCobrancaUpsertArgs>(args: SelectSubset<T, AcordoCobrancaUpsertArgs<ExtArgs>>): Prisma__AcordoCobrancaClient<$Result.GetResult<Prisma.$AcordoCobrancaPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of AcordoCobrancas.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AcordoCobrancaCountArgs} args - Arguments to filter AcordoCobrancas to count.
+     * @example
+     * // Count the number of AcordoCobrancas
+     * const count = await prisma.acordoCobranca.count({
+     *   where: {
+     *     // ... the filter for the AcordoCobrancas we want to count
+     *   }
+     * })
+    **/
+    count<T extends AcordoCobrancaCountArgs>(
+      args?: Subset<T, AcordoCobrancaCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AcordoCobrancaCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AcordoCobranca.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AcordoCobrancaAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AcordoCobrancaAggregateArgs>(args: Subset<T, AcordoCobrancaAggregateArgs>): Prisma.PrismaPromise<GetAcordoCobrancaAggregateType<T>>
+
+    /**
+     * Group by AcordoCobranca.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AcordoCobrancaGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AcordoCobrancaGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AcordoCobrancaGroupByArgs['orderBy'] }
+        : { orderBy?: AcordoCobrancaGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AcordoCobrancaGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAcordoCobrancaGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AcordoCobranca model
+   */
+  readonly fields: AcordoCobrancaFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AcordoCobranca.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AcordoCobrancaClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    titulo<T extends TituloCobrancaDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TituloCobrancaDefaultArgs<ExtArgs>>): Prisma__TituloCobrancaClient<$Result.GetResult<Prisma.$TituloCobrancaPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    parcelas<T extends AcordoCobranca$parcelasArgs<ExtArgs> = {}>(args?: Subset<T, AcordoCobranca$parcelasArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ParcelaAcordoPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AcordoCobranca model
+   */ 
+  interface AcordoCobrancaFieldRefs {
+    readonly id: FieldRef<"AcordoCobranca", 'String'>
+    readonly tenantId: FieldRef<"AcordoCobranca", 'String'>
+    readonly tituloId: FieldRef<"AcordoCobranca", 'String'>
+    readonly clienteId: FieldRef<"AcordoCobranca", 'String'>
+    readonly clienteNome: FieldRef<"AcordoCobranca", 'String'>
+    readonly valorOriginal: FieldRef<"AcordoCobranca", 'Decimal'>
+    readonly descontoAplicado: FieldRef<"AcordoCobranca", 'Decimal'>
+    readonly valorFinal: FieldRef<"AcordoCobranca", 'Decimal'>
+    readonly numeroParcelas: FieldRef<"AcordoCobranca", 'Int'>
+    readonly status: FieldRef<"AcordoCobranca", 'StatusAcordoCobranca'>
+    readonly observacao: FieldRef<"AcordoCobranca", 'String'>
+    readonly criadoEm: FieldRef<"AcordoCobranca", 'DateTime'>
+    readonly atualizadoEm: FieldRef<"AcordoCobranca", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AcordoCobranca findUnique
+   */
+  export type AcordoCobrancaFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcordoCobranca
+     */
+    select?: AcordoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcordoCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter, which AcordoCobranca to fetch.
+     */
+    where: AcordoCobrancaWhereUniqueInput
+  }
+
+  /**
+   * AcordoCobranca findUniqueOrThrow
+   */
+  export type AcordoCobrancaFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcordoCobranca
+     */
+    select?: AcordoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcordoCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter, which AcordoCobranca to fetch.
+     */
+    where: AcordoCobrancaWhereUniqueInput
+  }
+
+  /**
+   * AcordoCobranca findFirst
+   */
+  export type AcordoCobrancaFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcordoCobranca
+     */
+    select?: AcordoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcordoCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter, which AcordoCobranca to fetch.
+     */
+    where?: AcordoCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AcordoCobrancas to fetch.
+     */
+    orderBy?: AcordoCobrancaOrderByWithRelationInput | AcordoCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AcordoCobrancas.
+     */
+    cursor?: AcordoCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AcordoCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AcordoCobrancas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AcordoCobrancas.
+     */
+    distinct?: AcordoCobrancaScalarFieldEnum | AcordoCobrancaScalarFieldEnum[]
+  }
+
+  /**
+   * AcordoCobranca findFirstOrThrow
+   */
+  export type AcordoCobrancaFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcordoCobranca
+     */
+    select?: AcordoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcordoCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter, which AcordoCobranca to fetch.
+     */
+    where?: AcordoCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AcordoCobrancas to fetch.
+     */
+    orderBy?: AcordoCobrancaOrderByWithRelationInput | AcordoCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AcordoCobrancas.
+     */
+    cursor?: AcordoCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AcordoCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AcordoCobrancas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AcordoCobrancas.
+     */
+    distinct?: AcordoCobrancaScalarFieldEnum | AcordoCobrancaScalarFieldEnum[]
+  }
+
+  /**
+   * AcordoCobranca findMany
+   */
+  export type AcordoCobrancaFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcordoCobranca
+     */
+    select?: AcordoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcordoCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter, which AcordoCobrancas to fetch.
+     */
+    where?: AcordoCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AcordoCobrancas to fetch.
+     */
+    orderBy?: AcordoCobrancaOrderByWithRelationInput | AcordoCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AcordoCobrancas.
+     */
+    cursor?: AcordoCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AcordoCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AcordoCobrancas.
+     */
+    skip?: number
+    distinct?: AcordoCobrancaScalarFieldEnum | AcordoCobrancaScalarFieldEnum[]
+  }
+
+  /**
+   * AcordoCobranca create
+   */
+  export type AcordoCobrancaCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcordoCobranca
+     */
+    select?: AcordoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcordoCobrancaInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AcordoCobranca.
+     */
+    data: XOR<AcordoCobrancaCreateInput, AcordoCobrancaUncheckedCreateInput>
+  }
+
+  /**
+   * AcordoCobranca createMany
+   */
+  export type AcordoCobrancaCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AcordoCobrancas.
+     */
+    data: AcordoCobrancaCreateManyInput | AcordoCobrancaCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AcordoCobranca createManyAndReturn
+   */
+  export type AcordoCobrancaCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcordoCobranca
+     */
+    select?: AcordoCobrancaSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many AcordoCobrancas.
+     */
+    data: AcordoCobrancaCreateManyInput | AcordoCobrancaCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcordoCobrancaIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AcordoCobranca update
+   */
+  export type AcordoCobrancaUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcordoCobranca
+     */
+    select?: AcordoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcordoCobrancaInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AcordoCobranca.
+     */
+    data: XOR<AcordoCobrancaUpdateInput, AcordoCobrancaUncheckedUpdateInput>
+    /**
+     * Choose, which AcordoCobranca to update.
+     */
+    where: AcordoCobrancaWhereUniqueInput
+  }
+
+  /**
+   * AcordoCobranca updateMany
+   */
+  export type AcordoCobrancaUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AcordoCobrancas.
+     */
+    data: XOR<AcordoCobrancaUpdateManyMutationInput, AcordoCobrancaUncheckedUpdateManyInput>
+    /**
+     * Filter which AcordoCobrancas to update
+     */
+    where?: AcordoCobrancaWhereInput
+  }
+
+  /**
+   * AcordoCobranca upsert
+   */
+  export type AcordoCobrancaUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcordoCobranca
+     */
+    select?: AcordoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcordoCobrancaInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AcordoCobranca to update in case it exists.
+     */
+    where: AcordoCobrancaWhereUniqueInput
+    /**
+     * In case the AcordoCobranca found by the `where` argument doesn't exist, create a new AcordoCobranca with this data.
+     */
+    create: XOR<AcordoCobrancaCreateInput, AcordoCobrancaUncheckedCreateInput>
+    /**
+     * In case the AcordoCobranca was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AcordoCobrancaUpdateInput, AcordoCobrancaUncheckedUpdateInput>
+  }
+
+  /**
+   * AcordoCobranca delete
+   */
+  export type AcordoCobrancaDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcordoCobranca
+     */
+    select?: AcordoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcordoCobrancaInclude<ExtArgs> | null
+    /**
+     * Filter which AcordoCobranca to delete.
+     */
+    where: AcordoCobrancaWhereUniqueInput
+  }
+
+  /**
+   * AcordoCobranca deleteMany
+   */
+  export type AcordoCobrancaDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AcordoCobrancas to delete
+     */
+    where?: AcordoCobrancaWhereInput
+  }
+
+  /**
+   * AcordoCobranca.parcelas
+   */
+  export type AcordoCobranca$parcelasArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ParcelaAcordo
+     */
+    select?: ParcelaAcordoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ParcelaAcordoInclude<ExtArgs> | null
+    where?: ParcelaAcordoWhereInput
+    orderBy?: ParcelaAcordoOrderByWithRelationInput | ParcelaAcordoOrderByWithRelationInput[]
+    cursor?: ParcelaAcordoWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ParcelaAcordoScalarFieldEnum | ParcelaAcordoScalarFieldEnum[]
+  }
+
+  /**
+   * AcordoCobranca without action
+   */
+  export type AcordoCobrancaDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AcordoCobranca
+     */
+    select?: AcordoCobrancaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AcordoCobrancaInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ParcelaAcordo
+   */
+
+  export type AggregateParcelaAcordo = {
+    _count: ParcelaAcordoCountAggregateOutputType | null
+    _avg: ParcelaAcordoAvgAggregateOutputType | null
+    _sum: ParcelaAcordoSumAggregateOutputType | null
+    _min: ParcelaAcordoMinAggregateOutputType | null
+    _max: ParcelaAcordoMaxAggregateOutputType | null
+  }
+
+  export type ParcelaAcordoAvgAggregateOutputType = {
+    numero: number | null
+    valor: Decimal | null
+  }
+
+  export type ParcelaAcordoSumAggregateOutputType = {
+    numero: number | null
+    valor: Decimal | null
+  }
+
+  export type ParcelaAcordoMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    acordoId: string | null
+    numero: number | null
+    valor: Decimal | null
+    vencimento: Date | null
+    pago: boolean | null
+    pagoEm: Date | null
+  }
+
+  export type ParcelaAcordoMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    acordoId: string | null
+    numero: number | null
+    valor: Decimal | null
+    vencimento: Date | null
+    pago: boolean | null
+    pagoEm: Date | null
+  }
+
+  export type ParcelaAcordoCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    acordoId: number
+    numero: number
+    valor: number
+    vencimento: number
+    pago: number
+    pagoEm: number
+    _all: number
+  }
+
+
+  export type ParcelaAcordoAvgAggregateInputType = {
+    numero?: true
+    valor?: true
+  }
+
+  export type ParcelaAcordoSumAggregateInputType = {
+    numero?: true
+    valor?: true
+  }
+
+  export type ParcelaAcordoMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    acordoId?: true
+    numero?: true
+    valor?: true
+    vencimento?: true
+    pago?: true
+    pagoEm?: true
+  }
+
+  export type ParcelaAcordoMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    acordoId?: true
+    numero?: true
+    valor?: true
+    vencimento?: true
+    pago?: true
+    pagoEm?: true
+  }
+
+  export type ParcelaAcordoCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    acordoId?: true
+    numero?: true
+    valor?: true
+    vencimento?: true
+    pago?: true
+    pagoEm?: true
+    _all?: true
+  }
+
+  export type ParcelaAcordoAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ParcelaAcordo to aggregate.
+     */
+    where?: ParcelaAcordoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ParcelaAcordos to fetch.
+     */
+    orderBy?: ParcelaAcordoOrderByWithRelationInput | ParcelaAcordoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ParcelaAcordoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ParcelaAcordos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ParcelaAcordos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ParcelaAcordos
+    **/
+    _count?: true | ParcelaAcordoCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ParcelaAcordoAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ParcelaAcordoSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ParcelaAcordoMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ParcelaAcordoMaxAggregateInputType
+  }
+
+  export type GetParcelaAcordoAggregateType<T extends ParcelaAcordoAggregateArgs> = {
+        [P in keyof T & keyof AggregateParcelaAcordo]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateParcelaAcordo[P]>
+      : GetScalarType<T[P], AggregateParcelaAcordo[P]>
+  }
+
+
+
+
+  export type ParcelaAcordoGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ParcelaAcordoWhereInput
+    orderBy?: ParcelaAcordoOrderByWithAggregationInput | ParcelaAcordoOrderByWithAggregationInput[]
+    by: ParcelaAcordoScalarFieldEnum[] | ParcelaAcordoScalarFieldEnum
+    having?: ParcelaAcordoScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ParcelaAcordoCountAggregateInputType | true
+    _avg?: ParcelaAcordoAvgAggregateInputType
+    _sum?: ParcelaAcordoSumAggregateInputType
+    _min?: ParcelaAcordoMinAggregateInputType
+    _max?: ParcelaAcordoMaxAggregateInputType
+  }
+
+  export type ParcelaAcordoGroupByOutputType = {
+    id: string
+    tenantId: string
+    acordoId: string
+    numero: number
+    valor: Decimal
+    vencimento: Date
+    pago: boolean
+    pagoEm: Date | null
+    _count: ParcelaAcordoCountAggregateOutputType | null
+    _avg: ParcelaAcordoAvgAggregateOutputType | null
+    _sum: ParcelaAcordoSumAggregateOutputType | null
+    _min: ParcelaAcordoMinAggregateOutputType | null
+    _max: ParcelaAcordoMaxAggregateOutputType | null
+  }
+
+  type GetParcelaAcordoGroupByPayload<T extends ParcelaAcordoGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ParcelaAcordoGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ParcelaAcordoGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ParcelaAcordoGroupByOutputType[P]>
+            : GetScalarType<T[P], ParcelaAcordoGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ParcelaAcordoSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    acordoId?: boolean
+    numero?: boolean
+    valor?: boolean
+    vencimento?: boolean
+    pago?: boolean
+    pagoEm?: boolean
+    acordo?: boolean | AcordoCobrancaDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["parcelaAcordo"]>
+
+  export type ParcelaAcordoSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    acordoId?: boolean
+    numero?: boolean
+    valor?: boolean
+    vencimento?: boolean
+    pago?: boolean
+    pagoEm?: boolean
+    acordo?: boolean | AcordoCobrancaDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["parcelaAcordo"]>
+
+  export type ParcelaAcordoSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    acordoId?: boolean
+    numero?: boolean
+    valor?: boolean
+    vencimento?: boolean
+    pago?: boolean
+    pagoEm?: boolean
+  }
+
+  export type ParcelaAcordoInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    acordo?: boolean | AcordoCobrancaDefaultArgs<ExtArgs>
+  }
+  export type ParcelaAcordoIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    acordo?: boolean | AcordoCobrancaDefaultArgs<ExtArgs>
+  }
+
+  export type $ParcelaAcordoPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ParcelaAcordo"
+    objects: {
+      acordo: Prisma.$AcordoCobrancaPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      acordoId: string
+      numero: number
+      valor: Prisma.Decimal
+      vencimento: Date
+      pago: boolean
+      pagoEm: Date | null
+    }, ExtArgs["result"]["parcelaAcordo"]>
+    composites: {}
+  }
+
+  type ParcelaAcordoGetPayload<S extends boolean | null | undefined | ParcelaAcordoDefaultArgs> = $Result.GetResult<Prisma.$ParcelaAcordoPayload, S>
+
+  type ParcelaAcordoCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<ParcelaAcordoFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: ParcelaAcordoCountAggregateInputType | true
+    }
+
+  export interface ParcelaAcordoDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ParcelaAcordo'], meta: { name: 'ParcelaAcordo' } }
+    /**
+     * Find zero or one ParcelaAcordo that matches the filter.
+     * @param {ParcelaAcordoFindUniqueArgs} args - Arguments to find a ParcelaAcordo
+     * @example
+     * // Get one ParcelaAcordo
+     * const parcelaAcordo = await prisma.parcelaAcordo.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ParcelaAcordoFindUniqueArgs>(args: SelectSubset<T, ParcelaAcordoFindUniqueArgs<ExtArgs>>): Prisma__ParcelaAcordoClient<$Result.GetResult<Prisma.$ParcelaAcordoPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one ParcelaAcordo that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {ParcelaAcordoFindUniqueOrThrowArgs} args - Arguments to find a ParcelaAcordo
+     * @example
+     * // Get one ParcelaAcordo
+     * const parcelaAcordo = await prisma.parcelaAcordo.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ParcelaAcordoFindUniqueOrThrowArgs>(args: SelectSubset<T, ParcelaAcordoFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ParcelaAcordoClient<$Result.GetResult<Prisma.$ParcelaAcordoPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first ParcelaAcordo that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ParcelaAcordoFindFirstArgs} args - Arguments to find a ParcelaAcordo
+     * @example
+     * // Get one ParcelaAcordo
+     * const parcelaAcordo = await prisma.parcelaAcordo.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ParcelaAcordoFindFirstArgs>(args?: SelectSubset<T, ParcelaAcordoFindFirstArgs<ExtArgs>>): Prisma__ParcelaAcordoClient<$Result.GetResult<Prisma.$ParcelaAcordoPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first ParcelaAcordo that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ParcelaAcordoFindFirstOrThrowArgs} args - Arguments to find a ParcelaAcordo
+     * @example
+     * // Get one ParcelaAcordo
+     * const parcelaAcordo = await prisma.parcelaAcordo.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ParcelaAcordoFindFirstOrThrowArgs>(args?: SelectSubset<T, ParcelaAcordoFindFirstOrThrowArgs<ExtArgs>>): Prisma__ParcelaAcordoClient<$Result.GetResult<Prisma.$ParcelaAcordoPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more ParcelaAcordos that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ParcelaAcordoFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ParcelaAcordos
+     * const parcelaAcordos = await prisma.parcelaAcordo.findMany()
+     * 
+     * // Get first 10 ParcelaAcordos
+     * const parcelaAcordos = await prisma.parcelaAcordo.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const parcelaAcordoWithIdOnly = await prisma.parcelaAcordo.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ParcelaAcordoFindManyArgs>(args?: SelectSubset<T, ParcelaAcordoFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ParcelaAcordoPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a ParcelaAcordo.
+     * @param {ParcelaAcordoCreateArgs} args - Arguments to create a ParcelaAcordo.
+     * @example
+     * // Create one ParcelaAcordo
+     * const ParcelaAcordo = await prisma.parcelaAcordo.create({
+     *   data: {
+     *     // ... data to create a ParcelaAcordo
+     *   }
+     * })
+     * 
+     */
+    create<T extends ParcelaAcordoCreateArgs>(args: SelectSubset<T, ParcelaAcordoCreateArgs<ExtArgs>>): Prisma__ParcelaAcordoClient<$Result.GetResult<Prisma.$ParcelaAcordoPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many ParcelaAcordos.
+     * @param {ParcelaAcordoCreateManyArgs} args - Arguments to create many ParcelaAcordos.
+     * @example
+     * // Create many ParcelaAcordos
+     * const parcelaAcordo = await prisma.parcelaAcordo.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ParcelaAcordoCreateManyArgs>(args?: SelectSubset<T, ParcelaAcordoCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ParcelaAcordos and returns the data saved in the database.
+     * @param {ParcelaAcordoCreateManyAndReturnArgs} args - Arguments to create many ParcelaAcordos.
+     * @example
+     * // Create many ParcelaAcordos
+     * const parcelaAcordo = await prisma.parcelaAcordo.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ParcelaAcordos and only return the `id`
+     * const parcelaAcordoWithIdOnly = await prisma.parcelaAcordo.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ParcelaAcordoCreateManyAndReturnArgs>(args?: SelectSubset<T, ParcelaAcordoCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ParcelaAcordoPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a ParcelaAcordo.
+     * @param {ParcelaAcordoDeleteArgs} args - Arguments to delete one ParcelaAcordo.
+     * @example
+     * // Delete one ParcelaAcordo
+     * const ParcelaAcordo = await prisma.parcelaAcordo.delete({
+     *   where: {
+     *     // ... filter to delete one ParcelaAcordo
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ParcelaAcordoDeleteArgs>(args: SelectSubset<T, ParcelaAcordoDeleteArgs<ExtArgs>>): Prisma__ParcelaAcordoClient<$Result.GetResult<Prisma.$ParcelaAcordoPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one ParcelaAcordo.
+     * @param {ParcelaAcordoUpdateArgs} args - Arguments to update one ParcelaAcordo.
+     * @example
+     * // Update one ParcelaAcordo
+     * const parcelaAcordo = await prisma.parcelaAcordo.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ParcelaAcordoUpdateArgs>(args: SelectSubset<T, ParcelaAcordoUpdateArgs<ExtArgs>>): Prisma__ParcelaAcordoClient<$Result.GetResult<Prisma.$ParcelaAcordoPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more ParcelaAcordos.
+     * @param {ParcelaAcordoDeleteManyArgs} args - Arguments to filter ParcelaAcordos to delete.
+     * @example
+     * // Delete a few ParcelaAcordos
+     * const { count } = await prisma.parcelaAcordo.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ParcelaAcordoDeleteManyArgs>(args?: SelectSubset<T, ParcelaAcordoDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ParcelaAcordos.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ParcelaAcordoUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ParcelaAcordos
+     * const parcelaAcordo = await prisma.parcelaAcordo.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ParcelaAcordoUpdateManyArgs>(args: SelectSubset<T, ParcelaAcordoUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one ParcelaAcordo.
+     * @param {ParcelaAcordoUpsertArgs} args - Arguments to update or create a ParcelaAcordo.
+     * @example
+     * // Update or create a ParcelaAcordo
+     * const parcelaAcordo = await prisma.parcelaAcordo.upsert({
+     *   create: {
+     *     // ... data to create a ParcelaAcordo
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ParcelaAcordo we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ParcelaAcordoUpsertArgs>(args: SelectSubset<T, ParcelaAcordoUpsertArgs<ExtArgs>>): Prisma__ParcelaAcordoClient<$Result.GetResult<Prisma.$ParcelaAcordoPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of ParcelaAcordos.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ParcelaAcordoCountArgs} args - Arguments to filter ParcelaAcordos to count.
+     * @example
+     * // Count the number of ParcelaAcordos
+     * const count = await prisma.parcelaAcordo.count({
+     *   where: {
+     *     // ... the filter for the ParcelaAcordos we want to count
+     *   }
+     * })
+    **/
+    count<T extends ParcelaAcordoCountArgs>(
+      args?: Subset<T, ParcelaAcordoCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ParcelaAcordoCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ParcelaAcordo.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ParcelaAcordoAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ParcelaAcordoAggregateArgs>(args: Subset<T, ParcelaAcordoAggregateArgs>): Prisma.PrismaPromise<GetParcelaAcordoAggregateType<T>>
+
+    /**
+     * Group by ParcelaAcordo.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ParcelaAcordoGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ParcelaAcordoGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ParcelaAcordoGroupByArgs['orderBy'] }
+        : { orderBy?: ParcelaAcordoGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ParcelaAcordoGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetParcelaAcordoGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ParcelaAcordo model
+   */
+  readonly fields: ParcelaAcordoFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ParcelaAcordo.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ParcelaAcordoClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    acordo<T extends AcordoCobrancaDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AcordoCobrancaDefaultArgs<ExtArgs>>): Prisma__AcordoCobrancaClient<$Result.GetResult<Prisma.$AcordoCobrancaPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ParcelaAcordo model
+   */ 
+  interface ParcelaAcordoFieldRefs {
+    readonly id: FieldRef<"ParcelaAcordo", 'String'>
+    readonly tenantId: FieldRef<"ParcelaAcordo", 'String'>
+    readonly acordoId: FieldRef<"ParcelaAcordo", 'String'>
+    readonly numero: FieldRef<"ParcelaAcordo", 'Int'>
+    readonly valor: FieldRef<"ParcelaAcordo", 'Decimal'>
+    readonly vencimento: FieldRef<"ParcelaAcordo", 'DateTime'>
+    readonly pago: FieldRef<"ParcelaAcordo", 'Boolean'>
+    readonly pagoEm: FieldRef<"ParcelaAcordo", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ParcelaAcordo findUnique
+   */
+  export type ParcelaAcordoFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ParcelaAcordo
+     */
+    select?: ParcelaAcordoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ParcelaAcordoInclude<ExtArgs> | null
+    /**
+     * Filter, which ParcelaAcordo to fetch.
+     */
+    where: ParcelaAcordoWhereUniqueInput
+  }
+
+  /**
+   * ParcelaAcordo findUniqueOrThrow
+   */
+  export type ParcelaAcordoFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ParcelaAcordo
+     */
+    select?: ParcelaAcordoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ParcelaAcordoInclude<ExtArgs> | null
+    /**
+     * Filter, which ParcelaAcordo to fetch.
+     */
+    where: ParcelaAcordoWhereUniqueInput
+  }
+
+  /**
+   * ParcelaAcordo findFirst
+   */
+  export type ParcelaAcordoFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ParcelaAcordo
+     */
+    select?: ParcelaAcordoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ParcelaAcordoInclude<ExtArgs> | null
+    /**
+     * Filter, which ParcelaAcordo to fetch.
+     */
+    where?: ParcelaAcordoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ParcelaAcordos to fetch.
+     */
+    orderBy?: ParcelaAcordoOrderByWithRelationInput | ParcelaAcordoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ParcelaAcordos.
+     */
+    cursor?: ParcelaAcordoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ParcelaAcordos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ParcelaAcordos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ParcelaAcordos.
+     */
+    distinct?: ParcelaAcordoScalarFieldEnum | ParcelaAcordoScalarFieldEnum[]
+  }
+
+  /**
+   * ParcelaAcordo findFirstOrThrow
+   */
+  export type ParcelaAcordoFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ParcelaAcordo
+     */
+    select?: ParcelaAcordoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ParcelaAcordoInclude<ExtArgs> | null
+    /**
+     * Filter, which ParcelaAcordo to fetch.
+     */
+    where?: ParcelaAcordoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ParcelaAcordos to fetch.
+     */
+    orderBy?: ParcelaAcordoOrderByWithRelationInput | ParcelaAcordoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ParcelaAcordos.
+     */
+    cursor?: ParcelaAcordoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ParcelaAcordos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ParcelaAcordos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ParcelaAcordos.
+     */
+    distinct?: ParcelaAcordoScalarFieldEnum | ParcelaAcordoScalarFieldEnum[]
+  }
+
+  /**
+   * ParcelaAcordo findMany
+   */
+  export type ParcelaAcordoFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ParcelaAcordo
+     */
+    select?: ParcelaAcordoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ParcelaAcordoInclude<ExtArgs> | null
+    /**
+     * Filter, which ParcelaAcordos to fetch.
+     */
+    where?: ParcelaAcordoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ParcelaAcordos to fetch.
+     */
+    orderBy?: ParcelaAcordoOrderByWithRelationInput | ParcelaAcordoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ParcelaAcordos.
+     */
+    cursor?: ParcelaAcordoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ParcelaAcordos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ParcelaAcordos.
+     */
+    skip?: number
+    distinct?: ParcelaAcordoScalarFieldEnum | ParcelaAcordoScalarFieldEnum[]
+  }
+
+  /**
+   * ParcelaAcordo create
+   */
+  export type ParcelaAcordoCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ParcelaAcordo
+     */
+    select?: ParcelaAcordoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ParcelaAcordoInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ParcelaAcordo.
+     */
+    data: XOR<ParcelaAcordoCreateInput, ParcelaAcordoUncheckedCreateInput>
+  }
+
+  /**
+   * ParcelaAcordo createMany
+   */
+  export type ParcelaAcordoCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ParcelaAcordos.
+     */
+    data: ParcelaAcordoCreateManyInput | ParcelaAcordoCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ParcelaAcordo createManyAndReturn
+   */
+  export type ParcelaAcordoCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ParcelaAcordo
+     */
+    select?: ParcelaAcordoSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many ParcelaAcordos.
+     */
+    data: ParcelaAcordoCreateManyInput | ParcelaAcordoCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ParcelaAcordoIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ParcelaAcordo update
+   */
+  export type ParcelaAcordoUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ParcelaAcordo
+     */
+    select?: ParcelaAcordoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ParcelaAcordoInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ParcelaAcordo.
+     */
+    data: XOR<ParcelaAcordoUpdateInput, ParcelaAcordoUncheckedUpdateInput>
+    /**
+     * Choose, which ParcelaAcordo to update.
+     */
+    where: ParcelaAcordoWhereUniqueInput
+  }
+
+  /**
+   * ParcelaAcordo updateMany
+   */
+  export type ParcelaAcordoUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ParcelaAcordos.
+     */
+    data: XOR<ParcelaAcordoUpdateManyMutationInput, ParcelaAcordoUncheckedUpdateManyInput>
+    /**
+     * Filter which ParcelaAcordos to update
+     */
+    where?: ParcelaAcordoWhereInput
+  }
+
+  /**
+   * ParcelaAcordo upsert
+   */
+  export type ParcelaAcordoUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ParcelaAcordo
+     */
+    select?: ParcelaAcordoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ParcelaAcordoInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ParcelaAcordo to update in case it exists.
+     */
+    where: ParcelaAcordoWhereUniqueInput
+    /**
+     * In case the ParcelaAcordo found by the `where` argument doesn't exist, create a new ParcelaAcordo with this data.
+     */
+    create: XOR<ParcelaAcordoCreateInput, ParcelaAcordoUncheckedCreateInput>
+    /**
+     * In case the ParcelaAcordo was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ParcelaAcordoUpdateInput, ParcelaAcordoUncheckedUpdateInput>
+  }
+
+  /**
+   * ParcelaAcordo delete
+   */
+  export type ParcelaAcordoDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ParcelaAcordo
+     */
+    select?: ParcelaAcordoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ParcelaAcordoInclude<ExtArgs> | null
+    /**
+     * Filter which ParcelaAcordo to delete.
+     */
+    where: ParcelaAcordoWhereUniqueInput
+  }
+
+  /**
+   * ParcelaAcordo deleteMany
+   */
+  export type ParcelaAcordoDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ParcelaAcordos to delete
+     */
+    where?: ParcelaAcordoWhereInput
+  }
+
+  /**
+   * ParcelaAcordo without action
+   */
+  export type ParcelaAcordoDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ParcelaAcordo
+     */
+    select?: ParcelaAcordoSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ParcelaAcordoInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ConfiguracaoCobranca
+   */
+
+  export type AggregateConfiguracaoCobranca = {
+    _count: ConfiguracaoCobrancaCountAggregateOutputType | null
+    _avg: ConfiguracaoCobrancaAvgAggregateOutputType | null
+    _sum: ConfiguracaoCobrancaSumAggregateOutputType | null
+    _min: ConfiguracaoCobrancaMinAggregateOutputType | null
+    _max: ConfiguracaoCobrancaMaxAggregateOutputType | null
+  }
+
+  export type ConfiguracaoCobrancaAvgAggregateOutputType = {
+    descontoMaximo: Decimal | null
+    parcelasMaximas: number | null
+  }
+
+  export type ConfiguracaoCobrancaSumAggregateOutputType = {
+    descontoMaximo: Decimal | null
+    parcelasMaximas: number | null
+  }
+
+  export type ConfiguracaoCobrancaMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    ativo: boolean | null
+    webhookN8n: string | null
+    callbackUrl: string | null
+    descontoMaximo: Decimal | null
+    parcelasMaximas: number | null
+    horarioInicio: string | null
+    horarioFim: string | null
+    pausarFimDeSemana: boolean | null
+    criadoEm: Date | null
+    atualizadoEm: Date | null
+  }
+
+  export type ConfiguracaoCobrancaMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    ativo: boolean | null
+    webhookN8n: string | null
+    callbackUrl: string | null
+    descontoMaximo: Decimal | null
+    parcelasMaximas: number | null
+    horarioInicio: string | null
+    horarioFim: string | null
+    pausarFimDeSemana: boolean | null
+    criadoEm: Date | null
+    atualizadoEm: Date | null
+  }
+
+  export type ConfiguracaoCobrancaCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    ativo: number
+    webhookN8n: number
+    callbackUrl: number
+    regras: number
+    descontoMaximo: number
+    parcelasMaximas: number
+    horarioInicio: number
+    horarioFim: number
+    pausarFimDeSemana: number
+    criadoEm: number
+    atualizadoEm: number
+    _all: number
+  }
+
+
+  export type ConfiguracaoCobrancaAvgAggregateInputType = {
+    descontoMaximo?: true
+    parcelasMaximas?: true
+  }
+
+  export type ConfiguracaoCobrancaSumAggregateInputType = {
+    descontoMaximo?: true
+    parcelasMaximas?: true
+  }
+
+  export type ConfiguracaoCobrancaMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    ativo?: true
+    webhookN8n?: true
+    callbackUrl?: true
+    descontoMaximo?: true
+    parcelasMaximas?: true
+    horarioInicio?: true
+    horarioFim?: true
+    pausarFimDeSemana?: true
+    criadoEm?: true
+    atualizadoEm?: true
+  }
+
+  export type ConfiguracaoCobrancaMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    ativo?: true
+    webhookN8n?: true
+    callbackUrl?: true
+    descontoMaximo?: true
+    parcelasMaximas?: true
+    horarioInicio?: true
+    horarioFim?: true
+    pausarFimDeSemana?: true
+    criadoEm?: true
+    atualizadoEm?: true
+  }
+
+  export type ConfiguracaoCobrancaCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    ativo?: true
+    webhookN8n?: true
+    callbackUrl?: true
+    regras?: true
+    descontoMaximo?: true
+    parcelasMaximas?: true
+    horarioInicio?: true
+    horarioFim?: true
+    pausarFimDeSemana?: true
+    criadoEm?: true
+    atualizadoEm?: true
+    _all?: true
+  }
+
+  export type ConfiguracaoCobrancaAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ConfiguracaoCobranca to aggregate.
+     */
+    where?: ConfiguracaoCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ConfiguracaoCobrancas to fetch.
+     */
+    orderBy?: ConfiguracaoCobrancaOrderByWithRelationInput | ConfiguracaoCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ConfiguracaoCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ConfiguracaoCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ConfiguracaoCobrancas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ConfiguracaoCobrancas
+    **/
+    _count?: true | ConfiguracaoCobrancaCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ConfiguracaoCobrancaAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ConfiguracaoCobrancaSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ConfiguracaoCobrancaMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ConfiguracaoCobrancaMaxAggregateInputType
+  }
+
+  export type GetConfiguracaoCobrancaAggregateType<T extends ConfiguracaoCobrancaAggregateArgs> = {
+        [P in keyof T & keyof AggregateConfiguracaoCobranca]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateConfiguracaoCobranca[P]>
+      : GetScalarType<T[P], AggregateConfiguracaoCobranca[P]>
+  }
+
+
+
+
+  export type ConfiguracaoCobrancaGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ConfiguracaoCobrancaWhereInput
+    orderBy?: ConfiguracaoCobrancaOrderByWithAggregationInput | ConfiguracaoCobrancaOrderByWithAggregationInput[]
+    by: ConfiguracaoCobrancaScalarFieldEnum[] | ConfiguracaoCobrancaScalarFieldEnum
+    having?: ConfiguracaoCobrancaScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ConfiguracaoCobrancaCountAggregateInputType | true
+    _avg?: ConfiguracaoCobrancaAvgAggregateInputType
+    _sum?: ConfiguracaoCobrancaSumAggregateInputType
+    _min?: ConfiguracaoCobrancaMinAggregateInputType
+    _max?: ConfiguracaoCobrancaMaxAggregateInputType
+  }
+
+  export type ConfiguracaoCobrancaGroupByOutputType = {
+    id: string
+    tenantId: string
+    ativo: boolean
+    webhookN8n: string | null
+    callbackUrl: string | null
+    regras: JsonValue
+    descontoMaximo: Decimal
+    parcelasMaximas: number
+    horarioInicio: string
+    horarioFim: string
+    pausarFimDeSemana: boolean
+    criadoEm: Date
+    atualizadoEm: Date
+    _count: ConfiguracaoCobrancaCountAggregateOutputType | null
+    _avg: ConfiguracaoCobrancaAvgAggregateOutputType | null
+    _sum: ConfiguracaoCobrancaSumAggregateOutputType | null
+    _min: ConfiguracaoCobrancaMinAggregateOutputType | null
+    _max: ConfiguracaoCobrancaMaxAggregateOutputType | null
+  }
+
+  type GetConfiguracaoCobrancaGroupByPayload<T extends ConfiguracaoCobrancaGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ConfiguracaoCobrancaGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ConfiguracaoCobrancaGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ConfiguracaoCobrancaGroupByOutputType[P]>
+            : GetScalarType<T[P], ConfiguracaoCobrancaGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ConfiguracaoCobrancaSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    ativo?: boolean
+    webhookN8n?: boolean
+    callbackUrl?: boolean
+    regras?: boolean
+    descontoMaximo?: boolean
+    parcelasMaximas?: boolean
+    horarioInicio?: boolean
+    horarioFim?: boolean
+    pausarFimDeSemana?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }, ExtArgs["result"]["configuracaoCobranca"]>
+
+  export type ConfiguracaoCobrancaSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    ativo?: boolean
+    webhookN8n?: boolean
+    callbackUrl?: boolean
+    regras?: boolean
+    descontoMaximo?: boolean
+    parcelasMaximas?: boolean
+    horarioInicio?: boolean
+    horarioFim?: boolean
+    pausarFimDeSemana?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }, ExtArgs["result"]["configuracaoCobranca"]>
+
+  export type ConfiguracaoCobrancaSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    ativo?: boolean
+    webhookN8n?: boolean
+    callbackUrl?: boolean
+    regras?: boolean
+    descontoMaximo?: boolean
+    parcelasMaximas?: boolean
+    horarioInicio?: boolean
+    horarioFim?: boolean
+    pausarFimDeSemana?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }
+
+
+  export type $ConfiguracaoCobrancaPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ConfiguracaoCobranca"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      ativo: boolean
+      webhookN8n: string | null
+      callbackUrl: string | null
+      regras: Prisma.JsonValue
+      descontoMaximo: Prisma.Decimal
+      parcelasMaximas: number
+      horarioInicio: string
+      horarioFim: string
+      pausarFimDeSemana: boolean
+      criadoEm: Date
+      atualizadoEm: Date
+    }, ExtArgs["result"]["configuracaoCobranca"]>
+    composites: {}
+  }
+
+  type ConfiguracaoCobrancaGetPayload<S extends boolean | null | undefined | ConfiguracaoCobrancaDefaultArgs> = $Result.GetResult<Prisma.$ConfiguracaoCobrancaPayload, S>
+
+  type ConfiguracaoCobrancaCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<ConfiguracaoCobrancaFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: ConfiguracaoCobrancaCountAggregateInputType | true
+    }
+
+  export interface ConfiguracaoCobrancaDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ConfiguracaoCobranca'], meta: { name: 'ConfiguracaoCobranca' } }
+    /**
+     * Find zero or one ConfiguracaoCobranca that matches the filter.
+     * @param {ConfiguracaoCobrancaFindUniqueArgs} args - Arguments to find a ConfiguracaoCobranca
+     * @example
+     * // Get one ConfiguracaoCobranca
+     * const configuracaoCobranca = await prisma.configuracaoCobranca.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ConfiguracaoCobrancaFindUniqueArgs>(args: SelectSubset<T, ConfiguracaoCobrancaFindUniqueArgs<ExtArgs>>): Prisma__ConfiguracaoCobrancaClient<$Result.GetResult<Prisma.$ConfiguracaoCobrancaPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one ConfiguracaoCobranca that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {ConfiguracaoCobrancaFindUniqueOrThrowArgs} args - Arguments to find a ConfiguracaoCobranca
+     * @example
+     * // Get one ConfiguracaoCobranca
+     * const configuracaoCobranca = await prisma.configuracaoCobranca.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ConfiguracaoCobrancaFindUniqueOrThrowArgs>(args: SelectSubset<T, ConfiguracaoCobrancaFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ConfiguracaoCobrancaClient<$Result.GetResult<Prisma.$ConfiguracaoCobrancaPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first ConfiguracaoCobranca that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ConfiguracaoCobrancaFindFirstArgs} args - Arguments to find a ConfiguracaoCobranca
+     * @example
+     * // Get one ConfiguracaoCobranca
+     * const configuracaoCobranca = await prisma.configuracaoCobranca.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ConfiguracaoCobrancaFindFirstArgs>(args?: SelectSubset<T, ConfiguracaoCobrancaFindFirstArgs<ExtArgs>>): Prisma__ConfiguracaoCobrancaClient<$Result.GetResult<Prisma.$ConfiguracaoCobrancaPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first ConfiguracaoCobranca that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ConfiguracaoCobrancaFindFirstOrThrowArgs} args - Arguments to find a ConfiguracaoCobranca
+     * @example
+     * // Get one ConfiguracaoCobranca
+     * const configuracaoCobranca = await prisma.configuracaoCobranca.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ConfiguracaoCobrancaFindFirstOrThrowArgs>(args?: SelectSubset<T, ConfiguracaoCobrancaFindFirstOrThrowArgs<ExtArgs>>): Prisma__ConfiguracaoCobrancaClient<$Result.GetResult<Prisma.$ConfiguracaoCobrancaPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more ConfiguracaoCobrancas that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ConfiguracaoCobrancaFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ConfiguracaoCobrancas
+     * const configuracaoCobrancas = await prisma.configuracaoCobranca.findMany()
+     * 
+     * // Get first 10 ConfiguracaoCobrancas
+     * const configuracaoCobrancas = await prisma.configuracaoCobranca.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const configuracaoCobrancaWithIdOnly = await prisma.configuracaoCobranca.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ConfiguracaoCobrancaFindManyArgs>(args?: SelectSubset<T, ConfiguracaoCobrancaFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConfiguracaoCobrancaPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a ConfiguracaoCobranca.
+     * @param {ConfiguracaoCobrancaCreateArgs} args - Arguments to create a ConfiguracaoCobranca.
+     * @example
+     * // Create one ConfiguracaoCobranca
+     * const ConfiguracaoCobranca = await prisma.configuracaoCobranca.create({
+     *   data: {
+     *     // ... data to create a ConfiguracaoCobranca
+     *   }
+     * })
+     * 
+     */
+    create<T extends ConfiguracaoCobrancaCreateArgs>(args: SelectSubset<T, ConfiguracaoCobrancaCreateArgs<ExtArgs>>): Prisma__ConfiguracaoCobrancaClient<$Result.GetResult<Prisma.$ConfiguracaoCobrancaPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many ConfiguracaoCobrancas.
+     * @param {ConfiguracaoCobrancaCreateManyArgs} args - Arguments to create many ConfiguracaoCobrancas.
+     * @example
+     * // Create many ConfiguracaoCobrancas
+     * const configuracaoCobranca = await prisma.configuracaoCobranca.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ConfiguracaoCobrancaCreateManyArgs>(args?: SelectSubset<T, ConfiguracaoCobrancaCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ConfiguracaoCobrancas and returns the data saved in the database.
+     * @param {ConfiguracaoCobrancaCreateManyAndReturnArgs} args - Arguments to create many ConfiguracaoCobrancas.
+     * @example
+     * // Create many ConfiguracaoCobrancas
+     * const configuracaoCobranca = await prisma.configuracaoCobranca.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ConfiguracaoCobrancas and only return the `id`
+     * const configuracaoCobrancaWithIdOnly = await prisma.configuracaoCobranca.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ConfiguracaoCobrancaCreateManyAndReturnArgs>(args?: SelectSubset<T, ConfiguracaoCobrancaCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConfiguracaoCobrancaPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a ConfiguracaoCobranca.
+     * @param {ConfiguracaoCobrancaDeleteArgs} args - Arguments to delete one ConfiguracaoCobranca.
+     * @example
+     * // Delete one ConfiguracaoCobranca
+     * const ConfiguracaoCobranca = await prisma.configuracaoCobranca.delete({
+     *   where: {
+     *     // ... filter to delete one ConfiguracaoCobranca
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ConfiguracaoCobrancaDeleteArgs>(args: SelectSubset<T, ConfiguracaoCobrancaDeleteArgs<ExtArgs>>): Prisma__ConfiguracaoCobrancaClient<$Result.GetResult<Prisma.$ConfiguracaoCobrancaPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one ConfiguracaoCobranca.
+     * @param {ConfiguracaoCobrancaUpdateArgs} args - Arguments to update one ConfiguracaoCobranca.
+     * @example
+     * // Update one ConfiguracaoCobranca
+     * const configuracaoCobranca = await prisma.configuracaoCobranca.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ConfiguracaoCobrancaUpdateArgs>(args: SelectSubset<T, ConfiguracaoCobrancaUpdateArgs<ExtArgs>>): Prisma__ConfiguracaoCobrancaClient<$Result.GetResult<Prisma.$ConfiguracaoCobrancaPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more ConfiguracaoCobrancas.
+     * @param {ConfiguracaoCobrancaDeleteManyArgs} args - Arguments to filter ConfiguracaoCobrancas to delete.
+     * @example
+     * // Delete a few ConfiguracaoCobrancas
+     * const { count } = await prisma.configuracaoCobranca.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ConfiguracaoCobrancaDeleteManyArgs>(args?: SelectSubset<T, ConfiguracaoCobrancaDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ConfiguracaoCobrancas.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ConfiguracaoCobrancaUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ConfiguracaoCobrancas
+     * const configuracaoCobranca = await prisma.configuracaoCobranca.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ConfiguracaoCobrancaUpdateManyArgs>(args: SelectSubset<T, ConfiguracaoCobrancaUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one ConfiguracaoCobranca.
+     * @param {ConfiguracaoCobrancaUpsertArgs} args - Arguments to update or create a ConfiguracaoCobranca.
+     * @example
+     * // Update or create a ConfiguracaoCobranca
+     * const configuracaoCobranca = await prisma.configuracaoCobranca.upsert({
+     *   create: {
+     *     // ... data to create a ConfiguracaoCobranca
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ConfiguracaoCobranca we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ConfiguracaoCobrancaUpsertArgs>(args: SelectSubset<T, ConfiguracaoCobrancaUpsertArgs<ExtArgs>>): Prisma__ConfiguracaoCobrancaClient<$Result.GetResult<Prisma.$ConfiguracaoCobrancaPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of ConfiguracaoCobrancas.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ConfiguracaoCobrancaCountArgs} args - Arguments to filter ConfiguracaoCobrancas to count.
+     * @example
+     * // Count the number of ConfiguracaoCobrancas
+     * const count = await prisma.configuracaoCobranca.count({
+     *   where: {
+     *     // ... the filter for the ConfiguracaoCobrancas we want to count
+     *   }
+     * })
+    **/
+    count<T extends ConfiguracaoCobrancaCountArgs>(
+      args?: Subset<T, ConfiguracaoCobrancaCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ConfiguracaoCobrancaCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ConfiguracaoCobranca.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ConfiguracaoCobrancaAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ConfiguracaoCobrancaAggregateArgs>(args: Subset<T, ConfiguracaoCobrancaAggregateArgs>): Prisma.PrismaPromise<GetConfiguracaoCobrancaAggregateType<T>>
+
+    /**
+     * Group by ConfiguracaoCobranca.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ConfiguracaoCobrancaGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ConfiguracaoCobrancaGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ConfiguracaoCobrancaGroupByArgs['orderBy'] }
+        : { orderBy?: ConfiguracaoCobrancaGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ConfiguracaoCobrancaGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetConfiguracaoCobrancaGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ConfiguracaoCobranca model
+   */
+  readonly fields: ConfiguracaoCobrancaFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ConfiguracaoCobranca.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ConfiguracaoCobrancaClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ConfiguracaoCobranca model
+   */ 
+  interface ConfiguracaoCobrancaFieldRefs {
+    readonly id: FieldRef<"ConfiguracaoCobranca", 'String'>
+    readonly tenantId: FieldRef<"ConfiguracaoCobranca", 'String'>
+    readonly ativo: FieldRef<"ConfiguracaoCobranca", 'Boolean'>
+    readonly webhookN8n: FieldRef<"ConfiguracaoCobranca", 'String'>
+    readonly callbackUrl: FieldRef<"ConfiguracaoCobranca", 'String'>
+    readonly regras: FieldRef<"ConfiguracaoCobranca", 'Json'>
+    readonly descontoMaximo: FieldRef<"ConfiguracaoCobranca", 'Decimal'>
+    readonly parcelasMaximas: FieldRef<"ConfiguracaoCobranca", 'Int'>
+    readonly horarioInicio: FieldRef<"ConfiguracaoCobranca", 'String'>
+    readonly horarioFim: FieldRef<"ConfiguracaoCobranca", 'String'>
+    readonly pausarFimDeSemana: FieldRef<"ConfiguracaoCobranca", 'Boolean'>
+    readonly criadoEm: FieldRef<"ConfiguracaoCobranca", 'DateTime'>
+    readonly atualizadoEm: FieldRef<"ConfiguracaoCobranca", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ConfiguracaoCobranca findUnique
+   */
+  export type ConfiguracaoCobrancaFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfiguracaoCobranca
+     */
+    select?: ConfiguracaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Filter, which ConfiguracaoCobranca to fetch.
+     */
+    where: ConfiguracaoCobrancaWhereUniqueInput
+  }
+
+  /**
+   * ConfiguracaoCobranca findUniqueOrThrow
+   */
+  export type ConfiguracaoCobrancaFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfiguracaoCobranca
+     */
+    select?: ConfiguracaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Filter, which ConfiguracaoCobranca to fetch.
+     */
+    where: ConfiguracaoCobrancaWhereUniqueInput
+  }
+
+  /**
+   * ConfiguracaoCobranca findFirst
+   */
+  export type ConfiguracaoCobrancaFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfiguracaoCobranca
+     */
+    select?: ConfiguracaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Filter, which ConfiguracaoCobranca to fetch.
+     */
+    where?: ConfiguracaoCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ConfiguracaoCobrancas to fetch.
+     */
+    orderBy?: ConfiguracaoCobrancaOrderByWithRelationInput | ConfiguracaoCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ConfiguracaoCobrancas.
+     */
+    cursor?: ConfiguracaoCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ConfiguracaoCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ConfiguracaoCobrancas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ConfiguracaoCobrancas.
+     */
+    distinct?: ConfiguracaoCobrancaScalarFieldEnum | ConfiguracaoCobrancaScalarFieldEnum[]
+  }
+
+  /**
+   * ConfiguracaoCobranca findFirstOrThrow
+   */
+  export type ConfiguracaoCobrancaFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfiguracaoCobranca
+     */
+    select?: ConfiguracaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Filter, which ConfiguracaoCobranca to fetch.
+     */
+    where?: ConfiguracaoCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ConfiguracaoCobrancas to fetch.
+     */
+    orderBy?: ConfiguracaoCobrancaOrderByWithRelationInput | ConfiguracaoCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ConfiguracaoCobrancas.
+     */
+    cursor?: ConfiguracaoCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ConfiguracaoCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ConfiguracaoCobrancas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ConfiguracaoCobrancas.
+     */
+    distinct?: ConfiguracaoCobrancaScalarFieldEnum | ConfiguracaoCobrancaScalarFieldEnum[]
+  }
+
+  /**
+   * ConfiguracaoCobranca findMany
+   */
+  export type ConfiguracaoCobrancaFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfiguracaoCobranca
+     */
+    select?: ConfiguracaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Filter, which ConfiguracaoCobrancas to fetch.
+     */
+    where?: ConfiguracaoCobrancaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ConfiguracaoCobrancas to fetch.
+     */
+    orderBy?: ConfiguracaoCobrancaOrderByWithRelationInput | ConfiguracaoCobrancaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ConfiguracaoCobrancas.
+     */
+    cursor?: ConfiguracaoCobrancaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ConfiguracaoCobrancas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ConfiguracaoCobrancas.
+     */
+    skip?: number
+    distinct?: ConfiguracaoCobrancaScalarFieldEnum | ConfiguracaoCobrancaScalarFieldEnum[]
+  }
+
+  /**
+   * ConfiguracaoCobranca create
+   */
+  export type ConfiguracaoCobrancaCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfiguracaoCobranca
+     */
+    select?: ConfiguracaoCobrancaSelect<ExtArgs> | null
+    /**
+     * The data needed to create a ConfiguracaoCobranca.
+     */
+    data: XOR<ConfiguracaoCobrancaCreateInput, ConfiguracaoCobrancaUncheckedCreateInput>
+  }
+
+  /**
+   * ConfiguracaoCobranca createMany
+   */
+  export type ConfiguracaoCobrancaCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ConfiguracaoCobrancas.
+     */
+    data: ConfiguracaoCobrancaCreateManyInput | ConfiguracaoCobrancaCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ConfiguracaoCobranca createManyAndReturn
+   */
+  export type ConfiguracaoCobrancaCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfiguracaoCobranca
+     */
+    select?: ConfiguracaoCobrancaSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many ConfiguracaoCobrancas.
+     */
+    data: ConfiguracaoCobrancaCreateManyInput | ConfiguracaoCobrancaCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ConfiguracaoCobranca update
+   */
+  export type ConfiguracaoCobrancaUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfiguracaoCobranca
+     */
+    select?: ConfiguracaoCobrancaSelect<ExtArgs> | null
+    /**
+     * The data needed to update a ConfiguracaoCobranca.
+     */
+    data: XOR<ConfiguracaoCobrancaUpdateInput, ConfiguracaoCobrancaUncheckedUpdateInput>
+    /**
+     * Choose, which ConfiguracaoCobranca to update.
+     */
+    where: ConfiguracaoCobrancaWhereUniqueInput
+  }
+
+  /**
+   * ConfiguracaoCobranca updateMany
+   */
+  export type ConfiguracaoCobrancaUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ConfiguracaoCobrancas.
+     */
+    data: XOR<ConfiguracaoCobrancaUpdateManyMutationInput, ConfiguracaoCobrancaUncheckedUpdateManyInput>
+    /**
+     * Filter which ConfiguracaoCobrancas to update
+     */
+    where?: ConfiguracaoCobrancaWhereInput
+  }
+
+  /**
+   * ConfiguracaoCobranca upsert
+   */
+  export type ConfiguracaoCobrancaUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfiguracaoCobranca
+     */
+    select?: ConfiguracaoCobrancaSelect<ExtArgs> | null
+    /**
+     * The filter to search for the ConfiguracaoCobranca to update in case it exists.
+     */
+    where: ConfiguracaoCobrancaWhereUniqueInput
+    /**
+     * In case the ConfiguracaoCobranca found by the `where` argument doesn't exist, create a new ConfiguracaoCobranca with this data.
+     */
+    create: XOR<ConfiguracaoCobrancaCreateInput, ConfiguracaoCobrancaUncheckedCreateInput>
+    /**
+     * In case the ConfiguracaoCobranca was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ConfiguracaoCobrancaUpdateInput, ConfiguracaoCobrancaUncheckedUpdateInput>
+  }
+
+  /**
+   * ConfiguracaoCobranca delete
+   */
+  export type ConfiguracaoCobrancaDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfiguracaoCobranca
+     */
+    select?: ConfiguracaoCobrancaSelect<ExtArgs> | null
+    /**
+     * Filter which ConfiguracaoCobranca to delete.
+     */
+    where: ConfiguracaoCobrancaWhereUniqueInput
+  }
+
+  /**
+   * ConfiguracaoCobranca deleteMany
+   */
+  export type ConfiguracaoCobrancaDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ConfiguracaoCobrancas to delete
+     */
+    where?: ConfiguracaoCobrancaWhereInput
+  }
+
+  /**
+   * ConfiguracaoCobranca without action
+   */
+  export type ConfiguracaoCobrancaDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ConfiguracaoCobranca
+     */
+    select?: ConfiguracaoCobrancaSelect<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -9485,6 +15345,99 @@ export namespace Prisma {
   export type DREScalarFieldEnum = (typeof DREScalarFieldEnum)[keyof typeof DREScalarFieldEnum]
 
 
+  export const TituloCobrancaScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    lancamentoId: 'lancamentoId',
+    pedidoId: 'pedidoId',
+    clienteId: 'clienteId',
+    clienteNome: 'clienteNome',
+    clienteTelefone: 'clienteTelefone',
+    clienteEmail: 'clienteEmail',
+    descricao: 'descricao',
+    valor: 'valor',
+    dataVencimento: 'dataVencimento',
+    status: 'status',
+    prioridade: 'prioridade',
+    tentativas: 'tentativas',
+    ultimaAcaoEm: 'ultimaAcaoEm',
+    canalUltimaAcao: 'canalUltimaAcao',
+    observacao: 'observacao',
+    criadoEm: 'criadoEm',
+    atualizadoEm: 'atualizadoEm'
+  };
+
+  export type TituloCobrancaScalarFieldEnum = (typeof TituloCobrancaScalarFieldEnum)[keyof typeof TituloCobrancaScalarFieldEnum]
+
+
+  export const AcaoCobrancaScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    tituloId: 'tituloId',
+    clienteNome: 'clienteNome',
+    tipo: 'tipo',
+    mensagem: 'mensagem',
+    status: 'status',
+    automatica: 'automatica',
+    detalhe: 'detalhe',
+    criadoEm: 'criadoEm'
+  };
+
+  export type AcaoCobrancaScalarFieldEnum = (typeof AcaoCobrancaScalarFieldEnum)[keyof typeof AcaoCobrancaScalarFieldEnum]
+
+
+  export const AcordoCobrancaScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    tituloId: 'tituloId',
+    clienteId: 'clienteId',
+    clienteNome: 'clienteNome',
+    valorOriginal: 'valorOriginal',
+    descontoAplicado: 'descontoAplicado',
+    valorFinal: 'valorFinal',
+    numeroParcelas: 'numeroParcelas',
+    status: 'status',
+    observacao: 'observacao',
+    criadoEm: 'criadoEm',
+    atualizadoEm: 'atualizadoEm'
+  };
+
+  export type AcordoCobrancaScalarFieldEnum = (typeof AcordoCobrancaScalarFieldEnum)[keyof typeof AcordoCobrancaScalarFieldEnum]
+
+
+  export const ParcelaAcordoScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    acordoId: 'acordoId',
+    numero: 'numero',
+    valor: 'valor',
+    vencimento: 'vencimento',
+    pago: 'pago',
+    pagoEm: 'pagoEm'
+  };
+
+  export type ParcelaAcordoScalarFieldEnum = (typeof ParcelaAcordoScalarFieldEnum)[keyof typeof ParcelaAcordoScalarFieldEnum]
+
+
+  export const ConfiguracaoCobrancaScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    ativo: 'ativo',
+    webhookN8n: 'webhookN8n',
+    callbackUrl: 'callbackUrl',
+    regras: 'regras',
+    descontoMaximo: 'descontoMaximo',
+    parcelasMaximas: 'parcelasMaximas',
+    horarioInicio: 'horarioInicio',
+    horarioFim: 'horarioFim',
+    pausarFimDeSemana: 'pausarFimDeSemana',
+    criadoEm: 'criadoEm',
+    atualizadoEm: 'atualizadoEm'
+  };
+
+  export type ConfiguracaoCobrancaScalarFieldEnum = (typeof ConfiguracaoCobrancaScalarFieldEnum)[keyof typeof ConfiguracaoCobrancaScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -9499,6 +15452,13 @@ export namespace Prisma {
   };
 
   export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
   export const QueryMode: {
@@ -9696,6 +15656,76 @@ export namespace Prisma {
    * Reference to a field of type 'Json'
    */
   export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusTituloCobranca'
+   */
+  export type EnumStatusTituloCobrancaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusTituloCobranca'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusTituloCobranca[]'
+   */
+  export type ListEnumStatusTituloCobrancaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusTituloCobranca[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'PrioridadeCobranca'
+   */
+  export type EnumPrioridadeCobrancaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PrioridadeCobranca'>
+    
+
+
+  /**
+   * Reference to a field of type 'PrioridadeCobranca[]'
+   */
+  export type ListEnumPrioridadeCobrancaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PrioridadeCobranca[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'TipoAcaoCobranca'
+   */
+  export type EnumTipoAcaoCobrancaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoAcaoCobranca'>
+    
+
+
+  /**
+   * Reference to a field of type 'TipoAcaoCobranca[]'
+   */
+  export type ListEnumTipoAcaoCobrancaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoAcaoCobranca[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusAcaoCobranca'
+   */
+  export type EnumStatusAcaoCobrancaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusAcaoCobranca'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusAcaoCobranca[]'
+   */
+  export type ListEnumStatusAcaoCobrancaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusAcaoCobranca[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusAcordoCobranca'
+   */
+  export type EnumStatusAcordoCobrancaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusAcordoCobranca'>
+    
+
+
+  /**
+   * Reference to a field of type 'StatusAcordoCobranca[]'
+   */
+  export type ListEnumStatusAcordoCobrancaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StatusAcordoCobranca[]'>
     
 
 
@@ -10462,6 +16492,483 @@ export namespace Prisma {
     receitasFinanceiras?: DecimalWithAggregatesFilter<"DRE"> | Decimal | DecimalJsLike | number | string
     lucroLiquido?: DecimalWithAggregatesFilter<"DRE"> | Decimal | DecimalJsLike | number | string
     criadoEm?: DateTimeWithAggregatesFilter<"DRE"> | Date | string
+  }
+
+  export type TituloCobrancaWhereInput = {
+    AND?: TituloCobrancaWhereInput | TituloCobrancaWhereInput[]
+    OR?: TituloCobrancaWhereInput[]
+    NOT?: TituloCobrancaWhereInput | TituloCobrancaWhereInput[]
+    id?: UuidFilter<"TituloCobranca"> | string
+    tenantId?: UuidFilter<"TituloCobranca"> | string
+    lancamentoId?: UuidNullableFilter<"TituloCobranca"> | string | null
+    pedidoId?: UuidNullableFilter<"TituloCobranca"> | string | null
+    clienteId?: UuidNullableFilter<"TituloCobranca"> | string | null
+    clienteNome?: StringFilter<"TituloCobranca"> | string
+    clienteTelefone?: StringNullableFilter<"TituloCobranca"> | string | null
+    clienteEmail?: StringNullableFilter<"TituloCobranca"> | string | null
+    descricao?: StringFilter<"TituloCobranca"> | string
+    valor?: DecimalFilter<"TituloCobranca"> | Decimal | DecimalJsLike | number | string
+    dataVencimento?: DateTimeFilter<"TituloCobranca"> | Date | string
+    status?: EnumStatusTituloCobrancaFilter<"TituloCobranca"> | $Enums.StatusTituloCobranca
+    prioridade?: EnumPrioridadeCobrancaFilter<"TituloCobranca"> | $Enums.PrioridadeCobranca
+    tentativas?: IntFilter<"TituloCobranca"> | number
+    ultimaAcaoEm?: DateTimeNullableFilter<"TituloCobranca"> | Date | string | null
+    canalUltimaAcao?: StringNullableFilter<"TituloCobranca"> | string | null
+    observacao?: StringNullableFilter<"TituloCobranca"> | string | null
+    criadoEm?: DateTimeFilter<"TituloCobranca"> | Date | string
+    atualizadoEm?: DateTimeFilter<"TituloCobranca"> | Date | string
+    acoes?: AcaoCobrancaListRelationFilter
+    acordos?: AcordoCobrancaListRelationFilter
+  }
+
+  export type TituloCobrancaOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    lancamentoId?: SortOrderInput | SortOrder
+    pedidoId?: SortOrderInput | SortOrder
+    clienteId?: SortOrderInput | SortOrder
+    clienteNome?: SortOrder
+    clienteTelefone?: SortOrderInput | SortOrder
+    clienteEmail?: SortOrderInput | SortOrder
+    descricao?: SortOrder
+    valor?: SortOrder
+    dataVencimento?: SortOrder
+    status?: SortOrder
+    prioridade?: SortOrder
+    tentativas?: SortOrder
+    ultimaAcaoEm?: SortOrderInput | SortOrder
+    canalUltimaAcao?: SortOrderInput | SortOrder
+    observacao?: SortOrderInput | SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+    acoes?: AcaoCobrancaOrderByRelationAggregateInput
+    acordos?: AcordoCobrancaOrderByRelationAggregateInput
+  }
+
+  export type TituloCobrancaWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    tenantId_lancamentoId?: TituloCobrancaTenantIdLancamentoIdCompoundUniqueInput
+    AND?: TituloCobrancaWhereInput | TituloCobrancaWhereInput[]
+    OR?: TituloCobrancaWhereInput[]
+    NOT?: TituloCobrancaWhereInput | TituloCobrancaWhereInput[]
+    tenantId?: UuidFilter<"TituloCobranca"> | string
+    lancamentoId?: UuidNullableFilter<"TituloCobranca"> | string | null
+    pedidoId?: UuidNullableFilter<"TituloCobranca"> | string | null
+    clienteId?: UuidNullableFilter<"TituloCobranca"> | string | null
+    clienteNome?: StringFilter<"TituloCobranca"> | string
+    clienteTelefone?: StringNullableFilter<"TituloCobranca"> | string | null
+    clienteEmail?: StringNullableFilter<"TituloCobranca"> | string | null
+    descricao?: StringFilter<"TituloCobranca"> | string
+    valor?: DecimalFilter<"TituloCobranca"> | Decimal | DecimalJsLike | number | string
+    dataVencimento?: DateTimeFilter<"TituloCobranca"> | Date | string
+    status?: EnumStatusTituloCobrancaFilter<"TituloCobranca"> | $Enums.StatusTituloCobranca
+    prioridade?: EnumPrioridadeCobrancaFilter<"TituloCobranca"> | $Enums.PrioridadeCobranca
+    tentativas?: IntFilter<"TituloCobranca"> | number
+    ultimaAcaoEm?: DateTimeNullableFilter<"TituloCobranca"> | Date | string | null
+    canalUltimaAcao?: StringNullableFilter<"TituloCobranca"> | string | null
+    observacao?: StringNullableFilter<"TituloCobranca"> | string | null
+    criadoEm?: DateTimeFilter<"TituloCobranca"> | Date | string
+    atualizadoEm?: DateTimeFilter<"TituloCobranca"> | Date | string
+    acoes?: AcaoCobrancaListRelationFilter
+    acordos?: AcordoCobrancaListRelationFilter
+  }, "id" | "tenantId_lancamentoId">
+
+  export type TituloCobrancaOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    lancamentoId?: SortOrderInput | SortOrder
+    pedidoId?: SortOrderInput | SortOrder
+    clienteId?: SortOrderInput | SortOrder
+    clienteNome?: SortOrder
+    clienteTelefone?: SortOrderInput | SortOrder
+    clienteEmail?: SortOrderInput | SortOrder
+    descricao?: SortOrder
+    valor?: SortOrder
+    dataVencimento?: SortOrder
+    status?: SortOrder
+    prioridade?: SortOrder
+    tentativas?: SortOrder
+    ultimaAcaoEm?: SortOrderInput | SortOrder
+    canalUltimaAcao?: SortOrderInput | SortOrder
+    observacao?: SortOrderInput | SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+    _count?: TituloCobrancaCountOrderByAggregateInput
+    _avg?: TituloCobrancaAvgOrderByAggregateInput
+    _max?: TituloCobrancaMaxOrderByAggregateInput
+    _min?: TituloCobrancaMinOrderByAggregateInput
+    _sum?: TituloCobrancaSumOrderByAggregateInput
+  }
+
+  export type TituloCobrancaScalarWhereWithAggregatesInput = {
+    AND?: TituloCobrancaScalarWhereWithAggregatesInput | TituloCobrancaScalarWhereWithAggregatesInput[]
+    OR?: TituloCobrancaScalarWhereWithAggregatesInput[]
+    NOT?: TituloCobrancaScalarWhereWithAggregatesInput | TituloCobrancaScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"TituloCobranca"> | string
+    tenantId?: UuidWithAggregatesFilter<"TituloCobranca"> | string
+    lancamentoId?: UuidNullableWithAggregatesFilter<"TituloCobranca"> | string | null
+    pedidoId?: UuidNullableWithAggregatesFilter<"TituloCobranca"> | string | null
+    clienteId?: UuidNullableWithAggregatesFilter<"TituloCobranca"> | string | null
+    clienteNome?: StringWithAggregatesFilter<"TituloCobranca"> | string
+    clienteTelefone?: StringNullableWithAggregatesFilter<"TituloCobranca"> | string | null
+    clienteEmail?: StringNullableWithAggregatesFilter<"TituloCobranca"> | string | null
+    descricao?: StringWithAggregatesFilter<"TituloCobranca"> | string
+    valor?: DecimalWithAggregatesFilter<"TituloCobranca"> | Decimal | DecimalJsLike | number | string
+    dataVencimento?: DateTimeWithAggregatesFilter<"TituloCobranca"> | Date | string
+    status?: EnumStatusTituloCobrancaWithAggregatesFilter<"TituloCobranca"> | $Enums.StatusTituloCobranca
+    prioridade?: EnumPrioridadeCobrancaWithAggregatesFilter<"TituloCobranca"> | $Enums.PrioridadeCobranca
+    tentativas?: IntWithAggregatesFilter<"TituloCobranca"> | number
+    ultimaAcaoEm?: DateTimeNullableWithAggregatesFilter<"TituloCobranca"> | Date | string | null
+    canalUltimaAcao?: StringNullableWithAggregatesFilter<"TituloCobranca"> | string | null
+    observacao?: StringNullableWithAggregatesFilter<"TituloCobranca"> | string | null
+    criadoEm?: DateTimeWithAggregatesFilter<"TituloCobranca"> | Date | string
+    atualizadoEm?: DateTimeWithAggregatesFilter<"TituloCobranca"> | Date | string
+  }
+
+  export type AcaoCobrancaWhereInput = {
+    AND?: AcaoCobrancaWhereInput | AcaoCobrancaWhereInput[]
+    OR?: AcaoCobrancaWhereInput[]
+    NOT?: AcaoCobrancaWhereInput | AcaoCobrancaWhereInput[]
+    id?: UuidFilter<"AcaoCobranca"> | string
+    tenantId?: UuidFilter<"AcaoCobranca"> | string
+    tituloId?: UuidFilter<"AcaoCobranca"> | string
+    clienteNome?: StringFilter<"AcaoCobranca"> | string
+    tipo?: EnumTipoAcaoCobrancaFilter<"AcaoCobranca"> | $Enums.TipoAcaoCobranca
+    mensagem?: StringFilter<"AcaoCobranca"> | string
+    status?: EnumStatusAcaoCobrancaFilter<"AcaoCobranca"> | $Enums.StatusAcaoCobranca
+    automatica?: BoolFilter<"AcaoCobranca"> | boolean
+    detalhe?: StringNullableFilter<"AcaoCobranca"> | string | null
+    criadoEm?: DateTimeFilter<"AcaoCobranca"> | Date | string
+    titulo?: XOR<TituloCobrancaRelationFilter, TituloCobrancaWhereInput>
+  }
+
+  export type AcaoCobrancaOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    tituloId?: SortOrder
+    clienteNome?: SortOrder
+    tipo?: SortOrder
+    mensagem?: SortOrder
+    status?: SortOrder
+    automatica?: SortOrder
+    detalhe?: SortOrderInput | SortOrder
+    criadoEm?: SortOrder
+    titulo?: TituloCobrancaOrderByWithRelationInput
+  }
+
+  export type AcaoCobrancaWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AcaoCobrancaWhereInput | AcaoCobrancaWhereInput[]
+    OR?: AcaoCobrancaWhereInput[]
+    NOT?: AcaoCobrancaWhereInput | AcaoCobrancaWhereInput[]
+    tenantId?: UuidFilter<"AcaoCobranca"> | string
+    tituloId?: UuidFilter<"AcaoCobranca"> | string
+    clienteNome?: StringFilter<"AcaoCobranca"> | string
+    tipo?: EnumTipoAcaoCobrancaFilter<"AcaoCobranca"> | $Enums.TipoAcaoCobranca
+    mensagem?: StringFilter<"AcaoCobranca"> | string
+    status?: EnumStatusAcaoCobrancaFilter<"AcaoCobranca"> | $Enums.StatusAcaoCobranca
+    automatica?: BoolFilter<"AcaoCobranca"> | boolean
+    detalhe?: StringNullableFilter<"AcaoCobranca"> | string | null
+    criadoEm?: DateTimeFilter<"AcaoCobranca"> | Date | string
+    titulo?: XOR<TituloCobrancaRelationFilter, TituloCobrancaWhereInput>
+  }, "id">
+
+  export type AcaoCobrancaOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    tituloId?: SortOrder
+    clienteNome?: SortOrder
+    tipo?: SortOrder
+    mensagem?: SortOrder
+    status?: SortOrder
+    automatica?: SortOrder
+    detalhe?: SortOrderInput | SortOrder
+    criadoEm?: SortOrder
+    _count?: AcaoCobrancaCountOrderByAggregateInput
+    _max?: AcaoCobrancaMaxOrderByAggregateInput
+    _min?: AcaoCobrancaMinOrderByAggregateInput
+  }
+
+  export type AcaoCobrancaScalarWhereWithAggregatesInput = {
+    AND?: AcaoCobrancaScalarWhereWithAggregatesInput | AcaoCobrancaScalarWhereWithAggregatesInput[]
+    OR?: AcaoCobrancaScalarWhereWithAggregatesInput[]
+    NOT?: AcaoCobrancaScalarWhereWithAggregatesInput | AcaoCobrancaScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"AcaoCobranca"> | string
+    tenantId?: UuidWithAggregatesFilter<"AcaoCobranca"> | string
+    tituloId?: UuidWithAggregatesFilter<"AcaoCobranca"> | string
+    clienteNome?: StringWithAggregatesFilter<"AcaoCobranca"> | string
+    tipo?: EnumTipoAcaoCobrancaWithAggregatesFilter<"AcaoCobranca"> | $Enums.TipoAcaoCobranca
+    mensagem?: StringWithAggregatesFilter<"AcaoCobranca"> | string
+    status?: EnumStatusAcaoCobrancaWithAggregatesFilter<"AcaoCobranca"> | $Enums.StatusAcaoCobranca
+    automatica?: BoolWithAggregatesFilter<"AcaoCobranca"> | boolean
+    detalhe?: StringNullableWithAggregatesFilter<"AcaoCobranca"> | string | null
+    criadoEm?: DateTimeWithAggregatesFilter<"AcaoCobranca"> | Date | string
+  }
+
+  export type AcordoCobrancaWhereInput = {
+    AND?: AcordoCobrancaWhereInput | AcordoCobrancaWhereInput[]
+    OR?: AcordoCobrancaWhereInput[]
+    NOT?: AcordoCobrancaWhereInput | AcordoCobrancaWhereInput[]
+    id?: UuidFilter<"AcordoCobranca"> | string
+    tenantId?: UuidFilter<"AcordoCobranca"> | string
+    tituloId?: UuidFilter<"AcordoCobranca"> | string
+    clienteId?: UuidNullableFilter<"AcordoCobranca"> | string | null
+    clienteNome?: StringFilter<"AcordoCobranca"> | string
+    valorOriginal?: DecimalFilter<"AcordoCobranca"> | Decimal | DecimalJsLike | number | string
+    descontoAplicado?: DecimalFilter<"AcordoCobranca"> | Decimal | DecimalJsLike | number | string
+    valorFinal?: DecimalFilter<"AcordoCobranca"> | Decimal | DecimalJsLike | number | string
+    numeroParcelas?: IntFilter<"AcordoCobranca"> | number
+    status?: EnumStatusAcordoCobrancaFilter<"AcordoCobranca"> | $Enums.StatusAcordoCobranca
+    observacao?: StringNullableFilter<"AcordoCobranca"> | string | null
+    criadoEm?: DateTimeFilter<"AcordoCobranca"> | Date | string
+    atualizadoEm?: DateTimeFilter<"AcordoCobranca"> | Date | string
+    titulo?: XOR<TituloCobrancaRelationFilter, TituloCobrancaWhereInput>
+    parcelas?: ParcelaAcordoListRelationFilter
+  }
+
+  export type AcordoCobrancaOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    tituloId?: SortOrder
+    clienteId?: SortOrderInput | SortOrder
+    clienteNome?: SortOrder
+    valorOriginal?: SortOrder
+    descontoAplicado?: SortOrder
+    valorFinal?: SortOrder
+    numeroParcelas?: SortOrder
+    status?: SortOrder
+    observacao?: SortOrderInput | SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+    titulo?: TituloCobrancaOrderByWithRelationInput
+    parcelas?: ParcelaAcordoOrderByRelationAggregateInput
+  }
+
+  export type AcordoCobrancaWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AcordoCobrancaWhereInput | AcordoCobrancaWhereInput[]
+    OR?: AcordoCobrancaWhereInput[]
+    NOT?: AcordoCobrancaWhereInput | AcordoCobrancaWhereInput[]
+    tenantId?: UuidFilter<"AcordoCobranca"> | string
+    tituloId?: UuidFilter<"AcordoCobranca"> | string
+    clienteId?: UuidNullableFilter<"AcordoCobranca"> | string | null
+    clienteNome?: StringFilter<"AcordoCobranca"> | string
+    valorOriginal?: DecimalFilter<"AcordoCobranca"> | Decimal | DecimalJsLike | number | string
+    descontoAplicado?: DecimalFilter<"AcordoCobranca"> | Decimal | DecimalJsLike | number | string
+    valorFinal?: DecimalFilter<"AcordoCobranca"> | Decimal | DecimalJsLike | number | string
+    numeroParcelas?: IntFilter<"AcordoCobranca"> | number
+    status?: EnumStatusAcordoCobrancaFilter<"AcordoCobranca"> | $Enums.StatusAcordoCobranca
+    observacao?: StringNullableFilter<"AcordoCobranca"> | string | null
+    criadoEm?: DateTimeFilter<"AcordoCobranca"> | Date | string
+    atualizadoEm?: DateTimeFilter<"AcordoCobranca"> | Date | string
+    titulo?: XOR<TituloCobrancaRelationFilter, TituloCobrancaWhereInput>
+    parcelas?: ParcelaAcordoListRelationFilter
+  }, "id">
+
+  export type AcordoCobrancaOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    tituloId?: SortOrder
+    clienteId?: SortOrderInput | SortOrder
+    clienteNome?: SortOrder
+    valorOriginal?: SortOrder
+    descontoAplicado?: SortOrder
+    valorFinal?: SortOrder
+    numeroParcelas?: SortOrder
+    status?: SortOrder
+    observacao?: SortOrderInput | SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+    _count?: AcordoCobrancaCountOrderByAggregateInput
+    _avg?: AcordoCobrancaAvgOrderByAggregateInput
+    _max?: AcordoCobrancaMaxOrderByAggregateInput
+    _min?: AcordoCobrancaMinOrderByAggregateInput
+    _sum?: AcordoCobrancaSumOrderByAggregateInput
+  }
+
+  export type AcordoCobrancaScalarWhereWithAggregatesInput = {
+    AND?: AcordoCobrancaScalarWhereWithAggregatesInput | AcordoCobrancaScalarWhereWithAggregatesInput[]
+    OR?: AcordoCobrancaScalarWhereWithAggregatesInput[]
+    NOT?: AcordoCobrancaScalarWhereWithAggregatesInput | AcordoCobrancaScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"AcordoCobranca"> | string
+    tenantId?: UuidWithAggregatesFilter<"AcordoCobranca"> | string
+    tituloId?: UuidWithAggregatesFilter<"AcordoCobranca"> | string
+    clienteId?: UuidNullableWithAggregatesFilter<"AcordoCobranca"> | string | null
+    clienteNome?: StringWithAggregatesFilter<"AcordoCobranca"> | string
+    valorOriginal?: DecimalWithAggregatesFilter<"AcordoCobranca"> | Decimal | DecimalJsLike | number | string
+    descontoAplicado?: DecimalWithAggregatesFilter<"AcordoCobranca"> | Decimal | DecimalJsLike | number | string
+    valorFinal?: DecimalWithAggregatesFilter<"AcordoCobranca"> | Decimal | DecimalJsLike | number | string
+    numeroParcelas?: IntWithAggregatesFilter<"AcordoCobranca"> | number
+    status?: EnumStatusAcordoCobrancaWithAggregatesFilter<"AcordoCobranca"> | $Enums.StatusAcordoCobranca
+    observacao?: StringNullableWithAggregatesFilter<"AcordoCobranca"> | string | null
+    criadoEm?: DateTimeWithAggregatesFilter<"AcordoCobranca"> | Date | string
+    atualizadoEm?: DateTimeWithAggregatesFilter<"AcordoCobranca"> | Date | string
+  }
+
+  export type ParcelaAcordoWhereInput = {
+    AND?: ParcelaAcordoWhereInput | ParcelaAcordoWhereInput[]
+    OR?: ParcelaAcordoWhereInput[]
+    NOT?: ParcelaAcordoWhereInput | ParcelaAcordoWhereInput[]
+    id?: UuidFilter<"ParcelaAcordo"> | string
+    tenantId?: UuidFilter<"ParcelaAcordo"> | string
+    acordoId?: UuidFilter<"ParcelaAcordo"> | string
+    numero?: IntFilter<"ParcelaAcordo"> | number
+    valor?: DecimalFilter<"ParcelaAcordo"> | Decimal | DecimalJsLike | number | string
+    vencimento?: DateTimeFilter<"ParcelaAcordo"> | Date | string
+    pago?: BoolFilter<"ParcelaAcordo"> | boolean
+    pagoEm?: DateTimeNullableFilter<"ParcelaAcordo"> | Date | string | null
+    acordo?: XOR<AcordoCobrancaRelationFilter, AcordoCobrancaWhereInput>
+  }
+
+  export type ParcelaAcordoOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    acordoId?: SortOrder
+    numero?: SortOrder
+    valor?: SortOrder
+    vencimento?: SortOrder
+    pago?: SortOrder
+    pagoEm?: SortOrderInput | SortOrder
+    acordo?: AcordoCobrancaOrderByWithRelationInput
+  }
+
+  export type ParcelaAcordoWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ParcelaAcordoWhereInput | ParcelaAcordoWhereInput[]
+    OR?: ParcelaAcordoWhereInput[]
+    NOT?: ParcelaAcordoWhereInput | ParcelaAcordoWhereInput[]
+    tenantId?: UuidFilter<"ParcelaAcordo"> | string
+    acordoId?: UuidFilter<"ParcelaAcordo"> | string
+    numero?: IntFilter<"ParcelaAcordo"> | number
+    valor?: DecimalFilter<"ParcelaAcordo"> | Decimal | DecimalJsLike | number | string
+    vencimento?: DateTimeFilter<"ParcelaAcordo"> | Date | string
+    pago?: BoolFilter<"ParcelaAcordo"> | boolean
+    pagoEm?: DateTimeNullableFilter<"ParcelaAcordo"> | Date | string | null
+    acordo?: XOR<AcordoCobrancaRelationFilter, AcordoCobrancaWhereInput>
+  }, "id">
+
+  export type ParcelaAcordoOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    acordoId?: SortOrder
+    numero?: SortOrder
+    valor?: SortOrder
+    vencimento?: SortOrder
+    pago?: SortOrder
+    pagoEm?: SortOrderInput | SortOrder
+    _count?: ParcelaAcordoCountOrderByAggregateInput
+    _avg?: ParcelaAcordoAvgOrderByAggregateInput
+    _max?: ParcelaAcordoMaxOrderByAggregateInput
+    _min?: ParcelaAcordoMinOrderByAggregateInput
+    _sum?: ParcelaAcordoSumOrderByAggregateInput
+  }
+
+  export type ParcelaAcordoScalarWhereWithAggregatesInput = {
+    AND?: ParcelaAcordoScalarWhereWithAggregatesInput | ParcelaAcordoScalarWhereWithAggregatesInput[]
+    OR?: ParcelaAcordoScalarWhereWithAggregatesInput[]
+    NOT?: ParcelaAcordoScalarWhereWithAggregatesInput | ParcelaAcordoScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"ParcelaAcordo"> | string
+    tenantId?: UuidWithAggregatesFilter<"ParcelaAcordo"> | string
+    acordoId?: UuidWithAggregatesFilter<"ParcelaAcordo"> | string
+    numero?: IntWithAggregatesFilter<"ParcelaAcordo"> | number
+    valor?: DecimalWithAggregatesFilter<"ParcelaAcordo"> | Decimal | DecimalJsLike | number | string
+    vencimento?: DateTimeWithAggregatesFilter<"ParcelaAcordo"> | Date | string
+    pago?: BoolWithAggregatesFilter<"ParcelaAcordo"> | boolean
+    pagoEm?: DateTimeNullableWithAggregatesFilter<"ParcelaAcordo"> | Date | string | null
+  }
+
+  export type ConfiguracaoCobrancaWhereInput = {
+    AND?: ConfiguracaoCobrancaWhereInput | ConfiguracaoCobrancaWhereInput[]
+    OR?: ConfiguracaoCobrancaWhereInput[]
+    NOT?: ConfiguracaoCobrancaWhereInput | ConfiguracaoCobrancaWhereInput[]
+    id?: UuidFilter<"ConfiguracaoCobranca"> | string
+    tenantId?: UuidFilter<"ConfiguracaoCobranca"> | string
+    ativo?: BoolFilter<"ConfiguracaoCobranca"> | boolean
+    webhookN8n?: StringNullableFilter<"ConfiguracaoCobranca"> | string | null
+    callbackUrl?: StringNullableFilter<"ConfiguracaoCobranca"> | string | null
+    regras?: JsonFilter<"ConfiguracaoCobranca">
+    descontoMaximo?: DecimalFilter<"ConfiguracaoCobranca"> | Decimal | DecimalJsLike | number | string
+    parcelasMaximas?: IntFilter<"ConfiguracaoCobranca"> | number
+    horarioInicio?: StringFilter<"ConfiguracaoCobranca"> | string
+    horarioFim?: StringFilter<"ConfiguracaoCobranca"> | string
+    pausarFimDeSemana?: BoolFilter<"ConfiguracaoCobranca"> | boolean
+    criadoEm?: DateTimeFilter<"ConfiguracaoCobranca"> | Date | string
+    atualizadoEm?: DateTimeFilter<"ConfiguracaoCobranca"> | Date | string
+  }
+
+  export type ConfiguracaoCobrancaOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    ativo?: SortOrder
+    webhookN8n?: SortOrderInput | SortOrder
+    callbackUrl?: SortOrderInput | SortOrder
+    regras?: SortOrder
+    descontoMaximo?: SortOrder
+    parcelasMaximas?: SortOrder
+    horarioInicio?: SortOrder
+    horarioFim?: SortOrder
+    pausarFimDeSemana?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type ConfiguracaoCobrancaWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    tenantId?: string
+    AND?: ConfiguracaoCobrancaWhereInput | ConfiguracaoCobrancaWhereInput[]
+    OR?: ConfiguracaoCobrancaWhereInput[]
+    NOT?: ConfiguracaoCobrancaWhereInput | ConfiguracaoCobrancaWhereInput[]
+    ativo?: BoolFilter<"ConfiguracaoCobranca"> | boolean
+    webhookN8n?: StringNullableFilter<"ConfiguracaoCobranca"> | string | null
+    callbackUrl?: StringNullableFilter<"ConfiguracaoCobranca"> | string | null
+    regras?: JsonFilter<"ConfiguracaoCobranca">
+    descontoMaximo?: DecimalFilter<"ConfiguracaoCobranca"> | Decimal | DecimalJsLike | number | string
+    parcelasMaximas?: IntFilter<"ConfiguracaoCobranca"> | number
+    horarioInicio?: StringFilter<"ConfiguracaoCobranca"> | string
+    horarioFim?: StringFilter<"ConfiguracaoCobranca"> | string
+    pausarFimDeSemana?: BoolFilter<"ConfiguracaoCobranca"> | boolean
+    criadoEm?: DateTimeFilter<"ConfiguracaoCobranca"> | Date | string
+    atualizadoEm?: DateTimeFilter<"ConfiguracaoCobranca"> | Date | string
+  }, "id" | "tenantId">
+
+  export type ConfiguracaoCobrancaOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    ativo?: SortOrder
+    webhookN8n?: SortOrderInput | SortOrder
+    callbackUrl?: SortOrderInput | SortOrder
+    regras?: SortOrder
+    descontoMaximo?: SortOrder
+    parcelasMaximas?: SortOrder
+    horarioInicio?: SortOrder
+    horarioFim?: SortOrder
+    pausarFimDeSemana?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+    _count?: ConfiguracaoCobrancaCountOrderByAggregateInput
+    _avg?: ConfiguracaoCobrancaAvgOrderByAggregateInput
+    _max?: ConfiguracaoCobrancaMaxOrderByAggregateInput
+    _min?: ConfiguracaoCobrancaMinOrderByAggregateInput
+    _sum?: ConfiguracaoCobrancaSumOrderByAggregateInput
+  }
+
+  export type ConfiguracaoCobrancaScalarWhereWithAggregatesInput = {
+    AND?: ConfiguracaoCobrancaScalarWhereWithAggregatesInput | ConfiguracaoCobrancaScalarWhereWithAggregatesInput[]
+    OR?: ConfiguracaoCobrancaScalarWhereWithAggregatesInput[]
+    NOT?: ConfiguracaoCobrancaScalarWhereWithAggregatesInput | ConfiguracaoCobrancaScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"ConfiguracaoCobranca"> | string
+    tenantId?: UuidWithAggregatesFilter<"ConfiguracaoCobranca"> | string
+    ativo?: BoolWithAggregatesFilter<"ConfiguracaoCobranca"> | boolean
+    webhookN8n?: StringNullableWithAggregatesFilter<"ConfiguracaoCobranca"> | string | null
+    callbackUrl?: StringNullableWithAggregatesFilter<"ConfiguracaoCobranca"> | string | null
+    regras?: JsonWithAggregatesFilter<"ConfiguracaoCobranca">
+    descontoMaximo?: DecimalWithAggregatesFilter<"ConfiguracaoCobranca"> | Decimal | DecimalJsLike | number | string
+    parcelasMaximas?: IntWithAggregatesFilter<"ConfiguracaoCobranca"> | number
+    horarioInicio?: StringWithAggregatesFilter<"ConfiguracaoCobranca"> | string
+    horarioFim?: StringWithAggregatesFilter<"ConfiguracaoCobranca"> | string
+    pausarFimDeSemana?: BoolWithAggregatesFilter<"ConfiguracaoCobranca"> | boolean
+    criadoEm?: DateTimeWithAggregatesFilter<"ConfiguracaoCobranca"> | Date | string
+    atualizadoEm?: DateTimeWithAggregatesFilter<"ConfiguracaoCobranca"> | Date | string
   }
 
   export type ContaFinanceiraCreateInput = {
@@ -11337,6 +17844,561 @@ export namespace Prisma {
     receitasFinanceiras?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     lucroLiquido?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TituloCobrancaCreateInput = {
+    id?: string
+    tenantId: string
+    lancamentoId?: string | null
+    pedidoId?: string | null
+    clienteId?: string | null
+    clienteNome: string
+    clienteTelefone?: string | null
+    clienteEmail?: string | null
+    descricao: string
+    valor: Decimal | DecimalJsLike | number | string
+    dataVencimento: Date | string
+    status?: $Enums.StatusTituloCobranca
+    prioridade?: $Enums.PrioridadeCobranca
+    tentativas?: number
+    ultimaAcaoEm?: Date | string | null
+    canalUltimaAcao?: string | null
+    observacao?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+    acoes?: AcaoCobrancaCreateNestedManyWithoutTituloInput
+    acordos?: AcordoCobrancaCreateNestedManyWithoutTituloInput
+  }
+
+  export type TituloCobrancaUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    lancamentoId?: string | null
+    pedidoId?: string | null
+    clienteId?: string | null
+    clienteNome: string
+    clienteTelefone?: string | null
+    clienteEmail?: string | null
+    descricao: string
+    valor: Decimal | DecimalJsLike | number | string
+    dataVencimento: Date | string
+    status?: $Enums.StatusTituloCobranca
+    prioridade?: $Enums.PrioridadeCobranca
+    tentativas?: number
+    ultimaAcaoEm?: Date | string | null
+    canalUltimaAcao?: string | null
+    observacao?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+    acoes?: AcaoCobrancaUncheckedCreateNestedManyWithoutTituloInput
+    acordos?: AcordoCobrancaUncheckedCreateNestedManyWithoutTituloInput
+  }
+
+  export type TituloCobrancaUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    lancamentoId?: NullableStringFieldUpdateOperationsInput | string | null
+    pedidoId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    clienteTelefone?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    descricao?: StringFieldUpdateOperationsInput | string
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStatusTituloCobrancaFieldUpdateOperationsInput | $Enums.StatusTituloCobranca
+    prioridade?: EnumPrioridadeCobrancaFieldUpdateOperationsInput | $Enums.PrioridadeCobranca
+    tentativas?: IntFieldUpdateOperationsInput | number
+    ultimaAcaoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canalUltimaAcao?: NullableStringFieldUpdateOperationsInput | string | null
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    acoes?: AcaoCobrancaUpdateManyWithoutTituloNestedInput
+    acordos?: AcordoCobrancaUpdateManyWithoutTituloNestedInput
+  }
+
+  export type TituloCobrancaUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    lancamentoId?: NullableStringFieldUpdateOperationsInput | string | null
+    pedidoId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    clienteTelefone?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    descricao?: StringFieldUpdateOperationsInput | string
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStatusTituloCobrancaFieldUpdateOperationsInput | $Enums.StatusTituloCobranca
+    prioridade?: EnumPrioridadeCobrancaFieldUpdateOperationsInput | $Enums.PrioridadeCobranca
+    tentativas?: IntFieldUpdateOperationsInput | number
+    ultimaAcaoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canalUltimaAcao?: NullableStringFieldUpdateOperationsInput | string | null
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    acoes?: AcaoCobrancaUncheckedUpdateManyWithoutTituloNestedInput
+    acordos?: AcordoCobrancaUncheckedUpdateManyWithoutTituloNestedInput
+  }
+
+  export type TituloCobrancaCreateManyInput = {
+    id?: string
+    tenantId: string
+    lancamentoId?: string | null
+    pedidoId?: string | null
+    clienteId?: string | null
+    clienteNome: string
+    clienteTelefone?: string | null
+    clienteEmail?: string | null
+    descricao: string
+    valor: Decimal | DecimalJsLike | number | string
+    dataVencimento: Date | string
+    status?: $Enums.StatusTituloCobranca
+    prioridade?: $Enums.PrioridadeCobranca
+    tentativas?: number
+    ultimaAcaoEm?: Date | string | null
+    canalUltimaAcao?: string | null
+    observacao?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type TituloCobrancaUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    lancamentoId?: NullableStringFieldUpdateOperationsInput | string | null
+    pedidoId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    clienteTelefone?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    descricao?: StringFieldUpdateOperationsInput | string
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStatusTituloCobrancaFieldUpdateOperationsInput | $Enums.StatusTituloCobranca
+    prioridade?: EnumPrioridadeCobrancaFieldUpdateOperationsInput | $Enums.PrioridadeCobranca
+    tentativas?: IntFieldUpdateOperationsInput | number
+    ultimaAcaoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canalUltimaAcao?: NullableStringFieldUpdateOperationsInput | string | null
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TituloCobrancaUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    lancamentoId?: NullableStringFieldUpdateOperationsInput | string | null
+    pedidoId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    clienteTelefone?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    descricao?: StringFieldUpdateOperationsInput | string
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStatusTituloCobrancaFieldUpdateOperationsInput | $Enums.StatusTituloCobranca
+    prioridade?: EnumPrioridadeCobrancaFieldUpdateOperationsInput | $Enums.PrioridadeCobranca
+    tentativas?: IntFieldUpdateOperationsInput | number
+    ultimaAcaoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canalUltimaAcao?: NullableStringFieldUpdateOperationsInput | string | null
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AcaoCobrancaCreateInput = {
+    id?: string
+    tenantId: string
+    clienteNome: string
+    tipo: $Enums.TipoAcaoCobranca
+    mensagem: string
+    status?: $Enums.StatusAcaoCobranca
+    automatica?: boolean
+    detalhe?: string | null
+    criadoEm?: Date | string
+    titulo: TituloCobrancaCreateNestedOneWithoutAcoesInput
+  }
+
+  export type AcaoCobrancaUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    tituloId: string
+    clienteNome: string
+    tipo: $Enums.TipoAcaoCobranca
+    mensagem: string
+    status?: $Enums.StatusAcaoCobranca
+    automatica?: boolean
+    detalhe?: string | null
+    criadoEm?: Date | string
+  }
+
+  export type AcaoCobrancaUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoAcaoCobrancaFieldUpdateOperationsInput | $Enums.TipoAcaoCobranca
+    mensagem?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusAcaoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcaoCobranca
+    automatica?: BoolFieldUpdateOperationsInput | boolean
+    detalhe?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    titulo?: TituloCobrancaUpdateOneRequiredWithoutAcoesNestedInput
+  }
+
+  export type AcaoCobrancaUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    tituloId?: StringFieldUpdateOperationsInput | string
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoAcaoCobrancaFieldUpdateOperationsInput | $Enums.TipoAcaoCobranca
+    mensagem?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusAcaoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcaoCobranca
+    automatica?: BoolFieldUpdateOperationsInput | boolean
+    detalhe?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AcaoCobrancaCreateManyInput = {
+    id?: string
+    tenantId: string
+    tituloId: string
+    clienteNome: string
+    tipo: $Enums.TipoAcaoCobranca
+    mensagem: string
+    status?: $Enums.StatusAcaoCobranca
+    automatica?: boolean
+    detalhe?: string | null
+    criadoEm?: Date | string
+  }
+
+  export type AcaoCobrancaUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoAcaoCobrancaFieldUpdateOperationsInput | $Enums.TipoAcaoCobranca
+    mensagem?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusAcaoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcaoCobranca
+    automatica?: BoolFieldUpdateOperationsInput | boolean
+    detalhe?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AcaoCobrancaUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    tituloId?: StringFieldUpdateOperationsInput | string
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoAcaoCobrancaFieldUpdateOperationsInput | $Enums.TipoAcaoCobranca
+    mensagem?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusAcaoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcaoCobranca
+    automatica?: BoolFieldUpdateOperationsInput | boolean
+    detalhe?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AcordoCobrancaCreateInput = {
+    id?: string
+    tenantId: string
+    clienteId?: string | null
+    clienteNome: string
+    valorOriginal: Decimal | DecimalJsLike | number | string
+    descontoAplicado: Decimal | DecimalJsLike | number | string
+    valorFinal: Decimal | DecimalJsLike | number | string
+    numeroParcelas: number
+    status?: $Enums.StatusAcordoCobranca
+    observacao?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+    titulo: TituloCobrancaCreateNestedOneWithoutAcordosInput
+    parcelas?: ParcelaAcordoCreateNestedManyWithoutAcordoInput
+  }
+
+  export type AcordoCobrancaUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    tituloId: string
+    clienteId?: string | null
+    clienteNome: string
+    valorOriginal: Decimal | DecimalJsLike | number | string
+    descontoAplicado: Decimal | DecimalJsLike | number | string
+    valorFinal: Decimal | DecimalJsLike | number | string
+    numeroParcelas: number
+    status?: $Enums.StatusAcordoCobranca
+    observacao?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+    parcelas?: ParcelaAcordoUncheckedCreateNestedManyWithoutAcordoInput
+  }
+
+  export type AcordoCobrancaUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    valorOriginal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    descontoAplicado?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    valorFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    numeroParcelas?: IntFieldUpdateOperationsInput | number
+    status?: EnumStatusAcordoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcordoCobranca
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    titulo?: TituloCobrancaUpdateOneRequiredWithoutAcordosNestedInput
+    parcelas?: ParcelaAcordoUpdateManyWithoutAcordoNestedInput
+  }
+
+  export type AcordoCobrancaUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    tituloId?: StringFieldUpdateOperationsInput | string
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    valorOriginal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    descontoAplicado?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    valorFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    numeroParcelas?: IntFieldUpdateOperationsInput | number
+    status?: EnumStatusAcordoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcordoCobranca
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    parcelas?: ParcelaAcordoUncheckedUpdateManyWithoutAcordoNestedInput
+  }
+
+  export type AcordoCobrancaCreateManyInput = {
+    id?: string
+    tenantId: string
+    tituloId: string
+    clienteId?: string | null
+    clienteNome: string
+    valorOriginal: Decimal | DecimalJsLike | number | string
+    descontoAplicado: Decimal | DecimalJsLike | number | string
+    valorFinal: Decimal | DecimalJsLike | number | string
+    numeroParcelas: number
+    status?: $Enums.StatusAcordoCobranca
+    observacao?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type AcordoCobrancaUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    valorOriginal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    descontoAplicado?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    valorFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    numeroParcelas?: IntFieldUpdateOperationsInput | number
+    status?: EnumStatusAcordoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcordoCobranca
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AcordoCobrancaUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    tituloId?: StringFieldUpdateOperationsInput | string
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    valorOriginal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    descontoAplicado?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    valorFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    numeroParcelas?: IntFieldUpdateOperationsInput | number
+    status?: EnumStatusAcordoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcordoCobranca
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ParcelaAcordoCreateInput = {
+    id?: string
+    tenantId: string
+    numero: number
+    valor: Decimal | DecimalJsLike | number | string
+    vencimento: Date | string
+    pago?: boolean
+    pagoEm?: Date | string | null
+    acordo: AcordoCobrancaCreateNestedOneWithoutParcelasInput
+  }
+
+  export type ParcelaAcordoUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    acordoId: string
+    numero: number
+    valor: Decimal | DecimalJsLike | number | string
+    vencimento: Date | string
+    pago?: boolean
+    pagoEm?: Date | string | null
+  }
+
+  export type ParcelaAcordoUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    numero?: IntFieldUpdateOperationsInput | number
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    vencimento?: DateTimeFieldUpdateOperationsInput | Date | string
+    pago?: BoolFieldUpdateOperationsInput | boolean
+    pagoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    acordo?: AcordoCobrancaUpdateOneRequiredWithoutParcelasNestedInput
+  }
+
+  export type ParcelaAcordoUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    acordoId?: StringFieldUpdateOperationsInput | string
+    numero?: IntFieldUpdateOperationsInput | number
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    vencimento?: DateTimeFieldUpdateOperationsInput | Date | string
+    pago?: BoolFieldUpdateOperationsInput | boolean
+    pagoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type ParcelaAcordoCreateManyInput = {
+    id?: string
+    tenantId: string
+    acordoId: string
+    numero: number
+    valor: Decimal | DecimalJsLike | number | string
+    vencimento: Date | string
+    pago?: boolean
+    pagoEm?: Date | string | null
+  }
+
+  export type ParcelaAcordoUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    numero?: IntFieldUpdateOperationsInput | number
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    vencimento?: DateTimeFieldUpdateOperationsInput | Date | string
+    pago?: BoolFieldUpdateOperationsInput | boolean
+    pagoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type ParcelaAcordoUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    acordoId?: StringFieldUpdateOperationsInput | string
+    numero?: IntFieldUpdateOperationsInput | number
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    vencimento?: DateTimeFieldUpdateOperationsInput | Date | string
+    pago?: BoolFieldUpdateOperationsInput | boolean
+    pagoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type ConfiguracaoCobrancaCreateInput = {
+    id?: string
+    tenantId: string
+    ativo?: boolean
+    webhookN8n?: string | null
+    callbackUrl?: string | null
+    regras?: JsonNullValueInput | InputJsonValue
+    descontoMaximo?: Decimal | DecimalJsLike | number | string
+    parcelasMaximas?: number
+    horarioInicio?: string
+    horarioFim?: string
+    pausarFimDeSemana?: boolean
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type ConfiguracaoCobrancaUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    ativo?: boolean
+    webhookN8n?: string | null
+    callbackUrl?: string | null
+    regras?: JsonNullValueInput | InputJsonValue
+    descontoMaximo?: Decimal | DecimalJsLike | number | string
+    parcelasMaximas?: number
+    horarioInicio?: string
+    horarioFim?: string
+    pausarFimDeSemana?: boolean
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type ConfiguracaoCobrancaUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    ativo?: BoolFieldUpdateOperationsInput | boolean
+    webhookN8n?: NullableStringFieldUpdateOperationsInput | string | null
+    callbackUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    regras?: JsonNullValueInput | InputJsonValue
+    descontoMaximo?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    parcelasMaximas?: IntFieldUpdateOperationsInput | number
+    horarioInicio?: StringFieldUpdateOperationsInput | string
+    horarioFim?: StringFieldUpdateOperationsInput | string
+    pausarFimDeSemana?: BoolFieldUpdateOperationsInput | boolean
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ConfiguracaoCobrancaUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    ativo?: BoolFieldUpdateOperationsInput | boolean
+    webhookN8n?: NullableStringFieldUpdateOperationsInput | string | null
+    callbackUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    regras?: JsonNullValueInput | InputJsonValue
+    descontoMaximo?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    parcelasMaximas?: IntFieldUpdateOperationsInput | number
+    horarioInicio?: StringFieldUpdateOperationsInput | string
+    horarioFim?: StringFieldUpdateOperationsInput | string
+    pausarFimDeSemana?: BoolFieldUpdateOperationsInput | boolean
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ConfiguracaoCobrancaCreateManyInput = {
+    id?: string
+    tenantId: string
+    ativo?: boolean
+    webhookN8n?: string | null
+    callbackUrl?: string | null
+    regras?: JsonNullValueInput | InputJsonValue
+    descontoMaximo?: Decimal | DecimalJsLike | number | string
+    parcelasMaximas?: number
+    horarioInicio?: string
+    horarioFim?: string
+    pausarFimDeSemana?: boolean
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type ConfiguracaoCobrancaUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    ativo?: BoolFieldUpdateOperationsInput | boolean
+    webhookN8n?: NullableStringFieldUpdateOperationsInput | string | null
+    callbackUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    regras?: JsonNullValueInput | InputJsonValue
+    descontoMaximo?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    parcelasMaximas?: IntFieldUpdateOperationsInput | number
+    horarioInicio?: StringFieldUpdateOperationsInput | string
+    horarioFim?: StringFieldUpdateOperationsInput | string
+    pausarFimDeSemana?: BoolFieldUpdateOperationsInput | boolean
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ConfiguracaoCobrancaUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    ativo?: BoolFieldUpdateOperationsInput | boolean
+    webhookN8n?: NullableStringFieldUpdateOperationsInput | string | null
+    callbackUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    regras?: JsonNullValueInput | InputJsonValue
+    descontoMaximo?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    parcelasMaximas?: IntFieldUpdateOperationsInput | number
+    horarioInicio?: StringFieldUpdateOperationsInput | string
+    horarioFim?: StringFieldUpdateOperationsInput | string
+    pausarFimDeSemana?: BoolFieldUpdateOperationsInput | boolean
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UuidFilter<$PrismaModel = never> = {
@@ -12291,6 +19353,459 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
+  export type EnumStatusTituloCobrancaFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusTituloCobranca | EnumStatusTituloCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusTituloCobranca[] | ListEnumStatusTituloCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusTituloCobranca[] | ListEnumStatusTituloCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusTituloCobrancaFilter<$PrismaModel> | $Enums.StatusTituloCobranca
+  }
+
+  export type EnumPrioridadeCobrancaFilter<$PrismaModel = never> = {
+    equals?: $Enums.PrioridadeCobranca | EnumPrioridadeCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.PrioridadeCobranca[] | ListEnumPrioridadeCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PrioridadeCobranca[] | ListEnumPrioridadeCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumPrioridadeCobrancaFilter<$PrismaModel> | $Enums.PrioridadeCobranca
+  }
+
+  export type AcaoCobrancaListRelationFilter = {
+    every?: AcaoCobrancaWhereInput
+    some?: AcaoCobrancaWhereInput
+    none?: AcaoCobrancaWhereInput
+  }
+
+  export type AcordoCobrancaListRelationFilter = {
+    every?: AcordoCobrancaWhereInput
+    some?: AcordoCobrancaWhereInput
+    none?: AcordoCobrancaWhereInput
+  }
+
+  export type AcaoCobrancaOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AcordoCobrancaOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TituloCobrancaTenantIdLancamentoIdCompoundUniqueInput = {
+    tenantId: string
+    lancamentoId: string
+  }
+
+  export type TituloCobrancaCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    lancamentoId?: SortOrder
+    pedidoId?: SortOrder
+    clienteId?: SortOrder
+    clienteNome?: SortOrder
+    clienteTelefone?: SortOrder
+    clienteEmail?: SortOrder
+    descricao?: SortOrder
+    valor?: SortOrder
+    dataVencimento?: SortOrder
+    status?: SortOrder
+    prioridade?: SortOrder
+    tentativas?: SortOrder
+    ultimaAcaoEm?: SortOrder
+    canalUltimaAcao?: SortOrder
+    observacao?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type TituloCobrancaAvgOrderByAggregateInput = {
+    valor?: SortOrder
+    tentativas?: SortOrder
+  }
+
+  export type TituloCobrancaMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    lancamentoId?: SortOrder
+    pedidoId?: SortOrder
+    clienteId?: SortOrder
+    clienteNome?: SortOrder
+    clienteTelefone?: SortOrder
+    clienteEmail?: SortOrder
+    descricao?: SortOrder
+    valor?: SortOrder
+    dataVencimento?: SortOrder
+    status?: SortOrder
+    prioridade?: SortOrder
+    tentativas?: SortOrder
+    ultimaAcaoEm?: SortOrder
+    canalUltimaAcao?: SortOrder
+    observacao?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type TituloCobrancaMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    lancamentoId?: SortOrder
+    pedidoId?: SortOrder
+    clienteId?: SortOrder
+    clienteNome?: SortOrder
+    clienteTelefone?: SortOrder
+    clienteEmail?: SortOrder
+    descricao?: SortOrder
+    valor?: SortOrder
+    dataVencimento?: SortOrder
+    status?: SortOrder
+    prioridade?: SortOrder
+    tentativas?: SortOrder
+    ultimaAcaoEm?: SortOrder
+    canalUltimaAcao?: SortOrder
+    observacao?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type TituloCobrancaSumOrderByAggregateInput = {
+    valor?: SortOrder
+    tentativas?: SortOrder
+  }
+
+  export type EnumStatusTituloCobrancaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusTituloCobranca | EnumStatusTituloCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusTituloCobranca[] | ListEnumStatusTituloCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusTituloCobranca[] | ListEnumStatusTituloCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusTituloCobrancaWithAggregatesFilter<$PrismaModel> | $Enums.StatusTituloCobranca
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusTituloCobrancaFilter<$PrismaModel>
+    _max?: NestedEnumStatusTituloCobrancaFilter<$PrismaModel>
+  }
+
+  export type EnumPrioridadeCobrancaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PrioridadeCobranca | EnumPrioridadeCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.PrioridadeCobranca[] | ListEnumPrioridadeCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PrioridadeCobranca[] | ListEnumPrioridadeCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumPrioridadeCobrancaWithAggregatesFilter<$PrismaModel> | $Enums.PrioridadeCobranca
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPrioridadeCobrancaFilter<$PrismaModel>
+    _max?: NestedEnumPrioridadeCobrancaFilter<$PrismaModel>
+  }
+
+  export type EnumTipoAcaoCobrancaFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoAcaoCobranca | EnumTipoAcaoCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoAcaoCobranca[] | ListEnumTipoAcaoCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoAcaoCobranca[] | ListEnumTipoAcaoCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoAcaoCobrancaFilter<$PrismaModel> | $Enums.TipoAcaoCobranca
+  }
+
+  export type EnumStatusAcaoCobrancaFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusAcaoCobranca | EnumStatusAcaoCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusAcaoCobranca[] | ListEnumStatusAcaoCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusAcaoCobranca[] | ListEnumStatusAcaoCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusAcaoCobrancaFilter<$PrismaModel> | $Enums.StatusAcaoCobranca
+  }
+
+  export type TituloCobrancaRelationFilter = {
+    is?: TituloCobrancaWhereInput
+    isNot?: TituloCobrancaWhereInput
+  }
+
+  export type AcaoCobrancaCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    tituloId?: SortOrder
+    clienteNome?: SortOrder
+    tipo?: SortOrder
+    mensagem?: SortOrder
+    status?: SortOrder
+    automatica?: SortOrder
+    detalhe?: SortOrder
+    criadoEm?: SortOrder
+  }
+
+  export type AcaoCobrancaMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    tituloId?: SortOrder
+    clienteNome?: SortOrder
+    tipo?: SortOrder
+    mensagem?: SortOrder
+    status?: SortOrder
+    automatica?: SortOrder
+    detalhe?: SortOrder
+    criadoEm?: SortOrder
+  }
+
+  export type AcaoCobrancaMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    tituloId?: SortOrder
+    clienteNome?: SortOrder
+    tipo?: SortOrder
+    mensagem?: SortOrder
+    status?: SortOrder
+    automatica?: SortOrder
+    detalhe?: SortOrder
+    criadoEm?: SortOrder
+  }
+
+  export type EnumTipoAcaoCobrancaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoAcaoCobranca | EnumTipoAcaoCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoAcaoCobranca[] | ListEnumTipoAcaoCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoAcaoCobranca[] | ListEnumTipoAcaoCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoAcaoCobrancaWithAggregatesFilter<$PrismaModel> | $Enums.TipoAcaoCobranca
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTipoAcaoCobrancaFilter<$PrismaModel>
+    _max?: NestedEnumTipoAcaoCobrancaFilter<$PrismaModel>
+  }
+
+  export type EnumStatusAcaoCobrancaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusAcaoCobranca | EnumStatusAcaoCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusAcaoCobranca[] | ListEnumStatusAcaoCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusAcaoCobranca[] | ListEnumStatusAcaoCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusAcaoCobrancaWithAggregatesFilter<$PrismaModel> | $Enums.StatusAcaoCobranca
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusAcaoCobrancaFilter<$PrismaModel>
+    _max?: NestedEnumStatusAcaoCobrancaFilter<$PrismaModel>
+  }
+
+  export type EnumStatusAcordoCobrancaFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusAcordoCobranca | EnumStatusAcordoCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusAcordoCobranca[] | ListEnumStatusAcordoCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusAcordoCobranca[] | ListEnumStatusAcordoCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusAcordoCobrancaFilter<$PrismaModel> | $Enums.StatusAcordoCobranca
+  }
+
+  export type ParcelaAcordoListRelationFilter = {
+    every?: ParcelaAcordoWhereInput
+    some?: ParcelaAcordoWhereInput
+    none?: ParcelaAcordoWhereInput
+  }
+
+  export type ParcelaAcordoOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AcordoCobrancaCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    tituloId?: SortOrder
+    clienteId?: SortOrder
+    clienteNome?: SortOrder
+    valorOriginal?: SortOrder
+    descontoAplicado?: SortOrder
+    valorFinal?: SortOrder
+    numeroParcelas?: SortOrder
+    status?: SortOrder
+    observacao?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type AcordoCobrancaAvgOrderByAggregateInput = {
+    valorOriginal?: SortOrder
+    descontoAplicado?: SortOrder
+    valorFinal?: SortOrder
+    numeroParcelas?: SortOrder
+  }
+
+  export type AcordoCobrancaMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    tituloId?: SortOrder
+    clienteId?: SortOrder
+    clienteNome?: SortOrder
+    valorOriginal?: SortOrder
+    descontoAplicado?: SortOrder
+    valorFinal?: SortOrder
+    numeroParcelas?: SortOrder
+    status?: SortOrder
+    observacao?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type AcordoCobrancaMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    tituloId?: SortOrder
+    clienteId?: SortOrder
+    clienteNome?: SortOrder
+    valorOriginal?: SortOrder
+    descontoAplicado?: SortOrder
+    valorFinal?: SortOrder
+    numeroParcelas?: SortOrder
+    status?: SortOrder
+    observacao?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type AcordoCobrancaSumOrderByAggregateInput = {
+    valorOriginal?: SortOrder
+    descontoAplicado?: SortOrder
+    valorFinal?: SortOrder
+    numeroParcelas?: SortOrder
+  }
+
+  export type EnumStatusAcordoCobrancaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusAcordoCobranca | EnumStatusAcordoCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusAcordoCobranca[] | ListEnumStatusAcordoCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusAcordoCobranca[] | ListEnumStatusAcordoCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusAcordoCobrancaWithAggregatesFilter<$PrismaModel> | $Enums.StatusAcordoCobranca
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusAcordoCobrancaFilter<$PrismaModel>
+    _max?: NestedEnumStatusAcordoCobrancaFilter<$PrismaModel>
+  }
+
+  export type AcordoCobrancaRelationFilter = {
+    is?: AcordoCobrancaWhereInput
+    isNot?: AcordoCobrancaWhereInput
+  }
+
+  export type ParcelaAcordoCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    acordoId?: SortOrder
+    numero?: SortOrder
+    valor?: SortOrder
+    vencimento?: SortOrder
+    pago?: SortOrder
+    pagoEm?: SortOrder
+  }
+
+  export type ParcelaAcordoAvgOrderByAggregateInput = {
+    numero?: SortOrder
+    valor?: SortOrder
+  }
+
+  export type ParcelaAcordoMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    acordoId?: SortOrder
+    numero?: SortOrder
+    valor?: SortOrder
+    vencimento?: SortOrder
+    pago?: SortOrder
+    pagoEm?: SortOrder
+  }
+
+  export type ParcelaAcordoMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    acordoId?: SortOrder
+    numero?: SortOrder
+    valor?: SortOrder
+    vencimento?: SortOrder
+    pago?: SortOrder
+    pagoEm?: SortOrder
+  }
+
+  export type ParcelaAcordoSumOrderByAggregateInput = {
+    numero?: SortOrder
+    valor?: SortOrder
+  }
+  export type JsonFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type ConfiguracaoCobrancaCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    ativo?: SortOrder
+    webhookN8n?: SortOrder
+    callbackUrl?: SortOrder
+    regras?: SortOrder
+    descontoMaximo?: SortOrder
+    parcelasMaximas?: SortOrder
+    horarioInicio?: SortOrder
+    horarioFim?: SortOrder
+    pausarFimDeSemana?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type ConfiguracaoCobrancaAvgOrderByAggregateInput = {
+    descontoMaximo?: SortOrder
+    parcelasMaximas?: SortOrder
+  }
+
+  export type ConfiguracaoCobrancaMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    ativo?: SortOrder
+    webhookN8n?: SortOrder
+    callbackUrl?: SortOrder
+    descontoMaximo?: SortOrder
+    parcelasMaximas?: SortOrder
+    horarioInicio?: SortOrder
+    horarioFim?: SortOrder
+    pausarFimDeSemana?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type ConfiguracaoCobrancaMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    ativo?: SortOrder
+    webhookN8n?: SortOrder
+    callbackUrl?: SortOrder
+    descontoMaximo?: SortOrder
+    parcelasMaximas?: SortOrder
+    horarioInicio?: SortOrder
+    horarioFim?: SortOrder
+    pausarFimDeSemana?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type ConfiguracaoCobrancaSumOrderByAggregateInput = {
+    descontoMaximo?: SortOrder
+    parcelasMaximas?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
+  }
+
   export type LancamentoCreateNestedManyWithoutContaInput = {
     create?: XOR<LancamentoCreateWithoutContaInput, LancamentoUncheckedCreateWithoutContaInput> | LancamentoCreateWithoutContaInput[] | LancamentoUncheckedCreateWithoutContaInput[]
     connectOrCreate?: LancamentoCreateOrConnectWithoutContaInput | LancamentoCreateOrConnectWithoutContaInput[]
@@ -12776,6 +20291,194 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type AcaoCobrancaCreateNestedManyWithoutTituloInput = {
+    create?: XOR<AcaoCobrancaCreateWithoutTituloInput, AcaoCobrancaUncheckedCreateWithoutTituloInput> | AcaoCobrancaCreateWithoutTituloInput[] | AcaoCobrancaUncheckedCreateWithoutTituloInput[]
+    connectOrCreate?: AcaoCobrancaCreateOrConnectWithoutTituloInput | AcaoCobrancaCreateOrConnectWithoutTituloInput[]
+    createMany?: AcaoCobrancaCreateManyTituloInputEnvelope
+    connect?: AcaoCobrancaWhereUniqueInput | AcaoCobrancaWhereUniqueInput[]
+  }
+
+  export type AcordoCobrancaCreateNestedManyWithoutTituloInput = {
+    create?: XOR<AcordoCobrancaCreateWithoutTituloInput, AcordoCobrancaUncheckedCreateWithoutTituloInput> | AcordoCobrancaCreateWithoutTituloInput[] | AcordoCobrancaUncheckedCreateWithoutTituloInput[]
+    connectOrCreate?: AcordoCobrancaCreateOrConnectWithoutTituloInput | AcordoCobrancaCreateOrConnectWithoutTituloInput[]
+    createMany?: AcordoCobrancaCreateManyTituloInputEnvelope
+    connect?: AcordoCobrancaWhereUniqueInput | AcordoCobrancaWhereUniqueInput[]
+  }
+
+  export type AcaoCobrancaUncheckedCreateNestedManyWithoutTituloInput = {
+    create?: XOR<AcaoCobrancaCreateWithoutTituloInput, AcaoCobrancaUncheckedCreateWithoutTituloInput> | AcaoCobrancaCreateWithoutTituloInput[] | AcaoCobrancaUncheckedCreateWithoutTituloInput[]
+    connectOrCreate?: AcaoCobrancaCreateOrConnectWithoutTituloInput | AcaoCobrancaCreateOrConnectWithoutTituloInput[]
+    createMany?: AcaoCobrancaCreateManyTituloInputEnvelope
+    connect?: AcaoCobrancaWhereUniqueInput | AcaoCobrancaWhereUniqueInput[]
+  }
+
+  export type AcordoCobrancaUncheckedCreateNestedManyWithoutTituloInput = {
+    create?: XOR<AcordoCobrancaCreateWithoutTituloInput, AcordoCobrancaUncheckedCreateWithoutTituloInput> | AcordoCobrancaCreateWithoutTituloInput[] | AcordoCobrancaUncheckedCreateWithoutTituloInput[]
+    connectOrCreate?: AcordoCobrancaCreateOrConnectWithoutTituloInput | AcordoCobrancaCreateOrConnectWithoutTituloInput[]
+    createMany?: AcordoCobrancaCreateManyTituloInputEnvelope
+    connect?: AcordoCobrancaWhereUniqueInput | AcordoCobrancaWhereUniqueInput[]
+  }
+
+  export type EnumStatusTituloCobrancaFieldUpdateOperationsInput = {
+    set?: $Enums.StatusTituloCobranca
+  }
+
+  export type EnumPrioridadeCobrancaFieldUpdateOperationsInput = {
+    set?: $Enums.PrioridadeCobranca
+  }
+
+  export type AcaoCobrancaUpdateManyWithoutTituloNestedInput = {
+    create?: XOR<AcaoCobrancaCreateWithoutTituloInput, AcaoCobrancaUncheckedCreateWithoutTituloInput> | AcaoCobrancaCreateWithoutTituloInput[] | AcaoCobrancaUncheckedCreateWithoutTituloInput[]
+    connectOrCreate?: AcaoCobrancaCreateOrConnectWithoutTituloInput | AcaoCobrancaCreateOrConnectWithoutTituloInput[]
+    upsert?: AcaoCobrancaUpsertWithWhereUniqueWithoutTituloInput | AcaoCobrancaUpsertWithWhereUniqueWithoutTituloInput[]
+    createMany?: AcaoCobrancaCreateManyTituloInputEnvelope
+    set?: AcaoCobrancaWhereUniqueInput | AcaoCobrancaWhereUniqueInput[]
+    disconnect?: AcaoCobrancaWhereUniqueInput | AcaoCobrancaWhereUniqueInput[]
+    delete?: AcaoCobrancaWhereUniqueInput | AcaoCobrancaWhereUniqueInput[]
+    connect?: AcaoCobrancaWhereUniqueInput | AcaoCobrancaWhereUniqueInput[]
+    update?: AcaoCobrancaUpdateWithWhereUniqueWithoutTituloInput | AcaoCobrancaUpdateWithWhereUniqueWithoutTituloInput[]
+    updateMany?: AcaoCobrancaUpdateManyWithWhereWithoutTituloInput | AcaoCobrancaUpdateManyWithWhereWithoutTituloInput[]
+    deleteMany?: AcaoCobrancaScalarWhereInput | AcaoCobrancaScalarWhereInput[]
+  }
+
+  export type AcordoCobrancaUpdateManyWithoutTituloNestedInput = {
+    create?: XOR<AcordoCobrancaCreateWithoutTituloInput, AcordoCobrancaUncheckedCreateWithoutTituloInput> | AcordoCobrancaCreateWithoutTituloInput[] | AcordoCobrancaUncheckedCreateWithoutTituloInput[]
+    connectOrCreate?: AcordoCobrancaCreateOrConnectWithoutTituloInput | AcordoCobrancaCreateOrConnectWithoutTituloInput[]
+    upsert?: AcordoCobrancaUpsertWithWhereUniqueWithoutTituloInput | AcordoCobrancaUpsertWithWhereUniqueWithoutTituloInput[]
+    createMany?: AcordoCobrancaCreateManyTituloInputEnvelope
+    set?: AcordoCobrancaWhereUniqueInput | AcordoCobrancaWhereUniqueInput[]
+    disconnect?: AcordoCobrancaWhereUniqueInput | AcordoCobrancaWhereUniqueInput[]
+    delete?: AcordoCobrancaWhereUniqueInput | AcordoCobrancaWhereUniqueInput[]
+    connect?: AcordoCobrancaWhereUniqueInput | AcordoCobrancaWhereUniqueInput[]
+    update?: AcordoCobrancaUpdateWithWhereUniqueWithoutTituloInput | AcordoCobrancaUpdateWithWhereUniqueWithoutTituloInput[]
+    updateMany?: AcordoCobrancaUpdateManyWithWhereWithoutTituloInput | AcordoCobrancaUpdateManyWithWhereWithoutTituloInput[]
+    deleteMany?: AcordoCobrancaScalarWhereInput | AcordoCobrancaScalarWhereInput[]
+  }
+
+  export type AcaoCobrancaUncheckedUpdateManyWithoutTituloNestedInput = {
+    create?: XOR<AcaoCobrancaCreateWithoutTituloInput, AcaoCobrancaUncheckedCreateWithoutTituloInput> | AcaoCobrancaCreateWithoutTituloInput[] | AcaoCobrancaUncheckedCreateWithoutTituloInput[]
+    connectOrCreate?: AcaoCobrancaCreateOrConnectWithoutTituloInput | AcaoCobrancaCreateOrConnectWithoutTituloInput[]
+    upsert?: AcaoCobrancaUpsertWithWhereUniqueWithoutTituloInput | AcaoCobrancaUpsertWithWhereUniqueWithoutTituloInput[]
+    createMany?: AcaoCobrancaCreateManyTituloInputEnvelope
+    set?: AcaoCobrancaWhereUniqueInput | AcaoCobrancaWhereUniqueInput[]
+    disconnect?: AcaoCobrancaWhereUniqueInput | AcaoCobrancaWhereUniqueInput[]
+    delete?: AcaoCobrancaWhereUniqueInput | AcaoCobrancaWhereUniqueInput[]
+    connect?: AcaoCobrancaWhereUniqueInput | AcaoCobrancaWhereUniqueInput[]
+    update?: AcaoCobrancaUpdateWithWhereUniqueWithoutTituloInput | AcaoCobrancaUpdateWithWhereUniqueWithoutTituloInput[]
+    updateMany?: AcaoCobrancaUpdateManyWithWhereWithoutTituloInput | AcaoCobrancaUpdateManyWithWhereWithoutTituloInput[]
+    deleteMany?: AcaoCobrancaScalarWhereInput | AcaoCobrancaScalarWhereInput[]
+  }
+
+  export type AcordoCobrancaUncheckedUpdateManyWithoutTituloNestedInput = {
+    create?: XOR<AcordoCobrancaCreateWithoutTituloInput, AcordoCobrancaUncheckedCreateWithoutTituloInput> | AcordoCobrancaCreateWithoutTituloInput[] | AcordoCobrancaUncheckedCreateWithoutTituloInput[]
+    connectOrCreate?: AcordoCobrancaCreateOrConnectWithoutTituloInput | AcordoCobrancaCreateOrConnectWithoutTituloInput[]
+    upsert?: AcordoCobrancaUpsertWithWhereUniqueWithoutTituloInput | AcordoCobrancaUpsertWithWhereUniqueWithoutTituloInput[]
+    createMany?: AcordoCobrancaCreateManyTituloInputEnvelope
+    set?: AcordoCobrancaWhereUniqueInput | AcordoCobrancaWhereUniqueInput[]
+    disconnect?: AcordoCobrancaWhereUniqueInput | AcordoCobrancaWhereUniqueInput[]
+    delete?: AcordoCobrancaWhereUniqueInput | AcordoCobrancaWhereUniqueInput[]
+    connect?: AcordoCobrancaWhereUniqueInput | AcordoCobrancaWhereUniqueInput[]
+    update?: AcordoCobrancaUpdateWithWhereUniqueWithoutTituloInput | AcordoCobrancaUpdateWithWhereUniqueWithoutTituloInput[]
+    updateMany?: AcordoCobrancaUpdateManyWithWhereWithoutTituloInput | AcordoCobrancaUpdateManyWithWhereWithoutTituloInput[]
+    deleteMany?: AcordoCobrancaScalarWhereInput | AcordoCobrancaScalarWhereInput[]
+  }
+
+  export type TituloCobrancaCreateNestedOneWithoutAcoesInput = {
+    create?: XOR<TituloCobrancaCreateWithoutAcoesInput, TituloCobrancaUncheckedCreateWithoutAcoesInput>
+    connectOrCreate?: TituloCobrancaCreateOrConnectWithoutAcoesInput
+    connect?: TituloCobrancaWhereUniqueInput
+  }
+
+  export type EnumTipoAcaoCobrancaFieldUpdateOperationsInput = {
+    set?: $Enums.TipoAcaoCobranca
+  }
+
+  export type EnumStatusAcaoCobrancaFieldUpdateOperationsInput = {
+    set?: $Enums.StatusAcaoCobranca
+  }
+
+  export type TituloCobrancaUpdateOneRequiredWithoutAcoesNestedInput = {
+    create?: XOR<TituloCobrancaCreateWithoutAcoesInput, TituloCobrancaUncheckedCreateWithoutAcoesInput>
+    connectOrCreate?: TituloCobrancaCreateOrConnectWithoutAcoesInput
+    upsert?: TituloCobrancaUpsertWithoutAcoesInput
+    connect?: TituloCobrancaWhereUniqueInput
+    update?: XOR<XOR<TituloCobrancaUpdateToOneWithWhereWithoutAcoesInput, TituloCobrancaUpdateWithoutAcoesInput>, TituloCobrancaUncheckedUpdateWithoutAcoesInput>
+  }
+
+  export type TituloCobrancaCreateNestedOneWithoutAcordosInput = {
+    create?: XOR<TituloCobrancaCreateWithoutAcordosInput, TituloCobrancaUncheckedCreateWithoutAcordosInput>
+    connectOrCreate?: TituloCobrancaCreateOrConnectWithoutAcordosInput
+    connect?: TituloCobrancaWhereUniqueInput
+  }
+
+  export type ParcelaAcordoCreateNestedManyWithoutAcordoInput = {
+    create?: XOR<ParcelaAcordoCreateWithoutAcordoInput, ParcelaAcordoUncheckedCreateWithoutAcordoInput> | ParcelaAcordoCreateWithoutAcordoInput[] | ParcelaAcordoUncheckedCreateWithoutAcordoInput[]
+    connectOrCreate?: ParcelaAcordoCreateOrConnectWithoutAcordoInput | ParcelaAcordoCreateOrConnectWithoutAcordoInput[]
+    createMany?: ParcelaAcordoCreateManyAcordoInputEnvelope
+    connect?: ParcelaAcordoWhereUniqueInput | ParcelaAcordoWhereUniqueInput[]
+  }
+
+  export type ParcelaAcordoUncheckedCreateNestedManyWithoutAcordoInput = {
+    create?: XOR<ParcelaAcordoCreateWithoutAcordoInput, ParcelaAcordoUncheckedCreateWithoutAcordoInput> | ParcelaAcordoCreateWithoutAcordoInput[] | ParcelaAcordoUncheckedCreateWithoutAcordoInput[]
+    connectOrCreate?: ParcelaAcordoCreateOrConnectWithoutAcordoInput | ParcelaAcordoCreateOrConnectWithoutAcordoInput[]
+    createMany?: ParcelaAcordoCreateManyAcordoInputEnvelope
+    connect?: ParcelaAcordoWhereUniqueInput | ParcelaAcordoWhereUniqueInput[]
+  }
+
+  export type EnumStatusAcordoCobrancaFieldUpdateOperationsInput = {
+    set?: $Enums.StatusAcordoCobranca
+  }
+
+  export type TituloCobrancaUpdateOneRequiredWithoutAcordosNestedInput = {
+    create?: XOR<TituloCobrancaCreateWithoutAcordosInput, TituloCobrancaUncheckedCreateWithoutAcordosInput>
+    connectOrCreate?: TituloCobrancaCreateOrConnectWithoutAcordosInput
+    upsert?: TituloCobrancaUpsertWithoutAcordosInput
+    connect?: TituloCobrancaWhereUniqueInput
+    update?: XOR<XOR<TituloCobrancaUpdateToOneWithWhereWithoutAcordosInput, TituloCobrancaUpdateWithoutAcordosInput>, TituloCobrancaUncheckedUpdateWithoutAcordosInput>
+  }
+
+  export type ParcelaAcordoUpdateManyWithoutAcordoNestedInput = {
+    create?: XOR<ParcelaAcordoCreateWithoutAcordoInput, ParcelaAcordoUncheckedCreateWithoutAcordoInput> | ParcelaAcordoCreateWithoutAcordoInput[] | ParcelaAcordoUncheckedCreateWithoutAcordoInput[]
+    connectOrCreate?: ParcelaAcordoCreateOrConnectWithoutAcordoInput | ParcelaAcordoCreateOrConnectWithoutAcordoInput[]
+    upsert?: ParcelaAcordoUpsertWithWhereUniqueWithoutAcordoInput | ParcelaAcordoUpsertWithWhereUniqueWithoutAcordoInput[]
+    createMany?: ParcelaAcordoCreateManyAcordoInputEnvelope
+    set?: ParcelaAcordoWhereUniqueInput | ParcelaAcordoWhereUniqueInput[]
+    disconnect?: ParcelaAcordoWhereUniqueInput | ParcelaAcordoWhereUniqueInput[]
+    delete?: ParcelaAcordoWhereUniqueInput | ParcelaAcordoWhereUniqueInput[]
+    connect?: ParcelaAcordoWhereUniqueInput | ParcelaAcordoWhereUniqueInput[]
+    update?: ParcelaAcordoUpdateWithWhereUniqueWithoutAcordoInput | ParcelaAcordoUpdateWithWhereUniqueWithoutAcordoInput[]
+    updateMany?: ParcelaAcordoUpdateManyWithWhereWithoutAcordoInput | ParcelaAcordoUpdateManyWithWhereWithoutAcordoInput[]
+    deleteMany?: ParcelaAcordoScalarWhereInput | ParcelaAcordoScalarWhereInput[]
+  }
+
+  export type ParcelaAcordoUncheckedUpdateManyWithoutAcordoNestedInput = {
+    create?: XOR<ParcelaAcordoCreateWithoutAcordoInput, ParcelaAcordoUncheckedCreateWithoutAcordoInput> | ParcelaAcordoCreateWithoutAcordoInput[] | ParcelaAcordoUncheckedCreateWithoutAcordoInput[]
+    connectOrCreate?: ParcelaAcordoCreateOrConnectWithoutAcordoInput | ParcelaAcordoCreateOrConnectWithoutAcordoInput[]
+    upsert?: ParcelaAcordoUpsertWithWhereUniqueWithoutAcordoInput | ParcelaAcordoUpsertWithWhereUniqueWithoutAcordoInput[]
+    createMany?: ParcelaAcordoCreateManyAcordoInputEnvelope
+    set?: ParcelaAcordoWhereUniqueInput | ParcelaAcordoWhereUniqueInput[]
+    disconnect?: ParcelaAcordoWhereUniqueInput | ParcelaAcordoWhereUniqueInput[]
+    delete?: ParcelaAcordoWhereUniqueInput | ParcelaAcordoWhereUniqueInput[]
+    connect?: ParcelaAcordoWhereUniqueInput | ParcelaAcordoWhereUniqueInput[]
+    update?: ParcelaAcordoUpdateWithWhereUniqueWithoutAcordoInput | ParcelaAcordoUpdateWithWhereUniqueWithoutAcordoInput[]
+    updateMany?: ParcelaAcordoUpdateManyWithWhereWithoutAcordoInput | ParcelaAcordoUpdateManyWithWhereWithoutAcordoInput[]
+    deleteMany?: ParcelaAcordoScalarWhereInput | ParcelaAcordoScalarWhereInput[]
+  }
+
+  export type AcordoCobrancaCreateNestedOneWithoutParcelasInput = {
+    create?: XOR<AcordoCobrancaCreateWithoutParcelasInput, AcordoCobrancaUncheckedCreateWithoutParcelasInput>
+    connectOrCreate?: AcordoCobrancaCreateOrConnectWithoutParcelasInput
+    connect?: AcordoCobrancaWhereUniqueInput
+  }
+
+  export type AcordoCobrancaUpdateOneRequiredWithoutParcelasNestedInput = {
+    create?: XOR<AcordoCobrancaCreateWithoutParcelasInput, AcordoCobrancaUncheckedCreateWithoutParcelasInput>
+    connectOrCreate?: AcordoCobrancaCreateOrConnectWithoutParcelasInput
+    upsert?: AcordoCobrancaUpsertWithoutParcelasInput
+    connect?: AcordoCobrancaWhereUniqueInput
+    update?: XOR<XOR<AcordoCobrancaUpdateToOneWithWhereWithoutParcelasInput, AcordoCobrancaUpdateWithoutParcelasInput>, AcordoCobrancaUncheckedUpdateWithoutParcelasInput>
+  }
+
   export type NestedUuidFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -13193,6 +20896,113 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedEnumStatusTituloCobrancaFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusTituloCobranca | EnumStatusTituloCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusTituloCobranca[] | ListEnumStatusTituloCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusTituloCobranca[] | ListEnumStatusTituloCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusTituloCobrancaFilter<$PrismaModel> | $Enums.StatusTituloCobranca
+  }
+
+  export type NestedEnumPrioridadeCobrancaFilter<$PrismaModel = never> = {
+    equals?: $Enums.PrioridadeCobranca | EnumPrioridadeCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.PrioridadeCobranca[] | ListEnumPrioridadeCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PrioridadeCobranca[] | ListEnumPrioridadeCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumPrioridadeCobrancaFilter<$PrismaModel> | $Enums.PrioridadeCobranca
+  }
+
+  export type NestedEnumStatusTituloCobrancaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusTituloCobranca | EnumStatusTituloCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusTituloCobranca[] | ListEnumStatusTituloCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusTituloCobranca[] | ListEnumStatusTituloCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusTituloCobrancaWithAggregatesFilter<$PrismaModel> | $Enums.StatusTituloCobranca
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusTituloCobrancaFilter<$PrismaModel>
+    _max?: NestedEnumStatusTituloCobrancaFilter<$PrismaModel>
+  }
+
+  export type NestedEnumPrioridadeCobrancaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PrioridadeCobranca | EnumPrioridadeCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.PrioridadeCobranca[] | ListEnumPrioridadeCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PrioridadeCobranca[] | ListEnumPrioridadeCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumPrioridadeCobrancaWithAggregatesFilter<$PrismaModel> | $Enums.PrioridadeCobranca
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPrioridadeCobrancaFilter<$PrismaModel>
+    _max?: NestedEnumPrioridadeCobrancaFilter<$PrismaModel>
+  }
+
+  export type NestedEnumTipoAcaoCobrancaFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoAcaoCobranca | EnumTipoAcaoCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoAcaoCobranca[] | ListEnumTipoAcaoCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoAcaoCobranca[] | ListEnumTipoAcaoCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoAcaoCobrancaFilter<$PrismaModel> | $Enums.TipoAcaoCobranca
+  }
+
+  export type NestedEnumStatusAcaoCobrancaFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusAcaoCobranca | EnumStatusAcaoCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusAcaoCobranca[] | ListEnumStatusAcaoCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusAcaoCobranca[] | ListEnumStatusAcaoCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusAcaoCobrancaFilter<$PrismaModel> | $Enums.StatusAcaoCobranca
+  }
+
+  export type NestedEnumTipoAcaoCobrancaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoAcaoCobranca | EnumTipoAcaoCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoAcaoCobranca[] | ListEnumTipoAcaoCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoAcaoCobranca[] | ListEnumTipoAcaoCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoAcaoCobrancaWithAggregatesFilter<$PrismaModel> | $Enums.TipoAcaoCobranca
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTipoAcaoCobrancaFilter<$PrismaModel>
+    _max?: NestedEnumTipoAcaoCobrancaFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStatusAcaoCobrancaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusAcaoCobranca | EnumStatusAcaoCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusAcaoCobranca[] | ListEnumStatusAcaoCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusAcaoCobranca[] | ListEnumStatusAcaoCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusAcaoCobrancaWithAggregatesFilter<$PrismaModel> | $Enums.StatusAcaoCobranca
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusAcaoCobrancaFilter<$PrismaModel>
+    _max?: NestedEnumStatusAcaoCobrancaFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStatusAcordoCobrancaFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusAcordoCobranca | EnumStatusAcordoCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusAcordoCobranca[] | ListEnumStatusAcordoCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusAcordoCobranca[] | ListEnumStatusAcordoCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusAcordoCobrancaFilter<$PrismaModel> | $Enums.StatusAcordoCobranca
+  }
+
+  export type NestedEnumStatusAcordoCobrancaWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StatusAcordoCobranca | EnumStatusAcordoCobrancaFieldRefInput<$PrismaModel>
+    in?: $Enums.StatusAcordoCobranca[] | ListEnumStatusAcordoCobrancaFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StatusAcordoCobranca[] | ListEnumStatusAcordoCobrancaFieldRefInput<$PrismaModel>
+    not?: NestedEnumStatusAcordoCobrancaWithAggregatesFilter<$PrismaModel> | $Enums.StatusAcordoCobranca
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStatusAcordoCobrancaFilter<$PrismaModel>
+    _max?: NestedEnumStatusAcordoCobrancaFilter<$PrismaModel>
+  }
+  export type NestedJsonFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type LancamentoCreateWithoutContaInput = {
@@ -14453,6 +22263,505 @@ export namespace Prisma {
     recorrencias?: RecorrenciaUncheckedUpdateManyWithoutContaNestedInput
   }
 
+  export type AcaoCobrancaCreateWithoutTituloInput = {
+    id?: string
+    tenantId: string
+    clienteNome: string
+    tipo: $Enums.TipoAcaoCobranca
+    mensagem: string
+    status?: $Enums.StatusAcaoCobranca
+    automatica?: boolean
+    detalhe?: string | null
+    criadoEm?: Date | string
+  }
+
+  export type AcaoCobrancaUncheckedCreateWithoutTituloInput = {
+    id?: string
+    tenantId: string
+    clienteNome: string
+    tipo: $Enums.TipoAcaoCobranca
+    mensagem: string
+    status?: $Enums.StatusAcaoCobranca
+    automatica?: boolean
+    detalhe?: string | null
+    criadoEm?: Date | string
+  }
+
+  export type AcaoCobrancaCreateOrConnectWithoutTituloInput = {
+    where: AcaoCobrancaWhereUniqueInput
+    create: XOR<AcaoCobrancaCreateWithoutTituloInput, AcaoCobrancaUncheckedCreateWithoutTituloInput>
+  }
+
+  export type AcaoCobrancaCreateManyTituloInputEnvelope = {
+    data: AcaoCobrancaCreateManyTituloInput | AcaoCobrancaCreateManyTituloInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AcordoCobrancaCreateWithoutTituloInput = {
+    id?: string
+    tenantId: string
+    clienteId?: string | null
+    clienteNome: string
+    valorOriginal: Decimal | DecimalJsLike | number | string
+    descontoAplicado: Decimal | DecimalJsLike | number | string
+    valorFinal: Decimal | DecimalJsLike | number | string
+    numeroParcelas: number
+    status?: $Enums.StatusAcordoCobranca
+    observacao?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+    parcelas?: ParcelaAcordoCreateNestedManyWithoutAcordoInput
+  }
+
+  export type AcordoCobrancaUncheckedCreateWithoutTituloInput = {
+    id?: string
+    tenantId: string
+    clienteId?: string | null
+    clienteNome: string
+    valorOriginal: Decimal | DecimalJsLike | number | string
+    descontoAplicado: Decimal | DecimalJsLike | number | string
+    valorFinal: Decimal | DecimalJsLike | number | string
+    numeroParcelas: number
+    status?: $Enums.StatusAcordoCobranca
+    observacao?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+    parcelas?: ParcelaAcordoUncheckedCreateNestedManyWithoutAcordoInput
+  }
+
+  export type AcordoCobrancaCreateOrConnectWithoutTituloInput = {
+    where: AcordoCobrancaWhereUniqueInput
+    create: XOR<AcordoCobrancaCreateWithoutTituloInput, AcordoCobrancaUncheckedCreateWithoutTituloInput>
+  }
+
+  export type AcordoCobrancaCreateManyTituloInputEnvelope = {
+    data: AcordoCobrancaCreateManyTituloInput | AcordoCobrancaCreateManyTituloInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AcaoCobrancaUpsertWithWhereUniqueWithoutTituloInput = {
+    where: AcaoCobrancaWhereUniqueInput
+    update: XOR<AcaoCobrancaUpdateWithoutTituloInput, AcaoCobrancaUncheckedUpdateWithoutTituloInput>
+    create: XOR<AcaoCobrancaCreateWithoutTituloInput, AcaoCobrancaUncheckedCreateWithoutTituloInput>
+  }
+
+  export type AcaoCobrancaUpdateWithWhereUniqueWithoutTituloInput = {
+    where: AcaoCobrancaWhereUniqueInput
+    data: XOR<AcaoCobrancaUpdateWithoutTituloInput, AcaoCobrancaUncheckedUpdateWithoutTituloInput>
+  }
+
+  export type AcaoCobrancaUpdateManyWithWhereWithoutTituloInput = {
+    where: AcaoCobrancaScalarWhereInput
+    data: XOR<AcaoCobrancaUpdateManyMutationInput, AcaoCobrancaUncheckedUpdateManyWithoutTituloInput>
+  }
+
+  export type AcaoCobrancaScalarWhereInput = {
+    AND?: AcaoCobrancaScalarWhereInput | AcaoCobrancaScalarWhereInput[]
+    OR?: AcaoCobrancaScalarWhereInput[]
+    NOT?: AcaoCobrancaScalarWhereInput | AcaoCobrancaScalarWhereInput[]
+    id?: UuidFilter<"AcaoCobranca"> | string
+    tenantId?: UuidFilter<"AcaoCobranca"> | string
+    tituloId?: UuidFilter<"AcaoCobranca"> | string
+    clienteNome?: StringFilter<"AcaoCobranca"> | string
+    tipo?: EnumTipoAcaoCobrancaFilter<"AcaoCobranca"> | $Enums.TipoAcaoCobranca
+    mensagem?: StringFilter<"AcaoCobranca"> | string
+    status?: EnumStatusAcaoCobrancaFilter<"AcaoCobranca"> | $Enums.StatusAcaoCobranca
+    automatica?: BoolFilter<"AcaoCobranca"> | boolean
+    detalhe?: StringNullableFilter<"AcaoCobranca"> | string | null
+    criadoEm?: DateTimeFilter<"AcaoCobranca"> | Date | string
+  }
+
+  export type AcordoCobrancaUpsertWithWhereUniqueWithoutTituloInput = {
+    where: AcordoCobrancaWhereUniqueInput
+    update: XOR<AcordoCobrancaUpdateWithoutTituloInput, AcordoCobrancaUncheckedUpdateWithoutTituloInput>
+    create: XOR<AcordoCobrancaCreateWithoutTituloInput, AcordoCobrancaUncheckedCreateWithoutTituloInput>
+  }
+
+  export type AcordoCobrancaUpdateWithWhereUniqueWithoutTituloInput = {
+    where: AcordoCobrancaWhereUniqueInput
+    data: XOR<AcordoCobrancaUpdateWithoutTituloInput, AcordoCobrancaUncheckedUpdateWithoutTituloInput>
+  }
+
+  export type AcordoCobrancaUpdateManyWithWhereWithoutTituloInput = {
+    where: AcordoCobrancaScalarWhereInput
+    data: XOR<AcordoCobrancaUpdateManyMutationInput, AcordoCobrancaUncheckedUpdateManyWithoutTituloInput>
+  }
+
+  export type AcordoCobrancaScalarWhereInput = {
+    AND?: AcordoCobrancaScalarWhereInput | AcordoCobrancaScalarWhereInput[]
+    OR?: AcordoCobrancaScalarWhereInput[]
+    NOT?: AcordoCobrancaScalarWhereInput | AcordoCobrancaScalarWhereInput[]
+    id?: UuidFilter<"AcordoCobranca"> | string
+    tenantId?: UuidFilter<"AcordoCobranca"> | string
+    tituloId?: UuidFilter<"AcordoCobranca"> | string
+    clienteId?: UuidNullableFilter<"AcordoCobranca"> | string | null
+    clienteNome?: StringFilter<"AcordoCobranca"> | string
+    valorOriginal?: DecimalFilter<"AcordoCobranca"> | Decimal | DecimalJsLike | number | string
+    descontoAplicado?: DecimalFilter<"AcordoCobranca"> | Decimal | DecimalJsLike | number | string
+    valorFinal?: DecimalFilter<"AcordoCobranca"> | Decimal | DecimalJsLike | number | string
+    numeroParcelas?: IntFilter<"AcordoCobranca"> | number
+    status?: EnumStatusAcordoCobrancaFilter<"AcordoCobranca"> | $Enums.StatusAcordoCobranca
+    observacao?: StringNullableFilter<"AcordoCobranca"> | string | null
+    criadoEm?: DateTimeFilter<"AcordoCobranca"> | Date | string
+    atualizadoEm?: DateTimeFilter<"AcordoCobranca"> | Date | string
+  }
+
+  export type TituloCobrancaCreateWithoutAcoesInput = {
+    id?: string
+    tenantId: string
+    lancamentoId?: string | null
+    pedidoId?: string | null
+    clienteId?: string | null
+    clienteNome: string
+    clienteTelefone?: string | null
+    clienteEmail?: string | null
+    descricao: string
+    valor: Decimal | DecimalJsLike | number | string
+    dataVencimento: Date | string
+    status?: $Enums.StatusTituloCobranca
+    prioridade?: $Enums.PrioridadeCobranca
+    tentativas?: number
+    ultimaAcaoEm?: Date | string | null
+    canalUltimaAcao?: string | null
+    observacao?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+    acordos?: AcordoCobrancaCreateNestedManyWithoutTituloInput
+  }
+
+  export type TituloCobrancaUncheckedCreateWithoutAcoesInput = {
+    id?: string
+    tenantId: string
+    lancamentoId?: string | null
+    pedidoId?: string | null
+    clienteId?: string | null
+    clienteNome: string
+    clienteTelefone?: string | null
+    clienteEmail?: string | null
+    descricao: string
+    valor: Decimal | DecimalJsLike | number | string
+    dataVencimento: Date | string
+    status?: $Enums.StatusTituloCobranca
+    prioridade?: $Enums.PrioridadeCobranca
+    tentativas?: number
+    ultimaAcaoEm?: Date | string | null
+    canalUltimaAcao?: string | null
+    observacao?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+    acordos?: AcordoCobrancaUncheckedCreateNestedManyWithoutTituloInput
+  }
+
+  export type TituloCobrancaCreateOrConnectWithoutAcoesInput = {
+    where: TituloCobrancaWhereUniqueInput
+    create: XOR<TituloCobrancaCreateWithoutAcoesInput, TituloCobrancaUncheckedCreateWithoutAcoesInput>
+  }
+
+  export type TituloCobrancaUpsertWithoutAcoesInput = {
+    update: XOR<TituloCobrancaUpdateWithoutAcoesInput, TituloCobrancaUncheckedUpdateWithoutAcoesInput>
+    create: XOR<TituloCobrancaCreateWithoutAcoesInput, TituloCobrancaUncheckedCreateWithoutAcoesInput>
+    where?: TituloCobrancaWhereInput
+  }
+
+  export type TituloCobrancaUpdateToOneWithWhereWithoutAcoesInput = {
+    where?: TituloCobrancaWhereInput
+    data: XOR<TituloCobrancaUpdateWithoutAcoesInput, TituloCobrancaUncheckedUpdateWithoutAcoesInput>
+  }
+
+  export type TituloCobrancaUpdateWithoutAcoesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    lancamentoId?: NullableStringFieldUpdateOperationsInput | string | null
+    pedidoId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    clienteTelefone?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    descricao?: StringFieldUpdateOperationsInput | string
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStatusTituloCobrancaFieldUpdateOperationsInput | $Enums.StatusTituloCobranca
+    prioridade?: EnumPrioridadeCobrancaFieldUpdateOperationsInput | $Enums.PrioridadeCobranca
+    tentativas?: IntFieldUpdateOperationsInput | number
+    ultimaAcaoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canalUltimaAcao?: NullableStringFieldUpdateOperationsInput | string | null
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    acordos?: AcordoCobrancaUpdateManyWithoutTituloNestedInput
+  }
+
+  export type TituloCobrancaUncheckedUpdateWithoutAcoesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    lancamentoId?: NullableStringFieldUpdateOperationsInput | string | null
+    pedidoId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    clienteTelefone?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    descricao?: StringFieldUpdateOperationsInput | string
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStatusTituloCobrancaFieldUpdateOperationsInput | $Enums.StatusTituloCobranca
+    prioridade?: EnumPrioridadeCobrancaFieldUpdateOperationsInput | $Enums.PrioridadeCobranca
+    tentativas?: IntFieldUpdateOperationsInput | number
+    ultimaAcaoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canalUltimaAcao?: NullableStringFieldUpdateOperationsInput | string | null
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    acordos?: AcordoCobrancaUncheckedUpdateManyWithoutTituloNestedInput
+  }
+
+  export type TituloCobrancaCreateWithoutAcordosInput = {
+    id?: string
+    tenantId: string
+    lancamentoId?: string | null
+    pedidoId?: string | null
+    clienteId?: string | null
+    clienteNome: string
+    clienteTelefone?: string | null
+    clienteEmail?: string | null
+    descricao: string
+    valor: Decimal | DecimalJsLike | number | string
+    dataVencimento: Date | string
+    status?: $Enums.StatusTituloCobranca
+    prioridade?: $Enums.PrioridadeCobranca
+    tentativas?: number
+    ultimaAcaoEm?: Date | string | null
+    canalUltimaAcao?: string | null
+    observacao?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+    acoes?: AcaoCobrancaCreateNestedManyWithoutTituloInput
+  }
+
+  export type TituloCobrancaUncheckedCreateWithoutAcordosInput = {
+    id?: string
+    tenantId: string
+    lancamentoId?: string | null
+    pedidoId?: string | null
+    clienteId?: string | null
+    clienteNome: string
+    clienteTelefone?: string | null
+    clienteEmail?: string | null
+    descricao: string
+    valor: Decimal | DecimalJsLike | number | string
+    dataVencimento: Date | string
+    status?: $Enums.StatusTituloCobranca
+    prioridade?: $Enums.PrioridadeCobranca
+    tentativas?: number
+    ultimaAcaoEm?: Date | string | null
+    canalUltimaAcao?: string | null
+    observacao?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+    acoes?: AcaoCobrancaUncheckedCreateNestedManyWithoutTituloInput
+  }
+
+  export type TituloCobrancaCreateOrConnectWithoutAcordosInput = {
+    where: TituloCobrancaWhereUniqueInput
+    create: XOR<TituloCobrancaCreateWithoutAcordosInput, TituloCobrancaUncheckedCreateWithoutAcordosInput>
+  }
+
+  export type ParcelaAcordoCreateWithoutAcordoInput = {
+    id?: string
+    tenantId: string
+    numero: number
+    valor: Decimal | DecimalJsLike | number | string
+    vencimento: Date | string
+    pago?: boolean
+    pagoEm?: Date | string | null
+  }
+
+  export type ParcelaAcordoUncheckedCreateWithoutAcordoInput = {
+    id?: string
+    tenantId: string
+    numero: number
+    valor: Decimal | DecimalJsLike | number | string
+    vencimento: Date | string
+    pago?: boolean
+    pagoEm?: Date | string | null
+  }
+
+  export type ParcelaAcordoCreateOrConnectWithoutAcordoInput = {
+    where: ParcelaAcordoWhereUniqueInput
+    create: XOR<ParcelaAcordoCreateWithoutAcordoInput, ParcelaAcordoUncheckedCreateWithoutAcordoInput>
+  }
+
+  export type ParcelaAcordoCreateManyAcordoInputEnvelope = {
+    data: ParcelaAcordoCreateManyAcordoInput | ParcelaAcordoCreateManyAcordoInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TituloCobrancaUpsertWithoutAcordosInput = {
+    update: XOR<TituloCobrancaUpdateWithoutAcordosInput, TituloCobrancaUncheckedUpdateWithoutAcordosInput>
+    create: XOR<TituloCobrancaCreateWithoutAcordosInput, TituloCobrancaUncheckedCreateWithoutAcordosInput>
+    where?: TituloCobrancaWhereInput
+  }
+
+  export type TituloCobrancaUpdateToOneWithWhereWithoutAcordosInput = {
+    where?: TituloCobrancaWhereInput
+    data: XOR<TituloCobrancaUpdateWithoutAcordosInput, TituloCobrancaUncheckedUpdateWithoutAcordosInput>
+  }
+
+  export type TituloCobrancaUpdateWithoutAcordosInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    lancamentoId?: NullableStringFieldUpdateOperationsInput | string | null
+    pedidoId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    clienteTelefone?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    descricao?: StringFieldUpdateOperationsInput | string
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStatusTituloCobrancaFieldUpdateOperationsInput | $Enums.StatusTituloCobranca
+    prioridade?: EnumPrioridadeCobrancaFieldUpdateOperationsInput | $Enums.PrioridadeCobranca
+    tentativas?: IntFieldUpdateOperationsInput | number
+    ultimaAcaoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canalUltimaAcao?: NullableStringFieldUpdateOperationsInput | string | null
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    acoes?: AcaoCobrancaUpdateManyWithoutTituloNestedInput
+  }
+
+  export type TituloCobrancaUncheckedUpdateWithoutAcordosInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    lancamentoId?: NullableStringFieldUpdateOperationsInput | string | null
+    pedidoId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    clienteTelefone?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    descricao?: StringFieldUpdateOperationsInput | string
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    dataVencimento?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumStatusTituloCobrancaFieldUpdateOperationsInput | $Enums.StatusTituloCobranca
+    prioridade?: EnumPrioridadeCobrancaFieldUpdateOperationsInput | $Enums.PrioridadeCobranca
+    tentativas?: IntFieldUpdateOperationsInput | number
+    ultimaAcaoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    canalUltimaAcao?: NullableStringFieldUpdateOperationsInput | string | null
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    acoes?: AcaoCobrancaUncheckedUpdateManyWithoutTituloNestedInput
+  }
+
+  export type ParcelaAcordoUpsertWithWhereUniqueWithoutAcordoInput = {
+    where: ParcelaAcordoWhereUniqueInput
+    update: XOR<ParcelaAcordoUpdateWithoutAcordoInput, ParcelaAcordoUncheckedUpdateWithoutAcordoInput>
+    create: XOR<ParcelaAcordoCreateWithoutAcordoInput, ParcelaAcordoUncheckedCreateWithoutAcordoInput>
+  }
+
+  export type ParcelaAcordoUpdateWithWhereUniqueWithoutAcordoInput = {
+    where: ParcelaAcordoWhereUniqueInput
+    data: XOR<ParcelaAcordoUpdateWithoutAcordoInput, ParcelaAcordoUncheckedUpdateWithoutAcordoInput>
+  }
+
+  export type ParcelaAcordoUpdateManyWithWhereWithoutAcordoInput = {
+    where: ParcelaAcordoScalarWhereInput
+    data: XOR<ParcelaAcordoUpdateManyMutationInput, ParcelaAcordoUncheckedUpdateManyWithoutAcordoInput>
+  }
+
+  export type ParcelaAcordoScalarWhereInput = {
+    AND?: ParcelaAcordoScalarWhereInput | ParcelaAcordoScalarWhereInput[]
+    OR?: ParcelaAcordoScalarWhereInput[]
+    NOT?: ParcelaAcordoScalarWhereInput | ParcelaAcordoScalarWhereInput[]
+    id?: UuidFilter<"ParcelaAcordo"> | string
+    tenantId?: UuidFilter<"ParcelaAcordo"> | string
+    acordoId?: UuidFilter<"ParcelaAcordo"> | string
+    numero?: IntFilter<"ParcelaAcordo"> | number
+    valor?: DecimalFilter<"ParcelaAcordo"> | Decimal | DecimalJsLike | number | string
+    vencimento?: DateTimeFilter<"ParcelaAcordo"> | Date | string
+    pago?: BoolFilter<"ParcelaAcordo"> | boolean
+    pagoEm?: DateTimeNullableFilter<"ParcelaAcordo"> | Date | string | null
+  }
+
+  export type AcordoCobrancaCreateWithoutParcelasInput = {
+    id?: string
+    tenantId: string
+    clienteId?: string | null
+    clienteNome: string
+    valorOriginal: Decimal | DecimalJsLike | number | string
+    descontoAplicado: Decimal | DecimalJsLike | number | string
+    valorFinal: Decimal | DecimalJsLike | number | string
+    numeroParcelas: number
+    status?: $Enums.StatusAcordoCobranca
+    observacao?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+    titulo: TituloCobrancaCreateNestedOneWithoutAcordosInput
+  }
+
+  export type AcordoCobrancaUncheckedCreateWithoutParcelasInput = {
+    id?: string
+    tenantId: string
+    tituloId: string
+    clienteId?: string | null
+    clienteNome: string
+    valorOriginal: Decimal | DecimalJsLike | number | string
+    descontoAplicado: Decimal | DecimalJsLike | number | string
+    valorFinal: Decimal | DecimalJsLike | number | string
+    numeroParcelas: number
+    status?: $Enums.StatusAcordoCobranca
+    observacao?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type AcordoCobrancaCreateOrConnectWithoutParcelasInput = {
+    where: AcordoCobrancaWhereUniqueInput
+    create: XOR<AcordoCobrancaCreateWithoutParcelasInput, AcordoCobrancaUncheckedCreateWithoutParcelasInput>
+  }
+
+  export type AcordoCobrancaUpsertWithoutParcelasInput = {
+    update: XOR<AcordoCobrancaUpdateWithoutParcelasInput, AcordoCobrancaUncheckedUpdateWithoutParcelasInput>
+    create: XOR<AcordoCobrancaCreateWithoutParcelasInput, AcordoCobrancaUncheckedCreateWithoutParcelasInput>
+    where?: AcordoCobrancaWhereInput
+  }
+
+  export type AcordoCobrancaUpdateToOneWithWhereWithoutParcelasInput = {
+    where?: AcordoCobrancaWhereInput
+    data: XOR<AcordoCobrancaUpdateWithoutParcelasInput, AcordoCobrancaUncheckedUpdateWithoutParcelasInput>
+  }
+
+  export type AcordoCobrancaUpdateWithoutParcelasInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    valorOriginal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    descontoAplicado?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    valorFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    numeroParcelas?: IntFieldUpdateOperationsInput | number
+    status?: EnumStatusAcordoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcordoCobranca
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    titulo?: TituloCobrancaUpdateOneRequiredWithoutAcordosNestedInput
+  }
+
+  export type AcordoCobrancaUncheckedUpdateWithoutParcelasInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    tituloId?: StringFieldUpdateOperationsInput | string
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    valorOriginal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    descontoAplicado?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    valorFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    numeroParcelas?: IntFieldUpdateOperationsInput | number
+    status?: EnumStatusAcordoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcordoCobranca
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type LancamentoCreateManyContaInput = {
     id?: string
     tenantId: string
@@ -15129,6 +23438,156 @@ export namespace Prisma {
     contaDestinoId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type AcaoCobrancaCreateManyTituloInput = {
+    id?: string
+    tenantId: string
+    clienteNome: string
+    tipo: $Enums.TipoAcaoCobranca
+    mensagem: string
+    status?: $Enums.StatusAcaoCobranca
+    automatica?: boolean
+    detalhe?: string | null
+    criadoEm?: Date | string
+  }
+
+  export type AcordoCobrancaCreateManyTituloInput = {
+    id?: string
+    tenantId: string
+    clienteId?: string | null
+    clienteNome: string
+    valorOriginal: Decimal | DecimalJsLike | number | string
+    descontoAplicado: Decimal | DecimalJsLike | number | string
+    valorFinal: Decimal | DecimalJsLike | number | string
+    numeroParcelas: number
+    status?: $Enums.StatusAcordoCobranca
+    observacao?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type AcaoCobrancaUpdateWithoutTituloInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoAcaoCobrancaFieldUpdateOperationsInput | $Enums.TipoAcaoCobranca
+    mensagem?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusAcaoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcaoCobranca
+    automatica?: BoolFieldUpdateOperationsInput | boolean
+    detalhe?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AcaoCobrancaUncheckedUpdateWithoutTituloInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoAcaoCobrancaFieldUpdateOperationsInput | $Enums.TipoAcaoCobranca
+    mensagem?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusAcaoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcaoCobranca
+    automatica?: BoolFieldUpdateOperationsInput | boolean
+    detalhe?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AcaoCobrancaUncheckedUpdateManyWithoutTituloInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoAcaoCobrancaFieldUpdateOperationsInput | $Enums.TipoAcaoCobranca
+    mensagem?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusAcaoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcaoCobranca
+    automatica?: BoolFieldUpdateOperationsInput | boolean
+    detalhe?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AcordoCobrancaUpdateWithoutTituloInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    valorOriginal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    descontoAplicado?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    valorFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    numeroParcelas?: IntFieldUpdateOperationsInput | number
+    status?: EnumStatusAcordoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcordoCobranca
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    parcelas?: ParcelaAcordoUpdateManyWithoutAcordoNestedInput
+  }
+
+  export type AcordoCobrancaUncheckedUpdateWithoutTituloInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    valorOriginal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    descontoAplicado?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    valorFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    numeroParcelas?: IntFieldUpdateOperationsInput | number
+    status?: EnumStatusAcordoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcordoCobranca
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    parcelas?: ParcelaAcordoUncheckedUpdateManyWithoutAcordoNestedInput
+  }
+
+  export type AcordoCobrancaUncheckedUpdateManyWithoutTituloInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    clienteId?: NullableStringFieldUpdateOperationsInput | string | null
+    clienteNome?: StringFieldUpdateOperationsInput | string
+    valorOriginal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    descontoAplicado?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    valorFinal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    numeroParcelas?: IntFieldUpdateOperationsInput | number
+    status?: EnumStatusAcordoCobrancaFieldUpdateOperationsInput | $Enums.StatusAcordoCobranca
+    observacao?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ParcelaAcordoCreateManyAcordoInput = {
+    id?: string
+    tenantId: string
+    numero: number
+    valor: Decimal | DecimalJsLike | number | string
+    vencimento: Date | string
+    pago?: boolean
+    pagoEm?: Date | string | null
+  }
+
+  export type ParcelaAcordoUpdateWithoutAcordoInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    numero?: IntFieldUpdateOperationsInput | number
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    vencimento?: DateTimeFieldUpdateOperationsInput | Date | string
+    pago?: BoolFieldUpdateOperationsInput | boolean
+    pagoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type ParcelaAcordoUncheckedUpdateWithoutAcordoInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    numero?: IntFieldUpdateOperationsInput | number
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    vencimento?: DateTimeFieldUpdateOperationsInput | Date | string
+    pago?: BoolFieldUpdateOperationsInput | boolean
+    pagoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type ParcelaAcordoUncheckedUpdateManyWithoutAcordoInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    numero?: IntFieldUpdateOperationsInput | number
+    valor?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    vencimento?: DateTimeFieldUpdateOperationsInput | Date | string
+    pago?: BoolFieldUpdateOperationsInput | boolean
+    pagoEm?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
 
 
   /**
@@ -15146,6 +23605,14 @@ export namespace Prisma {
      * @deprecated Use RecorrenciaCountOutputTypeDefaultArgs instead
      */
     export type RecorrenciaCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = RecorrenciaCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use TituloCobrancaCountOutputTypeDefaultArgs instead
+     */
+    export type TituloCobrancaCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = TituloCobrancaCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use AcordoCobrancaCountOutputTypeDefaultArgs instead
+     */
+    export type AcordoCobrancaCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AcordoCobrancaCountOutputTypeDefaultArgs<ExtArgs>
     /**
      * @deprecated Use ContaFinanceiraDefaultArgs instead
      */
@@ -15174,6 +23641,26 @@ export namespace Prisma {
      * @deprecated Use DREDefaultArgs instead
      */
     export type DREArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DREDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use TituloCobrancaDefaultArgs instead
+     */
+    export type TituloCobrancaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = TituloCobrancaDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use AcaoCobrancaDefaultArgs instead
+     */
+    export type AcaoCobrancaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AcaoCobrancaDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use AcordoCobrancaDefaultArgs instead
+     */
+    export type AcordoCobrancaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AcordoCobrancaDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use ParcelaAcordoDefaultArgs instead
+     */
+    export type ParcelaAcordoArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ParcelaAcordoDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use ConfiguracaoCobrancaDefaultArgs instead
+     */
+    export type ConfiguracaoCobrancaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ConfiguracaoCobrancaDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

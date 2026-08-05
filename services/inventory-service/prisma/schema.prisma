@@ -49,14 +49,14 @@ enum StatusReserva {
 
 /// Depósito / armazém / centro de distribuição
 model Deposito {
-  id        String   @id @default(uuid()) @db.Uuid
-  tenantId  String   @map("tenant_id") @db.Uuid
-  nome      String
-  endereco  String?
-  cidade    String?
-  estado    String?
-  padrao    Boolean  @default(false) // Depósito padrão do tenant
-  ativo     Boolean  @default(true)
+  id       String  @id @default(uuid()) @db.Uuid
+  tenantId String  @map("tenant_id") @db.Uuid
+  nome     String
+  endereco String?
+  cidade   String?
+  estado   String?
+  padrao   Boolean @default(false) // Depósito padrão do tenant
+  ativo    Boolean @default(true)
 
   criadoEm     DateTime @default(now()) @map("criado_em")
   atualizadoEm DateTime @updatedAt @map("atualizado_em")
@@ -70,20 +70,20 @@ model Deposito {
 
 /// Saldo de estoque de um produto em um depósito específico
 model SaldoEstoque {
-  id               String   @id @default(uuid()) @db.Uuid
-  tenantId         String   @map("tenant_id") @db.Uuid
-  produtoId        String   @map("produto_id") @db.Uuid
-  depositoId       String   @map("deposito_id") @db.Uuid
-  deposito         Deposito @relation(fields: [depositoId], references: [id])
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  produtoId  String   @map("produto_id") @db.Uuid
+  depositoId String   @map("deposito_id") @db.Uuid
+  deposito   Deposito @relation(fields: [depositoId], references: [id])
 
-  quantidadeFisica Int      @default(0) @map("quantidade_fisica") // Quantidade real no depósito
-  reservado        Int      @default(0) // Quantidade reservada para pedidos
-  estoqueMinimo    Int      @default(0) @map("estoque_minimo") // Ponto de pedido
+  quantidadeFisica Int @default(0) @map("quantidade_fisica") // Quantidade real no depósito
+  reservado        Int @default(0) // Quantidade reservada para pedidos
+  estoqueMinimo    Int @default(0) @map("estoque_minimo") // Ponto de pedido
 
-  lote             String?  // Número do lote
-  numeroSerie      String?  @map("numero_serie") // Número de série
+  lote        String? // Número do lote
+  numeroSerie String? @map("numero_serie") // Número de série
 
-  atualizadoEm     DateTime @updatedAt @map("atualizado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
 
   // Disponível = quantidadeFisica - reservado (calculado no service)
 
@@ -95,17 +95,17 @@ model SaldoEstoque {
 
 /// Reserva de estoque para um pedido (impede venda duplicada)
 model ReservaEstoque {
-  id          String        @id @default(uuid()) @db.Uuid
-  tenantId    String        @map("tenant_id") @db.Uuid
-  produtoId   String        @map("produto_id") @db.Uuid
+  id         String        @id @default(uuid()) @db.Uuid
+  tenantId   String        @map("tenant_id") @db.Uuid
+  produtoId  String        @map("produto_id") @db.Uuid
   /// Depósito de onde o estoque foi reservado. Nulo apenas em reservas
   /// legadas criadas antes da reserva passar a ser por depósito.
-  depositoId  String?       @map("deposito_id") @db.Uuid
-  pedidoId    String        @map("pedido_id") @db.Uuid
-  quantidade  Int
-  status      StatusReserva @default(ATIVA)
+  depositoId String?       @map("deposito_id") @db.Uuid
+  pedidoId   String        @map("pedido_id") @db.Uuid
+  quantidade Int
+  status     StatusReserva @default(ATIVA)
 
-  criadoEm    DateTime      @default(now()) @map("criado_em")
+  criadoEm DateTime @default(now()) @map("criado_em")
 
   @@index([tenantId, pedidoId])
   @@index([tenantId, produtoId])
@@ -116,12 +116,12 @@ model ReservaEstoque {
 /// Garante que o mesmo evento (ex. pedido.pago para um pedidoId) só produza
 /// efeito colateral uma única vez, mesmo com reentrega do broker.
 model EventoProcessado {
-  id           String   @id @default(uuid()) @db.Uuid
-  tenantId     String   @map("tenant_id") @db.Uuid
+  id           String @id @default(uuid()) @db.Uuid
+  tenantId     String @map("tenant_id") @db.Uuid
   /// Nome lógico do evento consumido (ex. "pedido.criado", "pedido.pago").
   evento       String
   /// Identificador do agregado de referência (ex. pedidoId).
-  referenciaId String   @map("referencia_id")
+  referenciaId String @map("referencia_id")
 
   processadoEm DateTime @default(now()) @map("processado_em")
 
@@ -132,20 +132,20 @@ model EventoProcessado {
 
 /// Movimentação (histórico de entrada/saída/ajuste/transferência)
 model Movimentacao {
-  id            String                @id @default(uuid()) @db.Uuid
-  tenantId      String                @map("tenant_id") @db.Uuid
-  produtoId     String                @map("produto_id") @db.Uuid
-  depositoId    String                @map("deposito_id") @db.Uuid
-  deposito      Deposito              @relation(fields: [depositoId], references: [id])
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  produtoId  String   @map("produto_id") @db.Uuid
+  depositoId String   @map("deposito_id") @db.Uuid
+  deposito   Deposito @relation(fields: [depositoId], references: [id])
 
   tipo          TipoMovimentacao
   motivo        MotivoMovimentacao
-  quantidade    Int      // Positivo = entrada, Negativo = saída
-  custoUnitario Decimal? @db.Decimal(19, 2) @map("custo_unitario")
+  quantidade    Int // Positivo = entrada, Negativo = saída
+  custoUnitario Decimal?           @map("custo_unitario") @db.Decimal(19, 2)
   observacao    String?
-  usuarioId     String?  @map("usuario_id") @db.Uuid // Autor da movimentação (auditoria); nulo em movimentações originadas por evento
+  usuarioId     String?            @map("usuario_id") @db.Uuid // Autor da movimentação (auditoria); nulo em movimentações originadas por evento
 
-  criadoEm      DateTime              @default(now()) @map("criado_em")
+  criadoEm DateTime @default(now()) @map("criado_em")
 
   @@index([tenantId])
   @@index([tenantId, produtoId])
@@ -172,39 +172,39 @@ enum StatusCompra {
 }
 
 model PedidoCompra {
-  id                  String   @id @default(uuid()) @db.Uuid
-  tenantId            String   @map("tenant_id") @db.Uuid
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @map("tenant_id") @db.Uuid
 
   /// Sequencial por tenant, formatado na exibição (ex: "000012").
-  numero              Int
-  fornecedorId        String?  @map("fornecedor_id") @db.Uuid
-  fornecedorNome      String   @map("fornecedor_nome")
+  numero         Int
+  fornecedorId   String? @map("fornecedor_id") @db.Uuid
+  fornecedorNome String  @map("fornecedor_nome")
 
-  status              StatusCompra @default(RASCUNHO)
+  status StatusCompra @default(RASCUNHO)
 
   // Totais (dinheiro SEMPRE Decimal)
-  valorProdutos       Decimal  @default(0) @db.Decimal(12, 2) @map("valor_produtos")
-  valorFrete          Decimal  @default(0) @db.Decimal(12, 2) @map("valor_frete")
-  valorImpostos       Decimal  @default(0) @db.Decimal(12, 2) @map("valor_impostos")
-  valorTotal          Decimal  @default(0) @db.Decimal(12, 2) @map("valor_total")
+  valorProdutos Decimal @default(0) @map("valor_produtos") @db.Decimal(12, 2)
+  valorFrete    Decimal @default(0) @map("valor_frete") @db.Decimal(12, 2)
+  valorImpostos Decimal @default(0) @map("valor_impostos") @db.Decimal(12, 2)
+  valorTotal    Decimal @default(0) @map("valor_total") @db.Decimal(12, 2)
 
-  dataEmissao         DateTime @default(now()) @map("data_emissao")
+  dataEmissao         DateTime  @default(now()) @map("data_emissao")
   dataPrevistaEntrega DateTime? @map("data_prevista_entrega")
   dataRecebimento     DateTime? @map("data_recebimento")
 
   // NF-e de origem (importação): chave única por tenant deduplica reimportação.
-  nfeNumero           String?  @map("nfe_numero")
-  nfeSerie            String?  @map("nfe_serie")
-  nfeChave            String?  @map("nfe_chave")
+  nfeNumero String? @map("nfe_numero")
+  nfeSerie  String? @map("nfe_serie")
+  nfeChave  String? @map("nfe_chave")
 
-  condicaoPagamento   String?  @map("condicao_pagamento")
-  formaPagamento      String?  @map("forma_pagamento")
-  observacoes         String?  @db.Text
+  condicaoPagamento String? @map("condicao_pagamento")
+  formaPagamento    String? @map("forma_pagamento")
+  observacoes       String? @db.Text
 
-  criadoEm            DateTime @default(now()) @map("criado_em")
-  atualizadoEm        DateTime @updatedAt @map("atualizado_em")
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
 
-  itens               ItemPedidoCompra[]
+  itens ItemPedidoCompra[]
 
   @@unique([tenantId, numero])
   @@unique([tenantId, nfeChave])
@@ -215,32 +215,57 @@ model PedidoCompra {
 }
 
 model ItemPedidoCompra {
-  id                 String   @id @default(uuid()) @db.Uuid
-  pedidoCompraId     String   @map("pedido_compra_id") @db.Uuid
-  pedidoCompra       PedidoCompra @relation(fields: [pedidoCompraId], references: [id], onDelete: Cascade)
+  id             String       @id @default(uuid()) @db.Uuid
+  pedidoCompraId String       @map("pedido_compra_id") @db.Uuid
+  pedidoCompra   PedidoCompra @relation(fields: [pedidoCompraId], references: [id], onDelete: Cascade)
 
   /// Nulo quando o item veio de NF-e e o produto ainda não existe no
   /// catálogo (v1 não cria produto automaticamente; casa por SKU quando dá).
-  produtoId          String?  @map("produto_id") @db.Uuid
-  produtoNome        String   @map("produto_nome")
-  sku                String
-  ncm                String?
-  cfop               String?
-  unidade            String   @default("UN")
+  produtoId   String? @map("produto_id") @db.Uuid
+  produtoNome String  @map("produto_nome")
+  sku         String
+  ncm         String?
+  cfop        String?
+  unidade     String  @default("UN")
 
-  quantidade         Decimal  @db.Decimal(12, 3)
-  quantidadeRecebida Decimal  @default(0) @db.Decimal(12, 3) @map("quantidade_recebida")
+  quantidade         Decimal @db.Decimal(12, 3)
+  quantidadeRecebida Decimal @default(0) @map("quantidade_recebida") @db.Decimal(12, 3)
 
-  valorUnitario      Decimal  @db.Decimal(12, 4) @map("valor_unitario")
-  valorTotal         Decimal  @db.Decimal(12, 2) @map("valor_total")
-  valorIcms          Decimal  @default(0) @db.Decimal(12, 2) @map("valor_icms")
-  valorIpi           Decimal  @default(0) @db.Decimal(12, 2) @map("valor_ipi")
-  valorPis           Decimal  @default(0) @db.Decimal(12, 2) @map("valor_pis")
-  valorCofins        Decimal  @default(0) @db.Decimal(12, 2) @map("valor_cofins")
+  valorUnitario Decimal @map("valor_unitario") @db.Decimal(12, 4)
+  valorTotal    Decimal @map("valor_total") @db.Decimal(12, 2)
+  valorIcms     Decimal @default(0) @map("valor_icms") @db.Decimal(12, 2)
+  valorIpi      Decimal @default(0) @map("valor_ipi") @db.Decimal(12, 2)
+  valorPis      Decimal @default(0) @map("valor_pis") @db.Decimal(12, 2)
+  valorCofins   Decimal @default(0) @map("valor_cofins") @db.Decimal(12, 2)
 
-  criadoEm           DateTime @default(now()) @map("criado_em")
+  criadoEm DateTime @default(now()) @map("criado_em")
 
   @@index([pedidoCompraId])
   @@index([produtoId])
   @@map("itens_pedidos_compra")
+}
+
+/// De-Para entre o código do produto NO FORNECEDOR (cProd da NF-e) e o produto
+/// do nosso catálogo. Gravado quando o usuário resolve um item na conferência da
+/// importação; nas próximas notas do mesmo CNPJ o item já entra reconhecido.
+model VinculoProdutoFornecedor {
+  id               String   @id @default(uuid()) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  /// CNPJ do fornecedor NORMALIZADO (só dígitos) — a NF-e varia a formatação.
+  fornecedorCnpj   String   @map("fornecedor_cnpj")
+  /// cProd exatamente como veio na nota.
+  codigoFornecedor String   @map("codigo_fornecedor")
+  produtoId        String   @map("produto_id") @db.Uuid
+  /// Desnormalizados só para exibir o vínculo sem ir ao catálogo.
+  produtoSku       String?  @map("produto_sku")
+  produtoNome      String?  @map("produto_nome")
+  /// Descrição como veio na nota (ajuda a auditar o vínculo depois).
+  descricaoNfe     String?  @map("descricao_nfe")
+  criadoEm         DateTime @default(now()) @map("criado_em")
+  atualizadoEm     DateTime @updatedAt @map("atualizado_em")
+
+  @@unique([tenantId, fornecedorCnpj, codigoFornecedor])
+  @@index([tenantId])
+  @@index([tenantId, produtoId])
+  @@map("vinculos_produto_fornecedor")
 }

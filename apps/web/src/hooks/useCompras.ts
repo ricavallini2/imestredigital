@@ -88,8 +88,123 @@ export interface EstatisticasCompras {
  * casar entra sem vínculo (itensSemProduto) e não movimenta estoque no
  * recebimento até o produto ser cadastrado.
  */
+// ─── Importação de NF-e em 2 etapas (analisar → conferir → confirmar) ────────
+
+export interface FornecedorNFe {
+  cnpj: string;
+  razaoSocial: string;
+  nomeFantasia: string;
+  inscricaoEstadual: string;
+  telefone: string;
+  email: string;
+  endereco: {
+    logradouro: string;
+    numero: string;
+    complemento: string;
+    bairro: string;
+    cidade: string;
+    uf: string;
+    cep: string;
+  };
+}
+
+export interface DiferencaCadastro {
+  campo: string;
+  label: string;
+  valorCadastro: string;
+  valorNfe: string;
+}
+
+export interface ProdutoResumoAnalise {
+  id: string;
+  nome: string;
+  sku: string;
+}
+
+/** Como o item da nota foi (ou não) reconhecido no catálogo. */
+export type StatusItemAnalise = 'VINCULADO' | 'SUGERIDO' | 'NAO_ENCONTRADO';
+
+export interface ItemAnalise {
+  codigo: string;
+  ean: string;
+  descricao: string;
+  ncm: string;
+  cfop: string;
+  unidade: string;
+  quantidade: number;
+  valorUnitario: number;
+  valorTotal: number;
+  status: StatusItemAnalise;
+  /** DE_PARA = vínculo salvo antes; SKU/EAN = casou por código nesta análise. */
+  origemVinculo: 'DE_PARA' | 'SKU' | 'EAN' | null;
+  produto: ProdutoResumoAnalise | null;
+  candidatos: ProdutoResumoAnalise[];
+}
+
+export interface AnaliseNFe {
+  nfe: {
+    chave: string;
+    numero: string;
+    serie: string;
+    dataEmissao: string;
+    naturezaOperacao: string;
+    formaPagamento: string | null;
+    totais: {
+      valorProdutos: number;
+      valorFrete: number;
+      valorTotal: number;
+      valorImpostos: number;
+    };
+  };
+  jaImportada: { id: string; numero: string } | null;
+  fornecedor: {
+    daNfe: FornecedorNFe;
+    status: 'ENCONTRADO' | 'NAO_ENCONTRADO';
+    cadastro: {
+      id: string;
+      nome: string;
+      razaoSocial?: string | null;
+      cnpj?: string | null;
+      email?: string | null;
+    } | null;
+    diferencas: DiferencaCadastro[];
+  };
+  itens: ItemAnalise[];
+  resumo: { totalItens: number; vinculados: number; sugeridos: number; semVinculo: number };
+}
+
+export interface ConfirmacaoImportacao {
+  xml: string;
+  fornecedor: {
+    acao: 'USAR_EXISTENTE' | 'CRIAR' | 'ATUALIZAR';
+    clienteId?: string;
+    camposAtualizar?: string[];
+  };
+  itens: Array<{
+    codigo: string;
+    acao: 'VINCULAR' | 'CRIAR' | 'IGNORAR';
+    produtoId?: string;
+    novoProduto?: {
+      nome: string;
+      sku: string;
+      precoVenda?: number;
+      precoCusto?: number;
+      ean?: string;
+      ncm?: string;
+      unidade?: string;
+      categoriaId?: string;
+      marcaId?: string;
+    };
+    /** Grava o De-Para para a próxima nota do mesmo fornecedor já reconhecer. */
+    salvarVinculo?: boolean;
+  }>;
+}
+
 export interface ResultadoImportacao {
   compra: PedidoCompra;
+  fornecedor?: { id: string | null; nome: string; criado: boolean; atualizado: boolean };
+  produtosCriados?: Array<{ id: string; sku: string; nome: string }>;
+  vinculosSalvos?: number;
   itensTotal: number;
   itensSemProduto: number;
   aviso: string | null;
@@ -196,10 +311,24 @@ export function useReceberCompra(id: string) {
 
 // ─── Mutation: Importar NF-e ──────────────────────────────────────────────────
 
+/**
+ * ETAPA 1 da importação: analisa o XML e devolve o que foi reconhecido.
+ * É read-only no servidor — pode ser chamada quantas vezes for preciso.
+ */
+export function useAnalisarNFe() {
+  return useMutation({
+    mutationFn: async (body: { xml: string }) => {
+      const { data } = await api.post('/v1/compras/analisar-nfe', body);
+      return data as AnaliseNFe;
+    },
+  });
+}
+
+/** ETAPA 2: confirma a importação com as decisões conferidas pelo usuário. */
 export function useImportarNFe() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (body: { xml: string }) => {
+    mutationFn: async (body: ConfirmacaoImportacao) => {
       const { data } = await api.post('/v1/compras/importar-nfe', body);
       return data as ResultadoImportacao;
     },

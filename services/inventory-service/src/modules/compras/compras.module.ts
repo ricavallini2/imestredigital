@@ -5,12 +5,13 @@
 import { Module } from '@nestjs/common';
 import { ComprasService } from './compras.service';
 import { ComprasController } from './compras.controller';
+import { CustomerClient } from './customer.client';
 import { PrismaModule } from '../prisma/prisma.module';
 import { EstoqueModule } from '../estoque/estoque.module';
 
 @Module({
   imports: [PrismaModule, EstoqueModule],
-  providers: [ComprasService],
+  providers: [ComprasService, CustomerClient],
   controllers: [ComprasController],
   exports: [ComprasService],
 })

@@ -50,6 +50,13 @@ export type PedidoCompra = $Result.DefaultSelection<Prisma.$PedidoCompraPayload>
  * 
  */
 export type ItemPedidoCompra = $Result.DefaultSelection<Prisma.$ItemPedidoCompraPayload>
+/**
+ * Model VinculoProdutoFornecedor
+ * De-Para entre o código do produto NO FORNECEDOR (cProd da NF-e) e o produto
+ * do nosso catálogo. Gravado quando o usuário resolve um item na conferência da
+ * importação; nas próximas notas do mesmo CNPJ o item já entra reconhecido.
+ */
+export type VinculoProdutoFornecedor = $Result.DefaultSelection<Prisma.$VinculoProdutoFornecedorPayload>
 
 /**
  * Enums
@@ -316,6 +323,16 @@ export class PrismaClient<
     * ```
     */
   get itemPedidoCompra(): Prisma.ItemPedidoCompraDelegate<ExtArgs>;
+
+  /**
+   * `prisma.vinculoProdutoFornecedor`: Exposes CRUD operations for the **VinculoProdutoFornecedor** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more VinculoProdutoFornecedors
+    * const vinculoProdutoFornecedors = await prisma.vinculoProdutoFornecedor.findMany()
+    * ```
+    */
+  get vinculoProdutoFornecedor(): Prisma.VinculoProdutoFornecedorDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -763,7 +780,8 @@ export namespace Prisma {
     EventoProcessado: 'EventoProcessado',
     Movimentacao: 'Movimentacao',
     PedidoCompra: 'PedidoCompra',
-    ItemPedidoCompra: 'ItemPedidoCompra'
+    ItemPedidoCompra: 'ItemPedidoCompra',
+    VinculoProdutoFornecedor: 'VinculoProdutoFornecedor'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -779,7 +797,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "deposito" | "saldoEstoque" | "reservaEstoque" | "eventoProcessado" | "movimentacao" | "pedidoCompra" | "itemPedidoCompra"
+      modelProps: "deposito" | "saldoEstoque" | "reservaEstoque" | "eventoProcessado" | "movimentacao" | "pedidoCompra" | "itemPedidoCompra" | "vinculoProdutoFornecedor"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1270,6 +1288,76 @@ export namespace Prisma {
           count: {
             args: Prisma.ItemPedidoCompraCountArgs<ExtArgs>
             result: $Utils.Optional<ItemPedidoCompraCountAggregateOutputType> | number
+          }
+        }
+      }
+      VinculoProdutoFornecedor: {
+        payload: Prisma.$VinculoProdutoFornecedorPayload<ExtArgs>
+        fields: Prisma.VinculoProdutoFornecedorFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.VinculoProdutoFornecedorFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VinculoProdutoFornecedorPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.VinculoProdutoFornecedorFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VinculoProdutoFornecedorPayload>
+          }
+          findFirst: {
+            args: Prisma.VinculoProdutoFornecedorFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VinculoProdutoFornecedorPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.VinculoProdutoFornecedorFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VinculoProdutoFornecedorPayload>
+          }
+          findMany: {
+            args: Prisma.VinculoProdutoFornecedorFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VinculoProdutoFornecedorPayload>[]
+          }
+          create: {
+            args: Prisma.VinculoProdutoFornecedorCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VinculoProdutoFornecedorPayload>
+          }
+          createMany: {
+            args: Prisma.VinculoProdutoFornecedorCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.VinculoProdutoFornecedorCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VinculoProdutoFornecedorPayload>[]
+          }
+          delete: {
+            args: Prisma.VinculoProdutoFornecedorDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VinculoProdutoFornecedorPayload>
+          }
+          update: {
+            args: Prisma.VinculoProdutoFornecedorUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VinculoProdutoFornecedorPayload>
+          }
+          deleteMany: {
+            args: Prisma.VinculoProdutoFornecedorDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.VinculoProdutoFornecedorUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.VinculoProdutoFornecedorUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VinculoProdutoFornecedorPayload>
+          }
+          aggregate: {
+            args: Prisma.VinculoProdutoFornecedorAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateVinculoProdutoFornecedor>
+          }
+          groupBy: {
+            args: Prisma.VinculoProdutoFornecedorGroupByArgs<ExtArgs>
+            result: $Utils.Optional<VinculoProdutoFornecedorGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.VinculoProdutoFornecedorCountArgs<ExtArgs>
+            result: $Utils.Optional<VinculoProdutoFornecedorCountAggregateOutputType> | number
           }
         }
       }
@@ -8787,6 +8875,956 @@ export namespace Prisma {
 
 
   /**
+   * Model VinculoProdutoFornecedor
+   */
+
+  export type AggregateVinculoProdutoFornecedor = {
+    _count: VinculoProdutoFornecedorCountAggregateOutputType | null
+    _min: VinculoProdutoFornecedorMinAggregateOutputType | null
+    _max: VinculoProdutoFornecedorMaxAggregateOutputType | null
+  }
+
+  export type VinculoProdutoFornecedorMinAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    fornecedorCnpj: string | null
+    codigoFornecedor: string | null
+    produtoId: string | null
+    produtoSku: string | null
+    produtoNome: string | null
+    descricaoNfe: string | null
+    criadoEm: Date | null
+    atualizadoEm: Date | null
+  }
+
+  export type VinculoProdutoFornecedorMaxAggregateOutputType = {
+    id: string | null
+    tenantId: string | null
+    fornecedorCnpj: string | null
+    codigoFornecedor: string | null
+    produtoId: string | null
+    produtoSku: string | null
+    produtoNome: string | null
+    descricaoNfe: string | null
+    criadoEm: Date | null
+    atualizadoEm: Date | null
+  }
+
+  export type VinculoProdutoFornecedorCountAggregateOutputType = {
+    id: number
+    tenantId: number
+    fornecedorCnpj: number
+    codigoFornecedor: number
+    produtoId: number
+    produtoSku: number
+    produtoNome: number
+    descricaoNfe: number
+    criadoEm: number
+    atualizadoEm: number
+    _all: number
+  }
+
+
+  export type VinculoProdutoFornecedorMinAggregateInputType = {
+    id?: true
+    tenantId?: true
+    fornecedorCnpj?: true
+    codigoFornecedor?: true
+    produtoId?: true
+    produtoSku?: true
+    produtoNome?: true
+    descricaoNfe?: true
+    criadoEm?: true
+    atualizadoEm?: true
+  }
+
+  export type VinculoProdutoFornecedorMaxAggregateInputType = {
+    id?: true
+    tenantId?: true
+    fornecedorCnpj?: true
+    codigoFornecedor?: true
+    produtoId?: true
+    produtoSku?: true
+    produtoNome?: true
+    descricaoNfe?: true
+    criadoEm?: true
+    atualizadoEm?: true
+  }
+
+  export type VinculoProdutoFornecedorCountAggregateInputType = {
+    id?: true
+    tenantId?: true
+    fornecedorCnpj?: true
+    codigoFornecedor?: true
+    produtoId?: true
+    produtoSku?: true
+    produtoNome?: true
+    descricaoNfe?: true
+    criadoEm?: true
+    atualizadoEm?: true
+    _all?: true
+  }
+
+  export type VinculoProdutoFornecedorAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VinculoProdutoFornecedor to aggregate.
+     */
+    where?: VinculoProdutoFornecedorWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VinculoProdutoFornecedors to fetch.
+     */
+    orderBy?: VinculoProdutoFornecedorOrderByWithRelationInput | VinculoProdutoFornecedorOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: VinculoProdutoFornecedorWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VinculoProdutoFornecedors from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VinculoProdutoFornecedors.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned VinculoProdutoFornecedors
+    **/
+    _count?: true | VinculoProdutoFornecedorCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: VinculoProdutoFornecedorMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: VinculoProdutoFornecedorMaxAggregateInputType
+  }
+
+  export type GetVinculoProdutoFornecedorAggregateType<T extends VinculoProdutoFornecedorAggregateArgs> = {
+        [P in keyof T & keyof AggregateVinculoProdutoFornecedor]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateVinculoProdutoFornecedor[P]>
+      : GetScalarType<T[P], AggregateVinculoProdutoFornecedor[P]>
+  }
+
+
+
+
+  export type VinculoProdutoFornecedorGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VinculoProdutoFornecedorWhereInput
+    orderBy?: VinculoProdutoFornecedorOrderByWithAggregationInput | VinculoProdutoFornecedorOrderByWithAggregationInput[]
+    by: VinculoProdutoFornecedorScalarFieldEnum[] | VinculoProdutoFornecedorScalarFieldEnum
+    having?: VinculoProdutoFornecedorScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: VinculoProdutoFornecedorCountAggregateInputType | true
+    _min?: VinculoProdutoFornecedorMinAggregateInputType
+    _max?: VinculoProdutoFornecedorMaxAggregateInputType
+  }
+
+  export type VinculoProdutoFornecedorGroupByOutputType = {
+    id: string
+    tenantId: string
+    fornecedorCnpj: string
+    codigoFornecedor: string
+    produtoId: string
+    produtoSku: string | null
+    produtoNome: string | null
+    descricaoNfe: string | null
+    criadoEm: Date
+    atualizadoEm: Date
+    _count: VinculoProdutoFornecedorCountAggregateOutputType | null
+    _min: VinculoProdutoFornecedorMinAggregateOutputType | null
+    _max: VinculoProdutoFornecedorMaxAggregateOutputType | null
+  }
+
+  type GetVinculoProdutoFornecedorGroupByPayload<T extends VinculoProdutoFornecedorGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<VinculoProdutoFornecedorGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof VinculoProdutoFornecedorGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], VinculoProdutoFornecedorGroupByOutputType[P]>
+            : GetScalarType<T[P], VinculoProdutoFornecedorGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type VinculoProdutoFornecedorSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    fornecedorCnpj?: boolean
+    codigoFornecedor?: boolean
+    produtoId?: boolean
+    produtoSku?: boolean
+    produtoNome?: boolean
+    descricaoNfe?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }, ExtArgs["result"]["vinculoProdutoFornecedor"]>
+
+  export type VinculoProdutoFornecedorSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tenantId?: boolean
+    fornecedorCnpj?: boolean
+    codigoFornecedor?: boolean
+    produtoId?: boolean
+    produtoSku?: boolean
+    produtoNome?: boolean
+    descricaoNfe?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }, ExtArgs["result"]["vinculoProdutoFornecedor"]>
+
+  export type VinculoProdutoFornecedorSelectScalar = {
+    id?: boolean
+    tenantId?: boolean
+    fornecedorCnpj?: boolean
+    codigoFornecedor?: boolean
+    produtoId?: boolean
+    produtoSku?: boolean
+    produtoNome?: boolean
+    descricaoNfe?: boolean
+    criadoEm?: boolean
+    atualizadoEm?: boolean
+  }
+
+
+  export type $VinculoProdutoFornecedorPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "VinculoProdutoFornecedor"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tenantId: string
+      /**
+       * CNPJ do fornecedor NORMALIZADO (só dígitos) — a NF-e varia a formatação.
+       */
+      fornecedorCnpj: string
+      /**
+       * cProd exatamente como veio na nota.
+       */
+      codigoFornecedor: string
+      produtoId: string
+      /**
+       * Desnormalizados só para exibir o vínculo sem ir ao catálogo.
+       */
+      produtoSku: string | null
+      produtoNome: string | null
+      /**
+       * Descrição como veio na nota (ajuda a auditar o vínculo depois).
+       */
+      descricaoNfe: string | null
+      criadoEm: Date
+      atualizadoEm: Date
+    }, ExtArgs["result"]["vinculoProdutoFornecedor"]>
+    composites: {}
+  }
+
+  type VinculoProdutoFornecedorGetPayload<S extends boolean | null | undefined | VinculoProdutoFornecedorDefaultArgs> = $Result.GetResult<Prisma.$VinculoProdutoFornecedorPayload, S>
+
+  type VinculoProdutoFornecedorCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<VinculoProdutoFornecedorFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: VinculoProdutoFornecedorCountAggregateInputType | true
+    }
+
+  export interface VinculoProdutoFornecedorDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['VinculoProdutoFornecedor'], meta: { name: 'VinculoProdutoFornecedor' } }
+    /**
+     * Find zero or one VinculoProdutoFornecedor that matches the filter.
+     * @param {VinculoProdutoFornecedorFindUniqueArgs} args - Arguments to find a VinculoProdutoFornecedor
+     * @example
+     * // Get one VinculoProdutoFornecedor
+     * const vinculoProdutoFornecedor = await prisma.vinculoProdutoFornecedor.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends VinculoProdutoFornecedorFindUniqueArgs>(args: SelectSubset<T, VinculoProdutoFornecedorFindUniqueArgs<ExtArgs>>): Prisma__VinculoProdutoFornecedorClient<$Result.GetResult<Prisma.$VinculoProdutoFornecedorPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one VinculoProdutoFornecedor that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {VinculoProdutoFornecedorFindUniqueOrThrowArgs} args - Arguments to find a VinculoProdutoFornecedor
+     * @example
+     * // Get one VinculoProdutoFornecedor
+     * const vinculoProdutoFornecedor = await prisma.vinculoProdutoFornecedor.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends VinculoProdutoFornecedorFindUniqueOrThrowArgs>(args: SelectSubset<T, VinculoProdutoFornecedorFindUniqueOrThrowArgs<ExtArgs>>): Prisma__VinculoProdutoFornecedorClient<$Result.GetResult<Prisma.$VinculoProdutoFornecedorPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first VinculoProdutoFornecedor that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VinculoProdutoFornecedorFindFirstArgs} args - Arguments to find a VinculoProdutoFornecedor
+     * @example
+     * // Get one VinculoProdutoFornecedor
+     * const vinculoProdutoFornecedor = await prisma.vinculoProdutoFornecedor.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends VinculoProdutoFornecedorFindFirstArgs>(args?: SelectSubset<T, VinculoProdutoFornecedorFindFirstArgs<ExtArgs>>): Prisma__VinculoProdutoFornecedorClient<$Result.GetResult<Prisma.$VinculoProdutoFornecedorPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first VinculoProdutoFornecedor that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VinculoProdutoFornecedorFindFirstOrThrowArgs} args - Arguments to find a VinculoProdutoFornecedor
+     * @example
+     * // Get one VinculoProdutoFornecedor
+     * const vinculoProdutoFornecedor = await prisma.vinculoProdutoFornecedor.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends VinculoProdutoFornecedorFindFirstOrThrowArgs>(args?: SelectSubset<T, VinculoProdutoFornecedorFindFirstOrThrowArgs<ExtArgs>>): Prisma__VinculoProdutoFornecedorClient<$Result.GetResult<Prisma.$VinculoProdutoFornecedorPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more VinculoProdutoFornecedors that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VinculoProdutoFornecedorFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all VinculoProdutoFornecedors
+     * const vinculoProdutoFornecedors = await prisma.vinculoProdutoFornecedor.findMany()
+     * 
+     * // Get first 10 VinculoProdutoFornecedors
+     * const vinculoProdutoFornecedors = await prisma.vinculoProdutoFornecedor.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const vinculoProdutoFornecedorWithIdOnly = await prisma.vinculoProdutoFornecedor.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends VinculoProdutoFornecedorFindManyArgs>(args?: SelectSubset<T, VinculoProdutoFornecedorFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VinculoProdutoFornecedorPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a VinculoProdutoFornecedor.
+     * @param {VinculoProdutoFornecedorCreateArgs} args - Arguments to create a VinculoProdutoFornecedor.
+     * @example
+     * // Create one VinculoProdutoFornecedor
+     * const VinculoProdutoFornecedor = await prisma.vinculoProdutoFornecedor.create({
+     *   data: {
+     *     // ... data to create a VinculoProdutoFornecedor
+     *   }
+     * })
+     * 
+     */
+    create<T extends VinculoProdutoFornecedorCreateArgs>(args: SelectSubset<T, VinculoProdutoFornecedorCreateArgs<ExtArgs>>): Prisma__VinculoProdutoFornecedorClient<$Result.GetResult<Prisma.$VinculoProdutoFornecedorPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many VinculoProdutoFornecedors.
+     * @param {VinculoProdutoFornecedorCreateManyArgs} args - Arguments to create many VinculoProdutoFornecedors.
+     * @example
+     * // Create many VinculoProdutoFornecedors
+     * const vinculoProdutoFornecedor = await prisma.vinculoProdutoFornecedor.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends VinculoProdutoFornecedorCreateManyArgs>(args?: SelectSubset<T, VinculoProdutoFornecedorCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many VinculoProdutoFornecedors and returns the data saved in the database.
+     * @param {VinculoProdutoFornecedorCreateManyAndReturnArgs} args - Arguments to create many VinculoProdutoFornecedors.
+     * @example
+     * // Create many VinculoProdutoFornecedors
+     * const vinculoProdutoFornecedor = await prisma.vinculoProdutoFornecedor.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many VinculoProdutoFornecedors and only return the `id`
+     * const vinculoProdutoFornecedorWithIdOnly = await prisma.vinculoProdutoFornecedor.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends VinculoProdutoFornecedorCreateManyAndReturnArgs>(args?: SelectSubset<T, VinculoProdutoFornecedorCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VinculoProdutoFornecedorPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a VinculoProdutoFornecedor.
+     * @param {VinculoProdutoFornecedorDeleteArgs} args - Arguments to delete one VinculoProdutoFornecedor.
+     * @example
+     * // Delete one VinculoProdutoFornecedor
+     * const VinculoProdutoFornecedor = await prisma.vinculoProdutoFornecedor.delete({
+     *   where: {
+     *     // ... filter to delete one VinculoProdutoFornecedor
+     *   }
+     * })
+     * 
+     */
+    delete<T extends VinculoProdutoFornecedorDeleteArgs>(args: SelectSubset<T, VinculoProdutoFornecedorDeleteArgs<ExtArgs>>): Prisma__VinculoProdutoFornecedorClient<$Result.GetResult<Prisma.$VinculoProdutoFornecedorPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one VinculoProdutoFornecedor.
+     * @param {VinculoProdutoFornecedorUpdateArgs} args - Arguments to update one VinculoProdutoFornecedor.
+     * @example
+     * // Update one VinculoProdutoFornecedor
+     * const vinculoProdutoFornecedor = await prisma.vinculoProdutoFornecedor.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends VinculoProdutoFornecedorUpdateArgs>(args: SelectSubset<T, VinculoProdutoFornecedorUpdateArgs<ExtArgs>>): Prisma__VinculoProdutoFornecedorClient<$Result.GetResult<Prisma.$VinculoProdutoFornecedorPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more VinculoProdutoFornecedors.
+     * @param {VinculoProdutoFornecedorDeleteManyArgs} args - Arguments to filter VinculoProdutoFornecedors to delete.
+     * @example
+     * // Delete a few VinculoProdutoFornecedors
+     * const { count } = await prisma.vinculoProdutoFornecedor.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends VinculoProdutoFornecedorDeleteManyArgs>(args?: SelectSubset<T, VinculoProdutoFornecedorDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more VinculoProdutoFornecedors.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VinculoProdutoFornecedorUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many VinculoProdutoFornecedors
+     * const vinculoProdutoFornecedor = await prisma.vinculoProdutoFornecedor.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends VinculoProdutoFornecedorUpdateManyArgs>(args: SelectSubset<T, VinculoProdutoFornecedorUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one VinculoProdutoFornecedor.
+     * @param {VinculoProdutoFornecedorUpsertArgs} args - Arguments to update or create a VinculoProdutoFornecedor.
+     * @example
+     * // Update or create a VinculoProdutoFornecedor
+     * const vinculoProdutoFornecedor = await prisma.vinculoProdutoFornecedor.upsert({
+     *   create: {
+     *     // ... data to create a VinculoProdutoFornecedor
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the VinculoProdutoFornecedor we want to update
+     *   }
+     * })
+     */
+    upsert<T extends VinculoProdutoFornecedorUpsertArgs>(args: SelectSubset<T, VinculoProdutoFornecedorUpsertArgs<ExtArgs>>): Prisma__VinculoProdutoFornecedorClient<$Result.GetResult<Prisma.$VinculoProdutoFornecedorPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of VinculoProdutoFornecedors.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VinculoProdutoFornecedorCountArgs} args - Arguments to filter VinculoProdutoFornecedors to count.
+     * @example
+     * // Count the number of VinculoProdutoFornecedors
+     * const count = await prisma.vinculoProdutoFornecedor.count({
+     *   where: {
+     *     // ... the filter for the VinculoProdutoFornecedors we want to count
+     *   }
+     * })
+    **/
+    count<T extends VinculoProdutoFornecedorCountArgs>(
+      args?: Subset<T, VinculoProdutoFornecedorCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], VinculoProdutoFornecedorCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a VinculoProdutoFornecedor.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VinculoProdutoFornecedorAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends VinculoProdutoFornecedorAggregateArgs>(args: Subset<T, VinculoProdutoFornecedorAggregateArgs>): Prisma.PrismaPromise<GetVinculoProdutoFornecedorAggregateType<T>>
+
+    /**
+     * Group by VinculoProdutoFornecedor.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VinculoProdutoFornecedorGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends VinculoProdutoFornecedorGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: VinculoProdutoFornecedorGroupByArgs['orderBy'] }
+        : { orderBy?: VinculoProdutoFornecedorGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, VinculoProdutoFornecedorGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetVinculoProdutoFornecedorGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the VinculoProdutoFornecedor model
+   */
+  readonly fields: VinculoProdutoFornecedorFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for VinculoProdutoFornecedor.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__VinculoProdutoFornecedorClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the VinculoProdutoFornecedor model
+   */ 
+  interface VinculoProdutoFornecedorFieldRefs {
+    readonly id: FieldRef<"VinculoProdutoFornecedor", 'String'>
+    readonly tenantId: FieldRef<"VinculoProdutoFornecedor", 'String'>
+    readonly fornecedorCnpj: FieldRef<"VinculoProdutoFornecedor", 'String'>
+    readonly codigoFornecedor: FieldRef<"VinculoProdutoFornecedor", 'String'>
+    readonly produtoId: FieldRef<"VinculoProdutoFornecedor", 'String'>
+    readonly produtoSku: FieldRef<"VinculoProdutoFornecedor", 'String'>
+    readonly produtoNome: FieldRef<"VinculoProdutoFornecedor", 'String'>
+    readonly descricaoNfe: FieldRef<"VinculoProdutoFornecedor", 'String'>
+    readonly criadoEm: FieldRef<"VinculoProdutoFornecedor", 'DateTime'>
+    readonly atualizadoEm: FieldRef<"VinculoProdutoFornecedor", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * VinculoProdutoFornecedor findUnique
+   */
+  export type VinculoProdutoFornecedorFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VinculoProdutoFornecedor
+     */
+    select?: VinculoProdutoFornecedorSelect<ExtArgs> | null
+    /**
+     * Filter, which VinculoProdutoFornecedor to fetch.
+     */
+    where: VinculoProdutoFornecedorWhereUniqueInput
+  }
+
+  /**
+   * VinculoProdutoFornecedor findUniqueOrThrow
+   */
+  export type VinculoProdutoFornecedorFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VinculoProdutoFornecedor
+     */
+    select?: VinculoProdutoFornecedorSelect<ExtArgs> | null
+    /**
+     * Filter, which VinculoProdutoFornecedor to fetch.
+     */
+    where: VinculoProdutoFornecedorWhereUniqueInput
+  }
+
+  /**
+   * VinculoProdutoFornecedor findFirst
+   */
+  export type VinculoProdutoFornecedorFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VinculoProdutoFornecedor
+     */
+    select?: VinculoProdutoFornecedorSelect<ExtArgs> | null
+    /**
+     * Filter, which VinculoProdutoFornecedor to fetch.
+     */
+    where?: VinculoProdutoFornecedorWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VinculoProdutoFornecedors to fetch.
+     */
+    orderBy?: VinculoProdutoFornecedorOrderByWithRelationInput | VinculoProdutoFornecedorOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VinculoProdutoFornecedors.
+     */
+    cursor?: VinculoProdutoFornecedorWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VinculoProdutoFornecedors from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VinculoProdutoFornecedors.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VinculoProdutoFornecedors.
+     */
+    distinct?: VinculoProdutoFornecedorScalarFieldEnum | VinculoProdutoFornecedorScalarFieldEnum[]
+  }
+
+  /**
+   * VinculoProdutoFornecedor findFirstOrThrow
+   */
+  export type VinculoProdutoFornecedorFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VinculoProdutoFornecedor
+     */
+    select?: VinculoProdutoFornecedorSelect<ExtArgs> | null
+    /**
+     * Filter, which VinculoProdutoFornecedor to fetch.
+     */
+    where?: VinculoProdutoFornecedorWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VinculoProdutoFornecedors to fetch.
+     */
+    orderBy?: VinculoProdutoFornecedorOrderByWithRelationInput | VinculoProdutoFornecedorOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VinculoProdutoFornecedors.
+     */
+    cursor?: VinculoProdutoFornecedorWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VinculoProdutoFornecedors from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VinculoProdutoFornecedors.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VinculoProdutoFornecedors.
+     */
+    distinct?: VinculoProdutoFornecedorScalarFieldEnum | VinculoProdutoFornecedorScalarFieldEnum[]
+  }
+
+  /**
+   * VinculoProdutoFornecedor findMany
+   */
+  export type VinculoProdutoFornecedorFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VinculoProdutoFornecedor
+     */
+    select?: VinculoProdutoFornecedorSelect<ExtArgs> | null
+    /**
+     * Filter, which VinculoProdutoFornecedors to fetch.
+     */
+    where?: VinculoProdutoFornecedorWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VinculoProdutoFornecedors to fetch.
+     */
+    orderBy?: VinculoProdutoFornecedorOrderByWithRelationInput | VinculoProdutoFornecedorOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing VinculoProdutoFornecedors.
+     */
+    cursor?: VinculoProdutoFornecedorWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VinculoProdutoFornecedors from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VinculoProdutoFornecedors.
+     */
+    skip?: number
+    distinct?: VinculoProdutoFornecedorScalarFieldEnum | VinculoProdutoFornecedorScalarFieldEnum[]
+  }
+
+  /**
+   * VinculoProdutoFornecedor create
+   */
+  export type VinculoProdutoFornecedorCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VinculoProdutoFornecedor
+     */
+    select?: VinculoProdutoFornecedorSelect<ExtArgs> | null
+    /**
+     * The data needed to create a VinculoProdutoFornecedor.
+     */
+    data: XOR<VinculoProdutoFornecedorCreateInput, VinculoProdutoFornecedorUncheckedCreateInput>
+  }
+
+  /**
+   * VinculoProdutoFornecedor createMany
+   */
+  export type VinculoProdutoFornecedorCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many VinculoProdutoFornecedors.
+     */
+    data: VinculoProdutoFornecedorCreateManyInput | VinculoProdutoFornecedorCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * VinculoProdutoFornecedor createManyAndReturn
+   */
+  export type VinculoProdutoFornecedorCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VinculoProdutoFornecedor
+     */
+    select?: VinculoProdutoFornecedorSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many VinculoProdutoFornecedors.
+     */
+    data: VinculoProdutoFornecedorCreateManyInput | VinculoProdutoFornecedorCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * VinculoProdutoFornecedor update
+   */
+  export type VinculoProdutoFornecedorUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VinculoProdutoFornecedor
+     */
+    select?: VinculoProdutoFornecedorSelect<ExtArgs> | null
+    /**
+     * The data needed to update a VinculoProdutoFornecedor.
+     */
+    data: XOR<VinculoProdutoFornecedorUpdateInput, VinculoProdutoFornecedorUncheckedUpdateInput>
+    /**
+     * Choose, which VinculoProdutoFornecedor to update.
+     */
+    where: VinculoProdutoFornecedorWhereUniqueInput
+  }
+
+  /**
+   * VinculoProdutoFornecedor updateMany
+   */
+  export type VinculoProdutoFornecedorUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update VinculoProdutoFornecedors.
+     */
+    data: XOR<VinculoProdutoFornecedorUpdateManyMutationInput, VinculoProdutoFornecedorUncheckedUpdateManyInput>
+    /**
+     * Filter which VinculoProdutoFornecedors to update
+     */
+    where?: VinculoProdutoFornecedorWhereInput
+  }
+
+  /**
+   * VinculoProdutoFornecedor upsert
+   */
+  export type VinculoProdutoFornecedorUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VinculoProdutoFornecedor
+     */
+    select?: VinculoProdutoFornecedorSelect<ExtArgs> | null
+    /**
+     * The filter to search for the VinculoProdutoFornecedor to update in case it exists.
+     */
+    where: VinculoProdutoFornecedorWhereUniqueInput
+    /**
+     * In case the VinculoProdutoFornecedor found by the `where` argument doesn't exist, create a new VinculoProdutoFornecedor with this data.
+     */
+    create: XOR<VinculoProdutoFornecedorCreateInput, VinculoProdutoFornecedorUncheckedCreateInput>
+    /**
+     * In case the VinculoProdutoFornecedor was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<VinculoProdutoFornecedorUpdateInput, VinculoProdutoFornecedorUncheckedUpdateInput>
+  }
+
+  /**
+   * VinculoProdutoFornecedor delete
+   */
+  export type VinculoProdutoFornecedorDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VinculoProdutoFornecedor
+     */
+    select?: VinculoProdutoFornecedorSelect<ExtArgs> | null
+    /**
+     * Filter which VinculoProdutoFornecedor to delete.
+     */
+    where: VinculoProdutoFornecedorWhereUniqueInput
+  }
+
+  /**
+   * VinculoProdutoFornecedor deleteMany
+   */
+  export type VinculoProdutoFornecedorDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VinculoProdutoFornecedors to delete
+     */
+    where?: VinculoProdutoFornecedorWhereInput
+  }
+
+  /**
+   * VinculoProdutoFornecedor without action
+   */
+  export type VinculoProdutoFornecedorDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VinculoProdutoFornecedor
+     */
+    select?: VinculoProdutoFornecedorSelect<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -8922,6 +9960,22 @@ export namespace Prisma {
   };
 
   export type ItemPedidoCompraScalarFieldEnum = (typeof ItemPedidoCompraScalarFieldEnum)[keyof typeof ItemPedidoCompraScalarFieldEnum]
+
+
+  export const VinculoProdutoFornecedorScalarFieldEnum: {
+    id: 'id',
+    tenantId: 'tenantId',
+    fornecedorCnpj: 'fornecedorCnpj',
+    codigoFornecedor: 'codigoFornecedor',
+    produtoId: 'produtoId',
+    produtoSku: 'produtoSku',
+    produtoNome: 'produtoNome',
+    descricaoNfe: 'descricaoNfe',
+    criadoEm: 'criadoEm',
+    atualizadoEm: 'atualizadoEm'
+  };
+
+  export type VinculoProdutoFornecedorScalarFieldEnum = (typeof VinculoProdutoFornecedorScalarFieldEnum)[keyof typeof VinculoProdutoFornecedorScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -9720,6 +10774,84 @@ export namespace Prisma {
     criadoEm?: DateTimeWithAggregatesFilter<"ItemPedidoCompra"> | Date | string
   }
 
+  export type VinculoProdutoFornecedorWhereInput = {
+    AND?: VinculoProdutoFornecedorWhereInput | VinculoProdutoFornecedorWhereInput[]
+    OR?: VinculoProdutoFornecedorWhereInput[]
+    NOT?: VinculoProdutoFornecedorWhereInput | VinculoProdutoFornecedorWhereInput[]
+    id?: UuidFilter<"VinculoProdutoFornecedor"> | string
+    tenantId?: UuidFilter<"VinculoProdutoFornecedor"> | string
+    fornecedorCnpj?: StringFilter<"VinculoProdutoFornecedor"> | string
+    codigoFornecedor?: StringFilter<"VinculoProdutoFornecedor"> | string
+    produtoId?: UuidFilter<"VinculoProdutoFornecedor"> | string
+    produtoSku?: StringNullableFilter<"VinculoProdutoFornecedor"> | string | null
+    produtoNome?: StringNullableFilter<"VinculoProdutoFornecedor"> | string | null
+    descricaoNfe?: StringNullableFilter<"VinculoProdutoFornecedor"> | string | null
+    criadoEm?: DateTimeFilter<"VinculoProdutoFornecedor"> | Date | string
+    atualizadoEm?: DateTimeFilter<"VinculoProdutoFornecedor"> | Date | string
+  }
+
+  export type VinculoProdutoFornecedorOrderByWithRelationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    fornecedorCnpj?: SortOrder
+    codigoFornecedor?: SortOrder
+    produtoId?: SortOrder
+    produtoSku?: SortOrderInput | SortOrder
+    produtoNome?: SortOrderInput | SortOrder
+    descricaoNfe?: SortOrderInput | SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type VinculoProdutoFornecedorWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    tenantId_fornecedorCnpj_codigoFornecedor?: VinculoProdutoFornecedorTenantIdFornecedorCnpjCodigoFornecedorCompoundUniqueInput
+    AND?: VinculoProdutoFornecedorWhereInput | VinculoProdutoFornecedorWhereInput[]
+    OR?: VinculoProdutoFornecedorWhereInput[]
+    NOT?: VinculoProdutoFornecedorWhereInput | VinculoProdutoFornecedorWhereInput[]
+    tenantId?: UuidFilter<"VinculoProdutoFornecedor"> | string
+    fornecedorCnpj?: StringFilter<"VinculoProdutoFornecedor"> | string
+    codigoFornecedor?: StringFilter<"VinculoProdutoFornecedor"> | string
+    produtoId?: UuidFilter<"VinculoProdutoFornecedor"> | string
+    produtoSku?: StringNullableFilter<"VinculoProdutoFornecedor"> | string | null
+    produtoNome?: StringNullableFilter<"VinculoProdutoFornecedor"> | string | null
+    descricaoNfe?: StringNullableFilter<"VinculoProdutoFornecedor"> | string | null
+    criadoEm?: DateTimeFilter<"VinculoProdutoFornecedor"> | Date | string
+    atualizadoEm?: DateTimeFilter<"VinculoProdutoFornecedor"> | Date | string
+  }, "id" | "tenantId_fornecedorCnpj_codigoFornecedor">
+
+  export type VinculoProdutoFornecedorOrderByWithAggregationInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    fornecedorCnpj?: SortOrder
+    codigoFornecedor?: SortOrder
+    produtoId?: SortOrder
+    produtoSku?: SortOrderInput | SortOrder
+    produtoNome?: SortOrderInput | SortOrder
+    descricaoNfe?: SortOrderInput | SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+    _count?: VinculoProdutoFornecedorCountOrderByAggregateInput
+    _max?: VinculoProdutoFornecedorMaxOrderByAggregateInput
+    _min?: VinculoProdutoFornecedorMinOrderByAggregateInput
+  }
+
+  export type VinculoProdutoFornecedorScalarWhereWithAggregatesInput = {
+    AND?: VinculoProdutoFornecedorScalarWhereWithAggregatesInput | VinculoProdutoFornecedorScalarWhereWithAggregatesInput[]
+    OR?: VinculoProdutoFornecedorScalarWhereWithAggregatesInput[]
+    NOT?: VinculoProdutoFornecedorScalarWhereWithAggregatesInput | VinculoProdutoFornecedorScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"VinculoProdutoFornecedor"> | string
+    tenantId?: UuidWithAggregatesFilter<"VinculoProdutoFornecedor"> | string
+    fornecedorCnpj?: StringWithAggregatesFilter<"VinculoProdutoFornecedor"> | string
+    codigoFornecedor?: StringWithAggregatesFilter<"VinculoProdutoFornecedor"> | string
+    produtoId?: UuidWithAggregatesFilter<"VinculoProdutoFornecedor"> | string
+    produtoSku?: StringNullableWithAggregatesFilter<"VinculoProdutoFornecedor"> | string | null
+    produtoNome?: StringNullableWithAggregatesFilter<"VinculoProdutoFornecedor"> | string | null
+    descricaoNfe?: StringNullableWithAggregatesFilter<"VinculoProdutoFornecedor"> | string | null
+    criadoEm?: DateTimeWithAggregatesFilter<"VinculoProdutoFornecedor"> | Date | string
+    atualizadoEm?: DateTimeWithAggregatesFilter<"VinculoProdutoFornecedor"> | Date | string
+  }
+
   export type DepositoCreateInput = {
     id?: string
     tenantId: string
@@ -10448,6 +11580,97 @@ export namespace Prisma {
     valorPis?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     valorCofins?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VinculoProdutoFornecedorCreateInput = {
+    id?: string
+    tenantId: string
+    fornecedorCnpj: string
+    codigoFornecedor: string
+    produtoId: string
+    produtoSku?: string | null
+    produtoNome?: string | null
+    descricaoNfe?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type VinculoProdutoFornecedorUncheckedCreateInput = {
+    id?: string
+    tenantId: string
+    fornecedorCnpj: string
+    codigoFornecedor: string
+    produtoId: string
+    produtoSku?: string | null
+    produtoNome?: string | null
+    descricaoNfe?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type VinculoProdutoFornecedorUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    fornecedorCnpj?: StringFieldUpdateOperationsInput | string
+    codigoFornecedor?: StringFieldUpdateOperationsInput | string
+    produtoId?: StringFieldUpdateOperationsInput | string
+    produtoSku?: NullableStringFieldUpdateOperationsInput | string | null
+    produtoNome?: NullableStringFieldUpdateOperationsInput | string | null
+    descricaoNfe?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VinculoProdutoFornecedorUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    fornecedorCnpj?: StringFieldUpdateOperationsInput | string
+    codigoFornecedor?: StringFieldUpdateOperationsInput | string
+    produtoId?: StringFieldUpdateOperationsInput | string
+    produtoSku?: NullableStringFieldUpdateOperationsInput | string | null
+    produtoNome?: NullableStringFieldUpdateOperationsInput | string | null
+    descricaoNfe?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VinculoProdutoFornecedorCreateManyInput = {
+    id?: string
+    tenantId: string
+    fornecedorCnpj: string
+    codigoFornecedor: string
+    produtoId: string
+    produtoSku?: string | null
+    produtoNome?: string | null
+    descricaoNfe?: string | null
+    criadoEm?: Date | string
+    atualizadoEm?: Date | string
+  }
+
+  export type VinculoProdutoFornecedorUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    fornecedorCnpj?: StringFieldUpdateOperationsInput | string
+    codigoFornecedor?: StringFieldUpdateOperationsInput | string
+    produtoId?: StringFieldUpdateOperationsInput | string
+    produtoSku?: NullableStringFieldUpdateOperationsInput | string | null
+    produtoNome?: NullableStringFieldUpdateOperationsInput | string | null
+    descricaoNfe?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VinculoProdutoFornecedorUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tenantId?: StringFieldUpdateOperationsInput | string
+    fornecedorCnpj?: StringFieldUpdateOperationsInput | string
+    codigoFornecedor?: StringFieldUpdateOperationsInput | string
+    produtoId?: StringFieldUpdateOperationsInput | string
+    produtoSku?: NullableStringFieldUpdateOperationsInput | string | null
+    produtoNome?: NullableStringFieldUpdateOperationsInput | string | null
+    descricaoNfe?: NullableStringFieldUpdateOperationsInput | string | null
+    criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
+    atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UuidFilter<$PrismaModel = never> = {
@@ -11223,6 +12446,51 @@ export namespace Prisma {
     valorIpi?: SortOrder
     valorPis?: SortOrder
     valorCofins?: SortOrder
+  }
+
+  export type VinculoProdutoFornecedorTenantIdFornecedorCnpjCodigoFornecedorCompoundUniqueInput = {
+    tenantId: string
+    fornecedorCnpj: string
+    codigoFornecedor: string
+  }
+
+  export type VinculoProdutoFornecedorCountOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    fornecedorCnpj?: SortOrder
+    codigoFornecedor?: SortOrder
+    produtoId?: SortOrder
+    produtoSku?: SortOrder
+    produtoNome?: SortOrder
+    descricaoNfe?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type VinculoProdutoFornecedorMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    fornecedorCnpj?: SortOrder
+    codigoFornecedor?: SortOrder
+    produtoId?: SortOrder
+    produtoSku?: SortOrder
+    produtoNome?: SortOrder
+    descricaoNfe?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
+  }
+
+  export type VinculoProdutoFornecedorMinOrderByAggregateInput = {
+    id?: SortOrder
+    tenantId?: SortOrder
+    fornecedorCnpj?: SortOrder
+    codigoFornecedor?: SortOrder
+    produtoId?: SortOrder
+    produtoSku?: SortOrder
+    produtoNome?: SortOrder
+    descricaoNfe?: SortOrder
+    criadoEm?: SortOrder
+    atualizadoEm?: SortOrder
   }
 
   export type SaldoEstoqueCreateNestedManyWithoutDepositoInput = {
@@ -12494,6 +13762,10 @@ export namespace Prisma {
      * @deprecated Use ItemPedidoCompraDefaultArgs instead
      */
     export type ItemPedidoCompraArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ItemPedidoCompraDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use VinculoProdutoFornecedorDefaultArgs instead
+     */
+    export type VinculoProdutoFornecedorArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = VinculoProdutoFornecedorDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

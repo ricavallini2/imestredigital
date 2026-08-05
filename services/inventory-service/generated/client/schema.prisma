@@ -244,3 +244,28 @@ model ItemPedidoCompra {
   @@index([produtoId])
   @@map("itens_pedidos_compra")
 }
+
+/// De-Para entre o código do produto NO FORNECEDOR (cProd da NF-e) e o produto
+/// do nosso catálogo. Gravado quando o usuário resolve um item na conferência da
+/// importação; nas próximas notas do mesmo CNPJ o item já entra reconhecido.
+model VinculoProdutoFornecedor {
+  id               String   @id @default(uuid()) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  /// CNPJ do fornecedor NORMALIZADO (só dígitos) — a NF-e varia a formatação.
+  fornecedorCnpj   String   @map("fornecedor_cnpj")
+  /// cProd exatamente como veio na nota.
+  codigoFornecedor String   @map("codigo_fornecedor")
+  produtoId        String   @map("produto_id") @db.Uuid
+  /// Desnormalizados só para exibir o vínculo sem ir ao catálogo.
+  produtoSku       String?  @map("produto_sku")
+  produtoNome      String?  @map("produto_nome")
+  /// Descrição como veio na nota (ajuda a auditar o vínculo depois).
+  descricaoNfe     String?  @map("descricao_nfe")
+  criadoEm         DateTime @default(now()) @map("criado_em")
+  atualizadoEm     DateTime @updatedAt @map("atualizado_em")
+
+  @@unique([tenantId, fornecedorCnpj, codigoFornecedor])
+  @@index([tenantId])
+  @@index([tenantId, produtoId])
+  @@map("vinculos_produto_fornecedor")
+}

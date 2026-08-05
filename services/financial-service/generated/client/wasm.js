@@ -244,6 +244,84 @@ exports.Prisma.DREScalarFieldEnum = {
   criadoEm: 'criadoEm'
 };
 
+exports.Prisma.TituloCobrancaScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  lancamentoId: 'lancamentoId',
+  pedidoId: 'pedidoId',
+  clienteId: 'clienteId',
+  clienteNome: 'clienteNome',
+  clienteTelefone: 'clienteTelefone',
+  clienteEmail: 'clienteEmail',
+  descricao: 'descricao',
+  valor: 'valor',
+  dataVencimento: 'dataVencimento',
+  status: 'status',
+  prioridade: 'prioridade',
+  tentativas: 'tentativas',
+  ultimaAcaoEm: 'ultimaAcaoEm',
+  canalUltimaAcao: 'canalUltimaAcao',
+  observacao: 'observacao',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+};
+
+exports.Prisma.AcaoCobrancaScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  tituloId: 'tituloId',
+  clienteNome: 'clienteNome',
+  tipo: 'tipo',
+  mensagem: 'mensagem',
+  status: 'status',
+  automatica: 'automatica',
+  detalhe: 'detalhe',
+  criadoEm: 'criadoEm'
+};
+
+exports.Prisma.AcordoCobrancaScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  tituloId: 'tituloId',
+  clienteId: 'clienteId',
+  clienteNome: 'clienteNome',
+  valorOriginal: 'valorOriginal',
+  descontoAplicado: 'descontoAplicado',
+  valorFinal: 'valorFinal',
+  numeroParcelas: 'numeroParcelas',
+  status: 'status',
+  observacao: 'observacao',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+};
+
+exports.Prisma.ParcelaAcordoScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  acordoId: 'acordoId',
+  numero: 'numero',
+  valor: 'valor',
+  vencimento: 'vencimento',
+  pago: 'pago',
+  pagoEm: 'pagoEm'
+};
+
+exports.Prisma.ConfiguracaoCobrancaScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  ativo: 'ativo',
+  webhookN8n: 'webhookN8n',
+  callbackUrl: 'callbackUrl',
+  regras: 'regras',
+  descontoMaximo: 'descontoMaximo',
+  parcelasMaximas: 'parcelasMaximas',
+  horarioInicio: 'horarioInicio',
+  horarioFim: 'horarioFim',
+  pausarFimDeSemana: 'pausarFimDeSemana',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -251,6 +329,10 @@ exports.Prisma.SortOrder = {
 
 exports.Prisma.NullableJsonNullValueInput = {
   DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
@@ -327,6 +409,43 @@ exports.StatusConciliacao = exports.$Enums.StatusConciliacao = {
   DIVERGENTE: 'DIVERGENTE'
 };
 
+exports.StatusTituloCobranca = exports.$Enums.StatusTituloCobranca = {
+  EM_ABERTO: 'EM_ABERTO',
+  EM_COBRANCA: 'EM_COBRANCA',
+  NEGOCIANDO: 'NEGOCIANDO',
+  ACORDO: 'ACORDO',
+  PAGO: 'PAGO',
+  PERDIDO: 'PERDIDO'
+};
+
+exports.PrioridadeCobranca = exports.$Enums.PrioridadeCobranca = {
+  BAIXA: 'BAIXA',
+  MEDIA: 'MEDIA',
+  ALTA: 'ALTA',
+  CRITICA: 'CRITICA'
+};
+
+exports.TipoAcaoCobranca = exports.$Enums.TipoAcaoCobranca = {
+  WHATSAPP: 'WHATSAPP',
+  EMAIL: 'EMAIL',
+  SMS: 'SMS',
+  LIGACAO: 'LIGACAO'
+};
+
+exports.StatusAcaoCobranca = exports.$Enums.StatusAcaoCobranca = {
+  ENVIADO: 'ENVIADO',
+  ENTREGUE: 'ENTREGUE',
+  LIDO: 'LIDO',
+  RESPONDIDO: 'RESPONDIDO',
+  FALHOU: 'FALHOU'
+};
+
+exports.StatusAcordoCobranca = exports.$Enums.StatusAcordoCobranca = {
+  ATIVO: 'ATIVO',
+  CUMPRIDO: 'CUMPRIDO',
+  QUEBRADO: 'QUEBRADO'
+};
+
 exports.Prisma.ModelName = {
   ContaFinanceira: 'ContaFinanceira',
   Lancamento: 'Lancamento',
@@ -334,7 +453,12 @@ exports.Prisma.ModelName = {
   Recorrencia: 'Recorrencia',
   ConciliacaoBancaria: 'ConciliacaoBancaria',
   EventoProcessado: 'EventoProcessado',
-  DRE: 'DRE'
+  DRE: 'DRE',
+  TituloCobranca: 'TituloCobranca',
+  AcaoCobranca: 'AcaoCobranca',
+  AcordoCobranca: 'AcordoCobranca',
+  ParcelaAcordo: 'ParcelaAcordo',
+  ConfiguracaoCobranca: 'ConfiguracaoCobranca'
 };
 
 /**

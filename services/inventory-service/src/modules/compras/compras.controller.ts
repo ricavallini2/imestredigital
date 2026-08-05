@@ -26,8 +26,11 @@ import {
   CriarCompraDto,
   ReceberCompraDto,
   ListarComprasDto,
-  ImportarNfeDto,
 } from '../../dtos/compras/compras.dto';
+import {
+  AnalisarNfeDto,
+  ConfirmarImportacaoNfeDto,
+} from '../../dtos/compras/importacao-nfe.dto';
 
 @ApiTags('compras')
 @ApiBearerAuth()
@@ -41,12 +44,25 @@ export class ComprasController {
     return this.service.estatisticas(req.tenantId);
   }
 
+  @Post('analisar-nfe')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'ETAPA 1: analisa o XML e devolve fornecedor + itens reconhecidos (não grava nada)',
+  })
+  analisarNfe(@Request() req: any, @Body() dto: AnalisarNfeDto) {
+    // Propaga o JWT: a resolução consulta catalog-service e customer-service.
+    return this.service.analisarNfe(req.tenantId, dto, req.headers?.authorization);
+  }
+
   @Post('importar-nfe')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Importa NF-e (XML) como pedido de compra' })
-  importarNfe(@Request() req: any, @Body() dto: ImportarNfeDto) {
-    // Propaga o JWT: o casamento SKU→produto consulta o catalog-service.
-    return this.service.importarNfe(req.tenantId, dto, req.headers?.authorization);
+  @ApiOperation({
+    summary:
+      'ETAPA 2: confirma a importação aplicando as decisões do usuário ' +
+      '(fornecedor, produtos e vínculos De-Para)',
+  })
+  importarNfe(@Request() req: any, @Body() dto: ConfirmarImportacaoNfeDto) {
+    return this.service.confirmarImportacaoNfe(req.tenantId, dto, req.headers?.authorization);
   }
 
   @Get()

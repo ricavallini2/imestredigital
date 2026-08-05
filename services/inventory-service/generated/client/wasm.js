@@ -225,6 +225,19 @@ exports.Prisma.ItemPedidoCompraScalarFieldEnum = {
   criadoEm: 'criadoEm'
 };
 
+exports.Prisma.VinculoProdutoFornecedorScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  fornecedorCnpj: 'fornecedorCnpj',
+  codigoFornecedor: 'codigoFornecedor',
+  produtoId: 'produtoId',
+  produtoSku: 'produtoSku',
+  produtoNome: 'produtoNome',
+  descricaoNfe: 'descricaoNfe',
+  criadoEm: 'criadoEm',
+  atualizadoEm: 'atualizadoEm'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -286,7 +299,8 @@ exports.Prisma.ModelName = {
   EventoProcessado: 'EventoProcessado',
   Movimentacao: 'Movimentacao',
   PedidoCompra: 'PedidoCompra',
-  ItemPedidoCompra: 'ItemPedidoCompra'
+  ItemPedidoCompra: 'ItemPedidoCompra',
+  VinculoProdutoFornecedor: 'VinculoProdutoFornecedor'
 };
 
 /**

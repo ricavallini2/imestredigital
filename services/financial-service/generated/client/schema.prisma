@@ -263,6 +263,25 @@ model ConciliacaoBancaria {
   @@map("conciliacoes_bancarias")
 }
 
+// ─── Idempotência de Eventos Kafka ────────────────────────────
+/// Registra eventos já consumidos para garantir idempotência no processamento
+/// da SAGA (reentregas do broker não reaplicam o efeito colateral).
+/// Dedup por (evento, referenciaId) — ex. ("pedido.faturado", pedidoId).
+model EventoProcessado {
+  id           String @id @default(uuid()) @db.Uuid
+  tenantId     String @map("tenant_id") @db.Uuid
+  /// Nome lógico do evento consumido (ex. "pedido.faturado", "pedido.pago").
+  evento       String
+  /// Identificador do agregado de referência (ex. pedidoId).
+  referenciaId String @map("referencia_id")
+
+  processadoEm DateTime @default(now()) @map("processado_em")
+
+  @@unique([evento, referenciaId], name: "evento_referenciaId")
+  @@index([tenantId])
+  @@map("eventos_processados")
+}
+
 // ─── DRE (Demonstração de Resultado do Exercício) ─────────────
 /// Relatório financeiro mensal/anual.
 model DRE {
@@ -298,4 +317,151 @@ model DRE {
   @@index([ano])
   @@index([mes])
   @@map("dres")
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COBRANÇA — régua de cobrança sobre recebíveis vencidos
+// Os títulos DERIVAM de Lancamento (tipo RECEITA, vencido e não pago);
+// a sincronização é idempotente por [tenantId, lancamentoId].
+// ═══════════════════════════════════════════════════════════════
+
+enum StatusTituloCobranca {
+  EM_ABERTO
+  EM_COBRANCA
+  NEGOCIANDO
+  ACORDO
+  PAGO
+  PERDIDO
+}
+
+enum PrioridadeCobranca {
+  BAIXA
+  MEDIA
+  ALTA
+  CRITICA
+}
+
+enum TipoAcaoCobranca {
+  WHATSAPP
+  EMAIL
+  SMS
+  LIGACAO
+}
+
+enum StatusAcaoCobranca {
+  ENVIADO
+  ENTREGUE
+  LIDO
+  RESPONDIDO
+  FALHOU
+}
+
+enum StatusAcordoCobranca {
+  ATIVO
+  CUMPRIDO
+  QUEBRADO
+}
+
+model TituloCobranca {
+  id              String               @id @default(uuid()) @db.Uuid
+  tenantId        String               @map("tenant_id") @db.Uuid
+  lancamentoId    String?              @map("lancamento_id") @db.Uuid
+  pedidoId        String?              @map("pedido_id") @db.Uuid
+  clienteId       String?              @map("cliente_id") @db.Uuid
+  clienteNome     String               @map("cliente_nome")
+  clienteTelefone String?              @map("cliente_telefone")
+  clienteEmail    String?              @map("cliente_email")
+  descricao       String
+  valor           Decimal              @db.Decimal(19, 2)
+  dataVencimento  DateTime             @map("data_vencimento")
+  status          StatusTituloCobranca @default(EM_ABERTO)
+  prioridade      PrioridadeCobranca   @default(MEDIA)
+  tentativas      Int                  @default(0)
+  ultimaAcaoEm    DateTime?            @map("ultima_acao_em")
+  canalUltimaAcao String?              @map("canal_ultima_acao")
+  observacao      String?              @db.Text
+  criadoEm        DateTime             @default(now()) @map("criado_em")
+  atualizadoEm    DateTime             @updatedAt @map("atualizado_em")
+
+  acoes   AcaoCobranca[]
+  acordos AcordoCobranca[]
+
+  @@unique([tenantId, lancamentoId])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("titulos_cobranca")
+}
+
+model AcaoCobranca {
+  id          String             @id @default(uuid()) @db.Uuid
+  tenantId    String             @map("tenant_id") @db.Uuid
+  tituloId    String             @map("titulo_id") @db.Uuid
+  titulo      TituloCobranca     @relation(fields: [tituloId], references: [id], onDelete: Cascade)
+  clienteNome String             @map("cliente_nome")
+  tipo        TipoAcaoCobranca
+  mensagem    String             @db.Text
+  status      StatusAcaoCobranca @default(ENVIADO)
+  automatica  Boolean            @default(false)
+  detalhe     String?            @db.Text
+  criadoEm    DateTime           @default(now()) @map("criado_em")
+
+  @@index([tenantId])
+  @@index([tituloId])
+  @@map("acoes_cobranca")
+}
+
+model AcordoCobranca {
+  id               String               @id @default(uuid()) @db.Uuid
+  tenantId         String               @map("tenant_id") @db.Uuid
+  tituloId         String               @map("titulo_id") @db.Uuid
+  titulo           TituloCobranca       @relation(fields: [tituloId], references: [id], onDelete: Cascade)
+  clienteId        String?              @map("cliente_id") @db.Uuid
+  clienteNome      String               @map("cliente_nome")
+  valorOriginal    Decimal              @map("valor_original") @db.Decimal(19, 2)
+  descontoAplicado Decimal              @map("desconto_aplicado") @db.Decimal(5, 2)
+  valorFinal       Decimal              @map("valor_final") @db.Decimal(19, 2)
+  numeroParcelas   Int                  @map("numero_parcelas")
+  status           StatusAcordoCobranca @default(ATIVO)
+  observacao       String?              @db.Text
+  criadoEm         DateTime             @default(now()) @map("criado_em")
+  atualizadoEm     DateTime             @updatedAt @map("atualizado_em")
+
+  parcelas ParcelaAcordo[]
+
+  @@index([tenantId])
+  @@index([tituloId])
+  @@map("acordos_cobranca")
+}
+
+model ParcelaAcordo {
+  id         String         @id @default(uuid()) @db.Uuid
+  tenantId   String         @map("tenant_id") @db.Uuid
+  acordoId   String         @map("acordo_id") @db.Uuid
+  acordo     AcordoCobranca @relation(fields: [acordoId], references: [id], onDelete: Cascade)
+  numero     Int
+  valor      Decimal        @db.Decimal(19, 2)
+  vencimento DateTime
+  pago       Boolean        @default(false)
+  pagoEm     DateTime?      @map("pago_em")
+
+  @@index([acordoId])
+  @@map("parcelas_acordo")
+}
+
+model ConfiguracaoCobranca {
+  id                String   @id @default(uuid()) @db.Uuid
+  tenantId          String   @unique @map("tenant_id") @db.Uuid
+  ativo             Boolean  @default(false)
+  webhookN8n        String?  @map("webhook_n8n")
+  callbackUrl       String?  @map("callback_url")
+  regras            Json     @default("[]")
+  descontoMaximo    Decimal  @default(0) @map("desconto_maximo") @db.Decimal(5, 2)
+  parcelasMaximas   Int      @default(1) @map("parcelas_maximas")
+  horarioInicio     String   @default("08:00") @map("horario_inicio")
+  horarioFim        String   @default("18:00") @map("horario_fim")
+  pausarFimDeSemana Boolean  @default(true) @map("pausar_fim_de_semana")
+  criadoEm          DateTime @default(now()) @map("criado_em")
+  atualizadoEm      DateTime @updatedAt @map("atualizado_em")
+
+  @@map("configuracoes_cobranca")
 }
